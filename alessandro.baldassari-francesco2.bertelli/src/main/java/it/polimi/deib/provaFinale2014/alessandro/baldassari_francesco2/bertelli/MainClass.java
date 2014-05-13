@@ -7,6 +7,7 @@ public class MainClass
 	{
 		int x = 3 ;
 		int y = 333 ;
+		double z = Math.sqrt(2.0);
 		System.out.println("Bye bye");
 	}
 
