@@ -6,6 +6,7 @@ public class MainClass
 	public static void main ( String[] args ) 
 	{
 		int x = 3 ;
+		int y = 333 ;
 		System.out.println("Bye bye");
 	}
 
