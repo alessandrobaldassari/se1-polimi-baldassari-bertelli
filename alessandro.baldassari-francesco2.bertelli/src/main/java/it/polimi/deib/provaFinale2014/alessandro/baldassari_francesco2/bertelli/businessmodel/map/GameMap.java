@@ -11,11 +11,34 @@ import java.util.Scanner;
 
 public class GameMap 
 {
+
+	// ATTRIBUTES
 	
+	/**
+	 * The character used as a delimiter in the CSV InputStreams used to load the data of the map 
+	 */
 	private static final String DATA_FILES_DELIMITER = "," ;
+	
+	/**
+	 * The collection of all the regions that compose this map.
+	 */
 	private final Collection < Region > regions ;
+	
+	/**
+	 * The collection of all the roads that compose this map.
+	 */
 	private final Collection < Road > roads ;
 	
+	// ACCESSOR METHODS
+	
+	/**
+	 * Constructs a GameMap object using two InputStreams where raw data about regions, roads and their 
+	 * relationship are stored. 
+	 * Assumes that these streams are already open and that the contents they point to are the right ones
+	 * 
+	 * @param regionsCSVInputStream the InputStream where take the raw data about the regions
+	 * @param roadsCSVInputStream the InputStream where take the raw data about the roads
+	 */
 	public GameMap ( InputStream regionsCSVInputStream , InputStream roadsCSVInputStream ) 
 	{
 		Map < Integer , Couple < Region , int [] > > regionsMap ;
@@ -56,6 +79,11 @@ public class GameMap
 	public int getDistance ( Road source , Road destination ) {}
 */
 
+	// HELPER METHODS
+	
+	/**
+	 * 
+	 */
 	private static Map < Integer , Couple < Region , int [] > > readRegionsDataFile ( InputStream regionsCSVInputStream )  
 	{
 		String [] lineComponents ;

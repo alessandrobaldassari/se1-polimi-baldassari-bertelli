@@ -3,8 +3,12 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 public class Region extends GameMapElement
 {
 
+	// ATTRIBUTES
+	
 	private final RegionType type ;
 	private Iterable < Road > borderRoads ;
+	
+	// ACCESSOR METHODS
 	
 	Region ( RegionType type , int uid ) 
 	{
