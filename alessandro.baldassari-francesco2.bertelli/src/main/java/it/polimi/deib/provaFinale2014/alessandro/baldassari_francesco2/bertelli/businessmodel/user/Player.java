@@ -34,6 +34,10 @@ public abstract class Player
 		return money ;
 	}
 	
+	public LinkedList <Card> getCardList(){
+		return (LinkedList <Card>) cards;
+	}
+	
 	public void buyCard ( Card buyedCard ) 
 	{
 		cards.add ( buyedCard ) ;
