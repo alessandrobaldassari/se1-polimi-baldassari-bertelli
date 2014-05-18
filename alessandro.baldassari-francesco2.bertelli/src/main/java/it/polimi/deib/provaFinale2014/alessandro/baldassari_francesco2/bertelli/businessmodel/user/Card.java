@@ -1,6 +1,8 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.exception.NotSellableException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.exception.SellingPriceNotSetException;
 
 public class Card 
 {
@@ -73,8 +75,14 @@ public class Card
 		return sellable ;
 	}
 	
-	class NotSellableException extends Exception {}
+	public boolean equals(Card card){
+		if(regionType == card.regionType && id == card.id && initialPrice == card.initialPrice
+			&& sellingPrice == card.sellingPrice  && sellable == card.sellable)
+			return true;
+		else
+			return false;
+		
+	}
 	
-	class SellingPriceNotSetException extends Exception {}
 	
 }
