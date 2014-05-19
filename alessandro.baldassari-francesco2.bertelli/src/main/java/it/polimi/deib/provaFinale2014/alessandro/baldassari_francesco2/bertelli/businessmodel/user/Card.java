@@ -1,15 +1,31 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.exception.NotSellableException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.exception.SellingPriceNotSetException;
 
+/**
+ * This class model the concept of a Card of the Game.
+ * It is composed by a static part ( about its structure ) and by a dynamic part
+ * which refers to the possibility of this Card to be sold in the Market phase of the game.
+ */
 public class Card 
 {
 
+	/**
+	 * The minumum selling price for a Card during the Market phase: the value is a game's rule.
+	 */
 	public static final int MINIMUM_SELLING_PRICE = 1 ;
+	
+	/**
+	 * The maximum selling price for a Card during the Market phase: the value is a game's rule.
+	 */
 	public static final int MAXIMUM_SELLING_PRICE = 4 ;
+	
+	/**
+	 * The Region type this card is associated with.
+	 */
 	private final RegionType regionType ;
+	
+	/***/
 	private final int id ;
 	private final int initialPrice ;
 	private Integer sellingPrice ;
@@ -75,14 +91,8 @@ public class Card
 		return sellable ;
 	}
 	
-	public boolean equals(Card card){
-		if(regionType == card.regionType && id == card.id && initialPrice == card.initialPrice
-			&& sellingPrice == card.sellingPrice  && sellable == card.sellable)
-			return true;
-		else
-			return false;
-		
-	}
+	public class NotSellableException extends Exception {}
 	
+	public class SellingPriceNotSetException extends Exception {}
 	
 }

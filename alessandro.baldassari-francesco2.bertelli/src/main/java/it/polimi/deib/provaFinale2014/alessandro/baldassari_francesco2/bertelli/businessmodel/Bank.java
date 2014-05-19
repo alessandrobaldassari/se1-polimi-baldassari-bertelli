@@ -40,6 +40,14 @@ public class Bank
 		return moneyReserve ;
 	}
 	
+	public void receiveMoney ( int amount ) 
+	{
+		if ( amount > 0 )
+			moneyReserve = amount ;
+		else
+			throw new IllegalArgumentException () ;
+	}
+	
 	public Fence getAFence ( FenceType fenceType ) throws NoMoreFenceOfThisTypeException 
 	{
 		Fence res ;
@@ -59,6 +67,18 @@ public class Bank
 		return res ;
 	}
 
+	public int getPeekCardPrice ( RegionType regionType ) throws NoMoreCardOfThisTypeException 
+	{
+		int res ;
+		if ( cards.get ( regionType ).isEmpty () == false )
+		{
+			res = cards.get ( regionType ).peek ().getInitialPrice () ;
+		}
+		else
+			throw new NoMoreCardOfThisTypeException ( regionType ) ;
+		return res ;
+	}
+	
 	public Card sellACard ( int price , RegionType regionType ) throws CardPriceNotRightException, NoMoreCardOfThisTypeException 
 	{
 		Card res ;
@@ -78,7 +98,7 @@ public class Bank
 		return res ;
 	}
 	
-	class NoMoreFenceOfThisTypeException extends Exception 
+	public class NoMoreFenceOfThisTypeException extends Exception 
 	{
 		
 		private FenceType type ;
@@ -98,7 +118,7 @@ public class Bank
 		
 	}
 
-	class NoMoreCardOfThisTypeException extends Exception 
+	public class NoMoreCardOfThisTypeException extends Exception 
 	{
 		
 		private RegionType regionType ;
@@ -118,7 +138,7 @@ public class Bank
 		
 	}
 	
-	class CardPriceNotRightException extends Exception 
+	public class CardPriceNotRightException extends Exception 
 	{
 		
 		private int proposedPrice ;

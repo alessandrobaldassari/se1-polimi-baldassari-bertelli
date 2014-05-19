@@ -26,3 +26,4 @@ public abstract class Character < T extends GameMapElement > extends Positionabl
 	}
 	
 }
+

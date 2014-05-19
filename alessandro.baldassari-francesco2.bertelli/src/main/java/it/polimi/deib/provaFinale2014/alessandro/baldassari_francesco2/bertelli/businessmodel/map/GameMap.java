@@ -6,9 +6,20 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Scanner;
 
+/**
+ * This class is a passive data structure that represents the GameMap ( as the name says ).
+ * It hides the bipartite graph structure of the real map, and offer to its clients only the methods
+ * they need to interact with it.
+ * The object is immutable, also if the regions and roads contained here are not.
+ * 
+ * @see Collection
+ * @see Region
+ * @see Road
+ */
 public class GameMap 
 {
 
@@ -20,14 +31,14 @@ public class GameMap
 	private static final String DATA_FILES_DELIMITER = "," ;
 	
 	/**
-	 * The collection of all the regions that compose this map.
+	 * The map of all the regions that compose this map with the UID as the key and the Region object as the value.
 	 */
-	private final Collection < Region > regions ;
+	private final Map < Integer , Region > regions ;
 	
 	/**
-	 * The collection of all the roads that compose this map.
+	 * The map of all the roads that compose this map with the UID as the key and the Road object as the value.
 	 */
-	private final Collection < Road > roads ;
+	private final Map < Integer , Road > roads ;
 	
 	// ACCESSOR METHODS
 	
@@ -47,14 +58,14 @@ public class GameMap
 		Collection < Road > adjacentRoads ;
 		Region region ;
 		Road road ;
-		regions = new ArrayList < Region > () ;
-		roads = new ArrayList < Road > () ;
+		regions = new HashMap < Integer , Region > () ;
+		roads = new HashMap < Integer , Road > () ;
 		regionsMap = readRegionsDataFile ( regionsCSVInputStream ) ;
 		roadsMap = readRoadsDataFile ( roadsCSVInputStream , regionsMap ) ;
 		for ( Couple < Region , int [] > couple : regionsMap.values() )
 		{
 			region = couple.getFirstObject () ;
-			regions.add ( region ) ;
+			regions.put ( region.getUID() , region ) ;
 			borderRoads = new ArrayList < Road > ( couple.getSecondObject ().length ) ;
 			for ( Integer roadUID : couple.getSecondObject () )
 				borderRoads.add ( roadsMap.get ( roadUID ).getFirstObject() ) ;
@@ -63,7 +74,7 @@ public class GameMap
 		for ( Couple < Road , int [] > couple : roadsMap.values () )
 		{
 			road = couple.getFirstObject () ;
-			roads.add ( road ) ;
+			roads.put ( road.getUID () , road ) ;
 			adjacentRoads = new ArrayList < Road > ( couple.getSecondObject().length ) ;
 			for ( Integer roadUID : couple.getSecondObject () )
 				adjacentRoads.add ( roadsMap.get ( roadUID ).getFirstObject() ) ;
@@ -71,18 +82,44 @@ public class GameMap
 		}
 	}
 	
-	/*
-	public Collection < Road > getFreeRoads () {}
-
-	public Collection < Region > getAdjacentRegions ( Region sourceRegion ) {}
+	public Region getRegionByUID ( int uid ) 
+	{
+		Region res ;
+		res = regions.get ( uid ) ;
+		return res ;
+	}
 	
-	public int getDistance ( Road source , Road destination ) {}
-*/
+	public Road getRoadByUID ( int uid ) 
+	{
+		Road res ;
+		res = roads.get ( uid ) ;
+		return res ;
+	}
+	
+	/**
+	 * Select and returns all the free Road objects contained in this map.
+	 * A Road is considered free if, and only if, there is nor a Sheperd or a Fence in it.
+	 * 
+	 * @return an Iterable containing all the Road object considered free.
+	 */
+	public Iterable < Road > getFreeRoads () 
+	{
+		Collection < Road > res ;
+		res = new LinkedList < Road > () ;
+		for ( Road road : roads.values () )
+			if ( road.getElementContained() == null )
+				res.add ( road ) ;
+		return res ;
+	}
 
 	// HELPER METHODS
 	
 	/**
-	 * 
+	 * @param regionsCSVInputStream the datasource where read the data in a raw CSV format, assuming it's already opened
+	 * @return a Map object where, for every entry, the key is the UID of a Region, while the value is a Couple
+	 * 	       object where, the first param is the Region object associated with the UID key, and the value is
+	 *         an array of int, where each value matches the UID of a Road object ( if the workflow goes 
+	 *         well not already created ) bordering this region.
 	 */
 	private static Map < Integer , Couple < Region , int [] > > readRegionsDataFile ( InputStream regionsCSVInputStream )  
 	{
@@ -107,6 +144,13 @@ public class GameMap
 		return res ;
 	}
 	
+	/**
+	 * @param roadsCSVInputStream the datasource where read the data in a raw CSV format, assuming it's already opened
+	 * @return a Map object where, for every entry, the key is the UID of a Road, while the value is a Couple
+	 * 	       object where, the first param is the Road object associated with the UID key, and the value is
+	 *         an array of int, where each value matches the UID of a Road object ( if the workflow goes 
+	 *         well not already created ) adjacent to this region.
+	 */
 	private static Map < Integer , Couple < Road , int [] > > readRoadsDataFile ( InputStream roadsCSVInputStream , Map < Integer , Couple < Region , int [] > > regionsMap ) 
 	{
 		String [] lineComponents ;
@@ -127,6 +171,21 @@ public class GameMap
 			res.put ( road.getUID () , new Couple < Road ,int [] > ( road , adjacentRoadsUID ) ) ;
 		}
 		scanner.close () ;
+		return res ;
+	}
+
+	/**
+	 * EXACTLY AS THE SUPER ONE'S
+	 */
+	@Override
+	public String toString () 
+	{
+		String res ;
+		StringBuffer stringBuffer ;
+		stringBuffer = new StringBuffer () ;
+		stringBuffer.append ( "Class : " + getClass ().getName() );
+		
+		res = stringBuffer.toString () ;
 		return res ;
 	}
 	
