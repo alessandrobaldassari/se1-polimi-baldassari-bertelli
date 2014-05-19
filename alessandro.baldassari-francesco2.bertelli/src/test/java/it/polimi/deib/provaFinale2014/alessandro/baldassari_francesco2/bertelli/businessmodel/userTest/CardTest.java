@@ -51,17 +51,13 @@ public class CardTest{
 		assertTrue(hillCard.isSellable());
 	}
 	
-	@Ignore("Problem with exceptions")
-	@Test (expected = NotSellableException.class) public void getSellingPrice(){
-				try {
-					hillCard.getSellingPrice();
-				} catch (NotSellableException e) {
-					e.printStackTrace();
-				} catch (SellingPriceNotSetException e){
-					e.printStackTrace();
-				}
+	@Test (expected = NotSellableException.class) public void getSellingPrice() throws NotSellableException, SellingPriceNotSetException{
+		hillCard.getSellingPrice();
 	}
 	
+	@Test (expected = SellingPriceNotSetException.class) public void getSellingPrice1() throws NotSellableException, SellingPriceNotSetException{
+		sellableCardWithoutPrice.getSellingPrice();
+	}
 	@Test (expected = IllegalArgumentException.class) public void setSellingPrice(){
 		sellableCardWithoutPrice.setSellingPrice(-1);
 	}
