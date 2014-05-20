@@ -27,10 +27,10 @@ public abstract class AdultOvine extends Ovine
 		if ( type != partner.getType () )
 		{
 			d = Math.random () ;
-			if ( d > 0.5 )
+			/*if ( d > 0.5 )
 				res = new Lamb () ;
 			else
-				throw new MateNotSuccesfullException () ; 
+				throw new MateNotSuccesfullException () ; */
 		}
 		else
 			throw new CanNotMateWithHimException ( this , partner ) ; 
