@@ -1,7 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal;
 
 
-public abstract class AdultOvine extends Ovine
+public class AdultOvine extends Ovine
 {
 
 	private AdultOvineType type ;

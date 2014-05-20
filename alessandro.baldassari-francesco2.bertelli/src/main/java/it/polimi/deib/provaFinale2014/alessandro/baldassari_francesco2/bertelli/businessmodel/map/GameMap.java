@@ -15,10 +15,6 @@ import java.util.Scanner;
  * It hides the bipartite graph structure of the real map, and offer to its clients only the methods
  * they need to interact with it.
  * The object is immutable, also if the regions and roads contained here are not.
- * 
- * @see Collection
- * @see Region
- * @see Road
  */
 public class GameMap 
 {
@@ -40,7 +36,7 @@ public class GameMap
 	 */
 	private final Map < Integer , Road > roads ;
 	
-	// ACCESSOR METHODS
+	// METHODS
 	
 	/**
 	 * Constructs a GameMap object using two InputStreams where raw data about regions, roads and their 
@@ -50,7 +46,7 @@ public class GameMap
 	 * @param regionsCSVInputStream the InputStream where take the raw data about the regions
 	 * @param roadsCSVInputStream the InputStream where take the raw data about the roads
 	 */
-	public GameMap ( InputStream regionsCSVInputStream , InputStream roadsCSVInputStream ) 
+	GameMap ( InputStream regionsCSVInputStream , InputStream roadsCSVInputStream ) 
 	{
 		Map < Integer , Couple < Region , int [] > > regionsMap ;
 		Map < Integer , Couple < Road , int [] > > roadsMap ;
@@ -82,6 +78,21 @@ public class GameMap
 		}
 	}
 	
+	public static GameMap newInstance ( InputStream regionsCSVInputStream , InputStream roadsCSVInputStream ) 
+	{
+		return new GameMap ( regionsCSVInputStream , roadsCSVInputStream ) ;
+	}
+	
+	public Iterable <Region> getRegions(){
+		return regions.values();
+	}
+	/**
+	 * Accessor method for this GameMap object; gives access to the Region object identified by
+	 * the UID passed by parameter.
+	 * 
+	 * @param uid the UID of the Region object being accessed.
+	 * @return the wanted Region.
+	 */
 	public Region getRegionByUID ( int uid ) 
 	{
 		Region res ;
@@ -89,6 +100,13 @@ public class GameMap
 		return res ;
 	}
 	
+	/**
+	 * Accessor method for this GameMap object: gives access to the Road object identified by
+	 * the UID passed parameter.
+	 * 
+	 * @param uid the UID of the Road object being accessed.
+	 * @return the wanted Road.
+	 */
 	public Road getRoadByUID ( int uid ) 
 	{
 		Road res ;
@@ -111,8 +129,6 @@ public class GameMap
 				res.add ( road ) ;
 		return res ;
 	}
-
-	// HELPER METHODS
 	
 	/**
 	 * @param regionsCSVInputStream the datasource where read the data in a raw CSV format, assuming it's already opened

@@ -4,35 +4,102 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
 public class Bank 
 {
+	
+	// ATTRIBUTES
 
-	private Map < RegionType , Stack < Card > > cards ;
-	private List < Fence > fences ;
+	/***/
+	private static final int INITIAL_MONEY_RESERVE = 80 ;
+	
+	/***/
+	private static final int NON_FINAL_FENCE_NUMBER = 20 ;
+	
+	/***/
+	private static final int FINAL_FENCE_NUMBER = 12 ;
+	
+	/***/
+	private static final int NUMBER_OF_NON_INITIAL_CARDS_PER_REGION_TYPE = 5 ;
+	
+	/***/
+	private final Map < RegionType , Card > initialCards ;
+	
+	/***/
+	private final Map < RegionType , Stack < SellableCard > > cards ;
+	
+	/***/
+	private final List < Fence > fences ;
+	
+	/***/
 	private int moneyReserve ;
 	
-	public Bank ( int initialMoneyReserve , Iterable < Fence > fences , Iterable < Card > cards ) 
+	// METHODS
+	
+	public Bank ( int initialMoneyReserve , Iterable < Fence > fences , Iterable < Card > initCards , Iterable < SellableCard > otherCards ) 
 	{
-		if ( initialMoneyReserve >= 0 )
+		if ( fences != null && initCards != null && otherCards != null && initialMoneyReserve >= 0 )
 		{
 			moneyReserve = initialMoneyReserve ;
-			this.cards = new LinkedHashMap < RegionType , Stack < Card > > ( RegionType.values().length ) ;
+			initialCards = new LinkedHashMap < RegionType , Card > ( RegionType.values ().length )  ;
+			cards = new LinkedHashMap < RegionType , Stack < SellableCard > > ( RegionType.values().length ) ;
 			this.fences = new ArrayList < Fence > () ;
+			for ( Card card : initCards )
+				this.initialCards.put ( card.getRegionType() , card ) ;
 			for ( RegionType regionType : RegionType.values() )
-				this.cards.put ( regionType , new Stack < Card > () ) ;
-			this.cards.remove ( RegionType.SHEEPSBURG ) ;
+				if ( regionType != RegionType.SHEEPSBURG )
+					cards.put ( regionType , new Stack < SellableCard > () ) ;
+			for ( SellableCard card : otherCards )
+				cards.get ( card.getRegionType () ).push ( card ) ;
 			for ( Fence fence : fences )
 				this.fences.add ( fence ) ;
-			for ( Card card : cards )
-				this.cards.get ( card.getRegionType () ).push ( card ) ;
 		}
+		else
+			throw new IllegalArgumentException () ;
+	}
+	
+	public static Bank newInstance () 
+	{
+		Bank res ;
+		Collection < Fence > initFences ;
+		Collection < Card > initialCards ;
+		Collection < SellableCard > otherCards ;
+		byte i ;
+		byte counter ;
+		initFences = new ArrayList < Fence > ( NON_FINAL_FENCE_NUMBER + FINAL_FENCE_NUMBER ) ;
+		for ( i = 0 ; i < NON_FINAL_FENCE_NUMBER ; i ++ )
+			initFences.add ( new Fence ( FenceType.NON_FINAL ) ) ;
+		for ( i = 0 ; i < FINAL_FENCE_NUMBER ; i ++ )
+			initFences.add ( new Fence ( FenceType.FINAL ) ) ;
+		initialCards = new LinkedList < Card > () ;
+		otherCards = new LinkedList < SellableCard > () ;
+		counter = 0 ;
+		for ( RegionType type : RegionType.values() )
+		{
+			if ( type != RegionType.SHEEPSBURG )
+			{
+				initialCards.add ( new Card ( type , counter ) ) ;
+				counter ++ ;
+			}
+		}
+		for ( RegionType type : RegionType.values () )
+			if ( type != RegionType.SHEEPSBURG )
+			for ( i = NUMBER_OF_NON_INITIAL_CARDS_PER_REGION_TYPE-1 ; i >= 0 ; i -- )
+			{
+					otherCards.add ( new SellableCard ( type , counter , i ) ) ;
+					counter ++ ;
+			}
+		res = new Bank ( INITIAL_MONEY_RESERVE , initFences , initialCards , otherCards ) ;
+		return res ;
 	}
 	
 	public int getMoneyReserve () 
@@ -67,6 +134,14 @@ public class Bank
 		return res ;
 	}
 
+	public Card takeInitialCard ( RegionType regionType ) 
+	{
+		Card res ;
+		res = initialCards.get ( regionType ) ;
+		initialCards.remove ( regionType ) ;
+		return res  ;
+	}
+	
 	public int getPeekCardPrice ( RegionType regionType ) throws NoMoreCardOfThisTypeException 
 	{
 		int res ;
@@ -81,7 +156,7 @@ public class Bank
 	
 	public Card sellACard ( int price , RegionType regionType ) throws CardPriceNotRightException, NoMoreCardOfThisTypeException 
 	{
-		Card res ;
+		SellableCard res ;
 		if ( regionType != RegionType.SHEEPSBURG )
 		{
 			if ( cards.get ( regionType ).isEmpty () == false )

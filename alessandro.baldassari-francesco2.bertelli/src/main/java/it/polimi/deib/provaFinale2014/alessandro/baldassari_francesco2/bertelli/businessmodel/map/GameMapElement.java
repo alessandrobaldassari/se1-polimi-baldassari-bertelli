@@ -14,8 +14,11 @@ public abstract class GameMapElement
 	 */
 	private final int uid ;
 	
-	// ACCESSOR METHODS 
+	// METHODS 
 	
+	/**
+	 * @param uid the uid for  
+	 */
 	public GameMapElement ( int uid ) 
 	{
 		if ( uid > 0 )

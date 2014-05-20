@@ -3,7 +3,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import java.util.Collection;
 import java.util.Collections;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Positionable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElement;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 
 public class Road extends GameMapElement
@@ -17,7 +17,7 @@ public class Road extends GameMapElement
 	private final Region secondBorderRegion ;
 	private final int number ;
 	private Collection < Road > adjacentRoads ;
-	private Positionable < Road > elementContained ;
+	private PositionableElement < Road > elementContained ;
 	
 	// ACCESSOR METHODS 
 	
@@ -87,7 +87,7 @@ public class Road extends GameMapElement
 	/**
 	 * @param
 	 */
-	public void setElementContained ( Positionable < Road > elementContained ) 
+	public void setElementContained ( PositionableElement < Road > elementContained ) 
 	{
 		this.elementContained = elementContained ;
 	}
@@ -98,7 +98,7 @@ public class Road extends GameMapElement
 	 * 
 	 * @return the Positionable entity contained in this Road
 	 */
-	public Positionable < Road > getElementContained () 
+	public PositionableElement < Road > getElementContained () 
 	{
 		return elementContained ;
 	}
