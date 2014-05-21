@@ -110,18 +110,44 @@ public class Bank
 	public void receiveMoney ( int amount ) 
 	{
 		if ( amount > 0 )
-			moneyReserve = amount ;
+			moneyReserve = moneyReserve + amount ;
 		else
 			throw new IllegalArgumentException () ;
 	}
 	
-	public Fence getAFence ( FenceType fenceType ) throws NoMoreFenceOfThisTypeException 
+	
+	public Fence getAFence ( FenceType fenceType ) throws NoMoreFenceOfThisTypeException, ArrayIndexOutOfBoundsException 
+	{
+		Fence res ;
+		if(fenceType == null)
+			throw new NoMoreFenceOfThisTypeException ( fenceType );
+		if(fences.isEmpty() == false){
+			if ( fenceType == FenceType.NON_FINAL ){
+				if(fences.contains(new Fence(FenceType.NON_FINAL)))
+					res = fences.remove(0);
+				else	
+					throw new NoMoreFenceOfThisTypeException ( fenceType ) ;
+			}
+			else{
+				if(fences.contains(new Fence(FenceType.FINAL)))
+					res = fences.remove( fences.size () - 1 ) ;
+				else	
+					throw new NoMoreFenceOfThisTypeException ( fenceType );
+			} 
+		}
+		else
+			throw new ArrayIndexOutOfBoundsException ();
+		return res ;
+	}
+	
+	
+	/*public Fence getAFence ( FenceType fenceType ) throws NoMoreFenceOfThisTypeException 
 	{
 		Fence res ;
 		if ( fenceType == FenceType.NON_FINAL )
-			res = fences.get ( 0 ) ;
+			res = fences.remove(0); fences.
 		else
-			res = fences.get ( fences.size () - 1 ) ;
+			res = fences.remove( fences.size () - 1 ) ;
 		if ( res.isFinal() && fenceType == FenceType.FINAL )
 		{
 			if ( fenceType == FenceType.NON_FINAL ) 
@@ -133,13 +159,12 @@ public class Bank
 			throw new NoMoreFenceOfThisTypeException ( fenceType ) ;
 		return res ;
 	}
+	*/
 
 	public Card takeInitialCard ( RegionType regionType ) 
 	{
 		Card res ;
-		res = initialCards.get ( regionType ) ;
-		initialCards.remove ( regionType ) ;
-		return res  ;
+		return res = initialCards.remove ( regionType ) ;
 	}
 	
 	public int getPeekCardPrice ( RegionType regionType ) throws NoMoreCardOfThisTypeException 
