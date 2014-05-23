@@ -120,46 +120,27 @@ public class Bank
 	{
 		Fence res ;
 		if(fenceType == null)
-			throw new NoMoreFenceOfThisTypeException ( fenceType );
+			throw new IllegalArgumentException();
 		if(fences.isEmpty() == false){
 			if ( fenceType == FenceType.NON_FINAL ){
-				if(fences.contains(new Fence(FenceType.NON_FINAL)))
-					res = fences.remove(0);
-				else	
+				res = fences.get(0);
+				if(res.isFinal())
 					throw new NoMoreFenceOfThisTypeException ( fenceType ) ;
+				else
+					fences.remove(0);
 			}
 			else{
-				if(fences.contains(new Fence(FenceType.FINAL)))
-					res = fences.remove( fences.size () - 1 ) ;
+				res = fences.get( fences.size () - 1 ) ;
+				if(res.isFinal())
+					fences.remove( fences.size() - 1 );
 				else	
 					throw new NoMoreFenceOfThisTypeException ( fenceType );
 			} 
 		}
 		else
-			throw new ArrayIndexOutOfBoundsException ();
+			throw new NoMoreFenceOfThisTypeException ( fenceType );
 		return res ;
 	}
-	
-	
-	/*public Fence getAFence ( FenceType fenceType ) throws NoMoreFenceOfThisTypeException 
-	{
-		Fence res ;
-		if ( fenceType == FenceType.NON_FINAL )
-			res = fences.remove(0); fences.
-		else
-			res = fences.remove( fences.size () - 1 ) ;
-		if ( res.isFinal() && fenceType == FenceType.FINAL )
-		{
-			if ( fenceType == FenceType.NON_FINAL ) 
-				fences.remove ( 0 ) ;
-			else
-				fences.remove ( fences.size () - 1 ) ;
-		}
-		else
-			throw new NoMoreFenceOfThisTypeException ( fenceType ) ;
-		return res ;
-	}
-	*/
 
 	public Card takeInitialCard ( RegionType regionType ) 
 	{

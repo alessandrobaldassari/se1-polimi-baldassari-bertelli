@@ -44,13 +44,13 @@ public class BankTest {
 	}
 	
 	@Test (expected = NoMoreFenceOfThisTypeException.class) public void getAFence() throws ArrayIndexOutOfBoundsException, NoMoreFenceOfThisTypeException {
-		assertEquals(bank.getAFence(FenceType.NON_FINAL), new Fence(FenceType.NON_FINAL));
-		assertEquals(bank.getAFence(FenceType.FINAL), new Fence(FenceType.FINAL));
+		assertFalse(bank.getAFence(FenceType.NON_FINAL).isFinal());
+		assertTrue(bank.getAFence(FenceType.FINAL).isFinal());
 		bank.getAFence(FenceType.FINAL);
 	}
 	
 	@Test public void takeInitialCard(){
-		assertEquals(bank.takeInitialCard(RegionType.CULTIVABLE), new Card(RegionType.CULTIVABLE, 1));
+		assertTrue(bank.takeInitialCard(RegionType.CULTIVABLE).getRegionType() == RegionType.CULTIVABLE);
 	}
 	
 	@Test (expected = IllegalArgumentException.class)
