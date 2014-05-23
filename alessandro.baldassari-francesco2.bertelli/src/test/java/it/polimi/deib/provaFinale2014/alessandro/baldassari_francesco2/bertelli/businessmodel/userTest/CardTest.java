@@ -2,8 +2,9 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card.NotSellableException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card.SellingPriceNotSetException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.NotSellableException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.SellingPriceNotSetException;
 
 import org.junit.*;
 
@@ -12,17 +13,16 @@ import static org.junit.Assert.*;
 
 public class CardTest{
 	private Card hillCard;
-	private Card sellableCardWithoutPrice;
+	private SellableCard sellableCardWithoutPrice;
 	
 	@Before public void setUp(){
-		hillCard = new Card(RegionType.HILL, 1, 4);
-		sellableCardWithoutPrice = new Card(RegionType.FOREST, 2, 2);
-		sellableCardWithoutPrice.setSellable(true);
+		hillCard = new Card(RegionType.HILL, 1);
+		sellableCardWithoutPrice = new SellableCard(RegionType.FOREST, 2 , 3);
 	}
 	
 	@Test public void Card(){
-		assertTrue(new Card(RegionType.HILL, 1, 4).equals(hillCard));
-		assertFalse(new Card(RegionType.HILL, 1, 4).equals(sellableCardWithoutPrice));
+		assertTrue(new Card(RegionType.HILL, 1).equals(hillCard));
+		assertFalse(new Card(RegionType.HILL, 1).equals(sellableCardWithoutPrice));
 
 		
 	}
@@ -38,26 +38,26 @@ public class CardTest{
 	}
 	
 	@Test public void getInitialPrice(){
-		assertEquals(hillCard.getInitialPrice(), 4);
-		assertNotEquals(hillCard.getInitialPrice(), 3);
+		assertEquals(sellableCardWithoutPrice.getInitialPrice(), 3);
+		assertNotEquals(sellableCardWithoutPrice.getInitialPrice(), 4);
 	}
 	
 	@Test public void isSellable(){
-		assertEquals(hillCard.isSellable(), false);
-		assertNotEquals(hillCard.isSellable(), true);
+		assertEquals(sellableCardWithoutPrice.isSellable(), false);
+		assertNotEquals(sellableCardWithoutPrice.isSellable(), true);
 	}
 	
 	@Test public void setSellable(){
-		hillCard.setSellable(true);
-		assertTrue(hillCard.isSellable());
+		sellableCardWithoutPrice.setSellable(true);
+		assertTrue(sellableCardWithoutPrice.isSellable());
 	}
 	
 	@Test (expected = NotSellableException.class) public void getSellingPrice() throws NotSellableException, SellingPriceNotSetException{
-		hillCard.getSellingPrice();
+		sellableCardWithoutPrice.getSellingPrice();
 	}
 	
-	@Test (expected = SellingPriceNotSetException.class) public void getSellingPrice1() throws NotSellableException, SellingPriceNotSetException{
-		sellableCardWithoutPrice.getSellingPrice();
+	@Test (expected = NotSellableException.class) public void getSellingPrice1() throws NotSellableException, SellingPriceNotSetException{
+		assertEquals ( sellableCardWithoutPrice.getSellingPrice() , 3 );
 	}
 	@Test (expected = IllegalArgumentException.class) public void setSellingPrice(){
 		sellableCardWithoutPrice.setSellingPrice(-1);

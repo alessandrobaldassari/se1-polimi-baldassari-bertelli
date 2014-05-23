@@ -53,6 +53,9 @@ public class Couple < T , S >
 		return res ;
 	}
 	
+	/**
+	 * AAS THE SUPER'S ONE. 
+	 */
 	@Override
 	public String toString () 
 	{

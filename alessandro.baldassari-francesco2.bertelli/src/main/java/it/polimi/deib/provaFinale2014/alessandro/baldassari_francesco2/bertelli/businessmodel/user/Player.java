@@ -66,6 +66,29 @@ public abstract class Player
 	}
 	
 	/**
+	 * AS THE SUPER'S ONE.
+	 * Two Player objects are considered equals if, and only if, their two name properties are equal.
+	 * This definition is valid also for all subclasses of Player, so this method is marked as final. 
+	 */
+	@Override
+	public final boolean equals ( Object obj ) 
+	{
+		Player otherPlayer ;
+		boolean res ;
+		if ( obj instanceof Player )
+		{
+			otherPlayer = ( Player ) obj ;
+			if ( name == otherPlayer.getName () )
+				res = true ;
+			else
+				res = false ;
+		}
+		else
+			res = false ;
+		return res ;
+	}
+	
+	/**
 	 * This methods is called by the system in the Market phase of the Game.
 	 * Here, the Player, has the opportunity to set the selling state and price of his Cards, if he wants
 	 * to sell some of his Cards to other Players.

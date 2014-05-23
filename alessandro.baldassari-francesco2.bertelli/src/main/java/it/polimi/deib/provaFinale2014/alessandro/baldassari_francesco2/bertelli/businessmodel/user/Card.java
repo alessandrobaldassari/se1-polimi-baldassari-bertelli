@@ -39,6 +39,29 @@ public class Card
 	}
 	
 	/**
+	 * AS THE SUPER'S ONE.
+	 * Two card object are considered equals if, and only if, their two ids are the same.
+	 * This definition is valid also for every subclass of Card, so this method is marked as final.
+	 */
+	@Override
+	public final boolean equals ( Object obj ) 
+	{
+		Card otherCard ;
+		boolean res ;
+		if ( obj instanceof Card ) 
+		{
+			otherCard = ( Card ) obj ;
+			if ( id == otherCard.getId () )
+				res = true ;
+			else
+				res = false ;
+		}
+		else
+			res = false ;
+		return res ;
+	}
+	
+	/**
 	 * Getter for the Region Type property.
 	 * 
 	 * @return the region type associated with this Card.
