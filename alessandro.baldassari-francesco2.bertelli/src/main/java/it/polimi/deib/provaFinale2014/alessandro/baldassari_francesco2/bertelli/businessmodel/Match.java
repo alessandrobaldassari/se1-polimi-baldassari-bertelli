@@ -3,6 +3,8 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +27,18 @@ public class Match
 			state = null;
 			
 		}
+	}
+	
+	public Match newInstance(){
+		Match match;
+		Bank bank;
+		GameMap gameMap;
+		InputStream regionsCSVInputStream = new FileInputStream();
+		InputStream roadsCSVInputStream = new FileInputStream();
+		bank.newInstance();
+		gameMap = GameMap.newInstance(regionsCSVInputStream, roadsCSVInputStream);
+		return match = new Match(gameMap , bank);
+		
 	}
 	
 	public List < Player > getPlayers ()
