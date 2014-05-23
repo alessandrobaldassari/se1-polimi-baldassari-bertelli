@@ -29,18 +29,6 @@ public class Match
 		}
 	}
 	
-	public Match newInstance(){
-		Match match;
-		Bank bank;
-		GameMap gameMap;
-		InputStream regionsCSVInputStream = new FileInputStream();
-		InputStream roadsCSVInputStream = new FileInputStream();
-		bank.newInstance();
-		gameMap = GameMap.newInstance(regionsCSVInputStream, roadsCSVInputStream);
-		return match = new Match(gameMap , bank);
-		
-	}
-	
 	public List < Player > getPlayers ()
 	{
 		return players ;

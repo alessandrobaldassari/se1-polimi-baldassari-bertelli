@@ -4,14 +4,15 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 
-public class PlayerHuman extends Player {
-	PlayerHuman(String name, int money){
+public class AutomaticPlayer extends Player {
+	AutomaticPlayer(String name, int money){
 		super(name, money);
 	}
 	
-	public PlayerHuman newInstance(String name, int money){
-		PlayerHuman playerHuman;
-		return playerHuman = new PlayerHuman(name, money);
+	public AutomaticPlayer newInstance ( String name , int money ) 
+	{
+		AutomaticPlayer playerHuman;
+		return playerHuman = new AutomaticPlayer(name, money);
 	}
 
 	@Override
