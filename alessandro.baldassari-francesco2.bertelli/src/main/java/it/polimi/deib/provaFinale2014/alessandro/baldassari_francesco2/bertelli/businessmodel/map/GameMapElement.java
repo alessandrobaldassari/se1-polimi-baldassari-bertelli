@@ -17,16 +17,20 @@ public abstract class GameMapElement
 	// METHODS 
 	
 	/**
-	 * @param uid the uid for  
+	 * @param uid the uid of this GameMapElement
+	 * @throws IllegalArgumentException if the parameter is < 0  
 	 */
-	public GameMapElement ( int uid ) 
+	GameMapElement ( int uid ) 
 	{
-		if ( uid > 0 )
+		if ( uid >= 0 )
 			this.uid = uid ;
 		else
 			throw new IllegalArgumentException () ;
 	}
 
+	/**
+	 * @return the uid property. 
+	 */
 	public int getUID () 
 	{
 		return uid ;

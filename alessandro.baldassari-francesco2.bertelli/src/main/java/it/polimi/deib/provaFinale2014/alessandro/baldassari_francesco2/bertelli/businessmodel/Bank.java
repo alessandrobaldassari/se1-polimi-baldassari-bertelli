@@ -14,18 +14,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+/**
+ * This class models the Component of the Game which is the Bank, a background element
+ * that contains the not yet selled cards, the not placed fences and the reserve of money.
+ */
 public class Bank 
 {
 	
 	// ATTRIBUTES
 
-	/***/
+	/**
+	 * The initial money amount, total. 
+	 * It's a business rule. 
+	 */
 	private static final int INITIAL_MONEY_RESERVE = 80 ;
 	
-	/***/
+	/**
+	 * The total number of non final fences.
+	 * It's a business rule. 
+	 */
 	private static final int NON_FINAL_FENCE_NUMBER = 20 ;
 	
-	/***/
+	/**
+	 * The number of final  
+	 */
 	private static final int FINAL_FENCE_NUMBER = 12 ;
 	
 	/***/
@@ -45,6 +57,7 @@ public class Bank
 	
 	// METHODS
 	
+	/***/
 	public Bank ( int initialMoneyReserve , Iterable < Fence > fences , Iterable < Card > initCards , Iterable < SellableCard > otherCards ) 
 	{
 		if ( fences != null && initCards != null && otherCards != null && initialMoneyReserve >= 0 )

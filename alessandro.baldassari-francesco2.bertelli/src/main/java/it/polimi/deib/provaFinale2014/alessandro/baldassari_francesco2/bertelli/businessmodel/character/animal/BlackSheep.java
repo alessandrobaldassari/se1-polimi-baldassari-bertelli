@@ -1,10 +1,16 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal;
 
-
-public class BlackSheep extends AdultOvine 
+/**
+ * This class models the Black Sheep, a particular Sheep which exists in one
+ * instance per Match.
+ */
+class BlackSheep extends AdultOvine 
 {
 
-	public BlackSheep ( String name ) 
+	/**
+	 * @param name the name of this BlackSheep 
+	 */
+	BlackSheep ( String name ) 
 	{
 		super ( name , AdultOvineType.SHEEP ) ; 
 	}

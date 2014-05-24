@@ -9,6 +9,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,101 +17,168 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class GameController
+/**
+ * This class is a core component of the Server Architecture of the System and also
+ * of the whole System.
+ * It manages the whole lifecycle of the Match.
+ * Essentially, a GameController object is the runner of the GameMatch object;
+ * it calls all the lifecycle methods of the Game, including the Players ( which may
+ * be on the Client side in the case of a distributed scenario ).
+ * The only true state variable of a GameController object is the GameMatch object;
+ * so, every GameController, is potentially poolable.
+ */
+public class GameController implements Runnable
 {
-
-	/***/
-	private static final String REGIONS_FILE_PATH = "regions.csv" ;
 	
-	/***/
-	private static final String ROADS_FILE_PATH = "roads.csv" ;
-	
-	/***/
-	
-	
+	/**
+	 * The Timer value about the time to wait before begin a Match. 
+	 */
 	private static final long DELAY = 150000;
 	
+	/**
+	 * The maximum number of Player for a Match. 
+	 */
 	private static final int MAX_NUMBER_OF_PLAYERS = 4;
+	
+	/**
+	 * The match that this GameController will manage. 
+	 */
 	private Match match ;
 	
+	/**
+	 * A standard Timer object to mange the timer at the beginning of a Match.
+	 * It's a business rule. 
+	 */
 	private Timer timer;
-	GameController () 
-	{
-	
-	}
 	
 	/***/
-	private void creatingPhase () throws IOException 
+	public GameController () 
 	{
-		InputStream regionsCSVInputStream ;
-		InputStream roadsCSVInputStream ;
-		GameMap gameMap ;
-		Bank bank;
-		regionsCSVInputStream = Files.newInputStream ( Paths.get ( REGIONS_FILE_PATH ) , StandardOpenOption.READ  ) ; 
-		roadsCSVInputStream = Files.newInputStream ( Paths.get ( ROADS_FILE_PATH ) , StandardOpenOption.READ ) ;
-		gameMap = GameMap.newInstance ( regionsCSVInputStream, roadsCSVInputStream ) ;
-		bank = Bank.newInstance();
 		timer = new Timer();
-		match = new Match(gameMap, bank);
-		timer.schedule(new WaitingPlayersTimerTask(), DELAY);
-		
-		
 	}
 	
-	public void addPlayerAndCheck(Player newPlayer) throws WrongStateMethodCallException{
-		if(match.getMatchState() == Match.MatchState.WAIT_FOR_PLAYERS){
-			match.getPlayers().add(newPlayer);
-			if(match.getPlayers().size() == MAX_NUMBER_OF_PLAYERS){
-				timer.cancel();
-				match.setMatchState(MatchState.INITIALIZATION);
+	public void run () 
+	{
+		try 
+		{
+			creatingPhase () ;
+			while ( match.getMatchState() != MatchState.INITIALIZATION )
+				try 
+				{	
+					wait () ;
+				}
+				catch ( InterruptedException e ) 
+				{
+					e.printStackTrace();
+				}
+			initializationPhase () ;
+		}
+		catch ( IOException e ) 
+		{
+			e.printStackTrace () ;
+		} 
+	}
+	
+	/**
+	 * The first method executed by this controller during it's logical lifecycle.
+	 * It creates all the resources necessary to the game and starts a Timer
+	 * to wait for all players to add in. 
+	 */
+	private void creatingPhase () 
+	{
+		GameMap gameMap ;
+		Bank bank;
+		gameMap = GameMap.newInstance ( regionsCSVInputStream, roadsCSVInputStream ) ;
+		bank = Bank.newInstance();
+		match = new Match ( gameMap , bank ) ;
+		timer.schedule ( new WaitingPlayersTimerTask () , DELAY ) ;
+		regionsCSVInputStream.close () ;
+		roadsCSVInputStream.close () ;
+	}
+	
+	/**
+	 * This is the logically second method of the Game Controller lifecycle.
+	 * Obviously is not called by this GameController itself; otherwise, other 
+	 * components will call it to add new Players.
+	 * This component is also responsible for control if the MAXIMUM NUMBER OF PLAYERS
+	 * is reached; if so, it sets the match state to the INITIALIZATION state, and the WAIT
+	 * FR PLAYERS phase is considered concluded.
+	 */
+	public void addPlayerAndCheck(Player newPlayer) throws WrongStateMethodCallException
+	{
+		if ( match.getMatchState () == Match.MatchState.WAIT_FOR_PLAYERS )
+		{
+			match.getPlayers ().add ( newPlayer ) ;
+			if ( match.getPlayers ().size () == MAX_NUMBER_OF_PLAYERS ) 
+			{
+				timer.cancel () ;
+				match.setMatchState ( MatchState.INITIALIZATION ) ;
 			}
-			
 		}
 		else
 			throw new WrongStateMethodCallException();
-			
-		
 	}
 	
-	public void initializationPhase(){
-		placeSheeps();
+	/**
+	 * This is the third method in the logical flow of the Game Controller.
+	 * It is divided in 4 phases:
+	 * 1. All the Sheeps are placed in the Regions.
+	 * 2. The initial Cards are given to the Players.
+	 * 3. The Players are provided with money from the Bank.
+	 * 4.
+	 */
+	public void initializationPhase ()
+	{
+		placeSheeps () ;
+		distributeInitialCards () ;
+		moneyDistribution () ;
 	}
 	
-	private void placeSheeps(){
-		Ovine ovine;
-		double chooseOvineType;
-		chooseOvineType = Math.random();
-		for(Region r : match.getGameMap().getRegions()){
-			if(chooseOvineType < 0.4)
-				ovine = new AdultOvine("", AdultOvineType.SHEEP);
-			else
-				if(chooseOvineType >= 0.4 && chooseOvineType < 0.8)
-					ovine = new AdultOvine("", AdultOvineType.RAM);
-				else
-					ovine = new Lamb("", 0);
-			r.getContainedAnimals().add(ovine);
+	/**
+	 * This method place one Sheep per Region in the Game Map and the Black Sheep
+	 * in the Region of Sheepsburg.
+	 * 
+	 */
+	private void placeSheeps () 
+	{
+		Ovine bornOvine ;
+		for ( Region r : match.getGameMap ().getRegions () ) 
+		{
+			bornOvine = generateOvine () ;
+			r.getContainedAnimals().add ( bornOvine ) ;
 		}
 	}
 	
-	private void distributeInitialCard(){
-		List <RegionType> regions;
+	/**
+	 * This methods emulates the phase where one Initial Card is given to each Player.
+	 * Which Card give to each Player is a randomic decision.
+	 */
+	private void distributeInitialCards ()
+	{
+		List < RegionType > regions ;
 		regions = new ArrayList <RegionType> ( RegionType.values().length ) ;
-		for(RegionType type : RegionType.values())
-			regions.add(type);
-		regions.remove(RegionType.SHEEPSBURG);
-		//randomic card mesh
-		for( Player player : match.getPlayers()){
-			player.getCards().add(match.getBank().takeInitialCard(regions.get(0)));
-		regions.remove(0);
+		for ( RegionType type : RegionType.values () )
+			regions.add ( type ) ;
+		regions.remove ( RegionType.SHEEPSBURG ) ;
+		CollectionsUtilities.listMesh ( regions ) ;
+		for( Player player : match.getPlayers ())
+		{
+			player.getCards ().add ( match.getBank ().takeInitialCard ( regions.get ( 0 ) ) ) ;
+			regions.remove ( 0 ) ;
 		}
 	}
-		
-	private void moneyDistribution(){
+	
+	/**
+	 * This method emulates the phase of the Game where money are given to every player.
+	 * It determines the money to give to every Player based on the number of Player,
+	 * and gives them them.
+	 */
+	private void moneyDistribution ()
+	{
 		int moneyToDistribute;
 		if(match.getPlayers().size() == 2)
 			moneyToDistribute=30;
@@ -120,24 +188,61 @@ public class GameController
 			player.receiveMoney(moneyToDistribute);
 	}
 	
-	
-	public class WrongStateMethodCallException extends Exception{
-		
+	/**
+	 * This helper method genereta an Ovine choosing it's type ( sex ) with a simple
+	 * probabilistic process.
+	 * With p = 0.4, a Sheep.
+	 * With p = 0.4, a Ram.
+	 * With p = 0.2 a Lamb. 
+	 */
+	private static Ovine generateOvine ()  
+	{
+		final Ovine result ;
+		final double chooseOvineType ;
+		chooseOvineType = Math.random () ;
+		if ( chooseOvineType < 0.4 )
+			result = new AdultOvine ( "" , AdultOvineType.SHEEP ) ;
+		else
+			if ( chooseOvineType >= 0.4 && chooseOvineType < 0.8 )
+				result = new AdultOvine ( "", AdultOvineType.RAM ) ;
+			else
+				result = new Lamb ( "" , 0 ) ;
+		return result ;
 	}
 	
-	private class WaitingPlayersTimerTask extends TimerTask{
+	// INNER CLASSES
+	
+	/**
+	 * Utility class which implements the Task the GameController Timer has to do
+	 * when the Timer expires.
+	 * It set the MatchState to the INITIALIZATION value, and cancel the Timer. 
+	 */
+	private class WaitingPlayersTimerTask extends TimerTask
+	{
 
 		@Override
-		public void run() {
-			if(match.getPlayers().size() >= 2){
-				match.setMatchState(MatchState.INITIALIZATION);
+		public void run ()
+		{
+			if ( match.getPlayers().size() >= 2 ) 
+			{
+				match.setMatchState ( MatchState.INITIALIZATION ) ;
+				cancel () ;
 			}
-			else{
+			else
+			{
 				//Notify network controller that this match will not start
-			}
-				
-			
+			}	
 		}
 		
 	}
+	
+	// EXCEPTIONS
+	
+	/**
+	 * This Exceptions models the situation where a Client tries to invoke a Method of a
+	 * GameController while the GameController itself is in a state where that method 
+	 * can not be called. 
+	 */
+	public class WrongStateMethodCallException extends Exception {}
+
 }

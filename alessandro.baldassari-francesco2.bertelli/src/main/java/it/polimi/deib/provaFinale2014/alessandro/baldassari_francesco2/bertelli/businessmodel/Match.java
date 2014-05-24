@@ -3,20 +3,29 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+/***/
 public class Match 
 {
 
+	/***/
 	private List < Player > players ;
+	
+	/***/
 	private GameMap gameMap ;
+	
+	/***/
 	private Bank bank ;
+	
+	/***/
 	private boolean inFinalPhase ;
+	
+	/***/
 	private MatchState state;
 	
+	/***/
 	Match ( GameMap gameMap , Bank bank ) 
 	{
 		if ( gameMap != null && bank != null )
@@ -29,16 +38,19 @@ public class Match
 		}
 	}
 	
+	/***/
 	public List < Player > getPlayers ()
 	{
 		return players ;
 	}
 	
+	/***/
 	public GameMap getGameMap () 
 	{
 		return gameMap ;
 	}
 	
+	/***/
 	public Bank getBank () 
 	{
 		return bank ;
@@ -50,10 +62,12 @@ public class Match
 		return inFinalPhase ;
 	}
 	
+	/***/
 	public void setMatchState(MatchState state){
 		this.state = state;
 	}
 	
+	/***/
 	public MatchState getMatchState(){
 		return state;
 	}

@@ -3,25 +3,41 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 
 /**
- * 
+ * This class models a Region in the GameMap, a place where Animals can stay.
  */
 public class Region extends GameMapElement
 {
 
 	// ATTRIBUTES
 	
+	/**
+	 * The type of this Region.
+	 * Determined by the geography of the GameMap. 
+	 */
 	private final RegionType type ;
+	
+	/**
+	 * The set of Road object bordering this Region.
+	 * Determined by the geography of the GameMap.
+	 */
 	private Iterable < Road > borderRoads ;
+	
+	/**
+	 * The collection containing the Animal objects which stay in this Region.
+	 * Evolves during the Match.
+	 */
 	private Collection < Animal > containedAnimals ; 
 	
-	// ACCESSOR METHODS
+	// METHODS
 	
+	/**
+	 * @param type the Type of this Region.
+	 * @throws IllegalArgumentException if the type parameter is null.
+	 */
 	Region ( RegionType type , int uid ) 
 	{
 		super ( uid ) ;
@@ -35,6 +51,8 @@ public class Region extends GameMapElement
 	}
 	
 	/**
+	 * Getter method for the type property.
+	 * 
 	 * @return the Type of this Region
 	 */
 	public RegionType getType () 
@@ -43,6 +61,8 @@ public class Region extends GameMapElement
 	}
 	
 	/**
+	 * Setter method for the borderRoads property.
+	 * 
 	 * @param an Iterable containing the Road objects which border this Region
 	 * 		  Because the property borderRoads is thinked as an immutable ones ( the Roads bordering a Region are 
 	 * 	      always the same ), this method makes a copy of the data structure passed by parameters 
@@ -54,6 +74,8 @@ public class Region extends GameMapElement
 	}
 	
 	/**
+	 * Getter method for the borderRoads object.
+	 * 
 	 * @return an Iterable of Road objects which are the ones which border this Region
 	 */
 	public Iterable < Road > getBorderRoads () 
@@ -62,13 +84,21 @@ public class Region extends GameMapElement
 	}
 	
 	/**
-	 * @return 
+	 * Getter for the containedAnimals property.
+	 * 
+	 * @return the containedAnimals property.
 	 */
 	public Collection < Animal > getContainedAnimals () 
 	{
 		return containedAnimals ;
 	}
 	
+	// ENUMS
+	
+	/**
+	 * The types of Region which exists in the GameMap.
+	 * Determined by the GameMap.
+	 */
 	public enum RegionType 
 	{
 		

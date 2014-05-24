@@ -1,12 +1,26 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MathUtilities;
 
+/**
+ * This class models an AdultOvine, which is a Sheep or a Ram.
+ * AdultOvine's can mate between them, and so can generate Lambs, sometimes, but obviously
+ * the mating process can be only between two AdultOvines of different types ( sex ). 
+ */
 public class AdultOvine extends Ovine
 {
 
+	/**
+	 * The type ( sex ) of this AdultOvine, Sheep XOR Ram.
+	 */
 	private AdultOvineType type ;
 	
-	public AdultOvine ( String name , AdultOvineType type ) 
+	/**
+	 * @param name the name of this AdultOvine.
+	 * @type the type ( sex ) of this AdultOvine, Sheep XOR Ram.
+	 * @throws IllegalArgumentException if the type parameter is null.
+	 */
+	AdultOvine ( String name , AdultOvineType type ) 
 	{
 		super ( name ) ;
 		if ( type != null )
@@ -15,28 +29,66 @@ public class AdultOvine extends Ovine
 			throw new IllegalArgumentException () ;
 	}
 
+	/**
+	 * Getter for the type property.
+	 * 
+	 * @return the type property.
+	 */
 	public AdultOvineType getType () 
 	{
 		return type ;
 	}
 	
+	/**
+	 * This method represent the mate behavior between a Ram and a Sheep.
+	 * If this AdultOvine and the partner parameter AdultOvine have different
+	 * type ( sex ), and if the mate has success ( random decision ) a new Lamb is returned
+	 * to the caller, else exceptions are throwns.
+	 * 
+	 * @param partner the partner with which mate.
+	 * @return the generated Lamb if everything goes ok.
+	 * @throws CanNotMateWithHimException if the partner's type is equals
+	 *         to this AdultOvine's type
+	 * @throws MateNotSuccesfullException if this mate process does not go well.
+	 */
 	public Lamb mate ( AdultOvine partner ) throws CanNotMateWithHimException, MateNotSuccesfullException  
 	{
+		AdultOvine father ;
+		AdultOvine mother ;
 		Lamb res ;
 		double d ; 
 		if ( type != partner.getType () )
 		{
-			d = Math.random () ;
-			/*if ( d > 0.5 )
-				res = new Lamb () ;
+			d = MathUtilities.genProbabilityValue () ;
+			if ( d > 0.5 )
+			{
+				if ( type == AdultOvineType.RAM )
+				{
+					mother = this ;
+					father = partner ;
+				}
+				else
+				{
+					mother = partner ;
+					father = this ;
+				}
+				res = new Lamb ( "" , 0 , father , mother ) ;
+			}
 			else
-				throw new MateNotSuccesfullException () ; */
+				throw new MateNotSuccesfullException ( this , partner ) ; 
 		}
 		else
 			throw new CanNotMateWithHimException ( this , partner ) ; 
-		return null ;
+		return res ;
 	}
 
+	// ENUMS
+	
+	/**
+	 * Models the type an AdultOvine can have:
+	 * 1. RAM : the male.
+	 * 2. SHEEP : the famale. 
+	 */
 	public enum AdultOvineType 
 	{
 		
@@ -46,13 +98,33 @@ public class AdultOvine extends Ovine
 		
 	}
 	
-	public class CanNotMateWithHimException extends Exception 
+	// INNER CLASSES
+	 
+	// EXCEPTIONS
+	
+	/**
+	 * This class models a generic exception during the mating process. 
+	 */
+	class MatingException extends Exception 
 	{
 		
-		private AdultOvine firstPartner ;
-		private AdultOvine secondPartner ;
+		/**
+		 * The first partner involved in the mating process. 
+		 */
+		private final AdultOvine firstPartner ;
 		
-		public CanNotMateWithHimException ( AdultOvine firstPartner , AdultOvine secondPartner ) 
+		/**
+		 * The second partner involved in the mating process. 
+		 */
+		private final AdultOvine secondPartner ;
+		
+		/**
+		 * @param firstPartner the first partner involved in the mating process.
+		 * @param secondPartner the second partner involved in the mating process.
+		 * @throws IllegalArgumentException if the firstPartner or the secondPartner
+		 *	       parameter is null. 
+		 */
+		MatingException ( AdultOvine firstPartner , AdultOvine secondPartner ) 
 		{
 			super () ;
 			if ( firstPartner != null && secondPartner != null )
@@ -64,8 +136,49 @@ public class AdultOvine extends Ovine
 				throw new IllegalArgumentException () ;
 		}
 		
+		/**
+		 * @return the firstPartner property. 
+		 */
+		public AdultOvine getFirstPartner () 
+		{
+			return firstPartner ;
+		}
+		
+		/**
+		 * @return the secondPartner property. 
+		 */
+		public AdultOvine getSecondPartner () 
+		{
+			return secondPartner ;
+		}
+		
 	}
 	
-	public class MateNotSuccesfullException extends Exception {}
+	/**
+	 * This class model the wrong situation where two AdultOvine of the same type ( sex )
+	 * tries to mate. 
+	 */
+	public class CanNotMateWithHimException extends MatingException 
+	{
+
+		CanNotMateWithHimException ( AdultOvine firstPartner , AdultOvine secondPartner ) 
+		{
+			super ( firstPartner , secondPartner ) ;
+		}		
+		
+	}
+	
+	/**
+	 * This class model the situation where a mate process does not go well. 
+	 */
+	public class MateNotSuccesfullException extends MatingException 
+	{
+		
+		MateNotSuccesfullException ( AdultOvine firstPartner , AdultOvine secondPartner ) 
+		{
+			super ( firstPartner , secondPartner ) ;
+		}		
+		
+	}
 	
 }

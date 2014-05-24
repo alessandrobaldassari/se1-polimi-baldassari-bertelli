@@ -1,36 +1,77 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map;
 
-import java.util.Collection;
 import java.util.Collections;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElement;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 
+/**
+ * This class models the Road, a GameMap element which inglobes the line road and the numbered
+ * circles in the GameMap. 
+ */
 public class Road extends GameMapElement
 {
 
 	// ATTRIBUTES
 	
+	/**
+	 * The min value for the number property.
+	 * It's a business rule.
+	 */
 	private static final int MIN_NUMBER = 1 ;
-	private static final int MAX_NUMBER = 6 ;
-	private final Region firstBorderRegion ;
-	private final Region secondBorderRegion ;
-	private final int number ;
-	private Collection < Road > adjacentRoads ;
-	private PositionableElement < Road > elementContained ;
-	
-	// ACCESSOR METHODS 
 	
 	/**
-	 * @param number
-	 * @param uid
-	 * @param firstBorderRegion
-	 * @param secondBorderRegion
+	 * The max value for the number property.
+	 * It's a business rule. 
+	 */
+	private static final int MAX_NUMBER = 6 ;
+
+	/**
+	 * The first Region object bordering this Road. 
+	 * Determined by the geography of the GameMap.
+	 */
+	private final Region firstBorderRegion ;
+	
+	/**
+	 * The second Region object bordering this Road.
+	 * Determined by the geography of the GameMap. 
+	 */
+	private final Region secondBorderRegion ;
+	
+	/**
+	 * The number on this Road in the GameMap.
+	 * Determined by the GameMap. 
+	 */
+	private final int number ;
+	
+	/**
+	 * A collection containing the Road objects adjacent to this one.
+	 * Determined by the Geography of the GameMap. 
+	 */
+	private Iterable < Road > adjacentRoads ;
+	
+	/**
+	 * An element which is, at a given moment in time, contained in this Road.
+	 * May be null if this is Road is empty. 
+	 */
+	private PositionableElement < Road > elementContained ;
+	
+	// METHODS 
+	
+	/**
+	 * @param number the number on this Road in the GameMap.
+	 * @param uid the uid for this Road
+	 * @param firstBorderRegion the first Region object bordering this Road.
+	 * @param secondBorderRegion the second Region object bordering this Road.
+	 * @throws IllegalArgumentException if the number parameter is not lasquely contained
+	 *         between the MIN_NUMBER and MAX_NUMBER properties, or if the firstBorderRegion
+	 *         or secondBorderRegion parameter is null, or if the firstBorderRegion and
+	 *         the secondBorderRegion parameter are equals.
 	 */
 	Road ( int number , int uid , Region firstBorderRegion , Region secondBorderRegion ) 
 	{
 		super ( uid ) ;
-		if ( number >= MIN_NUMBER && number <= MAX_NUMBER && firstBorderRegion != null && secondBorderRegion != null )
+		if ( number >= MIN_NUMBER && number <= MAX_NUMBER && firstBorderRegion != null && secondBorderRegion != null && firstBorderRegion.equals ( secondBorderRegion ) == false )
 		{
 			this.number = number ;
 			this.firstBorderRegion = firstBorderRegion ;
@@ -52,14 +93,25 @@ public class Road extends GameMapElement
 	}
 	
 	/**
-	 * @param 
+	 * Setter method for the adjacentRoads property.
+	 * 
+	 * @param adjacentRoads the adjacentProperty value
+	 * @throws IllegalArgumentException if the parameter contains this Road object.
 	 */
 	void setAdjacentRoads ( Iterable < Road > adjacentRoads ) 
 	{
-		this.adjacentRoads = Collections.unmodifiableCollection ( CollectionsUtilities.newCollectionFromIterable ( adjacentRoads ) ) ;
+		if ( CollectionsUtilities.contains ( adjacentRoads , this ) == false )
+			this.adjacentRoads = Collections.unmodifiableCollection ( CollectionsUtilities.newCollectionFromIterable ( adjacentRoads ) ) ;
+		else 
+			throw new IllegalArgumentException () ;
 	} 
 	
-	public Collection < Road > getAdjacentRoads () 
+	/**
+	 * Getter method for the AdjacentRoad proeprty.
+	 * 
+	 * @return the adjacentRoads property. 
+	 */
+	public Iterable < Road > getAdjacentRoads () 
 	{
 		return adjacentRoads ;
 	}
@@ -85,7 +137,9 @@ public class Road extends GameMapElement
 	}
 	
 	/**
-	 * @param
+	 * Getter method for the elementContained property.
+	 * 
+	 * @param elementContained the value for the elementContained property.
 	 */
 	public void setElementContained ( PositionableElement < Road > elementContained ) 
 	{
