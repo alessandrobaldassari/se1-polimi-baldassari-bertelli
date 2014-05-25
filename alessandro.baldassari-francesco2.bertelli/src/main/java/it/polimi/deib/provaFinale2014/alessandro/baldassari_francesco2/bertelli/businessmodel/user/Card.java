@@ -16,7 +16,9 @@ public class Card
 	 */
 	private final RegionType regionType ;
 	
-	/***/
+	/**
+	 * The identifier for this Card object. 
+	 */
 	private final int id ;
 	
 	
@@ -25,7 +27,8 @@ public class Card
 	/**
 	 * @param regionType the Region type represented by this Player.
 	 * @param id the UID of this Card
-	 * @throws IllegalArgumentException if the region type is null or the id is < 0.
+	 * @throws IllegalArgumentException if the region type is null or the id is < 0 or if the
+	 *         regionType is Sheepsburg.
 	 */
 	public Card ( RegionType regionType , int id ) 
 	{

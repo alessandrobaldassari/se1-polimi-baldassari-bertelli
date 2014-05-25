@@ -5,6 +5,9 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.FactorySupport;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,6 +27,11 @@ public class Bank
 	// ATTRIBUTES
 
 	/**
+	 * The object needed to implement the Factory pattern 
+	 */
+	private static FactorySupport factorySupport = new FactorySupport () ;
+	
+	/**
 	 * The initial money amount, total. 
 	 * It's a business rule. 
 	 */
@@ -36,29 +44,47 @@ public class Bank
 	private static final int NON_FINAL_FENCE_NUMBER = 20 ;
 	
 	/**
-	 * The number of final  
+	 * The number of final fences initially in the Bank.
+	 * It's a business rule. 
 	 */
 	private static final int FINAL_FENCE_NUMBER = 12 ;
 	
-	/***/
+	/**
+	 * The number of non initial Cards to be created for each Region. 
+	 */
 	private static final int NUMBER_OF_NON_INITIAL_CARDS_PER_REGION_TYPE = 5 ;
 	
-	/***/
+	/**
+	 * The container for the initial Card objects. 
+	 */
 	private final Map < RegionType , Card > initialCards ;
 	
-	/***/
+	/**
+	 * The container for the non initial Card Objects. 
+	 */
 	private final Map < RegionType , Stack < SellableCard > > cards ;
 	
-	/***/
+	/**
+	 * The list of Fence objects this Bank holds. 
+	 */
 	private final List < Fence > fences ;
 	
-	/***/
+	/**
+	 * The amount of money this Bank holds at any moment in time. 
+	 */
 	private int moneyReserve ;
 	
 	// METHODS
 	
-	/***/
-	public Bank ( int initialMoneyReserve , Iterable < Fence > fences , Iterable < Card > initCards , Iterable < SellableCard > otherCards ) 
+	/**
+	 * @param initialMoneyReserve the initial amount of money this Bank holds.
+	 * @param fences the list of Fences this Bank will manage.
+	 * @param initCards the initCard objects this Bank will manage.
+	 * @param otherCards the sellable Card objects this Bank will manage.
+	 * @throws IllegalArgumentException if the fences or initCards or otherCards parameter
+	 *         is null or the initialMoneyReserve is < 0
+	 */
+	private Bank ( int initialMoneyReserve , Iterable < Fence > fences , Iterable < Card > initCards , Iterable < SellableCard > otherCards ) 
 	{
 		if ( fences != null && initCards != null && otherCards != null && initialMoneyReserve >= 0 )
 		{
@@ -80,7 +106,15 @@ public class Bank
 			throw new IllegalArgumentException () ;
 	}
 	
-	public static Bank newInstance () 
+	/**
+	 * Factory method.
+	 * 
+	 * @param caller the one who requires a new Bank object.
+	 * @return a new Bank instance
+	 * @throws SingletonElementAlreadyGeneratedException if the caller parameter already
+	 *         tried to call this method.
+	 */
+	public static Bank newInstance ( Identifiable < Match > caller ) throws SingletonElementAlreadyGeneratedException 
 	{
 		Bank res ;
 		Collection < Fence > initFences ;
@@ -88,40 +122,55 @@ public class Bank
 		Collection < SellableCard > otherCards ;
 		byte i ;
 		byte counter ;
-		initFences = new ArrayList < Fence > ( NON_FINAL_FENCE_NUMBER + FINAL_FENCE_NUMBER ) ;
-		for ( i = 0 ; i < NON_FINAL_FENCE_NUMBER ; i ++ )
-			initFences.add ( new Fence ( FenceType.NON_FINAL ) ) ;
-		for ( i = 0 ; i < FINAL_FENCE_NUMBER ; i ++ )
-			initFences.add ( new Fence ( FenceType.FINAL ) ) ;
-		initialCards = new LinkedList < Card > () ;
-		otherCards = new LinkedList < SellableCard > () ;
-		counter = 0 ;
-		for ( RegionType type : RegionType.values() )
+		if ( factorySupport.isAlreadyUser ( caller ) == false )
 		{
-			if ( type != RegionType.SHEEPSBURG )
+			factorySupport.addUser ( caller ) ;
+			initFences = new ArrayList < Fence > ( NON_FINAL_FENCE_NUMBER + FINAL_FENCE_NUMBER ) ;
+			for ( i = 0 ; i < NON_FINAL_FENCE_NUMBER ; i ++ )
+				initFences.add ( new Fence ( FenceType.NON_FINAL ) ) ;
+			for ( i = 0 ; i < FINAL_FENCE_NUMBER ; i ++ )
+				initFences.add ( new Fence ( FenceType.FINAL ) ) ;
+			initialCards = new LinkedList < Card > () ;
+			otherCards = new LinkedList < SellableCard > () ;
+			counter = 0 ;
+			for ( RegionType type : RegionType.values() )
 			{
-				initialCards.add ( new Card ( type , counter ) ) ;
-				counter ++ ;
-			}
-		}
-		for ( RegionType type : RegionType.values () )
-			if ( type != RegionType.SHEEPSBURG )
-			for ( i = NUMBER_OF_NON_INITIAL_CARDS_PER_REGION_TYPE-1 ; i >= 0 ; i -- )
-			{
-					otherCards.add ( new SellableCard ( type , counter , i ) ) ;
+				if ( type != RegionType.SHEEPSBURG )
+				{
+					initialCards.add ( new Card ( type , counter ) ) ;
 					counter ++ ;
+				}
 			}
-		res = new Bank ( INITIAL_MONEY_RESERVE , initFences , initialCards , otherCards ) ;
+			for ( RegionType type : RegionType.values () )
+				if ( type != RegionType.SHEEPSBURG )
+				for ( i = NUMBER_OF_NON_INITIAL_CARDS_PER_REGION_TYPE-1 ; i >= 0 ; i -- )
+				{
+						otherCards.add ( new SellableCard ( type , counter , i ) ) ;
+						counter ++ ;
+				}
+			res = new Bank ( INITIAL_MONEY_RESERVE , initFences , initialCards , otherCards ) ;
+		}
+		else 
+			throw new SingletonElementAlreadyGeneratedException () ;
 		return res ;
 	}
 	
-	/***/
+	/**
+	 * Getter property for the moneyReserve property.
+	 * 
+	 * @return the moneyReserve property.
+	 */
 	public int getMoneyReserve () 
 	{
 		return moneyReserve ;
 	}
 	
-	/***/
+	/**
+	 * Add to this Bank the specified amount of money.
+	 * 
+	 * @param amount the money to add to this Bank.
+	 * @throws IllegalArgumentException if the parameter is <= 0.
+	 */
 	public void receiveMoney ( int amount ) 
 	{
 		if ( amount > 0 )
@@ -130,14 +179,24 @@ public class Bank
 			throw new IllegalArgumentException () ;
 	}
 	
-	/***/
-	public Fence getAFence ( FenceType fenceType ) throws NoMoreFenceOfThisTypeException, ArrayIndexOutOfBoundsException 
+	/**
+	 * Returns a Fence object of the fenceType parameter type ( if it exists in this Bank ).
+	 * 
+	 * @param fenceType the type of Fence the client wants.
+	 * @return a fence of the specified type if it exists in this Bank.
+	 * @throws NoMoreFenceOfThisTypeException if this Bank does not have a Fence of the type
+	 * 	       specified by the parameter.
+	 * @throws IllegalArgumentExeption if the fenceType parameter is null.
+	 */
+	public Fence getAFence ( FenceType fenceType ) throws NoMoreFenceOfThisTypeException 
 	{
 		Fence res ;
-		if(fenceType == null)
+		if ( fenceType == null )
 			throw new IllegalArgumentException();
-		if(fences.isEmpty() == false){
-			if ( fenceType == FenceType.NON_FINAL ){
+		if ( fences.isEmpty () == false )
+		{
+			if ( fenceType == FenceType.NON_FINAL )
+			{
 				res = fences.get(0);
 				if( ! res.isFinal() )
 					fences.remove(0);
@@ -157,14 +216,31 @@ public class Bank
 		return res ;
 	}
 
-	/***/
-	public Card takeInitialCard ( RegionType regionType ) 
+	/**
+	 * Return the initial Card of the specified type.
+	 * 
+	 * @return the Initial Card of the type specified by the parameter.
+	 * @throws NoMoreCardOfThisTypeException if this Bank does not contain an Initial Card
+	 *         of type specified by the parameter.
+	 */
+	public Card takeInitialCard ( RegionType regionType ) throws NoMoreCardOfThisTypeException 
 	{
 		Card res ;
-		return res = initialCards.remove ( regionType ) ;
+		if ( initialCards.containsKey ( regionType ) )
+			res = initialCards.remove ( regionType ) ;
+		else 
+			throw new NoMoreCardOfThisTypeException ( regionType ) ;
+		return res ;
 	}
 	
-	/***/
+	/**
+	 * Return the price of the next Card sellable of type specified by the parameter.
+	 * 
+	 * @param regionType the type of the interested Card.
+	 * @return the price of the interested Card.
+	 * @throws NoMoreCardOfThisTypeException if there is no more Cards which type is 
+	 *         the one specified by the parameter.
+	 */
 	public int getPeekCardPrice ( RegionType regionType ) throws NoMoreCardOfThisTypeException 
 	{
 		int res ;
@@ -177,11 +253,21 @@ public class Bank
 		return res ;
 	}
 	
-	/***/
+	/**
+	 * Sell a Card to a User.
+	 * 
+	 * @param price the price of the Card that the buying User has to pay.
+	 * @param regionType the type of Region the buying Card is.
+	 * @throws CardPriceNotRightException if the User supply the wrong price value.
+	 * @throws NoMoreCardOfThisTypeException if the User wants to buy a Card whose type
+	 *         has no more representant in this Bank.
+	 * @throws IllegalArgumentException if the regionType parameter is null or equals
+	 *         to Sheepsburg. 
+	 */
 	public Card sellACard ( int price , RegionType regionType ) throws CardPriceNotRightException, NoMoreCardOfThisTypeException 
 	{
 		SellableCard res ;
-		if ( regionType != RegionType.SHEEPSBURG )
+		if ( regionType != null && regionType != RegionType.SHEEPSBURG )
 		{
 			if ( cards.get ( regionType ).isEmpty () == false )
 			{ 
@@ -201,13 +287,23 @@ public class Bank
 	
 	// EXCEPTIONS
 	
-	/***/
+	/**
+	 * This class models the situation where a User wants to buy a Card whose type
+	 * has no more representant in a Bank.
+	 */
 	public class NoMoreFenceOfThisTypeException extends Exception 
 	{
 		
+		/**
+		 * The Fence type a User wants to buy.
+		 */
 		private FenceType type ;
 		
-		public NoMoreFenceOfThisTypeException ( FenceType type ) 
+		/**
+		 * @param type the Fence type a User wants to buy.
+		 * @throws IllegalArgumentException if the type parameter is null. 
+		 */
+		NoMoreFenceOfThisTypeException ( FenceType type ) 
 		{
 			if ( type != null )
 				this.type = type ;
@@ -215,6 +311,11 @@ public class Bank
 				throw new IllegalArgumentException () ;
 		}
 		
+		/**
+		 * Getter method for the type property.
+		 * 
+		 * @return the type property. 
+		 */
 		public FenceType getFenceType () 
 		{
 			return type ;
@@ -222,13 +323,23 @@ public class Bank
 		
 	}
 
-	/***/
+	/**
+	 * This class models the situation where a User wants to buy a Card whose type
+	 * has no more representant in a Bank.
+	 */
 	public class NoMoreCardOfThisTypeException extends Exception 
 	{
 		
+		/**
+		 * The type of the Region of the Card a User wants to buy. 
+		 */
 		private RegionType regionType ;
 		
-		public NoMoreCardOfThisTypeException ( RegionType regionType ) 
+		/**
+		 * @param regionType the type of the Region of the Card a User wants to buy. 
+		 * @throws IllegalArgumentException if the regionType parameter is null
+		 */
+		NoMoreCardOfThisTypeException ( RegionType regionType ) 
 		{
 			if ( regionType != null && regionType != RegionType.SHEEPSBURG )
 				this.regionType = regionType ;
@@ -236,6 +347,11 @@ public class Bank
 				throw new IllegalArgumentException () ;
 		}
 		
+		/**
+		 * Getter method for the regionType property.
+		 * 
+		 * @return the regionType property. 
+		 */
 		public RegionType getRegionType () 
 		{
 			return regionType ;
@@ -243,14 +359,30 @@ public class Bank
 		
 	}
 	
-	/***/
+	/**
+	 * This class models the situation where a User try to buy a Card but does not 
+	 * supply the right amount of money for it. 
+	 */
 	public class CardPriceNotRightException extends Exception 
 	{
 		
+		/**
+		 * The amount of money a User try to pay for a Card. 
+		 */
 		private int proposedPrice ;
+		
+		/**
+		 * The amount of money that is required by the Bank to sell a Card. 
+		 */
 		private int rightPrice ;
 		
-		public CardPriceNotRightException ( int priceProposed , int rightPrice ) 
+		/**
+		 * @param priceProposed the amount of money a User try to pay for a Card. 
+		 * @param rightPrice the amount of money that is required by the Bank to sell a Card. 
+		 * @throws IllegalArgumentException if the priceProposed or the rightPrice parameter is 
+		 * <= 0 or the priceProposed and rightPrice parameters are equals.
+		 */
+		CardPriceNotRightException ( int priceProposed , int rightPrice ) 
 		{
 			if ( priceProposed > 0 && rightPrice > 0 && priceProposed != rightPrice )
 			{
@@ -261,11 +393,21 @@ public class Bank
 				throw new IllegalArgumentException () ;
 		}
 		
+		/**
+		 * Getter property for the proposedPrice property.
+		 * 
+		 * @return the proposedPrice property. 
+		 */
 		public int getProposedPrice () 
 		{
 			return proposedPrice ;
 		}
 		
+		/**
+		 * Getter property for the rightPrice property.
+		 * 
+		 * @return the rightPrice property.
+		 */
 		public int getRightPrice () 
 		{
 			return rightPrice ;

@@ -1,5 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Bank.NoMoreCardOfThisTypeException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match.MatchState;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
@@ -9,6 +10,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.MasterServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
@@ -65,7 +67,7 @@ public class GameController implements Runnable
 	private Timer timer;
 	
 	/***/
-	public GameController () 
+	public GameController ( MasterServer masterServer ) 
 	{
 		timer = new Timer();
 	}
@@ -102,7 +104,7 @@ public class GameController implements Runnable
 			matchIdentifier = new MatchIdentifier ( lastMatchIdentifierUID ++ ) ;
 			animalsFactory = AnimalFactory.newAnimalFactory ( matchIdentifier ) ;
 			gameMap = GameMapFactory.getInstance().newInstance ( matchIdentifier ) ;
-			bank = Bank.newInstance () ;
+			bank = Bank.newInstance ( matchIdentifier ) ;
 			match = new Match ( gameMap , bank ) ;		
 			timer.schedule ( new WaitingPlayersTimerTask () , DELAY ) ;
 		} 
@@ -175,15 +177,23 @@ public class GameController implements Runnable
 	private void distributeInitialCards ()
 	{
 		List < RegionType > regions ;
-		regions = new ArrayList <RegionType> ( RegionType.values().length ) ;
-		for ( RegionType type : RegionType.values () )
-			regions.add ( type ) ;
-		regions.remove ( RegionType.SHEEPSBURG ) ;
-		CollectionsUtilities.listMesh ( regions ) ;
-		for( Player player : match.getPlayers ())
+		try 
 		{
-			player.getCards ().add ( match.getBank ().takeInitialCard ( regions.get ( 0 ) ) ) ;
-			regions.remove ( 0 ) ;
+			regions = new ArrayList <RegionType> ( RegionType.values().length ) ;
+			for ( RegionType type : RegionType.values () )
+				regions.add ( type ) ;
+			regions.remove ( RegionType.SHEEPSBURG ) ;
+			CollectionsUtilities.listMesh ( regions ) ;
+			for( Player player : match.getPlayers ())
+			{
+					player.getCards ().add ( match.getBank ().takeInitialCard ( regions.get ( 0 ) ) ) ;
+				regions.remove ( 0 ) ;
+			}
+		}
+		catch ( NoMoreCardOfThisTypeException e ) 
+		{
+			e.printStackTrace();
+			throw new RuntimeException ( e ) ;
 		}
 	}
 	
@@ -270,21 +280,42 @@ public class GameController implements Runnable
 		
 	}
 	
+	/**
+	 * This class implements a MatchIdentifier for the Match managed by this GameController  
+	 */
 	private class MatchIdentifier implements Identifiable < Match > 
 	{
 
+		/**
+		 * The unique identifier for this MatchIdentifier.
+		 */
 		private int uid ;
 		
+		/**
+		 * @param uid the unique identifier for this MatchIdentifier. 
+		 */
 		public MatchIdentifier ( int uid ) 
 		{
 			this.uid = uid ;
 		}
 		
+		/**
+		 * Getter method for the uid property.
+		 * 
+		 * @return the uid property. 
+		 */
 		public int getUID () 
 		{
 			return uid ;
 		}
 		
+		/**
+		 * Determine if this MatchIdentifier object is the same as the one
+		 * passed by parameter.
+		 * 
+		 * @param otherObject the otherObject to compare this one.
+		 * @return true if this object is equals to the one passed by parameter, false else. 
+		 */
 		public boolean isEqualsTo ( Identifiable<Match> otherObject ) 
 		{
 			if ( otherObject instanceof MatchIdentifier )
