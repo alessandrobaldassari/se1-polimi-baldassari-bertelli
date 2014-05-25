@@ -4,15 +4,14 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 
-public class AutomaticPlayer extends Player {
-	AutomaticPlayer(String name){
-		super(name);
-	}
+public class NetworkCommunicantPlayer extends Player 
+{
+
 	
-	public AutomaticPlayer newInstance ( String name ) 
-	{
-		AutomaticPlayer playerHuman;
-		return playerHuman = new AutomaticPlayer(name);
+	
+	public NetworkCommunicantPlayer(String name) {
+		super(name);
+		// TODO Auto-generated constructor stub
 	}
 
 	@Override

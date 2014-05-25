@@ -10,7 +10,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.MasterServer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.MasterServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
@@ -66,9 +66,12 @@ public class GameController implements Runnable
 	 */
 	private Timer timer;
 	
+	private MasterServer masterServer ;
+	
 	/***/
 	public GameController ( MasterServer masterServer ) 
 	{
+		this.masterServer = masterServer ;
 		timer = new Timer();
 	}
 	
@@ -123,7 +126,7 @@ public class GameController implements Runnable
 	 * is reached; if so, it sets the match state to the INITIALIZATION state, and the WAIT
 	 * FR PLAYERS phase is considered concluded.
 	 */
-	public void addPlayerAndCheck(Player newPlayer) throws WrongStateMethodCallException
+	public void addPlayerAndCheck ( Player newPlayer ) throws WrongStateMethodCallException
 	{
 		if ( match.getMatchState () == Match.MatchState.WAIT_FOR_PLAYERS )
 		{
@@ -132,10 +135,11 @@ public class GameController implements Runnable
 			{
 				timer.cancel () ;
 				match.setMatchState ( MatchState.INITIALIZATION ) ;
+				masterServer.notifyFinishAddingPlayers () ;
 			}
 		}
 		else
-			throw new WrongStateMethodCallException();
+			throw new WrongStateMethodCallException ( match.getMatchState () ) ;
 	}
 	
 	/**
@@ -270,11 +274,12 @@ public class GameController implements Runnable
 			if ( match.getPlayers().size() >= 2 ) 
 			{
 				match.setMatchState ( MatchState.INITIALIZATION ) ;
+				masterServer.notifyFinishAddingPlayers () ;
 				cancel () ;
 			}
 			else
 			{
-				//Notify network controller that this match will not start
+				masterServer.notifyFailure () ;
 			}	
 		}
 		
@@ -332,6 +337,36 @@ public class GameController implements Runnable
 	 * GameController while the GameController itself is in a state where that method 
 	 * can not be called. 
 	 */
-	public class WrongStateMethodCallException extends Exception {}
+	public class WrongStateMethodCallException extends Exception 
+	{
+		
+		/**
+		 * The state where the System is when this Exception is thrown. 
+		 */
+		private MatchState actualState ;
+		
+		/**
+		 * @param actualState the state where the System is when this Exception is thrown. 
+		 * @throws IllegalArgumentException if the actualState parameter is null.
+		 */
+		WrongStateMethodCallException ( MatchState actualState ) 
+		{
+			if ( actualState != null )
+				this.actualState = actualState ;
+			else
+				throw new IllegalArgumentException () ;
+		}
+		
+		/**
+		 * Getter method for the actualState property.
+		 * 
+		 * @return the actualState property.
+		 */
+		public MatchState getActualState () 
+		{
+			return actualState ;
+		}
+		
+	}
 
 }

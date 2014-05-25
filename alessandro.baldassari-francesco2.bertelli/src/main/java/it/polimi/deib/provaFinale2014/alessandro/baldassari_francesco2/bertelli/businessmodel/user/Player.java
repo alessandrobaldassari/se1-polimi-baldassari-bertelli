@@ -34,7 +34,7 @@ public abstract class Player
 	 * This property ( obviously may change over time ).
 	 * A value less then zero is not permitted; this rule is realized controls set in the methods that act upon this property.
 	 */
-	private int money ;
+	private Integer money ;
 	
 	/**
 	 * A flag which is false if this Player is normally in the Game Workflow, false if he has been suspended.
@@ -49,17 +49,16 @@ public abstract class Player
 	
 	/**
 	 * @param name the name of this Player.
-	 * @param money the initial amount of money of this Player.
-	 * @throws IllegalArgumentException if the name parameter is null or if the money parameter is < 0.
+	 * @throws IllegalArgumentException if the name parameter is null.
 	 */
-	public Player ( String name , int money ) 
+	public Player ( String name ) 
 	{
-		if ( name != null && money > 0 )
+		if ( name != null )
 		{
 			this.name = name ;
-			this.money = money ;
 			cards = new LinkedList < Card > () ;
 			suspended = false ;
+			money = null ;
 		}
 		else 
 			throw new IllegalArgumentException () ;
