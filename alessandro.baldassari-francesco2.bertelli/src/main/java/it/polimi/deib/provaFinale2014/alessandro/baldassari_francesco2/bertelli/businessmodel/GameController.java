@@ -1,10 +1,8 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match.MatchState;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Ovine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapFactory;
@@ -12,12 +10,9 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -36,6 +31,8 @@ import java.util.TimerTask;
 public class GameController implements Runnable
 {
 	
+	private static int lastMatchIdentifierUID = -1 ;
+	
 	/**
 	 * The Timer value about the time to wait before begin a Match. 
 	 */
@@ -50,6 +47,11 @@ public class GameController implements Runnable
 	 * The match that this GameController will manage. 
 	 */
 	private Match match ;
+	
+	/**
+	 * The match identifier associated with the Match managed with this GameController. 
+	 */
+	private Identifiable < Match > matchIdentifier ;
 	
 	/**
 	 * An AnimalsFactory object to create all the Animal objects who play in the Game. 
@@ -87,16 +89,28 @@ public class GameController implements Runnable
 	 * The first method executed by this controller during it's logical lifecycle.
 	 * It creates all the resources necessary to the game and starts a Timer
 	 * to wait for all players to add in. 
+	 * 
+	 * @throws RuntimeException if the AnimalFactory Singleton mechanism fails.
 	 */
 	private void creatingPhase () 
 	{
 		GameMap gameMap ;
 		Bank bank;
-		//animalsFactory = AnimalFactory.newAnimalFactory () ;
-		//match = new Match ( gameMap , bank ) ;		
-		//gameMap = GameMapFactory.getInstance().newInstance () ;
-		bank = Bank.newInstance();
-		timer.schedule ( new WaitingPlayersTimerTask () , DELAY ) ;
+		try 
+		{
+			lastMatchIdentifierUID ++ ;
+			matchIdentifier = new MatchIdentifier ( lastMatchIdentifierUID ++ ) ;
+			animalsFactory = AnimalFactory.newAnimalFactory ( matchIdentifier ) ;
+			gameMap = GameMapFactory.getInstance().newInstance ( matchIdentifier ) ;
+			bank = Bank.newInstance () ;
+			match = new Match ( gameMap , bank ) ;		
+			timer.schedule ( new WaitingPlayersTimerTask () , DELAY ) ;
+		} 
+		catch ( SingletonElementAlreadyGeneratedException e ) 
+		{
+			e.printStackTrace();
+			throw new RuntimeException ( e ) ;
+		}
 	}
 	
 	/**
@@ -147,10 +161,10 @@ public class GameController implements Runnable
 	private void placeSheeps () 
 	{
 		Ovine bornOvine ;
-		for ( Region r : match.getGameMap ().getRegions () ) 
+		for ( Region region : match.getGameMap ().getRegions () ) 
 		{
-			//bornOvine =
-			//r.getContainedAnimals().add ( bornOvine ) ;
+			bornOvine = generateOvine () ;
+			region.getContainedAnimals().add ( bornOvine ) ;
 		}
 	}
 	
@@ -181,12 +195,12 @@ public class GameController implements Runnable
 	private void moneyDistribution ()
 	{
 		int moneyToDistribute;
-		if(match.getPlayers().size() == 2)
-			moneyToDistribute=30;
+		if ( match.getPlayers ().size () == 2 )
+			moneyToDistribute = 30 ;
 		else
-			moneyToDistribute=20;
-		for( Player player : match.getPlayers())
-			player.receiveMoney(moneyToDistribute);
+			moneyToDistribute = 20 ;
+		for( Player player : match.getPlayers () )
+			player.receiveMoney ( moneyToDistribute ) ;
 	}
 	
 	/**
@@ -213,9 +227,10 @@ public class GameController implements Runnable
 	/**
 	 * This helper method genereta an Ovine choosing it's type ( sex ) with a simple
 	 * probabilistic process.
-	 * With p = 0.4, a Sheep.
-	 * With p = 0.4, a Ram.
-	 * With p = 0.2 a Lamb. 
+	 * With p = 0.5, a Sheep.
+	 * With p = 0.5, a Ram.
+	 * 
+	 * @return the generated Ovine.
 	 */
 	private Ovine generateOvine ()  
 	{
@@ -253,6 +268,30 @@ public class GameController implements Runnable
 			}	
 		}
 		
+	}
+	
+	private class MatchIdentifier implements Identifiable < Match > 
+	{
+
+		private int uid ;
+		
+		public MatchIdentifier ( int uid ) 
+		{
+			this.uid = uid ;
+		}
+		
+		public int getUID () 
+		{
+			return uid ;
+		}
+		
+		public boolean isEqualsTo ( Identifiable<Match> otherObject ) 
+		{
+			if ( otherObject instanceof MatchIdentifier )
+				return uid == ( ( MatchIdentifier ) otherObject).getUID () ;
+			return false ;
+		}
+	
 	}
 	
 	// EXCEPTIONS

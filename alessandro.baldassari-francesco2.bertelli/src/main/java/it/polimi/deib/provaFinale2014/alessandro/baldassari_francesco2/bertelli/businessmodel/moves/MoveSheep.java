@@ -5,20 +5,36 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 
-/***/
+/**
+ * This class Models the MoveSheep move.
+ * In this context, a Sheperd wants to move an Ovine from the Region the Ovine is
+ * now to a new destination Region. 
+ */
 public class MoveSheep extends ExecutableGameMove 
 {
 
-	/***/
+	/**
+	 * The Sheperd who wants to make this move. 
+	 */
 	private Sheperd moverSheperd ;
 	
-	/***/
+	/**
+	 * The Ovine that is going to be moved. 
+	 */
 	private Ovine movingOvine ;
 	
-	/***/
+	/**
+	 * The new destination of the moving ovine. 
+	 */
 	private Region ovineDestinationRegion ;
 	
-	/***/
+	/**
+	 * @param moverSheperd the Sheperd who wants to make this move. 
+	 * @param movingOvine the Ovine that is going to be moved. 
+	 * @param ovineDestinationRegion the new destination of the moving ovine. 
+	 * @throws IllegalArgumentException if the moverSheperd or the movingOvine or the
+	 *         ovineDestinationRegion parameter is null.  
+	 */
 	MoveSheep ( Sheperd moverSheperd , Ovine movingOvine , Region ovineDestinationRegion ) 
 	{
 		if ( moverSheperd != null && movingOvine != null && ovineDestinationRegion != null )
@@ -31,7 +47,14 @@ public class MoveSheep extends ExecutableGameMove
 			throw new IllegalArgumentException () ;
 	}
 	
-	/***/
+	/**
+	 * The effective algorithm-method.
+	 * It checks if the the destinationRegion respects the business rules, and if so
+	 * performs the moving.
+	 * 
+	 * @param match the Match object on which this move is performed.
+	 * @throws MoveNotAllowedException if something goes wrong.
+	 */
 	@Override
 	public void execute ( Match match ) throws MoveNotAllowedException 
 	{
