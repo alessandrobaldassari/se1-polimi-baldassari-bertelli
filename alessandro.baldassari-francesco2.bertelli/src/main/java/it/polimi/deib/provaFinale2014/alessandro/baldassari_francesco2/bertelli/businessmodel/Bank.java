@@ -115,11 +115,13 @@ public class Bank
 		return res ;
 	}
 	
+	/***/
 	public int getMoneyReserve () 
 	{
 		return moneyReserve ;
 	}
 	
+	/***/
 	public void receiveMoney ( int amount ) 
 	{
 		if ( amount > 0 )
@@ -128,7 +130,7 @@ public class Bank
 			throw new IllegalArgumentException () ;
 	}
 	
-	
+	/***/
 	public Fence getAFence ( FenceType fenceType ) throws NoMoreFenceOfThisTypeException, ArrayIndexOutOfBoundsException 
 	{
 		Fence res ;
@@ -137,14 +139,14 @@ public class Bank
 		if(fences.isEmpty() == false){
 			if ( fenceType == FenceType.NON_FINAL ){
 				res = fences.get(0);
-				if(res.isFinal())
-					throw new NoMoreFenceOfThisTypeException ( fenceType ) ;
-				else
+				if( ! res.isFinal() )
 					fences.remove(0);
+				else
+					throw new NoMoreFenceOfThisTypeException ( fenceType ) ;
 			}
 			else{
 				res = fences.get( fences.size () - 1 ) ;
-				if(res.isFinal())
+				if ( res.isFinal () ) 
 					fences.remove( fences.size() - 1 );
 				else	
 					throw new NoMoreFenceOfThisTypeException ( fenceType );
@@ -155,12 +157,14 @@ public class Bank
 		return res ;
 	}
 
+	/***/
 	public Card takeInitialCard ( RegionType regionType ) 
 	{
 		Card res ;
 		return res = initialCards.remove ( regionType ) ;
 	}
 	
+	/***/
 	public int getPeekCardPrice ( RegionType regionType ) throws NoMoreCardOfThisTypeException 
 	{
 		int res ;
@@ -173,6 +177,7 @@ public class Bank
 		return res ;
 	}
 	
+	/***/
 	public Card sellACard ( int price , RegionType regionType ) throws CardPriceNotRightException, NoMoreCardOfThisTypeException 
 	{
 		SellableCard res ;
@@ -192,6 +197,11 @@ public class Bank
 		return res ;
 	}
 	
+	// INNER CLASSES 
+	
+	// EXCEPTIONS
+	
+	/***/
 	public class NoMoreFenceOfThisTypeException extends Exception 
 	{
 		
@@ -212,6 +222,7 @@ public class Bank
 		
 	}
 
+	/***/
 	public class NoMoreCardOfThisTypeException extends Exception 
 	{
 		
@@ -232,6 +243,7 @@ public class Bank
 		
 	}
 	
+	/***/
 	public class CardPriceNotRightException extends Exception 
 	{
 		

@@ -3,9 +3,11 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match.MatchState;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Ovine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
@@ -50,6 +52,11 @@ public class GameController implements Runnable
 	private Match match ;
 	
 	/**
+	 * An AnimalsFactory object to create all the Animal objects who play in the Game. 
+	 */
+	private AnimalFactory animalsFactory ;
+	
+	/**
 	 * A standard Timer object to mange the timer at the beginning of a Match.
 	 * It's a business rule. 
 	 */
@@ -63,24 +70,17 @@ public class GameController implements Runnable
 	
 	public void run () 
 	{
-		try 
-		{
-			creatingPhase () ;
-			while ( match.getMatchState() != MatchState.INITIALIZATION )
-				try 
-				{	
-					wait () ;
-				}
-				catch ( InterruptedException e ) 
-				{
-					e.printStackTrace();
-				}
-			initializationPhase () ;
-		}
-		catch ( IOException e ) 
-		{
-			e.printStackTrace () ;
-		} 
+		creatingPhase () ;
+		while ( match.getMatchState() != MatchState.INITIALIZATION )
+			try 
+			{	
+				wait () ;
+			}
+			catch ( InterruptedException e ) 
+			{
+				e.printStackTrace();
+			}
+		initializationPhase () ; 
 	}
 	
 	/**
@@ -92,12 +92,11 @@ public class GameController implements Runnable
 	{
 		GameMap gameMap ;
 		Bank bank;
-		gameMap = GameMap.newInstance ( regionsCSVInputStream, roadsCSVInputStream ) ;
+		//animalsFactory = AnimalFactory.newAnimalFactory () ;
+		//match = new Match ( gameMap , bank ) ;		
+		//gameMap = GameMapFactory.getInstance().newInstance () ;
 		bank = Bank.newInstance();
-		match = new Match ( gameMap , bank ) ;
 		timer.schedule ( new WaitingPlayersTimerTask () , DELAY ) ;
-		regionsCSVInputStream.close () ;
-		roadsCSVInputStream.close () ;
 	}
 	
 	/**
@@ -136,6 +135,8 @@ public class GameController implements Runnable
 		placeSheeps () ;
 		distributeInitialCards () ;
 		moneyDistribution () ;
+		choosePlayersOrder () ;
+		match.setMatchState ( MatchState.TURNATION );
 	}
 	
 	/**
@@ -148,8 +149,8 @@ public class GameController implements Runnable
 		Ovine bornOvine ;
 		for ( Region r : match.getGameMap ().getRegions () ) 
 		{
-			bornOvine = generateOvine () ;
-			r.getContainedAnimals().add ( bornOvine ) ;
+			//bornOvine =
+			//r.getContainedAnimals().add ( bornOvine ) ;
 		}
 	}
 	
@@ -189,24 +190,42 @@ public class GameController implements Runnable
 	}
 	
 	/**
+	 * This method is the fourth in the INITIALIZATION PHASE.
+	 * It performs a randomic ordering on the Players list to determine who will play
+	 * first, second, and so on. 
+	 */
+	private void choosePlayersOrder () 
+	{
+		CollectionsUtilities.listMesh ( match.getPlayers() ) ;
+	}
+	
+	/**
+	 * This methods implements the core phase of the Game, the time when every player
+	 * makes his moves.
+	 * It is implemented as a cycle, which, until the Game is finished asks every player
+	 * to do his moves, providing him the tools to do this. 
+	 */
+	private void turnationPhase () 
+	{
+		
+	}
+	
+	/**
 	 * This helper method genereta an Ovine choosing it's type ( sex ) with a simple
 	 * probabilistic process.
 	 * With p = 0.4, a Sheep.
 	 * With p = 0.4, a Ram.
 	 * With p = 0.2 a Lamb. 
 	 */
-	private static Ovine generateOvine ()  
+	private Ovine generateOvine ()  
 	{
-		final Ovine result ;
+		final Ovine result ; 
 		final double chooseOvineType ;
 		chooseOvineType = Math.random () ;
-		if ( chooseOvineType < 0.4 )
-			result = new AdultOvine ( "" , AdultOvineType.SHEEP ) ;
+		if ( chooseOvineType < 0.5 )
+			result = animalsFactory.newAdultOvine ( "" ,  AdultOvineType.SHEEP ) ;
 		else
-			if ( chooseOvineType >= 0.4 && chooseOvineType < 0.8 )
-				result = new AdultOvine ( "", AdultOvineType.RAM ) ;
-			else
-				result = new Lamb ( "" , 0 ) ;
+			result = animalsFactory.newAdultOvine ( "" ,  AdultOvineType.RAM ) ;				
 		return result ;
 	}
 	

@@ -13,6 +13,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.AutomaticPlayer;
 
 import org.junit.Test;
+
 /*
  * This jUnit test class tests Match.class
  */
@@ -27,10 +28,9 @@ public class MatchTest {
 	
 	@Before
 	public void setUp(){
-		gameMap.newInstance(null, null);
-		bank.newInstance();
-		players.add(player1.newInstance("player 1", 20));
-		players.add(player1.newInstance("player 2", 20));
+		//bank.newInstance();
+		//players.add(player1.newInstance("player 1", 20));
+		//players.add(player1.newInstance("player 2", 20));
 		
 	}
 	

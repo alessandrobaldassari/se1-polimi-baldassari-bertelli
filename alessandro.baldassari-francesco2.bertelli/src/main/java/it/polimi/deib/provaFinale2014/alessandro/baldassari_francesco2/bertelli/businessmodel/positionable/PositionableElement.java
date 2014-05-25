@@ -18,6 +18,8 @@ public abstract class PositionableElement < T extends GameMapElement >
 	
 	// METHODS
 	
+	protected PositionableElement () {}
+	
 	/**
 	 * Setter for the position property.
 	 * 

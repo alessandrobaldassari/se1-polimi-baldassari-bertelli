@@ -118,6 +118,22 @@ public class Fence extends PositionableElement < Road >
 			throw new FenceAlreadyPlacedException () ;
 	}
 	
+	// ENUMS
+	
+		/**
+		 * This enum describes the type of Fences which exists in the game.
+		 * 1. NON_FINAL : used in the first phase of the game.
+		 * 2. FINAL : used in the final phase of the game.
+		 */
+		public enum FenceType 
+		{
+			
+			NON_FINAL ,
+			
+			FINAL
+			
+		}
+	
 	// INNER CLASSES
 	
 	// EXCEPTIONS
@@ -127,21 +143,5 @@ public class Fence extends PositionableElement < Road >
 	 * already placed Fence. 
 	 */
 	public class FenceAlreadyPlacedException extends Exception {}
-	
-	// ENUMS
-	
-	/**
-	 * This enum describes the type of Fences which exists in the game.
-	 * NON_FINAL : used in the first phase of the game.
-	 * FINAL : used in the final phase of the game.
-	 */
-	public enum FenceType 
-	{
-		
-		NON_FINAL ,
-		
-		FINAL
-		
-	}
 	
 }

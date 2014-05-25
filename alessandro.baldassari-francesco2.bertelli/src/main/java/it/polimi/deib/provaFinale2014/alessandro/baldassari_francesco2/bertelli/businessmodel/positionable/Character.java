@@ -23,7 +23,7 @@ public abstract class Character < T extends GameMapElement > extends Positionabl
 	 * @param name the Name of this Character.
 	 * @throws IllegalArgumentException if the name parameter is null.
 	 */
-	public Character ( String name ) 
+	protected Character ( String name ) 
 	{
 		if ( name != null )
 			this.name = name ;
@@ -50,6 +50,26 @@ public abstract class Character < T extends GameMapElement > extends Positionabl
 	public String getName ()
 	{
 		return name ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	public boolean equals ( Object obj ) 
+	{
+		Character otherCharacter ;
+		boolean res ;
+		if ( obj instanceof Character ) 
+		{
+			otherCharacter = ( Character ) obj ;
+			if ( name.compareTo ( otherCharacter.getName () ) == 0 )
+				res = true ;
+			else
+				res = false ;
+		}
+		else
+			res = false ;
+		return res ;
 	}
 	
 }

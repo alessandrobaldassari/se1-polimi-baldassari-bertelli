@@ -7,15 +7,30 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player.TooFewMoneyException;
 
+/**
+ * This class models the BuyCard action, which is the situation where a Player wants to 
+ * buy a Card from the Bank. 
+ */
 public class BuyCard extends ExecutableGameMove
 {
 
+	/**
+	 * The Sheperd who required to do this move. 
+	 */
 	private Sheperd buyer ;
+	
+	/**
+	 * The RegionType the buyer is interested in. 
+	 */
 	private RegionType buyingCardType ;
 	
+	/**
+	 * @param buyer the Sheperd who required to do this move.
+	 * @param buyingCardType the RegionType the buyer is interested in.
+	 * @throws IllegalArgumentException if the buyer or the buyingCardType parameter is null.
+	 */
 	BuyCard ( Sheperd buyer , RegionType buyingCardType )
 	{
 		if ( buyer != null && buyingCardType != null ) 
@@ -24,9 +39,20 @@ public class BuyCard extends ExecutableGameMove
 			this.buyingCardType = buyingCardType ;
 		}
 		else
-			throw new RuntimeException () ;
+			throw new IllegalArgumentException () ;
 	}
 	
+	/**
+	 * The effective-algorithm method for this class.
+	 * It first determines if the buyer can buy this the Card of the choosen type,
+	 * then, if it is able to, perform the actual buying / selling operation.
+	 * 
+	 * @param match the Match on which the action is performed.
+	 * @throws NoMoreCardOfThisTypeException if the Bank has no more Card of the requested type.
+	 * @throws TooFewMoneyException if the buyer has not enough money to buy the wanted Card.
+	 * @throws CardPriceNotRightException if the buyer tries to buy a wrong price for the wanted Card.
+	 * @throws MoveNotAllowedException if the Player is not in a position from which he can buy the wanted Card.
+	 */
 	@Override
 	public void execute ( Match match ) throws MoveNotAllowedException 
 	{

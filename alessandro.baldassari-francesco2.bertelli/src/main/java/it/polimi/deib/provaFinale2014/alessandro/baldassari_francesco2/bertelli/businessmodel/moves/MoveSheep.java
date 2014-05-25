@@ -5,13 +5,20 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 
+/***/
 public class MoveSheep extends ExecutableGameMove 
 {
 
+	/***/
 	private Sheperd moverSheperd ;
+	
+	/***/
 	private Ovine movingOvine ;
+	
+	/***/
 	private Region ovineDestinationRegion ;
 	
+	/***/
 	MoveSheep ( Sheperd moverSheperd , Ovine movingOvine , Region ovineDestinationRegion ) 
 	{
 		if ( moverSheperd != null && movingOvine != null && ovineDestinationRegion != null )
@@ -24,6 +31,7 @@ public class MoveSheep extends ExecutableGameMove
 			throw new IllegalArgumentException () ;
 	}
 	
+	/***/
 	@Override
 	public void execute ( Match match ) throws MoveNotAllowedException 
 	{

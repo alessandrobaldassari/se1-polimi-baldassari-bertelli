@@ -36,4 +36,22 @@ public abstract class GameMapElement
 		return uid ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	public boolean equals ( Object obj ) 
+	{
+		GameMapElement other ;
+		boolean res ;
+		if ( obj instanceof GameMapElement ) 
+		{
+			other = ( GameMapElement ) obj ;
+			res = uid == other.getUID () ;
+		}
+		else
+			res = false ;
+		return res ;
+		
+	}
+	
 }

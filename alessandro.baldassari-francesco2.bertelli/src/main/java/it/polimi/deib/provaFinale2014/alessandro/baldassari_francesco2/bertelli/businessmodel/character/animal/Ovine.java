@@ -4,7 +4,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
  * This class models an Ovine, the common factor type between Sheeps, Rams and Lambs.
  * Anyway, it adds no attributes or behaviors to the Animal description. 
  */
-abstract class Ovine extends Animal 
+public abstract class Ovine extends Animal 
 {
 
 	/**

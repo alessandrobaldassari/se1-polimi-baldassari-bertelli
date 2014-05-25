@@ -1,5 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 
 import java.util.ArrayList;
@@ -67,8 +68,14 @@ public class GameMap
 		}
 	}
 	
-	public Iterable <Region> getRegions(){
-		return regions.values();
+	/**
+	 * Returns an Iterable containing all the Region objects stored in this GameMap.
+	 * 
+	 * @return an Iterable containing all the Region objects stored in this GameMap.
+	 */
+	public Iterable <Region> getRegions ()
+	{
+		return regions.values () ;
 	}
 	/**
 	 * Accessor method for this GameMap object; gives access to the Region object identified by
@@ -81,6 +88,25 @@ public class GameMap
 	{
 		Region res ;
 		res = regions.get ( uid ) ;
+		return res ;
+	}
+	
+	/**
+	 * Select and return all the Region objects in this Map that has the type property
+	 * equals to the parameter passed.
+	 * 
+	 * @param type the target region
+	 * @return an Iterable containing all the Region object whose type property matches
+	 *         the one passed as a parameter.
+	 * @throws IllegalArgumentException if the type parameter is null
+	 */
+	public Iterable < Region > getRegionByType ( RegionType type ) 
+	{
+		Collection < Region > res ;
+		res = new LinkedList < Region > () ;
+		for ( Region r : regions.values () )
+			if ( r.getType () == type )
+				res.add ( r ) ;
 		return res ;
 	}
 	

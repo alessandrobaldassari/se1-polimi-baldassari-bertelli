@@ -6,14 +6,21 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player.TooFewMoneyException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 
 public class MoveSheperd extends ExecutableGameMove
 {
 
+	/***/
 	private static final int MONEY_TO_PAY_IF_ROADS_NON_ADJACENT = 1 ;
+	
+	/***/
 	private Sheperd sheperdToMove ;
+	
+	/***/
 	private Road roadWhereGo ;
 	
+	/***/
 	MoveSheperd ( Sheperd sheperdToMove , Road roadWhereGo ) 
 	{
 		if ( sheperdToMove != null && roadWhereGo != null && roadWhereGo.getElementContained () == null )
@@ -25,12 +32,13 @@ public class MoveSheperd extends ExecutableGameMove
 			throw new IllegalArgumentException () ;
 	}
 	
+	/***/
 	@Override
 	public void execute ( Match match ) throws MoveNotAllowedException  
 	{
 		Road whereTheSheperdIsNow ;
 		whereTheSheperdIsNow = sheperdToMove.getPosition () ; 
-		if ( whereTheSheperdIsNow.getAdjacentRoads().contains ( roadWhereGo ) == false )
+		if ( CollectionsUtilities.contains ( whereTheSheperdIsNow.getAdjacentRoads () , roadWhereGo ) == false )
 		{
 			try 
 			{
