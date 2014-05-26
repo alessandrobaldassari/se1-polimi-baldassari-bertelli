@@ -34,7 +34,9 @@ public class SocketClientHandler implements ClientHandler
 		System.out.println ( "Socket Client Handler : Name Request Sent" ) ;
 		res = ois.readUTF () ;
 		if ( SocketProtocolAction.valueOf ( res ) == SocketProtocolAction.NAME_REQUESTING_RESPONSE )
+		{
 			res = ois.readUTF () ;
+		}
 		else
 		{
 			// ERROR MANAGEMENT STRATEGY

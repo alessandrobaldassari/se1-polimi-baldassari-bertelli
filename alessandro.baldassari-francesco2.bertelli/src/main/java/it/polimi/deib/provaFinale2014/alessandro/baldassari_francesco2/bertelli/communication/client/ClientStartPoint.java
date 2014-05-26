@@ -14,9 +14,9 @@ public class ClientStartPoint
 		try 
 		{
 			threadExecutor = Executors.newSingleThreadExecutor () ;
-			client = new SocketClient () ;
+			client = new RMIClient () ;
 			client.technicalConnect() ;
-			threadExecutor.submit ( client ) ;
+			//threadExecutor.submit ( client ) ;
 		} 
 		catch ( IOException e ) 
 		{

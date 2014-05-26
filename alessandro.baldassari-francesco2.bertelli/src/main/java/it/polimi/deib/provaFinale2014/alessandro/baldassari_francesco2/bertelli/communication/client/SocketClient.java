@@ -35,6 +35,7 @@ public class SocketClient implements Client , Runnable
 		inFunction = false ;
 	}
 	
+	/***/
 	public void technicalConnect () throws UnknownHostException , IOException
 	{
 		InetAddress inetAddress ;
@@ -47,6 +48,9 @@ public class SocketClient implements Client , Runnable
 		System.out.println ( "Socket Client : Connected" + channel.isConnected() ) ;
 	}
 
+	/**
+	 * 
+	 */
 	public void run () 
 	{
 		String command ;

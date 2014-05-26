@@ -1,6 +1,10 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server;
 
 import java.io.IOException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -62,11 +66,22 @@ public class MasterServer implements Runnable
 	 */
 	public void run () 
 	{
-		inFunction = true ;
-		threadExecutor.submit ( socketServer ) ;
-		createAndLaunchNewGameController () ;
-		System.out.println ( "Master Server : Listening" ) ;
-		while  ( inFunction ) ;
+		RMIServer stub ;
+		Registry registry ;
+		try 
+		{
+			inFunction = true ;
+			threadExecutor.submit ( socketServer ) ;
+			stub = ( RMIServer ) UnicastRemoteObject.exportObject ( rmiServer , 0 ) ;
+			registry = LocateRegistry.createRegistry ( RMIServer.RMI_SERVER_PORT ) ;
+			registry.rebind ( RMIServer.SERVER_NAME , stub ) ;
+			createAndLaunchNewGameController () ;
+			System.out.println ( "Master Server : Listening" ) ;
+			while  ( inFunction ) ;
+		} 
+		catch (RemoteException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
