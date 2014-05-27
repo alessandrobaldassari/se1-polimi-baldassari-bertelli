@@ -1,10 +1,13 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Bank.NoMoreCardOfThisTypeException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match.AlreadyInFinalPhaseException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match.MatchState;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.BlackSheepAlreadyGeneratedException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.WolfAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.BlackSheep;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Ovine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Wolf;
@@ -12,6 +15,9 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.CharacterDoesntMoveException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.MasterServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
@@ -177,11 +183,28 @@ public class GameController implements Runnable
 	 */
 	private void placeSheeps () 
 	{
+		Region sheepsburg ;
 		Ovine bornOvine ;
-		for ( Region region : match.getGameMap ().getRegions () ) 
+		try 
 		{
-			bornOvine = generateOvine () ;
-			region.getContainedAnimals().add ( bornOvine ) ;
+			for ( Region region : match.getGameMap ().getRegions () ) 
+			{
+				bornOvine = generateOvine () ;
+				region.getContainedAnimals().add ( bornOvine ) ;
+			}
+			sheepsburg = match.getGameMap ().getRegionByType ( RegionType.SHEEPSBURG ).iterator().next() ;
+			sheepsburg.getContainedAnimals ().add ( animalsFactory.newBlackSheep () ) ;
+			sheepsburg.getContainedAnimals().add ( animalsFactory.newWolf () ) ;
+		} 
+		catch ( BlackSheepAlreadyGeneratedException e ) 
+		{
+			e.printStackTrace();
+			throw new RuntimeException ( e ) ;
+		} 
+		catch ( WolfAlreadyGeneratedException e ) 
+		{
+			e.printStackTrace();
+			throw new RuntimeException ( e ) ;
 		}
 	}
 	
@@ -246,23 +269,46 @@ public class GameController implements Runnable
 	 */
 	private void turnationPhase () 
 	{
+		MoveFactory moveFactory ;
 		BlackSheep blackSheep ;
 		Wolf wolf ;
+		Player currentPlayer ;
 		byte playerIndex ;
 		byte moveIndex ;
+		boolean gamePlaying ;
 		blackSheep = findBlackSheep () ;
 		wolf = findWolf () ;
-		for ( playerIndex = 0 ; playerIndex < match.getPlayers().size () || ! match.isInFinalPhase () ; playerIndex ++ )
+		gamePlaying = true ;
+		while ( gamePlaying )
 		{
-			// move the black sheep
-			for ( moveIndex = 0 ; moveIndex < NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ ) 
+			try 
 			{
-				// ask player move 1
-				// ask player move 2 
-				// ask player move 3
+				blackSheep.escape() ;
 			}
-			if ( match.getBank().getAFence(fenceType) )
-			// move the wolf
+			catch ( CharacterDoesntMoveException e1 ) {}
+			for ( playerIndex = 0 ; playerIndex < match.getPlayers().size () || ! match.isInFinalPhase () ; playerIndex ++ )
+			{
+				currentPlayer = match.getPlayers ().get ( playerIndex ) ;
+				moveFactory = new MoveFactory () ;
+				for ( moveIndex = 0 ; moveIndex < NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ ) 
+					currentPlayer.doMove ( moveFactory , match.getGameMap () ) ;
+				if ( match.isInFinalPhase () == false && match.getBank().hasAFenceOfThisType ( FenceType.NON_FINAL ) == false )
+					try 
+					{
+						match.enterFinalPhase () ;
+					} 
+					catch (AlreadyInFinalPhaseException e) {}
+				for ( playerIndex = 0 ; playerIndex < match.getPlayers ().size () ; playerIndex ++ )
+					match.getPlayers().get ( playerIndex ).chooseCardsEligibleForSelling () ;
+				
+			}
+			try 
+			{
+				wolf.escape () ;
+			}
+			catch (CharacterDoesntMoveException e) {}
+			if ( match.isInFinalPhase () )
+				gamePlaying = false ;
 		}
 	}
 	

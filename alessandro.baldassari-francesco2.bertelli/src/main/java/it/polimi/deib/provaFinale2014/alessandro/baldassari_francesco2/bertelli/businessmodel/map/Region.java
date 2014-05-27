@@ -1,6 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 
 import java.util.Collection;
@@ -84,6 +85,23 @@ public class Region extends GameMapElement
 	}
 	
 	/**
+	 * @throws NoRoadWithThisNumberException */
+	public Road getBorderRoad ( int number ) throws NoRoadWithThisNumberException 
+	{
+		Road res ;
+		res = null ;
+		for ( Road r : borderRoads )
+			if ( r.getNumber () == number )
+			{
+				res = r ;
+				break ;
+			}
+		if ( res == null )
+			throw new NoRoadWithThisNumberException () ;
+		return res ;
+	}
+	
+	/**
 	 * Getter for the containedAnimals property.
 	 * 
 	 * @return the containedAnimals property.
@@ -91,6 +109,20 @@ public class Region extends GameMapElement
 	public Collection < Animal > getContainedAnimals () 
 	{
 		return containedAnimals ;
+	}
+	
+	/***/
+	public boolean isClosed () 
+	{
+		boolean result ;
+		result = true ;
+		for ( Road road : borderRoads )
+			if ( road.getElementContained () == null || ! ( road.getElementContained () instanceof Fence ) )
+			{
+				result = false ;
+				break ;
+			}
+		return result ;
 	}
 	
 	// ENUMS
@@ -117,5 +149,11 @@ public class Region extends GameMapElement
 		SHEEPSBURG
 		
 	}
+	
+	// INNER CLASSES
+	
+	// EXCEPTIONS
+	
+	public class NoRoadWithThisNumberException extends Exception {}
 	
 }

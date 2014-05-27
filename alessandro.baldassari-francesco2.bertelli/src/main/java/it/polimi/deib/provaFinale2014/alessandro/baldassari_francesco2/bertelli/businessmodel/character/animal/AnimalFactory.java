@@ -138,12 +138,30 @@ public class AnimalFactory
 	 * This class models the situation where a Client try to instantiate the Singleton Wolf
 	 * instance for a given Match, but it has already been generated and returned. 
 	 */
-	class WolfAlreadyGeneratedException extends SingletonElementAlreadyGeneratedException {}
+	public class WolfAlreadyGeneratedException extends SingletonElementAlreadyGeneratedException 
+	{
+		
+		/***/
+		private WolfAlreadyGeneratedException () 
+		{
+			super () ;
+		}
+		
+	}
 	
 	/**
 	 * This class models the situation where a Client try to instantiate the Singleton BlackSheep
 	 * instance for a given Match, but it has already been generated and returned. 
 	 */
-	class BlackSheepAlreadyGeneratedException extends SingletonElementAlreadyGeneratedException {}
+	public class BlackSheepAlreadyGeneratedException extends SingletonElementAlreadyGeneratedException 
+	{
+		
+		/***/
+		private BlackSheepAlreadyGeneratedException () 
+		{
+			super () ;
+		}
+		
+	}
 	
 }

@@ -1,21 +1,23 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities;
 
+import java.util.Random;
+
 public class MathUtilities 
 {
 
-	public static byte launchDice () 
+	private static Random random = new Random () ;
+	
+	public static int launchDice () 
 	{ 
-		byte result ;
-		double temp ;
-		temp = Math.random () ;
-		result = ( byte ) ( 6 * temp ) ;
-		return result ;
+		int res ;
+		res = random.nextInt ( 5 ) + 1 ;
+		return res ;
 	}
 	
 	public static double genProbabilityValue () 
 	{
 		double res ;
-		res = Math.random () ;
+		res = random.nextDouble () ;
 		return res ;
 	}
 	
