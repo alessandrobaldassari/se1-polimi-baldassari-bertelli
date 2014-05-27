@@ -3,6 +3,8 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MathUtilities;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -45,6 +47,8 @@ public abstract class Player
 	 */
 	private boolean suspended ;
 	
+	private Sheperd [] sheperds ; 
+	
 	// METHODS
 	
 	/**
@@ -59,6 +63,7 @@ public abstract class Player
 			cards = new LinkedList < Card > () ;
 			suspended = false ;
 			money = null ;
+			sheperds = null ;
 		}
 		else 
 			throw new IllegalArgumentException () ;
@@ -205,13 +210,26 @@ public abstract class Player
 	 */
 	public int launchDice () 
 	{
-		Random random ;
-		int res ;
-		random = new Random () ;
-		res = random.nextInt ( 6 ) + 1 ;
-		return res ;
+		return MathUtilities.launchDice () ;
 	}
 		
+	public void initializeSheperds ( Sheperd [] sheperds ) 
+	{
+		if ( this.sheperds != null )
+		{
+			if ( sheperds != null )
+				this.sheperds = sheperds ;
+			else
+				throw new IllegalArgumentException () ;
+		}
+		else
+			throw new RuntimeException () ;
+	} 
+	
+	public abstract SellableCard chooseCardToBuy ( Iterable < SellableCard > src ) ;
+	
+	public abstract Sheperd chooseSheperd () ;
+	
 	/**
 	 * This is the central method for the Player class ( and its subclasses too ) because it models the most important 
 	 * behavior of a Player : play.

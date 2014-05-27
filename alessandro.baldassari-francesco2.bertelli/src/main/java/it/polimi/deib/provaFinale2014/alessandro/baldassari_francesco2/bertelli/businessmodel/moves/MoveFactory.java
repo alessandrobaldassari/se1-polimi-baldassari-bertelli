@@ -83,7 +83,7 @@ public class MoveFactory
 				throw new CannotDoThisMoveException () ;  
 		}
 	
-	public GameMove newMoveSheperd ( Sheperd sheperdToMove , Road roadWhereGo ) 
+	public GameMove newMoveSheperd ( Sheperd sheperdToMove , Road roadWhereGo ) throws CannotDoThisMoveException
 	{
 		sheperdMoved = true ;
 		numberOfMovesDone ++ ;

@@ -21,6 +21,7 @@ public class Card
 	 */
 	private final int id ;
 	
+	private Player owner ;
 	
 	// MEHTODS
 	
@@ -82,6 +83,16 @@ public class Card
 	public int getId () 
 	{
 		return id ;
+	}
+	
+	public void setOwner ( Player owner ) 
+	{
+		this.owner = owner ;
+	}
+	
+	public Player getOwner () 
+	{
+		return owner ;
 	}
 	
 }

@@ -16,15 +16,22 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.TwoPlayersMatchMoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.CharacterDoesntMoveException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.MasterServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
+import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -90,6 +97,7 @@ public class GameController implements Runnable
 		timer = new Timer();
 	}
 	
+	// fare cambiare età agli agnelli !
 	public void run () 
 	{
 		creatingPhase () ;
@@ -173,6 +181,7 @@ public class GameController implements Runnable
 		distributeInitialCards () ;
 		moneyDistribution () ;
 		choosePlayersOrder () ;
+		distributeSheperds () ;
 		match.setMatchState ( MatchState.TURNATION );
 	}
 	
@@ -261,6 +270,31 @@ public class GameController implements Runnable
 		CollectionsUtilities.listMesh ( match.getPlayers() ) ;
 	}
 	
+	private void distributeSheperds () 
+	{
+		final Color[] colors = { Color.RED , Color.BLUE , Color.GREEN , Color.YELLOW } ;
+		Sheperd [] sheperds ; 
+		byte numberOfSheperdsPerPlayer ;
+		byte sheperdIndex ;
+		byte colorIndex ;
+		if ( match.getPlayers ().size () == 2 )
+			numberOfSheperdsPerPlayer = 2 ;
+		else
+			numberOfSheperdsPerPlayer = 1 ;
+		colorIndex = 0 ;
+		for ( Player p : match.getPlayers () )
+		{
+			sheperds = new Sheperd [ numberOfSheperdsPerPlayer ] ;
+			for ( sheperdIndex = 0 ; sheperdIndex < numberOfSheperdsPerPlayer ; sheperdIndex ++ )
+			{	sheperds [ sheperdIndex ] = new Sheperd ( "" , colors [ colorIndex ] , p ) ;
+				colorIndex ++ ;
+				if ( colorIndex == colors.length )
+					colorIndex = 0 ;
+			}
+			p.initializeSheperds ( sheperds ) ;
+		}
+	}
+		
 	/**
 	 * This methods implements the core phase of the Game, the time when every player
 	 * makes his moves.
@@ -269,12 +303,17 @@ public class GameController implements Runnable
 	 */
 	private void turnationPhase () 
 	{
+		Collection < SellableCard > choosenCards ;
+		Collection < SellableCard > sellableCards ;
+		SellableCard sellableCard ;
+		Sheperd choosenSheperd ;
 		MoveFactory moveFactory ;
 		BlackSheep blackSheep ;
 		Wolf wolf ;
 		Player currentPlayer ;
 		byte playerIndex ;
 		byte moveIndex ;
+		int amount ;
 		boolean gamePlaying ;
 		blackSheep = findBlackSheep () ;
 		wolf = findWolf () ;
@@ -289,7 +328,13 @@ public class GameController implements Runnable
 			for ( playerIndex = 0 ; playerIndex < match.getPlayers().size () || ! match.isInFinalPhase () ; playerIndex ++ )
 			{
 				currentPlayer = match.getPlayers ().get ( playerIndex ) ;
-				moveFactory = new MoveFactory () ;
+				if ( match.getPlayers ().size () == 2 )
+				{
+					choosenSheperd = currentPlayer.chooseSheperd () ;
+					moveFactory = new TwoPlayersMatchMoveFactory ( choosenSheperd ) ;
+				}
+				else
+					moveFactory = new MoveFactory () ;
 				for ( moveIndex = 0 ; moveIndex < NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ ) 
 					currentPlayer.doMove ( moveFactory , match.getGameMap () ) ;
 				if ( match.isInFinalPhase () == false && match.getBank().hasAFenceOfThisType ( FenceType.NON_FINAL ) == false )
@@ -297,10 +342,43 @@ public class GameController implements Runnable
 					{
 						match.enterFinalPhase () ;
 					} 
-					catch (AlreadyInFinalPhaseException e) {}
+					catch ( AlreadyInFinalPhaseException e ) {}
 				for ( playerIndex = 0 ; playerIndex < match.getPlayers ().size () ; playerIndex ++ )
 					match.getPlayers().get ( playerIndex ).chooseCardsEligibleForSelling () ;
-				
+				for ( playerIndex = 0 ; playerIndex < match.getPlayers ().size () ; playerIndex ++ )
+				{
+					amount = 0 ;
+					choosenCards = new LinkedList < SellableCard > () ;
+					currentPlayer = match.getPlayers ().get ( playerIndex ) ;
+					sellableCards = generateGettableCardList ( currentPlayer ) ;
+					sellableCard = currentPlayer.chooseCardToBuy ( sellableCards ) ;
+					if ( sellableCard != null && currentPlayer.getMoney () >= sellableCard.getSellingPrice () )
+					{
+						amount = amount + sellableCard.getSellingPrice () ;
+						choosenCards.add ( sellableCard ) ;
+						sellableCards.remove ( sellableCard ) ;
+						sellableCard = currentPlayer.chooseCardToBuy ( sellableCards ) ;
+						while ( sellableCard != null && currentPlayer.getMoney () >= amount + sellableCard.getSellingPrice () )
+						{
+							amount = amount + sellableCard.getSellingPrice () ;
+							choosenCards.add ( sellableCard ) ;
+							sellableCards.remove ( sellableCard ) ;
+							sellableCard = currentPlayer.chooseCardToBuy ( sellableCards ) ;
+						}
+						for ( SellableCard s : choosenCards )
+						{
+							s.getOwner().getCards().remove ( s ) ;
+							s.getOwner().receiveMoney ( s.getSellingPrice () ) ;
+							currentPlayer.getCards().add ( s ) ;
+							currentPlayer.pay ( s.getSellingPrice() ) ;
+							s.setOwner ( currentPlayer ) ;
+						}
+					}
+					else
+					{
+						// non ha soldi per comperare nemmeno una carta.
+					}
+				}
 			}
 			try 
 			{
@@ -312,12 +390,31 @@ public class GameController implements Runnable
 		}
 	}
 	
+	private Collection < SellableCard > generateGettableCardList ( Player buyer ) 
+	{
+		Collection < SellableCard > res ;
+		SellableCard s ;
+		res = new LinkedList < SellableCard > () ;
+		for ( Player p : match.getPlayers () )
+			if ( buyer.equals ( buyer ) )
+				for ( Card c : p.getCards () )
+					if ( c instanceof SellableCard )
+					{
+						s = ( SellableCard ) c ;
+						if ( s.isSellable () )
+							res.add ( s ) ;
+					}
+		return res ;
+	}
+	
 	/**
 	 * This move is the last in the game workflow.
 	 * It calculate the points that every Player did and communicate the winner. 
 	 */
 	private void resultsCalculationPhase () 
-	{}
+	{
+		
+	}
 	
 	private BlackSheep findBlackSheep () 
 	{
