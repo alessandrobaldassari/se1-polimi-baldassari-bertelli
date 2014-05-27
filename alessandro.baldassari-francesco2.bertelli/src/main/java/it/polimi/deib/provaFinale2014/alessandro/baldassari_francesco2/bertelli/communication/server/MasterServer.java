@@ -75,7 +75,6 @@ public class MasterServer implements Runnable
 			stub = ( RMIServer ) UnicastRemoteObject.exportObject ( rmiServer , 0 ) ;
 			registry = LocateRegistry.createRegistry ( RMIServer.RMI_SERVER_PORT ) ;
 			registry.rebind ( RMIServer.SERVER_NAME , stub ) ;
-			createAndLaunchNewGameController () ;
 			System.out.println ( "Master Server : Listening" ) ;
 			while  ( inFunction ) ;
 		} 
@@ -93,6 +92,8 @@ public class MasterServer implements Runnable
 	public synchronized void addPlayer ( ClientHandler newClientHandler ) 
 	{
 		String name ;
+		if ( currentGameController == null )
+			createAndLaunchNewGameController () ;
 		try 
 		{
 			System.out.println ( "Server wants to request the name" );
@@ -113,19 +114,31 @@ public class MasterServer implements Runnable
 	}
 	
 	/**
-	 * 
+	 * Method that manages the situation where a GameController notifies that 
+	 * a timeout expires and there is a number of Player < 2, so the match will not start.
+	 * The methods cancel the Match and notify the added Client that his request has been
+	 * rejected.
 	 */
 	public synchronized void notifyFailure () 
 	{
-		createAndLaunchNewGameController () ;
+		// notify the rejected player.
 	}
 	
-	/***/
+	/**
+	 * Method that manages the situation where the current GameController notifies that
+	 * it has reached the situation where a Match can start.
+	 * Standing the contract of the GameController class, it will start the workflow 
+	 * automatically, so the only thing this method has to do is to set the 
+	 * currentGameController property to null.
+	 */
 	public synchronized void notifyFinishAddingPlayers () 
 	{
-		createAndLaunchNewGameController () ;
+		currentGameController = null ;
 	}
 	
+	/**
+	 * Helper method that creates a new GameController and starts it. 
+	 */
 	private void createAndLaunchNewGameController () 
 	{
 		currentGameController = new GameController ( this ) ;

@@ -6,13 +6,14 @@ public class RMIClientHandler implements ClientHandler
 {
 
 	@Override
-	public String requestName() throws IOException {
-		// TODO Auto-generated method stub
+	public String requestName() throws IOException 
+	{
 		return null;
 	}
 
 	@Override
-	public void dispose() throws IOException {
+	public void dispose () throws IOException 
+	{
 		// TODO Auto-generated method stub
 		
 	}

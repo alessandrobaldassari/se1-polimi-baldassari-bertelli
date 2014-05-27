@@ -4,7 +4,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
  * This class models the Black Sheep, a particular Sheep which exists in one
  * instance per Match.
  */
-class BlackSheep extends AdultOvine 
+public class BlackSheep extends AdultOvine 
 {
 
 	/**

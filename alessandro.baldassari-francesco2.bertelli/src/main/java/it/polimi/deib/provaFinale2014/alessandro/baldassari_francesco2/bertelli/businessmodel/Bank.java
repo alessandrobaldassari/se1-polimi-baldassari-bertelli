@@ -180,6 +180,39 @@ public class Bank
 	}
 	
 	/**
+	 * Querying method to know if this Bank holds a Fence of the type which is specified
+	 * by the parameter.
+	 * 
+	 * @param fenceType the intersted type 
+	 * @return true if this Bank has a Fence whose type is fenceType, else false.
+	 * @throws IllegalArgumentException if the fenceType parameter is null.
+	 */
+	public boolean hasAFenceOfThisType ( FenceType fenceType ) 
+	{
+		boolean res ;
+		if ( fenceType != null )
+		{
+			if ( fenceType == FenceType.FINAL )
+			{
+				if ( fences.get ( fences.size () - 1 ).isFinal() )
+					res = true ;
+				else
+					res = false ;
+			}
+			else
+			{
+				if ( fences.get ( 0 ).isFinal () == false )
+					res = true ;
+				else
+					res = false ;
+			}
+		}
+		else 
+			throw new IllegalArgumentException () ;
+		return res ;
+	}
+	
+	/**
 	 * Returns a Fence object of the fenceType parameter type ( if it exists in this Bank ).
 	 * 
 	 * @param fenceType the type of Fence the client wants.

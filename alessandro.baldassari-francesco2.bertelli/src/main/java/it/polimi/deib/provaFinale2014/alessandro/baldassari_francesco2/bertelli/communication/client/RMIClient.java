@@ -27,7 +27,7 @@ public class RMIClient implements Client , Runnable
 		try 
 		{
 			server = ( RMIServer ) registry.lookup ( RMIServer.SERVER_NAME ) ;
-			server.addPlayer("uri"); 
+			server.addPlayer( "uri" ) ; 
 		} 
 		catch ( NotBoundException e ) 
 		{

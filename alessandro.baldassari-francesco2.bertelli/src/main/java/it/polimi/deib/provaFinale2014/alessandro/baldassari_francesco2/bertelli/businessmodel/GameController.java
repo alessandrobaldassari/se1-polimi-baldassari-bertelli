@@ -3,8 +3,11 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Bank.NoMoreCardOfThisTypeException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match.MatchState;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.BlackSheep;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Ovine;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Wolf;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
@@ -44,6 +47,12 @@ public class GameController implements Runnable
 	 * The maximum number of Player for a Match. 
 	 */
 	private static final int MAX_NUMBER_OF_PLAYERS = 4;
+
+	/**
+	 * The number of moves a Player can do each turn.
+	 * It's a business rule. 
+	 */
+	private static final int NUMBER_OF_MOVES_PER_USER_PER_TURN = 3 ;
 	
 	/**
 	 * The match that this GameController will manage. 
@@ -88,6 +97,8 @@ public class GameController implements Runnable
 				e.printStackTrace();
 			}
 		initializationPhase () ; 
+		turnationPhase () ;
+		resultsCalculationPhase () ;
 	}
 	
 	/**
@@ -235,7 +246,65 @@ public class GameController implements Runnable
 	 */
 	private void turnationPhase () 
 	{
-		
+		BlackSheep blackSheep ;
+		Wolf wolf ;
+		byte playerIndex ;
+		byte moveIndex ;
+		blackSheep = findBlackSheep () ;
+		wolf = findWolf () ;
+		for ( playerIndex = 0 ; playerIndex < match.getPlayers().size () || ! match.isInFinalPhase () ; playerIndex ++ )
+		{
+			// move the black sheep
+			for ( moveIndex = 0 ; moveIndex < NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ ) 
+			{
+				// ask player move 1
+				// ask player move 2 
+				// ask player move 3
+			}
+			if ( match.getBank().getAFence(fenceType) )
+			// move the wolf
+		}
+	}
+	
+	/**
+	 * This move is the last in the game workflow.
+	 * It calculate the points that every Player did and communicate the winner. 
+	 */
+	private void resultsCalculationPhase () 
+	{}
+	
+	private BlackSheep findBlackSheep () 
+	{
+		Iterable < Animal > sheepsburgAnimals ;
+		BlackSheep result ;
+		Region sheepsburg ;
+		sheepsburg = match.getGameMap().getRegionByType ( RegionType.SHEEPSBURG ).iterator().next () ;
+		sheepsburgAnimals = sheepsburg.getContainedAnimals () ;
+		result = null ;
+		for ( Animal a : sheepsburgAnimals )
+			if ( a instanceof BlackSheep )
+			{
+				result = ( BlackSheep ) a ;
+				break ;
+			}
+		return result ;
+	}
+	
+	private Wolf findWolf () 
+	{
+		Iterable < Animal > sheepsburgAnimals ;
+		Wolf result ;
+		Region sheepsburg ;
+		sheepsburg = match.getGameMap().getRegionByType ( RegionType.SHEEPSBURG ).iterator().next () ;
+		sheepsburgAnimals = sheepsburg.getContainedAnimals () ;
+		result = null ;
+		for ( Animal a : sheepsburgAnimals )
+			if ( a instanceof Wolf )
+			{
+				result = ( Wolf ) a ;
+				break ;
+			}
+		return result ;
 	}
 	
 	/**

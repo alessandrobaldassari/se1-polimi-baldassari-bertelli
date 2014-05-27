@@ -89,6 +89,23 @@ public class Match
 	}
 	
 	/**
+	 * Partial setter method for the inFinalPhase attribute.
+	 * The logical model requires that this method is called once during
+	 * the Match lifecycle.
+	 * It has to be called by an external component that realizes the game is
+	 * entering in its final phase. 
+	 * 
+	 * @throws AlreadyInFinalPhaseException if the inFinalPhase attribute value is true.
+	 */
+	void enterFinalPhase () throws AlreadyInFinalPhaseException 
+	{
+		if ( inFinalPhase == false )
+			inFinalPhase = true ;
+		else 
+			throw new AlreadyInFinalPhaseException () ;
+	}
+	
+	/**
 	 * Setter method for the inFinalPhase property.
 	 * 
 	 * @return the inFinalPhase property.
@@ -149,5 +166,15 @@ public class Match
 		CALCULATING_RESULTS
 		
 	}
+
+	// INNER CLASSES
+	
+	// EXCEPTIONS
+	
+	/**
+	 * This class models the situation where someone try to set this Match in the final
+	 * state also if it already is. 
+	 */
+	public class AlreadyInFinalPhaseException extends Exception {}
 	
 }
