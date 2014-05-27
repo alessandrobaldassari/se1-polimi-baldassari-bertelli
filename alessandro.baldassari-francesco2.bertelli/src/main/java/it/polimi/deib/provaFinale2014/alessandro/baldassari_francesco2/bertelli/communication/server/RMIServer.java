@@ -35,7 +35,7 @@ class RMIServerImpl implements RMIServer
 	{
 		ClientHandler clientHandler ;
 		clientHandler = new RMIClientHandler () ;
-		masterServer.addPlayer();
+		//masterServer.addPlayer();
 		System.out.println ( "Ricevuto : " + name ) ;
 	}
 

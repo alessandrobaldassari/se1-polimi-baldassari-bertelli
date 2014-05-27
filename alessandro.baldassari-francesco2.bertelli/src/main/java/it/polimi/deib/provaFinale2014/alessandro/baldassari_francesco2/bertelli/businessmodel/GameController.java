@@ -22,11 +22,15 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player.TooFewMoneyException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.NotSellableException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.SellingPriceNotSetException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.MasterServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -98,6 +102,9 @@ public class GameController implements Runnable
 	}
 	
 	// fare cambiare età agli agnelli !
+	/**
+	 * 
+	 */
 	public void run () 
 	{
 		creatingPhase () ;
@@ -132,7 +139,7 @@ public class GameController implements Runnable
 			matchIdentifier = new MatchIdentifier ( lastMatchIdentifierUID ++ ) ;
 			animalsFactory = AnimalFactory.newAnimalFactory ( matchIdentifier ) ;
 			gameMap = GameMapFactory.getInstance().newInstance ( matchIdentifier ) ;
-			bank = Bank.newInstance ( matchIdentifier ) ;
+			bank = BankFactory.getInstance().newInstance ( matchIdentifier ) ;
 			match = new Match ( gameMap , bank ) ;		
 			timer.schedule ( new WaitingPlayersTimerTask () , DELAY ) ;
 		} 
@@ -233,15 +240,15 @@ public class GameController implements Runnable
 			CollectionsUtilities.listMesh ( regions ) ;
 			for( Player player : match.getPlayers ())
 			{
-					player.getCards ().add ( match.getBank ().takeInitialCard ( regions.get ( 0 ) ) ) ;
+					player.setInitialCard ( match.getBank ().takeInitialCard ( regions.get ( 0 ) ) ) ;
 				regions.remove ( 0 ) ;
 			}
 		}
-		catch ( NoMoreCardOfThisTypeException e ) 
+		catch ( NoMoreCardOfThisTypeException | WriteOncePropertyAlreadSetException e ) 
 		{
 			e.printStackTrace();
 			throw new RuntimeException ( e ) ;
-		}
+		}	
 	}
 	
 	/**
@@ -291,7 +298,12 @@ public class GameController implements Runnable
 				if ( colorIndex == colors.length )
 					colorIndex = 0 ;
 			}
-			p.initializeSheperds ( sheperds ) ;
+			try {
+				p.initializeSheperds ( sheperds ) ;
+			} catch (WriteOncePropertyAlreadSetException e) {
+				e.printStackTrace();
+				throw new RuntimeException ( e ) ;
+			}
 		}
 	}
 		
@@ -303,9 +315,6 @@ public class GameController implements Runnable
 	 */
 	private void turnationPhase () 
 	{
-		Collection < SellableCard > choosenCards ;
-		Collection < SellableCard > sellableCards ;
-		SellableCard sellableCard ;
 		Sheperd choosenSheperd ;
 		MoveFactory moveFactory ;
 		BlackSheep blackSheep ;
@@ -313,7 +322,6 @@ public class GameController implements Runnable
 		Player currentPlayer ;
 		byte playerIndex ;
 		byte moveIndex ;
-		int amount ;
 		boolean gamePlaying ;
 		blackSheep = findBlackSheep () ;
 		wolf = findWolf () ;
@@ -330,7 +338,7 @@ public class GameController implements Runnable
 				currentPlayer = match.getPlayers ().get ( playerIndex ) ;
 				if ( match.getPlayers ().size () == 2 )
 				{
-					choosenSheperd = currentPlayer.chooseSheperd () ;
+					choosenSheperd = currentPlayer.chooseSheperdForATurn () ;
 					moveFactory = new TwoPlayersMatchMoveFactory ( choosenSheperd ) ;
 				}
 				else
@@ -343,43 +351,9 @@ public class GameController implements Runnable
 						match.enterFinalPhase () ;
 					} 
 					catch ( AlreadyInFinalPhaseException e ) {}
-				for ( playerIndex = 0 ; playerIndex < match.getPlayers ().size () ; playerIndex ++ )
-					match.getPlayers().get ( playerIndex ).chooseCardsEligibleForSelling () ;
-				for ( playerIndex = 0 ; playerIndex < match.getPlayers ().size () ; playerIndex ++ )
-				{
-					amount = 0 ;
-					choosenCards = new LinkedList < SellableCard > () ;
-					currentPlayer = match.getPlayers ().get ( playerIndex ) ;
-					sellableCards = generateGettableCardList ( currentPlayer ) ;
-					sellableCard = currentPlayer.chooseCardToBuy ( sellableCards ) ;
-					if ( sellableCard != null && currentPlayer.getMoney () >= sellableCard.getSellingPrice () )
-					{
-						amount = amount + sellableCard.getSellingPrice () ;
-						choosenCards.add ( sellableCard ) ;
-						sellableCards.remove ( sellableCard ) ;
-						sellableCard = currentPlayer.chooseCardToBuy ( sellableCards ) ;
-						while ( sellableCard != null && currentPlayer.getMoney () >= amount + sellableCard.getSellingPrice () )
-						{
-							amount = amount + sellableCard.getSellingPrice () ;
-							choosenCards.add ( sellableCard ) ;
-							sellableCards.remove ( sellableCard ) ;
-							sellableCard = currentPlayer.chooseCardToBuy ( sellableCards ) ;
-						}
-						for ( SellableCard s : choosenCards )
-						{
-							s.getOwner().getCards().remove ( s ) ;
-							s.getOwner().receiveMoney ( s.getSellingPrice () ) ;
-							currentPlayer.getCards().add ( s ) ;
-							currentPlayer.pay ( s.getSellingPrice() ) ;
-							s.setOwner ( currentPlayer ) ;
-						}
-					}
-					else
-					{
-						// non ha soldi per comperare nemmeno una carta.
-					}
-				}
 			}
+			marketPhase () ;
+
 			try 
 			{
 				wolf.escape () ;
@@ -390,20 +364,65 @@ public class GameController implements Runnable
 		}
 	}
 	
+	private void marketPhase () 
+	{
+		Collection < SellableCard > choosenCards ;
+		Collection < SellableCard > sellableCards ;
+		Player currentPlayer ;
+		SellableCard sellableCard ;
+		byte playerIndex ;
+		int amount ;
+		for ( playerIndex = 0 ; playerIndex < match.getPlayers ().size () ; playerIndex ++ )
+			match.getPlayers().get ( playerIndex ).chooseCardsEligibleForSelling () ;
+		for ( playerIndex = 0 ; playerIndex < match.getPlayers ().size () ; playerIndex ++ )
+		{
+			try
+			{
+				amount = 0 ;
+				choosenCards = new LinkedList < SellableCard > () ;
+				currentPlayer = match.getPlayers ().get ( playerIndex ) ;
+				sellableCards = generateGettableCardList ( currentPlayer ) ;
+				sellableCard = currentPlayer.chooseCardToBuy ( sellableCards ) ;
+				if ( sellableCard != null && currentPlayer.getMoney () >= sellableCard.getSellingPrice () )
+				{
+					amount = amount + sellableCard.getSellingPrice () ;
+					choosenCards.add ( sellableCard ) ;
+					sellableCards.remove ( sellableCard ) ;
+					sellableCard = currentPlayer.chooseCardToBuy ( sellableCards ) ;
+					while ( sellableCard != null && currentPlayer.getMoney () >= amount + sellableCard.getSellingPrice () )
+					{
+						amount = amount + sellableCard.getSellingPrice () ;
+						choosenCards.add ( sellableCard ) ;
+						sellableCards.remove ( sellableCard ) ;
+						sellableCard = currentPlayer.chooseCardToBuy ( sellableCards ) ;
+					}
+					for ( SellableCard s : choosenCards )
+					{
+						s.getOwner().getSellableCards().remove ( s ) ;
+						s.getOwner().receiveMoney ( s.getSellingPrice () ) ;
+						currentPlayer.getSellableCards().add ( s ) ;
+						currentPlayer.pay ( s.getSellingPrice() ) ;
+						s.setOwner ( currentPlayer ) ;
+					}
+				}
+				else
+				{
+					// non ha soldi per comperare nemmeno una carta.
+				}
+			}
+			catch ( NotSellableException | SellingPriceNotSetException | TooFewMoneyException n ) {}
+		}
+	}
+	
 	private Collection < SellableCard > generateGettableCardList ( Player buyer ) 
 	{
 		Collection < SellableCard > res ;
-		SellableCard s ;
 		res = new LinkedList < SellableCard > () ;
 		for ( Player p : match.getPlayers () )
 			if ( buyer.equals ( buyer ) )
-				for ( Card c : p.getCards () )
-					if ( c instanceof SellableCard )
-					{
-						s = ( SellableCard ) c ;
+				for ( SellableCard s : p.getSellableCards () )
 						if ( s.isSellable () )
 							res.add ( s ) ;
-					}
 		return res ;
 	}
 	

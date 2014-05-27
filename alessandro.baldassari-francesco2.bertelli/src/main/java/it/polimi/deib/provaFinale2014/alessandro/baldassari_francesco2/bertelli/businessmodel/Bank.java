@@ -5,14 +5,9 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.FactorySupport;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -25,34 +20,24 @@ public class Bank
 {
 	
 	// ATTRIBUTES
-
-	/**
-	 * The object needed to implement the Factory pattern 
-	 */
-	private static FactorySupport factorySupport = new FactorySupport () ;
 	
 	/**
 	 * The initial money amount, total. 
 	 * It's a business rule. 
 	 */
-	private static final int INITIAL_MONEY_RESERVE = 80 ;
+	public static final int INITIAL_MONEY_RESERVE = 80 ;
 	
 	/**
 	 * The total number of non final fences.
 	 * It's a business rule. 
 	 */
-	private static final int NON_FINAL_FENCE_NUMBER = 20 ;
+	public static final int NON_FINAL_FENCE_NUMBER = 20 ;
 	
 	/**
 	 * The number of final fences initially in the Bank.
 	 * It's a business rule. 
 	 */
-	private static final int FINAL_FENCE_NUMBER = 12 ;
-	
-	/**
-	 * The number of non initial Cards to be created for each Region. 
-	 */
-	private static final int NUMBER_OF_NON_INITIAL_CARDS_PER_REGION_TYPE = 5 ;
+	public static final int FINAL_FENCE_NUMBER = 12 ;
 	
 	/**
 	 * The container for the initial Card objects. 
@@ -84,7 +69,7 @@ public class Bank
 	 * @throws IllegalArgumentException if the fences or initCards or otherCards parameter
 	 *         is null or the initialMoneyReserve is < 0
 	 */
-	private Bank ( int initialMoneyReserve , Iterable < Fence > fences , Iterable < Card > initCards , Iterable < SellableCard > otherCards ) 
+	Bank ( int initialMoneyReserve , Iterable < Fence > fences , Iterable < Card > initCards , Iterable < SellableCard > otherCards ) 
 	{
 		if ( fences != null && initCards != null && otherCards != null && initialMoneyReserve >= 0 )
 		{
@@ -104,55 +89,6 @@ public class Bank
 		}
 		else
 			throw new IllegalArgumentException () ;
-	}
-	
-	/**
-	 * Factory method.
-	 * 
-	 * @param caller the one who requires a new Bank object.
-	 * @return a new Bank instance
-	 * @throws SingletonElementAlreadyGeneratedException if the caller parameter already
-	 *         tried to call this method.
-	 */
-	public static Bank newInstance ( Identifiable < Match > caller ) throws SingletonElementAlreadyGeneratedException 
-	{
-		Bank res ;
-		Collection < Fence > initFences ;
-		Collection < Card > initialCards ;
-		Collection < SellableCard > otherCards ;
-		byte i ;
-		byte counter ;
-		if ( factorySupport.isAlreadyUser ( caller ) == false )
-		{
-			factorySupport.addUser ( caller ) ;
-			initFences = new ArrayList < Fence > ( NON_FINAL_FENCE_NUMBER + FINAL_FENCE_NUMBER ) ;
-			for ( i = 0 ; i < NON_FINAL_FENCE_NUMBER ; i ++ )
-				initFences.add ( new Fence ( FenceType.NON_FINAL ) ) ;
-			for ( i = 0 ; i < FINAL_FENCE_NUMBER ; i ++ )
-				initFences.add ( new Fence ( FenceType.FINAL ) ) ;
-			initialCards = new LinkedList < Card > () ;
-			otherCards = new LinkedList < SellableCard > () ;
-			counter = 0 ;
-			for ( RegionType type : RegionType.values() )
-			{
-				if ( type != RegionType.SHEEPSBURG )
-				{
-					initialCards.add ( new Card ( type , counter ) ) ;
-					counter ++ ;
-				}
-			}
-			for ( RegionType type : RegionType.values () )
-				if ( type != RegionType.SHEEPSBURG )
-				for ( i = NUMBER_OF_NON_INITIAL_CARDS_PER_REGION_TYPE-1 ; i >= 0 ; i -- )
-				{
-						otherCards.add ( new SellableCard ( type , counter , i ) ) ;
-						counter ++ ;
-				}
-			res = new Bank ( INITIAL_MONEY_RESERVE , initFences , initialCards , otherCards ) ;
-		}
-		else 
-			throw new SingletonElementAlreadyGeneratedException () ;
-		return res ;
 	}
 	
 	/**
@@ -297,7 +233,7 @@ public class Bank
 	 * @throws IllegalArgumentException if the regionType parameter is null or equals
 	 *         to Sheepsburg. 
 	 */
-	public Card sellACard ( int price , RegionType regionType ) throws CardPriceNotRightException, NoMoreCardOfThisTypeException 
+	public SellableCard sellACard ( int price , RegionType regionType ) throws CardPriceNotRightException, NoMoreCardOfThisTypeException 
 	{
 		SellableCard res ;
 		if ( regionType != null && regionType != RegionType.SHEEPSBURG )

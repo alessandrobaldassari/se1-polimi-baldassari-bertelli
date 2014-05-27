@@ -5,10 +5,11 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MathUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
 
+import java.awt.Color;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Random;
 
 /**
  * This class models a Player in the Game.
@@ -22,14 +23,24 @@ public abstract class Player
 	// ATTRIBUTES
 	
 	/**
-	 * The collection containing all the Cards owned by this Player.
+	 * The collection containing all the SellableCard owned by this Player.
 	 */
-	private final Collection < Card > cards ;
+	private final Collection < SellableCard > sellableCards ;
 	
 	/**
 	 * The name of this Player.
 	 */
 	private final String name ;
+	
+	/**
+	 * The Sheperds owned by this Player. 
+	 */
+	private Sheperd [] sheperds ; 
+	
+	/**
+	 * The initial Card assigned to this Player at the Game beginning 
+	 */
+	private Card initialCard ;
 	
 	/**
 	 * The number of money owned by this Player.
@@ -47,8 +58,6 @@ public abstract class Player
 	 */
 	private boolean suspended ;
 	
-	private Sheperd [] sheperds ; 
-	
 	// METHODS
 	
 	/**
@@ -60,43 +69,21 @@ public abstract class Player
 		if ( name != null )
 		{
 			this.name = name ;
-			cards = new LinkedList < Card > () ;
-			suspended = false ;
-			money = null ;
 			sheperds = null ;
+			sellableCards = new LinkedList < SellableCard > () ;
+			initialCard = null ;
+			money = null ;
+			suspended = false ;
 		}
 		else 
 			throw new IllegalArgumentException () ;
 	}
 	
 	/**
-	 * AS THE SUPER'S ONE.
-	 * Two Player objects are considered equals if, and only if, their two name properties are equal.
-	 * This definition is valid also for all subclasses of Player, so this method is marked as final. 
-	 */
-	@Override
-	public final boolean equals ( Object obj ) 
-	{
-		Player otherPlayer ;
-		boolean res ;
-		if ( obj instanceof Player )
-		{
-			otherPlayer = ( Player ) obj ;
-			if ( name == otherPlayer.getName () )
-				res = true ;
-			else
-				res = false ;
-		}
-		else
-			res = false ;
-		return res ;
-	}
-	
-	/**
 	 * This methods is called by the system in the Market phase of the Game.
-	 * Here, the Player, has the opportunity to set the selling state and price of his Cards, if he wants
-	 * to sell some of his Cards to other Players.
-	 * It's important for subclasses to consider that this Class is stateful w.r.t. Cards; so if for example a Player
+	 * Here, the Player, has the opportunity to set the selling state and price of his SellableCards, if he wants
+	 * to sell some of his SellableCards to other Players.
+	 * It's important for subclasses to consider that this Class is stateful w.r.t. SellableCards; so if for example a Player
 	 * set a sellable for a given price at the turn t, and this Card is not sold at the same turn t, if the Player does not 
 	 * want to sell this Card anymore at the turn t+1, he has to explicitly make it not sellable ( or modify its price if he wants ), 
 	 * otherwise the system will consider the selling state the same as the turn t.
@@ -104,15 +91,13 @@ public abstract class Player
 	public abstract void chooseCardsEligibleForSelling () ;
 	
 	/**
-	 * Getter for the Cards property of this Player.
-	 * It returns the Collection instantiated in this Player object, not a copy, so every modification made on
-	 * the returned value will be visible here.
+	 * Getter methods for the sellableCards property.
 	 * 
-	 * @return a Collection containing the Cards owned by this Player.
+	 * @return the sellableCards property.
 	 */
-	public Collection < Card > getCards () 
+	public Collection < SellableCard > getSellableCards () 
 	{
-		return cards ;
+		return sellableCards ;
 	}
 	
 	/**
@@ -123,6 +108,68 @@ public abstract class Player
 	public String getName () 
 	{
 		return name ;
+	}
+	
+	/**
+	 * Partial Setter method for the sheperds property.
+	 * If the property has not been set yet, and the parameter is not null, it
+	 * sets the property to the parameter value, else throws some exceptions.
+	 * 
+	 * @param sheperds the value for the sheperds property.
+	 * @throws IllegalArgumentException if the parameter is null.
+	 * @throws SheperdsPropertyAlreadySetException if the property is already not null.
+	 */
+	public void initializeSheperds ( Sheperd [] sheperds ) throws WriteOncePropertyAlreadSetException
+	{
+		if ( this.sheperds != null )
+		{
+			if ( sheperds != null )
+				this.sheperds = sheperds ;
+			else
+				throw new IllegalArgumentException () ;
+		}
+		else
+			throw new WriteOncePropertyAlreadSetException ( "SHEPERDS" ) ;
+	} 
+	
+	/**
+	 * This method returns the Sheperd that a Player chooses, between his ones, to 
+	 * play in a given turn.
+	 * By business rule, this method will be asked only if the Match where this 
+	 * Player is is a two-players Match.
+	 * 
+	 * @return the Sheperd a this Player chooses to play in a given turn.
+	 */
+	public abstract Sheperd chooseSheperdForATurn () ;
+	
+	/**
+	 * Setter method for the initialCard property 
+	 * 
+	 * @param initialCard the value for the initialCard property.
+	 * @throws IllegalArgumentException if the parameter is null.
+	 * @throws WriteOncePropertyAlreadSetException if the property has been already set.
+	 */
+	public void setInitialCard ( Card initialCard ) throws WriteOncePropertyAlreadSetException 
+	{
+		if ( this.initialCard != null )
+		{
+			if ( initialCard != null )
+				this.initialCard = initialCard ;
+			else
+				throw new IllegalArgumentException () ;
+		}
+		else
+			throw new WriteOncePropertyAlreadSetException ( "INITIAL_CARD" ) ;
+	}
+	
+	/**
+	 * Getter method for the initialCard property.
+	 * 
+	 * @return the initialCard property.
+	 */
+	public Card getInitialCard () 
+	{
+		return initialCard ;
 	}
 	
 	/**
@@ -213,22 +260,42 @@ public abstract class Player
 		return MathUtilities.launchDice () ;
 	}
 		
-	public void initializeSheperds ( Sheperd [] sheperds ) 
+	/**
+	 * AS THE SUPER'S ONE.
+	 * Two Player objects are considered equals if, and only if, their two name properties are equal.
+	 * This definition is valid also for all subclasses of Player, so this method is marked as final. 
+	 */
+	@Override
+	public final boolean equals ( Object obj ) 
 	{
-		if ( this.sheperds != null )
+		Player otherPlayer ;
+		boolean res ;
+		if ( obj instanceof Player )
 		{
-			if ( sheperds != null )
-				this.sheperds = sheperds ;
+			otherPlayer = ( Player ) obj ;
+			if ( name == otherPlayer.getName () )
+				res = true ;
 			else
-				throw new IllegalArgumentException () ;
+				res = false ;
 		}
 		else
-			throw new RuntimeException () ;
-	} 
+			res = false ;
+		return res ;
+	}
 	
+	/**
+	 * Method called by the System during the Market phase of a Turn;
+	 * this Player has to decide which Card, included in the parameter Iterable, he 
+	 * wants to buy, and return it.
+	 * If the value returned is null, it is considered as a signal for the caller
+	 * that this Player does not want to buy any other card; else this method will 
+	 * be called again in order for this Player to buy more than one Card.
+	 * 
+	 * @param src the List of Cards this Player can potentially buy.
+	 * @return a SellableCard object contained in the parameter indicating a Card this Player
+	 *         wants to buy, or null if this Player does not want to buy any Card.
+	 */
 	public abstract SellableCard chooseCardToBuy ( Iterable < SellableCard > src ) ;
-	
-	public abstract Sheperd chooseSheperd () ;
 	
 	/**
 	 * This is the central method for the Player class ( and its subclasses too ) because it models the most important 
@@ -243,6 +310,27 @@ public abstract class Player
 	 * @return a GameMove object which represents the move the Player wants to make.
 	 */
 	public abstract GameMove doMove ( MoveFactory moveFactory , GameMap gameMap ) ;
+	
+	/**
+	 * This method is called by the System during the initialization phase to ask
+	 * this Player which Color to assign to one of his Sheperd.
+	 * The color has to be in the availableColors Iterable.
+	 * 
+	 * @param availableColors the Iterable containing the colors available for choosing.
+	 * @return the choosen color that has to be in the availableColors Iterable.
+	 */
+	public abstract Color getColorForSheperd ( Iterable < Color > availableColors ) ;
+	
+	/**
+	 * This is a generic method the System can call to notify a Player of something that
+	 * happend but is not a strictly workflow event.
+	 * An example of such type of situation may be when a Player goes wrong in an action;
+	 * the system may notify him of the error using this method before making the 
+	 * consequent actions ( repeating the action, skip some actions and so on ). 
+	 * 
+	 * @param message the message the System wants to communicate to this Player.
+	 */
+	public abstract void genericNotification ( String message ) ;
 	
 	// INNER CLASSES
 	

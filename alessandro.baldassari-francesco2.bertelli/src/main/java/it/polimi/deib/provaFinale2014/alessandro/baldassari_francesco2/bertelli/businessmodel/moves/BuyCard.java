@@ -8,6 +8,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player.TooFewMoneyException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 
 /**
  * This class models the BuyCard action, which is the situation where a Player wants to 
@@ -57,7 +58,7 @@ public class BuyCard extends ExecutableGameMove
 	public void execute ( Match match ) throws MoveNotAllowedException 
 	{
 		Road buyerPosition ;
-		Card theCard ;
+		SellableCard theCard ;
 		int price ;
 		buyerPosition = buyer.getPosition () ;
 		if ( buyingCardType == buyerPosition.getFirstBorderRegion ().getType () || buyingCardType == buyerPosition.getSecondBorderRegion ().getType () )
@@ -67,7 +68,7 @@ public class BuyCard extends ExecutableGameMove
 				price = match.getBank().getPeekCardPrice ( buyingCardType ) ;
 				buyer.getOwner ().pay ( price ) ;
 				theCard = match.getBank ().sellACard ( price , buyingCardType ) ;
-				buyer.getOwner().getCards ().add ( theCard ) ;
+				buyer.getOwner().getSellableCards ().add ( theCard ) ;
 			} 
 			catch ( NoMoreCardOfThisTypeException e ) 
 			{

@@ -36,8 +36,11 @@ public class SellableCard extends Card
 	
 	/**
 	 * @param initialPrice the price the Bank requires to sell this Card. 
+	 * @param regionType the Region type represented by this Player.
+	 * @param id the UID of this Card
+	 * @throws IllegalArgumentException if the initialPrice parameter is <= 0
 	 */
-	public SellableCard ( RegionType type , int id , int initialPrice ) 
+	SellableCard ( RegionType type , int id , int initialPrice ) 
 	{
 		super ( type , id ) ;
 		if ( initialPrice > 0 )
@@ -65,7 +68,7 @@ public class SellableCard extends Card
 	 * 
 	 * @param sellingPrice the value the sellingPrice property must be set to.
 	 * @throw IllegalArgumentException if the paremeter is not a legal argument ( < of 
-	 * MINIMUM_SELLING_PRICE or > of MAXIMUM_SELLING_PRICE ).
+	 * 	      MINIMUM_SELLING_PRICE or > of MAXIMUM_SELLING_PRICE ).
 	 */
 	public void setSellingPrice ( int sellingPrice ) 
 	{
@@ -125,7 +128,16 @@ public class SellableCard extends Card
 	 * This class model the situation where one try to buy / sell a Card that is not marked
 	 * for selling.
 	 */
-	public class NotSellableException extends Exception {}
+	public class NotSellableException extends Exception 
+	{
+		
+		/***/
+		private NotSellableException () 
+		{
+			super () ;
+		}
+		
+	}
 	
 	/**
 	 * This class model the situation where a Card is going to be sold but it's price has not 
