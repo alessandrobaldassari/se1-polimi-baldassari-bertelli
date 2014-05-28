@@ -1,6 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler;
 
-public enum SocketProtocolAction 
+public enum ClientHandlerClientCommunicationProtocolOperation 
 {
 
 	NAME_REQUESTING_REQUEST ,
@@ -17,6 +17,20 @@ public enum SocketProtocolAction
 	
 	CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST,
 	
-	CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_RESPONSE
+	CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_RESPONSE ,
+	
+	CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_REQUEST ,
+	
+	CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_RESPONSE ,
+	
+	CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST ,
+	
+	CHOOSE_CARDS_TO_BUY_REQUESTING_RESPONSE ,
+
+	DO_MOVE_REQUESTING_REQUEST ,
+	
+	DO_MOVE_REQUESTING_RESPONSE
+	
+	
 	
 }

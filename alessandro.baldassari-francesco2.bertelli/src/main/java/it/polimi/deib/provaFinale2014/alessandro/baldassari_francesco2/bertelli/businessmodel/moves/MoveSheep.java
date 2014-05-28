@@ -10,7 +10,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * In this context, a Sheperd wants to move an Ovine from the Region the Ovine is
  * now to a new destination Region. 
  */
-public class MoveSheep extends ExecutableGameMove 
+public class MoveSheep extends GameMove 
 {
 
 	/**

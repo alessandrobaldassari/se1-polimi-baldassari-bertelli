@@ -14,53 +14,95 @@ public class NetworkCommunicantPlayer extends Player
 
 	private ClientHandler clientHandler ;
 	
-	public NetworkCommunicantPlayer(String name, ClientHandler clientHandler ) 
+	public NetworkCommunicantPlayer ( String name , ClientHandler clientHandler ) 
 	{
-		super(name);
-		if(clientHandler != null)
+		super ( name ) ;
+		if ( clientHandler != null )
 			this.clientHandler = clientHandler;
-		else {
+		else 
 			throw new IllegalArgumentException();
+	}
+
+	@Override
+	public void chooseCardsEligibleForSelling () 
+	{
+		try 
+		{
+			clientHandler.chooseCardsEligibleForSelling ( getSellableCards () );
 		}
+		catch ( IOException e ) 
+		{
+			e.printStackTrace();
+		}		
 	}
 
 	@Override
-	public void chooseCardsEligibleForSelling() {
-		clientHandler.chooseCardsEligibleForSelling ( getSellableCards () );		
+	public GameMove doMove ( MoveFactory moveFactory , GameMap gameMap ) 
+	{
+		GameMove res = null ;
+		try 
+		{
+			res = clientHandler.doMove ( moveFactory , gameMap ) ;
+		}
+		catch ( IOException e ) 
+		{
+			e.printStackTrace();
+		}
+		return res ;
 	}
 
 	@Override
-	public GameMove doMove(MoveFactory moveFactory, GameMap gameMap) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Sheperd chooseSheperdForATurn() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public SellableCard chooseCardToBuy(Iterable<SellableCard> src) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Color getColorForSheperd(Iterable<Color> availableColors) {
-		Color res = null; 
+	public Sheperd chooseSheperdForATurn () 
+	{
+		Sheperd res = null ;
 		try {
-			res = clientHandler.requestSheperdColor(availableColors);
+			res = clientHandler.chooseSheperdForATurn ( getSheperds () ) ;
 		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return res ;
+	}
+
+	@Override
+	public SellableCard chooseCardToBuy ( Iterable<SellableCard > src ) 
+	{
+		SellableCard res = null ;
+		try 
+		{
+			res = clientHandler.chooseCardToBuy ( src ) ;
+		}
+		catch ( IOException e ) 
+		{
+			e.printStackTrace();
+		}
+		return res ;
+	}
+
+	@Override
+	public Color getColorForSheperd ( Iterable < Color > availableColors ) 
+	{
+		Color res = null; 
+		try 
+		{
+			res = clientHandler.requestSheperdColor(availableColors);
+		} 
+		catch ( IOException e ) 
+		{
 			e.printStackTrace();
 		}
 		return res;
 	}
 
 	@Override
-	public void genericNotification(String message) {
-		
+	public void genericNotification ( String message ) 
+	{
+		try 
+		{
+			clientHandler.genericNotification ( message ) ;
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

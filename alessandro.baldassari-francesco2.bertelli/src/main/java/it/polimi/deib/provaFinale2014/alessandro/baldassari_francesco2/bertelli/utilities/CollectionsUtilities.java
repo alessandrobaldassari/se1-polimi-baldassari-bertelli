@@ -1,5 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +16,15 @@ public class CollectionsUtilities
 		for ( T element : src )
 			res.add ( element ) ;
 		return res ; 
+	}
+	
+	public static < T > Iterable < T > newIterableFromArray ( T [] src ) 
+	{
+		Collection < T > res ;
+		res = new ArrayList < T > ( src.length ) ;
+		for ( T t : src )
+			res.add ( t ) ;
+		return res ;
 	}
 	
 	public static < T > boolean contains ( Iterable < T > src , T key ) 

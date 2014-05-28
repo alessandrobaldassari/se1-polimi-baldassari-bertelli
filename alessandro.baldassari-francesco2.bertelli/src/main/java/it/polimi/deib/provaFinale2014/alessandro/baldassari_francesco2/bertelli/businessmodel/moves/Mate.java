@@ -19,7 +19,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * This class models the Mate move.
  * A Sheperd wants a Mate process to happen in a given Region. 
  */
-public class Mate extends ExecutableGameMove 
+public class Mate extends GameMove 
 {
 
 	/**

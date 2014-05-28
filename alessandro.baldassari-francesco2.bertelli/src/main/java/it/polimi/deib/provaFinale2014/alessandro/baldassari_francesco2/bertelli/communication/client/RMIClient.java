@@ -7,18 +7,17 @@ import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-public class RMIClient implements Client , Runnable 
+public class RMIClient extends Client  
 {
 
+	
 	private final static String SERVER_IP_ADDRESS = "127.0.0.1" ;
 	
 	private final static int SERVER_PORT = 3334 ;
 	
 	private RMIServer server ;
-	
-	@Override
-	public void run () {}
 
+	/***/
 	@Override
 	public void technicalConnect() throws IOException 
 	{
@@ -34,5 +33,11 @@ public class RMIClient implements Client , Runnable
 			e.printStackTrace();
 		}
 	}	
+	
+	/***/
+	@Override
+	public void technicalDisconnect () 
+	{
+	}
 	
 }

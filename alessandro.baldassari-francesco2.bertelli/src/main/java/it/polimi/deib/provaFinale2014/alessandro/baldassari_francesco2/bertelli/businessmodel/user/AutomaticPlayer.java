@@ -7,27 +7,18 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 
-public class AutomaticPlayer extends Player {
-	AutomaticPlayer(String name){
-		super(name);
-	}
-	
-	public AutomaticPlayer newInstance ( String name ) 
+public class AutomaticPlayer extends Player 
+{
+
+	public AutomaticPlayer ( String name ) 
 	{
-		AutomaticPlayer playerHuman;
-		return playerHuman = new AutomaticPlayer(name);
+		super ( name ) ;
 	}
 
 	@Override
 	public void chooseCardsEligibleForSelling() {
 		// TODO Auto-generated method stub
 		
-	}
-
-	@Override
-	public GameMove doMove(MoveFactory moveFactory, GameMap gameMap) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -43,6 +34,12 @@ public class AutomaticPlayer extends Player {
 	}
 
 	@Override
+	public GameMove doMove(MoveFactory moveFactory, GameMap gameMap) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public Color getColorForSheperd(Iterable<Color> availableColors) {
 		// TODO Auto-generated method stub
 		return null;
@@ -53,5 +50,5 @@ public class AutomaticPlayer extends Player {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 }

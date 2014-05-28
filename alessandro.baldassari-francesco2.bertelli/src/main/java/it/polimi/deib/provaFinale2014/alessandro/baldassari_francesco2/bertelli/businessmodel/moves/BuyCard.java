@@ -14,7 +14,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * This class models the BuyCard action, which is the situation where a Player wants to 
  * buy a Card from the Bank. 
  */
-public class BuyCard extends ExecutableGameMove
+public class BuyCard extends GameMove
 {
 
 	/**

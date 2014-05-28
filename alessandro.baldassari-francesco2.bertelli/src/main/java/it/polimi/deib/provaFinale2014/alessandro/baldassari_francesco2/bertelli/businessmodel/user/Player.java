@@ -4,6 +4,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MathUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
 
@@ -141,6 +142,18 @@ public abstract class Player
 	 * @return the Sheperd a this Player chooses to play in a given turn.
 	 */
 	public abstract Sheperd chooseSheperdForATurn () ;
+	
+	/**
+	 * Accessor method useful for subclasses that want to know all the Sheperds.
+	 * 
+	 * @return an Iterable containing all the Sheperds that this Player has.
+	 */
+	protected Iterable < Sheperd > getSheperds () 
+	{
+		Iterable < Sheperd > res ;
+		res = CollectionsUtilities.newIterableFromArray ( sheperds ) ;
+		return res ;
+	}
 	
 	/**
 	 * Setter method for the initialCard property 
@@ -339,6 +352,12 @@ public abstract class Player
 	/**
 	 * This exception class model the situation where a Player has too few money to do an action ( tipically buy something ).
 	 */
-	public class TooFewMoneyException extends Exception {}
+	public class TooFewMoneyException extends Exception 
+	{
+		
+		/***/
+		private TooFewMoneyException () {}
+		
+	}
 	
 }

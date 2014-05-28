@@ -14,7 +14,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * This class represents the BreakDown move: a Sheperd wants to kill an Animal in a 
  * Region, and has to pay the nearest other Sheperd for their silence. 
  */
-public class BreakDown extends ExecutableGameMove
+public class BreakDown extends GameMove
 {
 
 	/**

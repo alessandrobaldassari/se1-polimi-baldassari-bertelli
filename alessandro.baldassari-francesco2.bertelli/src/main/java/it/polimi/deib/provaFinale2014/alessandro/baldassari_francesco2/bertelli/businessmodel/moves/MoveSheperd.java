@@ -12,7 +12,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * This class models the MoveSheperd Game Move.
  * In this context a Sheperd wants to move from one Road to another. 
  */
-public class MoveSheperd extends ExecutableGameMove
+public class MoveSheperd extends GameMove
 {
 
 	/**
