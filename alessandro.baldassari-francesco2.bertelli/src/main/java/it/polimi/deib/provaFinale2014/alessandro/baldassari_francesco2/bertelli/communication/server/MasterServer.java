@@ -5,8 +5,10 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.GameController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.GameController.WrongStateMethodCallException;
@@ -48,6 +50,8 @@ public class MasterServer implements Runnable
 	 */
 	private boolean inFunction ;
 	
+	private BlockingQueue<ClientHandler> queue;
+	
 	/**
 	 * @throws IOException if something goes wrong with the creation of the member objects. 
 	 */
@@ -58,6 +62,7 @@ public class MasterServer implements Runnable
 		currentGameController = null ;
 		threadExecutor = Executors.newCachedThreadPool () ;
 		inFunction = false ;
+		queue = new LinkedBlockingQueue<ClientHandler>(); 
 	}
 	
 	/**
@@ -68,6 +73,8 @@ public class MasterServer implements Runnable
 	{
 		RMIServer stub ;
 		Registry registry ;
+		String name ;
+		ClientHandler newClientHandler;
 		try 
 		{
 			inFunction = true ;
@@ -76,7 +83,32 @@ public class MasterServer implements Runnable
 			registry = LocateRegistry.createRegistry ( RMIServer.RMI_SERVER_PORT ) ;
 			registry.rebind ( RMIServer.SERVER_NAME , stub ) ;
 			System.out.println ( "Master Server : Listening" ) ;
-			while  ( inFunction ) ;
+			while  ( inFunction )
+			{
+				newClientHandler = queue.poll();
+				while (newClientHandler == null) 
+					newClientHandler = queue.poll();
+				if ( currentGameController == null )
+					createAndLaunchNewGameController () ;
+				try 
+				{
+					System.out.println ( "Server wants to request the name" );
+					name = newClientHandler.requestName () ;
+					currentGameController.addPlayerAndCheck ( new NetworkCommunicantPlayer ( name, newClientHandler ) ) ;
+				} 
+				catch ( WrongStateMethodCallException e ) 
+				{
+					if ( e.getActualState () == MatchState.CREATED )
+						addPlayer ( newClientHandler ) ;
+					else
+						throw new RuntimeException ( e ) ;
+				} 
+				catch ( IOException e ) 
+				{
+					e.printStackTrace();
+				}
+				
+			}
 		} 
 		catch (RemoteException e) {
 			e.printStackTrace();
@@ -91,26 +123,7 @@ public class MasterServer implements Runnable
 	 */
 	public synchronized void addPlayer ( ClientHandler newClientHandler ) 
 	{
-		String name ;
-		if ( currentGameController == null )
-			createAndLaunchNewGameController () ;
-		try 
-		{
-			System.out.println ( "Server wants to request the name" );
-			name = newClientHandler.requestName () ;
-			currentGameController.addPlayerAndCheck ( new NetworkCommunicantPlayer ( name ) ) ;
-		} 
-		catch ( WrongStateMethodCallException e ) 
-		{
-			if ( e.getActualState () == MatchState.CREATED )
-				addPlayer ( newClientHandler ) ;
-			else
-				throw new RuntimeException ( e ) ;
-		} 
-		catch ( IOException e ) 
-		{
-			e.printStackTrace();
-		}
+		
 	}
 	
 	/**

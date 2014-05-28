@@ -1,26 +1,32 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user;
 
 import java.awt.Color;
+import java.io.IOException;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 
 public class NetworkCommunicantPlayer extends Player 
 {
 
+	private ClientHandler clientHandler ;
 	
-	
-	public NetworkCommunicantPlayer(String name) {
+	public NetworkCommunicantPlayer(String name, ClientHandler clientHandler ) 
+	{
 		super(name);
-		// TODO Auto-generated constructor stub
+		if(clientHandler != null)
+			this.clientHandler = clientHandler;
+		else {
+			throw new IllegalArgumentException();
+		}
 	}
 
 	@Override
 	public void chooseCardsEligibleForSelling() {
-		// TODO Auto-generated method stub
-		
+		clientHandler.chooseCardsEligibleForSelling ( getSellableCards () );		
 	}
 
 	@Override
@@ -43,13 +49,17 @@ public class NetworkCommunicantPlayer extends Player
 
 	@Override
 	public Color getColorForSheperd(Iterable<Color> availableColors) {
-		// TODO Auto-generated method stub
-		return null;
+		Color res = null; 
+		try {
+			res = clientHandler.requestSheperdColor(availableColors);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return res;
 	}
 
 	@Override
 	public void genericNotification(String message) {
-		// TODO Auto-generated method stub
 		
 	}
 

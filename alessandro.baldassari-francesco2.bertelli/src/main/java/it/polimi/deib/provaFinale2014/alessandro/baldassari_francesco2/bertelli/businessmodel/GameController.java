@@ -35,8 +35,10 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -432,7 +434,57 @@ public class GameController implements Runnable
 	 */
 	private void resultsCalculationPhase () 
 	{
+		Map <RegionType, Integer> regionValuesMap;
+		Map <Player, Integer> playerScoresMap;
+		playerScoresMap = new HashMap<Player, Integer>(match.getPlayers().size());
+		regionValuesMap = calculateRegionsValue();
+		for(Player p : match.getPlayers())
+			playerScoresMap.put(p, calculatePlayerScore(p, regionValuesMap));
 		
+		
+	}
+	
+	private int calculatePlayerScore(Player player, Map <RegionType, Integer> regionValuesMap){
+		int res;
+		Collection <Card> playerCards;
+		playerCards = new ArrayList<Card>(player.getSellableCards().size() + 1);
+		playerCards.addAll(player.getSellableCards());
+		playerCards.add(player.getInitialCard());
+		res = 0;
+		for(Card card : playerCards)
+			res = res + regionValuesMap.get(card.getRegionType());
+		return 0;
+		
+		
+	}
+	
+	private Map <RegionType, Integer> calculateRegionsValue(){
+		Map <RegionType, Integer> regionValuesMap;
+		Iterable<Region> regions;
+		Iterable<Animal> animals;
+		int amount;
+		regionValuesMap = new HashMap<RegionType, Integer>(RegionType.values().length -1);
+		for(RegionType regionType: RegionType.values())	
+			if(regionType != RegionType.SHEEPSBURG)
+			{
+				amount = 0;
+				regions = match.getGameMap().getRegionByType(regionType);
+				for(Region r : regions){
+					animals = r.getContainedAnimals();
+					for(Animal a : animals){
+						if(!(a instanceof Wolf)){
+							if(a instanceof BlackSheep)
+								amount = amount + 2;
+							else {
+								amount = amount + 1;
+							}
+						}
+					}
+						
+				}
+				regionValuesMap.put(regionType, amount);
+			}
+		return regionValuesMap;
 	}
 	
 	private BlackSheep findBlackSheep () 
