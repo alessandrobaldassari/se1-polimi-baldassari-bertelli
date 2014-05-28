@@ -36,6 +36,11 @@ public class MasterServer implements Runnable
 	private RMIServer rmiServer ;
 	
 	/**
+	 * The queue the technical networks input servers will use to add players requests. 
+	 */
+	private final BlockingQueue<ClientHandler> queue;
+	
+	/**
 	 * The GameController object associated to the Match that is currently starting. 
 	 */
 	private GameController currentGameController ;
@@ -50,8 +55,6 @@ public class MasterServer implements Runnable
 	 */
 	private boolean inFunction ;
 	
-	private BlockingQueue<ClientHandler> queue;
-	
 	/**
 	 * @throws IOException if something goes wrong with the creation of the member objects. 
 	 */
@@ -59,10 +62,10 @@ public class MasterServer implements Runnable
 	{
 		socketServer = new SocketServer ( this ) ;
 		rmiServer = new RMIServerImpl ( this ) ;
+		queue = new LinkedBlockingQueue<ClientHandler>(); 
 		currentGameController = null ;
 		threadExecutor = Executors.newCachedThreadPool () ;
 		inFunction = false ;
-		queue = new LinkedBlockingQueue<ClientHandler>(); 
 	}
 	
 	/**
@@ -123,7 +126,11 @@ public class MasterServer implements Runnable
 	 */
 	public synchronized void addPlayer ( ClientHandler newClientHandler ) 
 	{
-		
+		try {
+			queue.put ( newClientHandler ) ;
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**

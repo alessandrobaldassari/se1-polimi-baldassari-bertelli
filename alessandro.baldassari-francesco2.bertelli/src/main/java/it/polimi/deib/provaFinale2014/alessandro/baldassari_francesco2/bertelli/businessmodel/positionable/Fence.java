@@ -115,24 +115,24 @@ public class Fence extends PositionableElement < Road >
 				throw new IllegalArgumentException () ;
 		}
 		else 
-			throw new FenceAlreadyPlacedException () ;
+			throw new FenceAlreadyPlacedException ( this ) ;
 	}
 	
 	// ENUMS
 	
-		/**
-		 * This enum describes the type of Fences which exists in the game.
-		 * 1. NON_FINAL : used in the first phase of the game.
-		 * 2. FINAL : used in the final phase of the game.
-		 */
-		public enum FenceType 
-		{
+	/**
+	 * This enum describes the type of Fences which exists in the game.
+	 * 1. NON_FINAL : used in the first phase of the game.
+	 * 2. FINAL : used in the final phase of the game.
+	 */
+	public enum FenceType 
+	{
+		
+		NON_FINAL ,
+		
+		FINAL
 			
-			NON_FINAL ,
-			
-			FINAL
-			
-		}
+	}
 	
 	// INNER CLASSES
 	
@@ -142,6 +142,36 @@ public class Fence extends PositionableElement < Road >
 	 * This class model the situation where a User tries to set the Position of an
 	 * already placed Fence. 
 	 */
-	public class FenceAlreadyPlacedException extends Exception {}
+	public class FenceAlreadyPlacedException extends Exception 
+	{
+		
+		/**
+		 * The fence that raised this Exception. 
+		 */
+		private Fence fence ;
+		
+		/**
+		 * @throws IllegalArgumentException if the fence parameter is null. 
+		 */
+		public FenceAlreadyPlacedException ( Fence fence ) 
+		{
+			super () ;
+			if ( fence != null )
+				this.fence = fence ;
+			else
+				throw new IllegalArgumentException () ;
+		}
+		
+		/**
+		 * Getter method for the fence property.
+		 * 
+		 * @return the fence property.
+		 */
+		public Fence getFence () 
+		{
+			return fence ;
+		}
+		
+	}
 	
 }

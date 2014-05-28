@@ -143,6 +143,15 @@ public class SellableCard extends Card
 	 * This class model the situation where a Card is going to be sold but it's price has not 
 	 * been set.
 	 */
-	public class SellingPriceNotSetException extends Exception {}
+	public class SellingPriceNotSetException extends Exception 
+	{
+		
+		/***/
+		private SellingPriceNotSetException () 
+		{
+			super () ;
+		}
+		
+	}
 	
 }
