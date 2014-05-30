@@ -42,9 +42,9 @@ public class BankTest {
 		otherCards = new ArrayList();	
 		fences.add(new Fence(FenceType.NON_FINAL));
 		fences.add(new Fence(FenceType.FINAL));
-		initCards.add(new Card(RegionType.CULTIVABLE, 1));
-		otherCards.add(new SellableCard(RegionType.DESERT, 3, 2));
-		otherCards.add(new SellableCard(RegionType.DESERT, 2, 3));
+		//initCards.add(new Card(RegionType.CULTIVABLE, 1));
+		//otherCards.add(new SellableCard(RegionType.DESERT, 3, 2));
+		//otherCards.add(new SellableCard(RegionType.DESERT, 2, 3));
 		initialMoneyReserve = 100;
 		//bank = Bank.newInstance ( null );
 	}

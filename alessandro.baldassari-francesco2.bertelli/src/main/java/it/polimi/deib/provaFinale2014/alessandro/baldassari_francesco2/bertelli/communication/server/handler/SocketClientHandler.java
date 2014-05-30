@@ -10,7 +10,10 @@ import java.awt.Color;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * This class is a Socket implementation of the ClientHandler interface, so it manages the game
@@ -50,36 +53,59 @@ public class SocketClientHandler implements ClientHandler
 			throw new IllegalArgumentException () ;
 	}
 	
-	/***/
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
 	public String requestName () throws IOException  
 	{
-		String res ;
-		oos.writeUTF ( ClientHandlerClientCommunicationProtocolOperation.NAME_REQUESTING_REQUEST.toString () ) ;
-		oos.flush () ;
-		System.out.println ( "Socket Client Handler : Name Request Sent" ) ;
-		res = ois.readUTF () ;
-		if ( ClientHandlerClientCommunicationProtocolOperation.valueOf ( res ) == ClientHandlerClientCommunicationProtocolOperation.NAME_REQUESTING_RESPONSE )
+		ClientHandlerClientCommunicationProtocolOperation op ;
+		Message m ;
+		String res = null ;
+		try
 		{
-			res = ois.readUTF () ;
+			op = ClientHandlerClientCommunicationProtocolOperation.NAME_REQUESTING_REQUEST ;
+			m = Message.newInstance ( op , Collections.EMPTY_LIST ) ;
+			oos.writeObject ( m ) ;
+			oos.flush () ;
+			System.out.println ( "Socket Client Handler : Name Request Sent" ) ;
+			m = (Message) ois.readObject () ;
+			System.out.println ( res ) ;
+			if ( m.getOperation () == ClientHandlerClientCommunicationProtocolOperation.NAME_REQUESTING_RESPONSE )
+			{
+				System.out.println( res ) ;
+				res = (String) m.getParameters().iterator().next();
+				System.out.println ( "NAME = " + res ) ;
+			}
+			else
+			{
+				// ERROR MANAGEMENT STRATEGY
+			}
+		} 
+		catch (ClassNotFoundException e) {
+			e.printStackTrace();
 		}
-		else
-		{
-			// ERROR MANAGEMENT STRATEGY
-		}
+		
 		return res ;
 	}
 	
-	/***/
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public void notifyMatchWillNotStart ( String message ) throws IOException 
 	{
-		oos.writeUTF ( ClientHandlerClientCommunicationProtocolOperation.MATCH_WILL_NOT_START_NOTIFICATION.toString () ) ;
-		oos.flush () ;
-		oos.writeUTF ( message);
+		Message m ;
+		ClientHandlerClientCommunicationProtocolOperation operation ;
+		operation = ClientHandlerClientCommunicationProtocolOperation.MATCH_WILL_NOT_START_NOTIFICATION ;
+		m = Message.newInstance ( operation , Collections.EMPTY_LIST ) ;
+		oos.writeObject ( m ) ;
 		oos.flush () ;
 	}
 	
-	/***/
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public Color requestSheperdColor ( Iterable<Color> availableColors ) throws IOException 
 	{
@@ -110,7 +136,9 @@ public class SocketClientHandler implements ClientHandler
 		
 	}
 	
-	/***/
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public void chooseCardsEligibleForSelling(Iterable<SellableCard> sellablecards) throws IOException 
 	{
@@ -122,7 +150,9 @@ public class SocketClientHandler implements ClientHandler
 		//il giocatore modifica sellableCards e il server deve conscere le modifiche
 	}
 
-	/***/
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public Sheperd chooseSheperdForATurn ( Iterable < Sheperd > sheperdsOfThePlayer ) throws IOException 
 	{
@@ -151,7 +181,9 @@ public class SocketClientHandler implements ClientHandler
 		return res ;
 	}
 
-	/***/
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public SellableCard chooseCardToBuy ( Iterable < SellableCard > src ) throws IOException 
 	{
@@ -180,7 +212,9 @@ public class SocketClientHandler implements ClientHandler
 		return res ;
 	}
 
-	/***/
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public GameMove doMove ( MoveFactory gameFactory , GameMap gameMap ) throws IOException 
 	{
@@ -211,16 +245,21 @@ public class SocketClientHandler implements ClientHandler
 		return res ;
 	}
 
-	/***/
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
-	public void genericNotification(String message) throws IOException {
+	public void genericNotification(String message) throws IOException 
+	{
 		oos.writeUTF(ClientHandlerClientCommunicationProtocolOperation.GENERIC_NOTIFICATION_NOTIFICATION.toString());
 		oos.flush();
 		oos.writeUTF(message);
 		oos.flush();
 	}
 	
-	/***/
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public void dispose () throws IOException  
 	{
@@ -229,10 +268,4 @@ public class SocketClientHandler implements ClientHandler
 		clientChannel.close () ;
 	}
 
-	
-
-	
-
-	
-	
 }

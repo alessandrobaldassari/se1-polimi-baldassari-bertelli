@@ -11,9 +11,12 @@ import java.util.concurrent.Executors;
 * This class represents the entry point of the Server Process.
 * It's main method is the one that launches all the stuff related to the server component.
 */
-public class ServerMainClass 
+public final class ServerMainClass 
 {
 
+	/***/
+	private ServerMainClass () {}
+	
 	/**
 	 * This is the entry point for the Server Components
 	 * 

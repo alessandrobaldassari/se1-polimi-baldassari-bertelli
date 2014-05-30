@@ -187,6 +187,7 @@ public class GameController implements Runnable
 			gameMap = GameMapFactory.getInstance().newInstance ( matchIdentifier ) ;
 			bank = BankFactory.getInstance().newInstance ( matchIdentifier ) ;
 			match = new Match ( gameMap , bank ) ;		
+			match.setMatchState ( MatchState.WAIT_FOR_PLAYERS );
 			timer.schedule ( new WaitingPlayersTimerTask () , DELAY ) ;
 		} 
 		catch ( SingletonElementAlreadyGeneratedException e ) 

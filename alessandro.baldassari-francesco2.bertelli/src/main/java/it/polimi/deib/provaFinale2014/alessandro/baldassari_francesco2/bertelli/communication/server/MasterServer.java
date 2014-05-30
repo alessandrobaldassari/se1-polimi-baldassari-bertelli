@@ -2,10 +2,8 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,6 +14,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.NetworkCommunicantPlayer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIServer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RequestAccepterServer;
 
 /**
  * This class is the MasterServer, the core component of the Server part of the System
@@ -26,20 +26,22 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 class MasterServer implements NetworkCommunicationController , MatchAdderCommunicationController , MatchStartCommunicationController
 {
 	
-	/**
-	 * A SocketServer object to intercept inbound socket connections.
-	 */
-	private SocketServer socketServer ;
-	
-	/**
-	 * A RMIServer object to intercept inbound RMI connections. 
-	 */
-	private RMIServer rmiServer ;
+	private static final long GAME_CONTROLLER_WAITING_DELAY = 1000L ;
 	
 	/**
 	 * The queue the technical networks input servers will use to add players requests. 
 	 */
-	private final BlockingQueue<ClientHandler> queue;
+	private final BlockingQueue < ClientHandler > queue;
+	
+	/**
+	 * A SocketServer object to intercept inbound socket connections.
+	 */
+	private RequestAccepterServer socketServer ;
+	
+	/**
+	 * A RMIServer object to intercept inbound RMI connections. 
+	 */
+	private RequestAccepterServer rmiServer ;
 	
 	/**
 	 * The GameController object associated to the Match that is currently starting. 
@@ -52,6 +54,11 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 	private ExecutorService threadExecutor ;
 	
 	/**
+	 * A Collection containing the handlers of the Client which are currently connecting to this Server. 
+	 */
+	private Collection < ClientHandler > currentClientHandlers ;
+	
+	/**
 	 * A flag indicating if this MasterServer is on or not.
 	 */
 	private boolean inFunction ;
@@ -62,12 +69,12 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 	MasterServer () throws IOException  
 	{
 		final String LOCALHOST_ADDRESS = InetAddress.getLocalHost ().getHostAddress () ;
-		final int SOCKET_SERVER_PORT = 3333 ;
-		socketServer = new SocketServer ( SOCKET_SERVER_PORT , this ) ;
-		rmiServer = new RMIServerImpl ( LOCALHOST_ADDRESS , RMIServer.SERVER_PORT , this ) ;
+		socketServer = RequestAccepterServer.newSocketServer ( this ) ; 
+		rmiServer = RequestAccepterServer.newRMIServer ( this , LOCALHOST_ADDRESS , RMIServer.SERVER_PORT ) ; 
 		queue = new LinkedBlockingQueue < ClientHandler > () ; 
 		currentGameController = null ;
 		threadExecutor = Executors.newCachedThreadPool () ;
+		currentClientHandlers = new LinkedList < ClientHandler > () ;
 		inFunction = false ;
 	}
 	
@@ -78,77 +85,63 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 	@Override
 	public void run () 
 	{
-		RMIServer stub ;
-		Registry registry ;
-		String name ;
 		ClientHandler newClientHandler;
-		try 
+		String name ;
+		threadExecutor.submit ( socketServer ) ;
+		threadExecutor.submit ( rmiServer ) ;
+		inFunction = true ;
+		while  ( inFunction )
 		{
-			inFunction = true ;
-			threadExecutor.submit ( socketServer ) ;
-			registry = LocateRegistry.createRegistry ( RMIServer.SERVER_PORT ) ;
-			stub = ( RMIServer ) UnicastRemoteObject.exportObject ( rmiServer , 0 ) ;
-			registry.rebind ( RMIServer.LOGICAL_SERVER_NAME , stub ) ;
-			while  ( inFunction )
+			System.out.println ( "MASTER_SERVER : WAITING FOR REQUESTS" ) ;
+			newClientHandler = nextClientHandler () ;
+			if ( currentGameController == null )
+				createAndLaunchNewGameController () ;
+			System.out.println ( "MASTER_SERVER : REQUEST CATCH" ) ;
+			try 
 			{
-				newClientHandler = queue.poll();
-				while (newClientHandler == null) 
-					newClientHandler = queue.poll();
-				if ( currentGameController == null )
-					createAndLaunchNewGameController () ;
-				try 
+				System.out.println ( "MASTER_SERVER : ASKING_NAME " ) ;
+				name = newClientHandler.requestName () ;
+				currentGameController.addPlayerAndCheck ( new NetworkCommunicantPlayer ( name, newClientHandler ) ) ;
+				System.out.println ( "MASTER_SERVER : NAME_CATCH " + name ) ;
+			} 
+			catch ( WrongStateMethodCallException e )
+			{
+				if ( e.getActualState () == MatchState.CREATED ) // may be the Game Controller is late, give this Player another change to enter.
 				{
-					name = newClientHandler.requestName () ;
-					System.out.println ( "NAMENANEMANEMNE " + name ) ;
-					currentGameController.addPlayerAndCheck ( new NetworkCommunicantPlayer ( name, newClientHandler ) ) ;
-				} 
-				catch ( WrongStateMethodCallException e ) 
-				{
-					if ( e.getActualState () == MatchState.CREATED )
-						addPlayer ( newClientHandler ) ;
-					else
-						throw new RuntimeException ( e ) ;
-				} 
-				catch ( IOException e ) 
-				{
-					e.printStackTrace();
+					try 
+					{
+						Thread.sleep ( GAME_CONTROLLER_WAITING_DELAY ) ;
+					} 
+					catch ( InterruptedException e1 ) 
+					{
+						e1.printStackTrace();
+					}
+					addPlayer ( newClientHandler ) ;
 				}
-				
+				else
+					throw new RuntimeException ( e ) ;
+			} 
+			catch ( IOException e ) 
+			{
+				e.printStackTrace();
 			}
-		} 
-		catch (RemoteException e) {
-			e.printStackTrace();
+			
 		}
 	}
 
 	/**
-	 * AS THE SUPER'S ONE.
+	 * Query the requests queue until finds a request in; then return it.
+	 * It's a thread-blocking method ;
+	 * 
+	 * @return the first request in the Players queue.
 	 */
-	public synchronized void addPlayer ( ClientHandler newClientHandler ) 
+	private ClientHandler nextClientHandler () 
 	{
-		try 
-		{
-			queue.put ( newClientHandler ) ;
-		}
-		catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	public synchronized void notifyFailStartMatch () 
-	{
-		// notify the rejected player.
-	}
-	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	public synchronized void notifyFinishAddingPlayers () 
-	{
-		currentGameController = null ;
+		ClientHandler res ;
+		res = queue.poll () ;
+		while ( res == null ) 
+			res = queue.poll();
+		return res ;
 	}
 	
 	/**
@@ -158,6 +151,48 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 	{
 		currentGameController = new GameController ( this ) ;
 		threadExecutor.submit ( currentGameController ) ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE.
+	 */
+	@Override
+	public void addPlayer ( ClientHandler newClientHandler ) 
+	{
+		try 
+		{
+			queue.put ( newClientHandler ) ;
+		}
+		catch ( InterruptedException e ) 
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public synchronized void notifyFailStartMatch () 
+	{
+		for ( ClientHandler c : currentClientHandlers )
+			try 
+			{
+				c.notifyMatchWillNotStart ( ClientHandler.MATCH_WILL_NOT_START_MESSAGE );
+			}
+			catch ( IOException e ) 
+			{
+				e.printStackTrace();
+			}
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public synchronized void notifyFinishAddingPlayers () 
+	{
+		currentGameController = null ;
 	}
 	
 }

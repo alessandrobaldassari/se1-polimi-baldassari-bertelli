@@ -2,6 +2,9 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import java.io.IOException;
 
+/**
+ * This class implements the Singleton Pattern for the NetworkCommunicationController entity. 
+ */
 public class NetworkCommunicationControllerSingleton 
 {
 
@@ -9,7 +12,7 @@ public class NetworkCommunicationControllerSingleton
 	 * A static reference to the only living instance of this class.
 	 * Needed to implement the Singleton pattern. 
 	 */
-	private static MasterServer instance ;
+	private static NetworkCommunicationController instance ;
 
 	/**
 	 * Singleton method for this class.

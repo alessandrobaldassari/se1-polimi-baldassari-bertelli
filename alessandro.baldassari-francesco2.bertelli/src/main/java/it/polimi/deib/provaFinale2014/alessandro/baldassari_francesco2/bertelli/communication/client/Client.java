@@ -16,10 +16,24 @@ public abstract class Client extends Thread
 	 */
 	private boolean technicallyOn ;
 	
-	/***/
-	Client () 
+	/**
+	 * A CommunicationProtocolResponser to retrieve the data to send to the Server. 
+	 */
+	private CommunicationProtocolResponser dataPicker ;
+	
+	/**
+	 * @param dataPicker the value for the dataPicker field.
+	 * @throws IllegalArgumentException if the dataPicker field is null.
+	 */
+	Client ( CommunicationProtocolResponser dataPicker )
 	{
-		technicallyOn = false ;
+		if ( dataPicker != null )
+		{
+			this.dataPicker = dataPicker ;
+			technicallyOn = false ;
+		}
+		else
+			throw new IllegalArgumentException () ;
 	}
 	
 	/**
@@ -68,6 +82,16 @@ public abstract class Client extends Thread
 	 * Here subclasses have to implement their logic related to the with-the-server communication. 
 	 */
 	protected abstract void communicationProtocolImpl () ;
+	
+	/**
+	 * Getter method for the dataPicker property.
+	 * 
+	 * @return the dataPicker property.
+	 */
+	protected CommunicationProtocolResponser getDataPicker () 
+	{
+		return dataPicker ;
+	}
 	
 	/**
 	 * AS THE SUPER'S ONE.

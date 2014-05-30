@@ -18,6 +18,11 @@ public interface ClientHandler
 {
 
 	/**
+	 * Standard message to give to the User if the Match he was waiting for to start, will no begin. 
+	 */
+	public static final String MATCH_WILL_NOT_START_MESSAGE = "Sorry, but the game can not start now" ;
+	
+	/**
 	 * This method should call the managed client for his name.
 	 * 
 	 * @return the name the client returns
@@ -32,7 +37,7 @@ public interface ClientHandler
 	 * @param a message to explain the client the situation
 	 * @throws IOException if something goes wrong with the communication.
 	 */
-	public void notifyMatchWillNotStart (String message) throws IOException ;
+	public void notifyMatchWillNotStart ( String message ) throws IOException ;
 	
 	/**
 	 * Ask the color to choose a color for one of his Sheperds.
@@ -42,7 +47,7 @@ public interface ClientHandler
 	 * @return the color the client chooses.
 	 * @throws IOException if something goes wrong with the communication.
 	 */
-	public Color requestSheperdColor( Iterable <Color> availableColors) throws IOException;
+	public Color requestSheperdColor( Iterable <Color> availableColors ) throws IOException;
 	
 	/**
 	 * Ask the client to say which of his cards are eligible for selling and at what price.

@@ -5,30 +5,25 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandlerClientCommunicationProtocolOperation;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NetworkUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.Message;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.SocketServer;
 
 import java.awt.Color;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetAddress;
+import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.Collection;
 
-/***/
+/**
+ * Socket based implementation of the Client astraction entity. 
+ */
 public class SocketClient extends Client 
 {
-
-	/**
-	 * The IP address of the server where connect to. 
-	 */
-	public static final String SERVER_IP_ADDRESS = "127.0.0.1" ;
-	
-	/**
-	 * The TCP port of the server where connect to. 
-	 */
-	public static final int SERVER_PORT_NUMBER = 3333 ;
 	
 	/**
 	 * The socket object used to make the connection to the server. 
@@ -45,9 +40,12 @@ public class SocketClient extends Client
 	 */
 	private ObjectOutputStream oos ;
 		
-	public SocketClient () throws IOException  
+	/**
+	 * @param communicationProtocolResponser the value for the communicationProtocolResponser field.
+	 */
+	public SocketClient ( CommunicationProtocolResponser communicationProtocolResponser )   
 	{
-		super () ;
+		super ( communicationProtocolResponser ) ;
 		channel = new Socket () ;
 		ois = null ;
 		oos = null ;
@@ -59,14 +57,13 @@ public class SocketClient extends Client
 	@Override
 	public void technicalConnect () throws IOException
 	{
-		InetAddress inetAddress ;
 		SocketAddress socketAddress ;
-		inetAddress = InetAddress.getByAddress ( NetworkUtilities.fromStringToByteArrayIPAddress ( SERVER_IP_ADDRESS ) ) ;
-		socketAddress = new InetSocketAddress ( inetAddress , SERVER_PORT_NUMBER ) ;
+		System.out.println ( "SOCKET_CLIENT : BEGIN TECHNICAL CONNECT" ) ;
+		socketAddress = new InetSocketAddress ( SocketServer.SERVER_IP_ADDRESS , SocketServer.TCP_LISTENING_PORT ) ;
 		channel.connect ( socketAddress ) ;
 		ois = new ObjectInputStream ( channel.getInputStream () ) ;
 		oos = new ObjectOutputStream ( channel.getOutputStream () ) ;
-		System.out.println ( "Socket Client : Connected" + channel.isConnected() ) ;
+		System.out.println ( "SOCKET CLIENT : END TECHNICAL CONNECT" ) ;
 	}
 
 	/**
@@ -86,6 +83,9 @@ public class SocketClient extends Client
 	@Override
 	protected void communicationProtocolImpl () 
 	{
+		Collection < Serializable > params ;
+		ClientHandlerClientCommunicationProtocolOperation op ;
+		Message m ;
 		MoveFactory moveFactory ;
 		GameMap gameMap ;
 		Iterable < Sheperd > sheperds ;
@@ -95,20 +95,23 @@ public class SocketClient extends Client
 		String s ;
 		try 
 		{
+			params = new ArrayList < Serializable > ( 2 ) ;
 			System.out.println ( "Socket Client : Before Receiving Command" ) ;
-			command = ois.readUTF () ; 
-			System.out.println ( "Sockeet Client : command received" );
-			switch ( ClientHandlerClientCommunicationProtocolOperation.valueOf ( command ) ) 
+			m = ( Message ) ois.readObject () ;
+			System.out.println ( "Socket Client : command received" );
+			switch ( m.getOperation () )  
 			{
 				case NAME_REQUESTING_REQUEST :
-					oos.writeUTF ( ClientHandlerClientCommunicationProtocolOperation.NAME_REQUESTING_RESPONSE.toString () );
+					op = ClientHandlerClientCommunicationProtocolOperation.NAME_REQUESTING_RESPONSE ;
+					s = getDataPicker ().onNameRequest () ;
+					params.add ( s ) ;
+					System.out.println ( "SOCKET CLIENT : " + s ) ;
+					m = Message.newInstance ( op , params ) ;
+					oos.writeObject ( m ) ;
 					oos.flush () ;
-					oos.writeUTF ( "Pippo" ) ;
-					oos.flush () ;
-					System.out.println ( "sent name" ) ;
 				break ;	
 				case SHEPERD_COLOR_REQUESTING_REQUEST:
-					colors = (Iterable<Color>) ois.readObject();
+					colors = ( Iterable<Color> ) ois.readObject () ;
 					oos.writeUTF( ClientHandlerClientCommunicationProtocolOperation.SHEPERD_COLOR_REQUESTING_RESPONSE.toString() );
 					oos.flush();
 					oos.writeObject(Color.BLUE);
@@ -127,7 +130,7 @@ public class SocketClient extends Client
 					oos.flush();
 				break ;
 				case CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_REQUEST :
-					sheperds = (Iterable<Sheperd>) ois.readObject () ;
+					sheperds = ( Iterable<Sheperd> ) ois.readObject () ;
 					oos.writeUTF ( ClientHandlerClientCommunicationProtocolOperation.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_RESPONSE.toString () ) ;
 				break ;
 				case CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST :
@@ -138,6 +141,8 @@ public class SocketClient extends Client
 					moveFactory = (MoveFactory) ois.readObject () ;
 					gameMap = (GameMap) ois.readObject () ;
 					oos.writeUTF ( ClientHandlerClientCommunicationProtocolOperation.DO_MOVE_REQUESTING_RESPONSE.toString () ) ;
+				break ;
+				default :
 				break ;
 			}
 		} 

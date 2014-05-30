@@ -5,43 +5,39 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIClientBroker;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIClientBroker.AnotherCommandYetRunningException;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.Collections;
 
-public class RMIClientHandler implements ClientHandler , RMIClientBroker 
+/**
+ * RMI-based implementation of the ClientHandler interface. 
+ */
+public class RMIClientHandler implements ClientHandler 
 {
+	
+	/**
+	 * The prefix name each RMIClientHandler will have. 
+	 */
+	public static final String LOGICAL_ABSTRACT_RMI_CLIENT_HANDLER = "SHEEPLAND_RMI_CLIENT_HANDLER_#_" ;
+	
+	/**
+	 * A RMIClientBroker object this Handler will use to synchronize with the Client. 
+	 */
+	private RMIClientBroker rmiClientBroker;
 
 	/**
-	 * A Queue containing the parameters about the operation pending in the communication.
-	 * Shared with the client. 
+	 * @param rmiClientBroker the value for the rmiClientBroker field
+	 * @throws IllegalArgumentException if the parameter is null. 
 	 */
-	private Queue < Serializable > nextParameters ;
-	
-	/**
-	 * A variable to know which is the operation pending in the communication. 
-	 * Shared with the client.
-	 */
-	private ClientHandlerClientCommunicationProtocolOperation nextOperation ;
-	
-	/**
-	 * 
-	 */
-	private boolean serverReady ;
-	
-	/**
-	 *  
-	 */
-	private boolean clientReady ;
-	
-	/***/
-	public RMIClientHandler () 
+	public RMIClientHandler ( RMIClientBroker rmiClientBroker ) 
 	{
-		nextParameters = new LinkedList < Serializable > () ;
-		nextOperation = null ;
+		if ( rmiClientBroker != null )
+			this.rmiClientBroker = rmiClientBroker ;
+		else
+			throw new IllegalArgumentException () ;
 	}
 	
 	/**
@@ -50,39 +46,47 @@ public class RMIClientHandler implements ClientHandler , RMIClientBroker
 	@Override
 	public String requestName () throws IOException 
 	{
-		ClientHandlerClientCommunicationProtocolOperation clientCmd ;
+		Message m ;
+
 		String res ;
-		putNextParameter ( ClientHandlerClientCommunicationProtocolOperation.NAME_REQUESTING_REQUEST ) ;
-		setServerReady ( true ) ;
-		while ( isClientReady () == false )
-			try 
-			{
-				wait () ;
-			}
-			catch ( InterruptedException e ) 
-			{
-				e.printStackTrace();
-			}
-		clientCmd = ( ClientHandlerClientCommunicationProtocolOperation ) getNextParameter () ;
-		if ( clientCmd == ClientHandlerClientCommunicationProtocolOperation.NAME_REQUESTING_RESPONSE )
+		System.out.println ( "RMI CLIENT HANDLER : BEFORE GO INTO CORE METHOD" ) ;
+		while ( rmiClientBroker.isClientReady () == false ) ;
+		System.out.println ( "RMI CLIENT HANDLER : AFTER GO INTO CORE METHOD" ) ;
+		try 
 		{
-			
+			m = Message.newInstance ( ClientHandlerClientCommunicationProtocolOperation.NAME_REQUESTING_REQUEST , Collections.EMPTY_LIST ) ;
+			rmiClientBroker.putNextMessage ( m ) ;
+		} 
+		catch ( AnotherCommandYetRunningException e ) 
+		{
+			e.printStackTrace();
+		}
+		rmiClientBroker.setServerReady () ;
+		while ( rmiClientBroker.isClientReady () == false ) ;
+		m = rmiClientBroker.getNextMessage () ;
+		if ( m.getOperation () == ClientHandlerClientCommunicationProtocolOperation.NAME_REQUESTING_RESPONSE )
+		{
+			res = ( String ) m.getParameters().iterator().next () ;
 		}
 		else
 		{
-			// error management
+			throw new IOException ();
 		}
 		return res ;
 	}
 
-	/***/
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
-	public void notifyMatchWillNotStart(String message) throws IOException {
-		// TODO Auto-generated method stub
+	public void notifyMatchWillNotStart(String message) throws IOException 
+	{
 		
 	}
 
-	/***/
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public Color requestSheperdColor(Iterable<Color> availableColors)
 			throws IOException {
@@ -90,27 +94,35 @@ public class RMIClientHandler implements ClientHandler , RMIClientBroker
 		return null;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
-	public void chooseCardsEligibleForSelling(
-			Iterable<SellableCard> sellablecards) throws IOException {
-		// TODO Auto-generated method stub
-		
+	public void chooseCardsEligibleForSelling ( Iterable<SellableCard > sellablecards ) throws IOException 
+	{	
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
-	public Sheperd chooseSheperdForATurn(Iterable<Sheperd> sheperdsOfThePlayer)
-			throws IOException {
-		// TODO Auto-generated method stub
+	public Sheperd chooseSheperdForATurn ( Iterable < Sheperd > sheperdsOfThePlayer) throws IOException 
+	{
 		return null;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
-	public SellableCard chooseCardToBuy(Iterable<SellableCard> src)
-			throws IOException {
-		// TODO Auto-generated method stub
+	public SellableCard chooseCardToBuy ( Iterable < SellableCard > src )throws IOException 
+	{
 		return null;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public GameMove doMove(MoveFactory gameFactory, GameMap gameMap)
 			throws IOException {
@@ -118,64 +130,22 @@ public class RMIClientHandler implements ClientHandler , RMIClientBroker
 		return null;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public void genericNotification(String message) throws IOException {
 		// TODO Auto-generated method stub
 		
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public void dispose() throws IOException 
 	{
 		
-	}
-
-	@Override
-	public ClientHandlerClientCommunicationProtocolOperation getNextCommand () 
-	{
-		return nextOperation ;
-	}
-
-	@Override
-	public Serializable getNextParameter () 
-	{
-		return nextParameters.poll () ;
-	}
-
-	@Override
-	public void putNextCommand ( ClientHandlerClientCommunicationProtocolOperation op ) throws AnotherCommandYetRunningException 
-	{
-		if ( nextOperation != null )
-			this.nextOperation = op ;
-		else
-			throw new AnotherCommandYetRunningException () ;
-	}
-
-	@Override
-	public void putNextParameter ( Serializable parameter ) 
-	{
-		nextParameters.offer ( parameter ) ;
-	}
-
-	/***/
-	public void setServerReady ( boolean serverReady ) {}
-	
-	/***/
-	public boolean isServerReady () 
-	{
-		return serverReady ;
-	}
-	
-	/***/
-	public void setClientReady ( boolean clientReady ) 
-	{
-		
-	}
-	
-	/***/
-	public boolean isClientReady () 
-	{
-		return clientReady ;
 	}
 	
 }

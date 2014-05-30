@@ -1,5 +1,8 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler;
 
+/**
+ * Enums containing all the possible net operations supported by this System. 
+ */
 public enum ClientHandlerClientCommunicationProtocolOperation 
 {
 
@@ -30,7 +33,5 @@ public enum ClientHandlerClientCommunicationProtocolOperation
 	DO_MOVE_REQUESTING_REQUEST ,
 	
 	DO_MOVE_REQUESTING_RESPONSE
-	
-	
 	
 }
