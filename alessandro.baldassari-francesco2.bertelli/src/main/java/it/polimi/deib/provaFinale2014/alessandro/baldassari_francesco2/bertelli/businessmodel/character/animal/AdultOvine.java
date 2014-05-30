@@ -105,7 +105,7 @@ public class AdultOvine extends Ovine
 	/**
 	 * This class models a generic exception during the mating process. 
 	 */
-	class MatingException extends Exception 
+	public abstract class MatingException extends Exception 
 	{
 		
 		/**

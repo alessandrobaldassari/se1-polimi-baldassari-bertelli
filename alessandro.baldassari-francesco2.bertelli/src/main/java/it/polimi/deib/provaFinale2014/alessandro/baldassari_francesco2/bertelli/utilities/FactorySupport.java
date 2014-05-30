@@ -23,11 +23,11 @@ public class FactorySupport
 	public boolean isAlreadyUser ( Identifiable < Match > key ) 
 	{
 		boolean res ;
-		res = true ;
+		res = false ;
 		for ( Identifiable < Match > identifiable : alreadyUsers )
 			if ( key.isEqualsTo ( identifiable ) )
 			{
-				res = false;
+				res = true;
 				break;
 			}
 		return res ;

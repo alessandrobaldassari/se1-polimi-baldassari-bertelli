@@ -65,14 +65,20 @@ public class AnimalFactory
 	{
 		AnimalFactory res ; 
 		boolean alreadyCalled ;
-		alreadyCalled = globalFactorySupport.isAlreadyUser( matchIdentifier ) ;
-		if ( alreadyCalled )
+		if(matchIdentifier != null)
 		{
-			res = new AnimalFactory () ;
-			globalFactorySupport.addUser ( matchIdentifier ) ;
+			alreadyCalled = globalFactorySupport.isAlreadyUser( matchIdentifier ) ;
+			if ( alreadyCalled == false )
+			{
+				res = new AnimalFactory ();
+				globalFactorySupport.addUser ( matchIdentifier ) ;
+			}
+			else 
+				throw new SingletonElementAlreadyGeneratedException () ;
 		}
-		else 
-			throw new SingletonElementAlreadyGeneratedException () ;
+		else {
+			throw new IllegalArgumentException();
+		}
 		return res ;
 	}
 	
