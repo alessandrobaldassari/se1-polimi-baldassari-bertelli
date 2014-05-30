@@ -1,6 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -11,8 +12,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.GameController;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.GameController.WrongStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match.MatchState;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.NetworkCommunicantPlayer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 
@@ -22,9 +23,9 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * It is the one that sums all the inbound connections, bounds them to the GameController
  * instances and manages also the situation where just one Player wants to play ( and cannot ). 
  */
-public class MasterServer implements Runnable , MatchStartCommunicationController
+class MasterServer implements NetworkCommunicationController , MatchAdderCommunicationController , MatchStartCommunicationController
 {
-
+	
 	/**
 	 * A SocketServer object to intercept inbound socket connections.
 	 */
@@ -60,9 +61,11 @@ public class MasterServer implements Runnable , MatchStartCommunicationControlle
 	 */
 	MasterServer () throws IOException  
 	{
-		socketServer = new SocketServer ( this ) ;
-		rmiServer = new RMIServerImpl ( this ) ;
-		queue = new LinkedBlockingQueue<ClientHandler>(); 
+		final String LOCALHOST_ADDRESS = InetAddress.getLocalHost ().getHostAddress () ;
+		final int SOCKET_SERVER_PORT = 3333 ;
+		socketServer = new SocketServer ( SOCKET_SERVER_PORT , this ) ;
+		rmiServer = new RMIServerImpl ( LOCALHOST_ADDRESS , RMIServer.SERVER_PORT , this ) ;
+		queue = new LinkedBlockingQueue < ClientHandler > () ; 
 		currentGameController = null ;
 		threadExecutor = Executors.newCachedThreadPool () ;
 		inFunction = false ;
@@ -72,6 +75,7 @@ public class MasterServer implements Runnable , MatchStartCommunicationControlle
 	 * The run method of this Runnable object.
 	 * Essentially it consists of an infinite loop which has to maintain this Runnable alive. 
 	 */
+	@Override
 	public void run () 
 	{
 		RMIServer stub ;
@@ -82,10 +86,9 @@ public class MasterServer implements Runnable , MatchStartCommunicationControlle
 		{
 			inFunction = true ;
 			threadExecutor.submit ( socketServer ) ;
-			registry = LocateRegistry.createRegistry ( RMIServer.RMI_SERVER_PORT ) ;
+			registry = LocateRegistry.createRegistry ( RMIServer.SERVER_PORT ) ;
 			stub = ( RMIServer ) UnicastRemoteObject.exportObject ( rmiServer , 0 ) ;
-			registry.rebind ( RMIServer.SERVER_NAME , stub ) ;
-			System.out.println ( "Master Server : Listening" ) ;
+			registry.rebind ( RMIServer.LOGICAL_SERVER_NAME , stub ) ;
 			while  ( inFunction )
 			{
 				newClientHandler = queue.poll();
@@ -95,8 +98,8 @@ public class MasterServer implements Runnable , MatchStartCommunicationControlle
 					createAndLaunchNewGameController () ;
 				try 
 				{
-					System.out.println ( "Server wants to request the name" );
 					name = newClientHandler.requestName () ;
+					System.out.println ( "NAMENANEMANEMNE " + name ) ;
 					currentGameController.addPlayerAndCheck ( new NetworkCommunicantPlayer ( name, newClientHandler ) ) ;
 				} 
 				catch ( WrongStateMethodCallException e ) 
@@ -119,16 +122,15 @@ public class MasterServer implements Runnable , MatchStartCommunicationControlle
 	}
 
 	/**
-	 * This method is called by a technical server to notify that a Player contacted him
-	 * and asked him to add a Player to a Match.
-	 * It asks the clientHandler that the technical server passed to it to request the user
-	 * his name; if everything goes well, then add the player 
+	 * AS THE SUPER'S ONE.
 	 */
 	public synchronized void addPlayer ( ClientHandler newClientHandler ) 
 	{
-		try {
+		try 
+		{
 			queue.put ( newClientHandler ) ;
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}

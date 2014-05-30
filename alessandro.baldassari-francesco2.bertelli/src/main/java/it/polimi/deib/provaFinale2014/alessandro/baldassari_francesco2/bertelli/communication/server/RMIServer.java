@@ -10,50 +10,71 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
-/***/
+/**
+ * This interface defines the behavior of an RMI Server  
+ */
 public interface RMIServer extends Remote 
 {
 	
-	public static final String SERVER_NAME = "SHEEPLAND" ; 
+	/**
+	 * The logical name of this RMI Server.
+	 */
+	public static final String LOGICAL_SERVER_NAME = "SHEEPLAND_RMI_SERVER" ; 
 	
-	public static final int RMI_SERVER_PORT = 3334 ;
+	public static final String LOGICAL_ABSTRACT_RMI_CLIENT_HANDLER = "SHEEPLAND_RMI_CLIENT_HANDLER_#_" ;
 	
+	public static final int SERVER_PORT = 3334 ;
+ 	
+	/**
+	 *  
+	 */
 	public String addPlayer ( String name ) throws RemoteException ;
 	
 }
 
-/***/
+/**
+ * Implementation of the RMI Server interface 
+ */
 class RMIServerImpl implements RMIServer 
 {
 
+	/**
+	 * Static variable to generate a different name for each ClientHandler. 
+	 */
 	private static int lastRMIIdGenerated = -1 ;
 
+	/**
+	 * Registry object to implement the RMI protocol. 
+	 */
 	private Registry registry ;
 	
-	private MasterServer masterServer ;
+	/***/
+	private MatchAdderCommunicationController matchAdderCommunicationController ;
 	
-	RMIServerImpl ( MasterServer masterServer ) throws RemoteException 
+	RMIServerImpl ( String localhostAddress , int registryPort , MatchAdderCommunicationController matchAdderCommunicationController ) throws RemoteException 
 	{
-		if ( masterServer != null )
+		if ( matchAdderCommunicationController != null && localhostAddress != null )
 		{
-			this.masterServer = masterServer ;
-			registry = LocateRegistry.getRegistry ( "localhost" , 3334 ) ;
+			this.matchAdderCommunicationController = matchAdderCommunicationController ;
+			registry = LocateRegistry.getRegistry ( localhostAddress , registryPort ) ;
 		}
 		else
 			throw new IllegalArgumentException () ;
 	}
 
-	/***/
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public String addPlayer ( String name ) throws RemoteException 
 	{
 		String clientBrokerName ;
-		RMIClientBroker stub ;
 		RMIClientHandler clientHandler ;
+		RMIClientBroker stub ;
 		clientHandler = new RMIClientHandler () ;
-		masterServer.addPlayer ( clientHandler )  ;
+		matchAdderCommunicationController.addPlayer ( clientHandler )  ;
 		lastRMIIdGenerated ++ ;
-		clientBrokerName = "RMI_CLIENT_BROKER_" + lastRMIIdGenerated ;
+		clientBrokerName = LOGICAL_ABSTRACT_RMI_CLIENT_HANDLER+lastRMIIdGenerated ;
 		stub = ( RMIClientBroker ) UnicastRemoteObject.exportObject ( ( Remote ) clientHandler , 0 ) ;
 		System.out.println ( "Ricevuto : " + name ) ;
 		try 

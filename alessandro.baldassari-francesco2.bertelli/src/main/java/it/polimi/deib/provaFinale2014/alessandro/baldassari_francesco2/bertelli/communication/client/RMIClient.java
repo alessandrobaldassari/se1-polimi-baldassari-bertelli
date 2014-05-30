@@ -6,6 +6,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 
 import java.io.IOException;
 import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
@@ -25,6 +26,9 @@ public class RMIClient extends Client
 	private RMIClientBroker clientBroker ;
 	
 	/***/
+	public RMIClient () {}
+	
+	/***/
 	@Override
 	public void technicalConnect() throws IOException 
 	{
@@ -33,7 +37,7 @@ public class RMIClient extends Client
 		registry = LocateRegistry.getRegistry ( "localhost" , SERVER_PORT ) ;
 		try 
 		{
-			server = ( RMIServer ) registry.lookup ( RMIServer.SERVER_NAME ) ;
+			server = ( RMIServer ) registry.lookup ( RMIServer.LOGICAL_SERVER_NAME ) ;
 			key = server.addPlayer( "uri" ) ; 
 			clientBroker = ( RMIClientBroker ) registry.lookup ( key ) ;
 		} 
@@ -53,11 +57,19 @@ public class RMIClient extends Client
 	protected void communicationProtocolImpl () 
 	{
 		ClientHandlerClientCommunicationProtocolOperation nextOperation ;
-		nextOperation = clientBroker.getNextCommand () ;
-		switch ( nextOperation )
+		try 
 		{
-		
+			nextOperation = clientBroker.getNextCommand () ;
+			switch ( nextOperation )
+			{
+			
+			}
 		}
+		catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 }
