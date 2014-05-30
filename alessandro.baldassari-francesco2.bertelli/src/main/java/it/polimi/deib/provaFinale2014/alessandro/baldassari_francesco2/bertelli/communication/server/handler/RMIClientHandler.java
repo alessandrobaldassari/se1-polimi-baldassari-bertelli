@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.Queue;
 
-class RMIClientHandler implements ClientHandler , RMIClientBroker 
+public class RMIClientHandler implements ClientHandler , RMIClientBroker 
 {
 
 	/**
@@ -28,7 +28,7 @@ class RMIClientHandler implements ClientHandler , RMIClientBroker
 	private ClientHandlerClientCommunicationProtocolOperation nextOperation ;
 	
 	/**
-	 *  
+	 * 
 	 */
 	private boolean serverReady ;
 	
@@ -38,7 +38,7 @@ class RMIClientHandler implements ClientHandler , RMIClientBroker
 	private boolean clientReady ;
 	
 	/***/
-	RMIClientHandler () 
+	public RMIClientHandler () 
 	{
 		nextParameters = new LinkedList < Serializable > () ;
 		nextOperation = null ;

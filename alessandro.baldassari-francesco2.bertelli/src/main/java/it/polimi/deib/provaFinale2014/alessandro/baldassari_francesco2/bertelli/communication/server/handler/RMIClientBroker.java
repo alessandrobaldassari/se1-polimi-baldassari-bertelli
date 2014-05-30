@@ -2,6 +2,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import java.io.Serializable;
 import java.rmi.Remote;
+import java.rmi.RemoteException;
 
 /**
  * This interface is the Protocol Component shared by an RMIClientHandler and an RMIClient.
@@ -16,36 +17,36 @@ public interface RMIClientBroker extends Remote
 	 * 
 	 * @return the command stored in this broker, null if there are none.
 	 */
-	public ClientHandlerClientCommunicationProtocolOperation getNextCommand () ;
+	public ClientHandlerClientCommunicationProtocolOperation getNextCommand () throws RemoteException ;
 	
 	/**
 	 * Allow to retrieve the oldest parameter stored in this broker.
 	 * 
 	 * @return the oldest parameter stored in this broker.
 	 */
-	public Serializable getNextParameter () ;
+	public Serializable getNextParameter () throws RemoteException ;
 	
 	/**
 	 * Add a new parameter to the communications parameter queue.
 	 * 
 	 * @param op the parameter being added.
 	 */
-	public void putNextCommand ( ClientHandlerClientCommunicationProtocolOperation op ) throws AnotherCommandYetRunningException ;
+	public void putNextCommand ( ClientHandlerClientCommunicationProtocolOperation op ) throws RemoteException , AnotherCommandYetRunningException ;
 	
 	/***/
-	public void putNextParameter ( Serializable parameter ) ;
+	public void putNextParameter ( Serializable parameter ) throws RemoteException ;
 	
 	/***/
-	public void setServerReady ( boolean serverReady ) ;
+	public void setServerReady ( boolean serverReady ) throws RemoteException ;
 	
 	/***/
-	public boolean isServerReady () ;
+	public boolean isServerReady () throws RemoteException ;
 	
 	/***/
-	public void setClientReady ( boolean clientReady ) ;
+	public void setClientReady ( boolean clientReady ) throws RemoteException ;
 	
 	/***/
-	public boolean isClientReady () ;
+	public boolean isClientReady () throws RemoteException ;
 	
 	/***/
 	public class AnotherCommandYetRunningException extends Exception
