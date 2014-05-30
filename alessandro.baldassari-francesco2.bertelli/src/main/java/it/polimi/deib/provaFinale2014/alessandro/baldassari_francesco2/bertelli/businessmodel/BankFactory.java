@@ -15,7 +15,9 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class BankFactory 
 {
 
-	/***/
+	/**
+	 * Instance variable to implement to Singleton Pattern. 
+	 */
 	private static BankFactory instance = new BankFactory () ;
 	
 	/**

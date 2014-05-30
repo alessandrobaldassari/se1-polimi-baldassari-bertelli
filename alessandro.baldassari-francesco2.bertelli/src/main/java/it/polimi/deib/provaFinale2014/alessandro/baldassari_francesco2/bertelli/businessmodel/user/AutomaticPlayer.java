@@ -10,17 +10,20 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class AutomaticPlayer extends Player 
 {
 
+	/***/
 	public AutomaticPlayer ( String name ) 
 	{
 		super ( name ) ;
 	}
 
+	/***/
 	@Override
 	public void chooseCardsEligibleForSelling() {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
+	/***/
 	@Override
 	public Sheperd chooseSheperdForATurn() {
 		// TODO Auto-generated method stub

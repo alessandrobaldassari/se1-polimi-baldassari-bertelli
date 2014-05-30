@@ -18,6 +18,15 @@ public class CollectionsUtilities
 		return res ; 
 	}
 	
+	public static < T > List < T > newListFromIterable ( Iterable < T > src ) 
+	{
+		List < T > res ;
+		res = new ArrayList < T > () ;
+		for ( T t : src )
+			res.add ( t ) ;
+		return res ;
+	}
+	
 	public static < T > Iterable < T > newIterableFromArray ( T [] src ) 
 	{
 		Collection < T > res ;

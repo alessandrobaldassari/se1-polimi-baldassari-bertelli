@@ -7,17 +7,23 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/***/
 public class SocketServer implements Runnable
 {
 
+	/***/
 	private final int TCP_LISTENING_PORT = 3333 ;
 	
+	/***/
 	private final ServerSocket serverSocket ;
 
+	/***/
 	private boolean inFunction ;
 	
+	/***/
 	private MasterServer masterServer ;
 	
+	/***/
 	SocketServer ( MasterServer masterServer ) throws IOException 
 	{
 		this.masterServer = masterServer ;
@@ -25,6 +31,7 @@ public class SocketServer implements Runnable
 		inFunction = false ;
 	}
 	
+	/***/
 	public void run () 
 	{
 		ClientHandler clientHandler ;

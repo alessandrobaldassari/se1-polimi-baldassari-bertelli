@@ -2,9 +2,11 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A core component of the whole system.
@@ -18,27 +20,27 @@ public class Match
 	/**
 	 * A list containing the players who are playing this Match. 
 	 */
-	private List < Player > players ;
+	private final List < Player > players ;
 	
 	/**
 	 * The GameMap object associated with this Match. 
 	 */
-	private GameMap gameMap ;
+	private final GameMap gameMap ;
 	
 	/**
 	 * The Bank object associated with this Match. 
 	 */
-	private Bank bank ;
-	
-	/**
-	 * A flag indicating if this Match is in its final phase. 
-	 */
-	private boolean inFinalPhase ;
+	private final Bank bank ;
 	
 	/**
 	 * This represents the actual state of the Match.
 	 */
 	private MatchState state;
+	
+	/**
+	 * A flag indicating if this Match is in its final phase. 
+	 */
+	private boolean inFinalPhase ;
 	
 	/**
 	 * @param gameMap the GameMap object associated to this Match.
@@ -53,9 +55,65 @@ public class Match
 			this.bank = bank ;
 			players = new ArrayList < Player > () ;
 			state = MatchState.CREATED ;
+			inFinalPhase = false ;
 		}
 		else
 			throw new IllegalArgumentException () ;
+	}
+	
+	/**
+	 * Add a new Player to this Match.
+	 * 
+	 * @param newPlayer the new Player to add.
+	 * @throws WrongStateMethodCallException if this method is called while this Match object is
+	 *         not in the WAIT_FOR_PLAYERS state.
+	 * @throws IllegalArgumentException if the newPlayer parameter is null.
+	 */
+	public void addPlayer ( Player newPlayer ) throws WrongStateMethodCallException 
+	{
+		if ( state == MatchState.WAIT_FOR_PLAYERS )
+			if ( newPlayer != null )
+				players.add ( newPlayer ) ;
+			else
+				throw new IllegalArgumentException () ;
+		else
+			throw new WrongStateMethodCallException ( state ) ; 
+	}
+	
+	/**
+	 * This method simulates the phase of the Game where the Players' order is decided.
+	 * This method implements this functionality as a randomic list mesh of the Players's list. 
+	 * 
+	 * @throws WrongStateMethodCallException if this method is not called while the state attribute is
+	 *         equals to INITIALIZATION.
+	 */
+	public void setPlayerOrder ( Map < Player , Integer > playersOrdering ) throws WrongStateMethodCallException 
+	{
+		int i ;
+		if ( state == MatchState.INITIALIZATION ) 
+		{
+			if ( playersOrdering.keySet ().containsAll ( players ) && players.containsAll ( playersOrdering.keySet() ) )
+			{
+				players.clear () ;
+				i = 0 ;
+				for ( Player p : playersOrdering.keySet () )
+					players.add ( playersOrdering.get ( p ) , p ) ;
+			}
+			else
+				throw new IllegalArgumentException () ;
+		}
+		else
+			throw new WrongStateMethodCallException ( state ) ;
+	}
+	
+	/**
+	 * Getter for the number of Player of this Match.
+	 * 
+	 * @return the number of Player of this Match.
+	 */
+	public int getNumberOfPlayers () 
+	{
+		return players.size () ;
 	}
 	
 	/**
@@ -63,7 +121,7 @@ public class Match
 	 * 
 	 * @return the players property.
 	 */
-	public List < Player > getPlayers ()
+	public Iterable < Player > getPlayers ()
 	{
 		return players ;
 	}
@@ -121,7 +179,7 @@ public class Match
 	 * @param state the new value for the MatchState property
 	 * @throws IllegalArgumentException if the parameter is null
 	 */
-	public void setMatchState ( MatchState state ) 
+	void setMatchState ( MatchState state ) 
 	{
 		if ( state != null )
 			this.state = state;

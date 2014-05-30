@@ -22,7 +22,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * It is the one that sums all the inbound connections, bounds them to the GameController
  * instances and manages also the situation where just one Player wants to play ( and cannot ). 
  */
-public class MasterServer implements Runnable
+public class MasterServer implements Runnable , MatchStartCommunicationController
 {
 
 	/**
@@ -82,8 +82,8 @@ public class MasterServer implements Runnable
 		{
 			inFunction = true ;
 			threadExecutor.submit ( socketServer ) ;
-			stub = ( RMIServer ) UnicastRemoteObject.exportObject ( rmiServer , 0 ) ;
 			registry = LocateRegistry.createRegistry ( RMIServer.RMI_SERVER_PORT ) ;
+			stub = ( RMIServer ) UnicastRemoteObject.exportObject ( rmiServer , 0 ) ;
 			registry.rebind ( RMIServer.SERVER_NAME , stub ) ;
 			System.out.println ( "Master Server : Listening" ) ;
 			while  ( inFunction )
@@ -134,22 +134,15 @@ public class MasterServer implements Runnable
 	}
 	
 	/**
-	 * Method that manages the situation where a GameController notifies that 
-	 * a timeout expires and there is a number of Player < 2, so the match will not start.
-	 * The methods cancel the Match and notify the added Client that his request has been
-	 * rejected.
+	 * AS THE SUPER'S ONE. 
 	 */
-	public synchronized void notifyFailure () 
+	public synchronized void notifyFailStartMatch () 
 	{
 		// notify the rejected player.
 	}
 	
 	/**
-	 * Method that manages the situation where the current GameController notifies that
-	 * it has reached the situation where a Match can start.
-	 * Standing the contract of the GameController class, it will start the workflow 
-	 * automatically, so the only thing this method has to do is to set the 
-	 * currentGameController property to null.
+	 * AS THE SUPER'S ONE. 
 	 */
 	public synchronized void notifyFinishAddingPlayers () 
 	{

@@ -272,7 +272,7 @@ public class Bank
 		 * @param type the Fence type a User wants to buy.
 		 * @throws IllegalArgumentException if the type parameter is null. 
 		 */
-		NoMoreFenceOfThisTypeException ( FenceType type ) 
+		private NoMoreFenceOfThisTypeException ( FenceType type ) 
 		{
 			if ( type != null )
 				this.type = type ;
@@ -308,7 +308,7 @@ public class Bank
 		 * @param regionType the type of the Region of the Card a User wants to buy. 
 		 * @throws IllegalArgumentException if the regionType parameter is null
 		 */
-		NoMoreCardOfThisTypeException ( RegionType regionType ) 
+		private NoMoreCardOfThisTypeException ( RegionType regionType ) 
 		{
 			if ( regionType != null && regionType != RegionType.SHEEPSBURG )
 				this.regionType = regionType ;
@@ -351,7 +351,7 @@ public class Bank
 		 * @throws IllegalArgumentException if the priceProposed or the rightPrice parameter is 
 		 * <= 0 or the priceProposed and rightPrice parameters are equals.
 		 */
-		CardPriceNotRightException ( int priceProposed , int rightPrice ) 
+		private CardPriceNotRightException ( int priceProposed , int rightPrice ) 
 		{
 			if ( priceProposed > 0 && rightPrice > 0 && priceProposed != rightPrice )
 			{

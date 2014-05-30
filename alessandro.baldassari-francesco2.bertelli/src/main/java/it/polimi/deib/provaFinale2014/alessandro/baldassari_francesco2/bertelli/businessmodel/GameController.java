@@ -27,7 +27,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.NotSellableException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.SellingPriceNotSetException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.MasterServer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.MatchStartCommunicationController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
@@ -56,6 +56,9 @@ import java.util.TimerTask;
 public class GameController implements Runnable
 {
 	
+	/**
+	 * Static variable to generate id's for the Match objects here created. 
+	 */
 	private static int lastMatchIdentifierUID = -1 ;
 	
 	/**
@@ -75,6 +78,19 @@ public class GameController implements Runnable
 	private static final int NUMBER_OF_MOVES_PER_USER_PER_TURN = 3 ;
 	
 	/**
+	 * A standard Timer object to mange the timer at the beginning of a Match.
+	 * It's a business rule. 
+	 */
+	private final Timer timer;
+	
+	/**
+	 * The component this GameController will invoke to notify that the Initialization phase of this
+	 * match is finished ( either well or bad ) and this GameController is ready to continue his
+	 * lifecycle alone. 
+	 */
+	private final MatchStartCommunicationController matchStartCommunicationController ;
+	
+	/**
 	 * The match that this GameController will manage. 
 	 */
 	private Match match ;
@@ -90,36 +106,63 @@ public class GameController implements Runnable
 	private AnimalFactory animalsFactory ;
 	
 	/**
-	 * A standard Timer object to mange the timer at the beginning of a Match.
-	 * It's a business rule. 
+	 * @param matchStartCommunicationController the value for the matchStartCommunicationController field.
+	 * @throws IllegalArgumentException if the parameter passed is null.
 	 */
-	private Timer timer;
-	
-	private MasterServer masterServer ;
-	
-	/***/
-	public GameController ( MasterServer masterServer ) 
+	public GameController ( MatchStartCommunicationController matchStartCommunicationController ) 
 	{
-		this.masterServer = masterServer ;
-		timer = new Timer();
+		if ( matchStartCommunicationController != null )
+		{
+			this.matchStartCommunicationController = matchStartCommunicationController ;
+			timer = new Timer();
+		}
+		else
+			throw new IllegalArgumentException () ;
 	}
 	
-	// fare cambiare età agli agnelli !
 	/**
-	 * 
+	 * This is the logically second method of the Game Controller lifecycle.
+	 * Obviously is not called by this GameController itself; otherwise, other 
+	 * components will call it to add new Players.
+	 * This component is also responsible for control if the MAXIMUM NUMBER OF PLAYERS
+	 * is reached; if so, it sets the match state to the INITIALIZATION state, and the WAIT
+	 * FOR PLAYERS phase is considered concluded.
+	 */
+	public void addPlayerAndCheck ( Player newPlayer ) throws WrongStateMethodCallException
+	{
+		if ( match.getMatchState () == Match.MatchState.WAIT_FOR_PLAYERS )
+		{
+			match.addPlayer ( newPlayer ) ;
+			if ( match.getNumberOfPlayers () == MAX_NUMBER_OF_PLAYERS ) 
+			{
+				timer.cancel () ;
+				match.setMatchState ( MatchState.INITIALIZATION ) ;
+				matchStartCommunicationController.notifyFinishAddingPlayers () ;
+			}
+		}
+		else
+			throw new WrongStateMethodCallException ( match.getMatchState () ) ;
+	}
+	
+	/**
+	 * The run method of this GameController, which implements the Game Workflow, using
+	 * appropriate private helper methods that describe each game phase.
 	 */
 	public void run () 
 	{
 		creatingPhase () ;
-		while ( match.getMatchState() != MatchState.INITIALIZATION )
-			try 
-			{	
-				wait () ;
-			}
-			catch ( InterruptedException e ) 
-			{
-				e.printStackTrace();
-			}
+		synchronized ( match )
+		{
+			while ( match.getMatchState() != MatchState.INITIALIZATION )
+				try 
+				{	
+					wait () ;
+				}
+				catch ( InterruptedException e ) 
+				{
+					e.printStackTrace () ;
+				}
+		}
 		initializationPhase () ; 
 		turnationPhase () ;
 		resultsCalculationPhase () ;
@@ -151,30 +194,6 @@ public class GameController implements Runnable
 			e.printStackTrace();
 			throw new RuntimeException ( e ) ;
 		}
-	}
-	
-	/**
-	 * This is the logically second method of the Game Controller lifecycle.
-	 * Obviously is not called by this GameController itself; otherwise, other 
-	 * components will call it to add new Players.
-	 * This component is also responsible for control if the MAXIMUM NUMBER OF PLAYERS
-	 * is reached; if so, it sets the match state to the INITIALIZATION state, and the WAIT
-	 * FR PLAYERS phase is considered concluded.
-	 */
-	public void addPlayerAndCheck ( Player newPlayer ) throws WrongStateMethodCallException
-	{
-		if ( match.getMatchState () == Match.MatchState.WAIT_FOR_PLAYERS )
-		{
-			match.getPlayers ().add ( newPlayer ) ;
-			if ( match.getPlayers ().size () == MAX_NUMBER_OF_PLAYERS ) 
-			{
-				timer.cancel () ;
-				match.setMatchState ( MatchState.INITIALIZATION ) ;
-				masterServer.notifyFinishAddingPlayers () ;
-			}
-		}
-		else
-			throw new WrongStateMethodCallException ( match.getMatchState () ) ;
 	}
 	
 	/**
@@ -228,6 +247,26 @@ public class GameController implements Runnable
 	}
 	
 	/**
+	 * This helper method genereta an Ovine choosing it's type ( sex ) with a simple
+	 * probabilistic process.
+	 * With p = 0.5, a Sheep.
+	 * With p = 0.5, a Ram.
+	 * 
+	 * @return the generated Ovine.
+	 */
+	private Ovine generateOvine ()  
+	{
+		final Ovine result ; 
+		final double chooseOvineType ;
+		chooseOvineType = Math.random () ;
+		if ( chooseOvineType < 0.5 )
+			result = animalsFactory.newAdultOvine ( "" ,  AdultOvineType.SHEEP ) ;
+		else
+			result = animalsFactory.newAdultOvine ( "" ,  AdultOvineType.RAM ) ;				
+		return result ;
+	}
+	
+	/**
 	 * This methods emulates the phase where one Initial Card is given to each Player.
 	 * Which Card give to each Player is a randomic decision.
 	 */
@@ -262,7 +301,7 @@ public class GameController implements Runnable
 	private void moneyDistribution ()
 	{
 		int moneyToDistribute;
-		if ( match.getPlayers ().size () == 2 )
+		if ( match.getNumberOfPlayers () == 2 )
 			moneyToDistribute = 30 ;
 		else
 			moneyToDistribute = 20 ;
@@ -277,9 +316,34 @@ public class GameController implements Runnable
 	 */
 	private void choosePlayersOrder () 
 	{
-		CollectionsUtilities.listMesh ( match.getPlayers() ) ;
+		Map < Player , Integer > playersMapOrder ;
+		List < Player > orderedPlayers ;
+		int i ;
+		try 
+		{
+			orderedPlayers = CollectionsUtilities.newListFromIterable ( match.getPlayers () ) ;
+			CollectionsUtilities.listMesh ( orderedPlayers );
+			playersMapOrder = new HashMap < Player , Integer > ( orderedPlayers.size () ) ;
+			i = 0 ;
+			for ( Player p : orderedPlayers )
+			{
+				playersMapOrder.put ( p , i ) ;
+				i ++ ;
+			}
+			match.setPlayerOrder ( playersMapOrder ) ;
+		} 
+		catch (WrongStateMethodCallException e) {
+			e.printStackTrace();
+			throw new RuntimeException (e);
+		}
 	}
 	
+	/**
+	 * This methods describes the phase of the Game where Sheperds are distributed to Players.
+	 * This procedure, determines the number of Sheperds per Player based on the total number
+	 * of Players, ask each Player the color he wants for a given Sheperd and assigns Sheperd.
+	 * to Players
+	 */
 	private void distributeSheperds () 
 	{
 		final Color[] colors = { Color.RED , Color.BLUE , Color.GREEN , Color.YELLOW } ;
@@ -287,7 +351,7 @@ public class GameController implements Runnable
 		byte numberOfSheperdsPerPlayer ;
 		byte sheperdIndex ;
 		byte colorIndex ;
-		if ( match.getPlayers ().size () == 2 )
+		if ( match.getNumberOfPlayers() == 2 )
 			numberOfSheperdsPerPlayer = 2 ;
 		else
 			numberOfSheperdsPerPlayer = 1 ;
@@ -301,15 +365,18 @@ public class GameController implements Runnable
 				if ( colorIndex == colors.length )
 					colorIndex = 0 ;
 			}
-			try {
+			try 
+			{
 				p.initializeSheperds ( sheperds ) ;
-			} catch (WriteOncePropertyAlreadSetException e) {
+			}
+			catch (WriteOncePropertyAlreadSetException e) {
 				e.printStackTrace();
 				throw new RuntimeException ( e ) ;
 			}
 		}
 	}
 		
+	// fare cambiare età agli agnelli !
 	/**
 	 * This methods implements the core phase of the Game, the time when every player
 	 * makes his moves.
@@ -322,8 +389,6 @@ public class GameController implements Runnable
 		MoveFactory moveFactory ;
 		BlackSheep blackSheep ;
 		Wolf wolf ;
-		Player currentPlayer ;
-		byte playerIndex ;
 		byte moveIndex ;
 		boolean gamePlaying ;
 		blackSheep = findBlackSheep () ;
@@ -333,13 +398,17 @@ public class GameController implements Runnable
 		{
 			try 
 			{
-				blackSheep.escape() ;
+				blackSheep.escape () ;
 			}
-			catch ( CharacterDoesntMoveException e1 ) {}
-			for ( playerIndex = 0 ; playerIndex < match.getPlayers().size () || ! match.isInFinalPhase () ; playerIndex ++ )
+			catch ( CharacterDoesntMoveException e1 ) 
 			{
-				currentPlayer = match.getPlayers ().get ( playerIndex ) ;
-				if ( match.getPlayers ().size () == 2 )
+				// if you want communicate to users.
+			}
+			for ( Player currentPlayer : match.getPlayers() )
+			{
+				if ( match.isInFinalPhase () )
+					break ;
+				if ( match.getNumberOfPlayers () == 2 )
 				{
 					choosenSheperd = currentPlayer.chooseSheperdForATurn () ;
 					moveFactory = new TwoPlayersMatchMoveFactory ( choosenSheperd ) ;
@@ -347,11 +416,13 @@ public class GameController implements Runnable
 				else
 					moveFactory = new MoveFactory () ;
 				for ( moveIndex = 0 ; moveIndex < NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ )
-					try {
+					try 
+					{
 						currentPlayer.doMove ( moveFactory , match.getGameMap () ).execute ( match );
-					} catch (MoveNotAllowedException e) {
+					} 
+					catch (MoveNotAllowedException e) {
 						e.printStackTrace();
-					} ;
+					} 
 				if ( match.isInFinalPhase () == false && match.getBank().hasAFenceOfThisType ( FenceType.NON_FINAL ) == false )
 					try 
 					{
@@ -360,34 +431,82 @@ public class GameController implements Runnable
 					catch ( AlreadyInFinalPhaseException e ) {}
 			}
 			marketPhase () ;
-
 			try 
 			{
 				wolf.escape () ;
 			}
-			catch (CharacterDoesntMoveException e) {}
+			catch (CharacterDoesntMoveException e) 
+			{
+				// if you want communicate the user of the thing...
+			}
 			if ( match.isInFinalPhase () )
 				gamePlaying = false ;
 		}
 	}
 	
+	/**
+	 * This method finds the only BlackSheep which, at the beginning of the Game is in Sheepsburg.
+	 * 
+	 * @return a reference to the only BlackSheep present in the GameMap associated with this GameController
+	 */
+	private BlackSheep findBlackSheep () 
+	{
+		Iterable < Animal > sheepsburgAnimals ;
+		BlackSheep result ;
+		Region sheepsburg ;
+		sheepsburg = match.getGameMap().getRegionByType ( RegionType.SHEEPSBURG ).iterator().next () ;
+		sheepsburgAnimals = sheepsburg.getContainedAnimals () ;
+		result = null ;
+		for ( Animal a : sheepsburgAnimals )
+			if ( a instanceof BlackSheep )
+			{
+				result = ( BlackSheep ) a ;
+				break ;
+			}
+		return result ;
+	}
+	
+	/**
+	 * This method finds the only Wolf which, at the beginning of the Game is in Sheepsburg.
+	 * 
+	 * @return a reference to the only Wolf present in the GameMap associated with this GameController
+	 */
+	private Wolf findWolf () 
+	{
+		Iterable < Animal > sheepsburgAnimals ;
+		Wolf result ;
+		Region sheepsburg ;
+		sheepsburg = match.getGameMap().getRegionByType ( RegionType.SHEEPSBURG ).iterator().next () ;
+		sheepsburgAnimals = sheepsburg.getContainedAnimals () ;
+		result = null ;
+		for ( Animal a : sheepsburgAnimals )
+			if ( a instanceof Wolf )
+			{
+				result = ( Wolf ) a ;
+				break ;
+			}
+		return result ;
+	}
+	
+	/**
+	 * This method implements the Market phase of the Game.
+	 * The code is straightforward and highly tighted with the business rules.
+	 * It uses some private helper methods. 
+	 */
 	private void marketPhase () 
 	{
 		Collection < SellableCard > choosenCards ;
 		Collection < SellableCard > sellableCards ;
-		Player currentPlayer ;
 		SellableCard sellableCard ;
-		byte playerIndex ;
 		int amount ;
-		for ( playerIndex = 0 ; playerIndex < match.getPlayers ().size () ; playerIndex ++ )
-			match.getPlayers().get ( playerIndex ).chooseCardsEligibleForSelling () ;
-		for ( playerIndex = 0 ; playerIndex < match.getPlayers ().size () ; playerIndex ++ )
+		for ( Player currentPlayer : match.getPlayers() )
+			currentPlayer.chooseCardsEligibleForSelling () ;
+		for ( Player currentPlayer : match.getPlayers () )
 		{
 			try
 			{
 				amount = 0 ;
 				choosenCards = new LinkedList < SellableCard > () ;
-				currentPlayer = match.getPlayers ().get ( playerIndex ) ;
 				sellableCards = generateGettableCardList ( currentPlayer ) ;
 				sellableCard = currentPlayer.chooseCardToBuy ( sellableCards ) ;
 				if ( sellableCard != null && currentPlayer.getMoney () >= sellableCard.getSellingPrice () )
@@ -421,6 +540,14 @@ public class GameController implements Runnable
 		}
 	}
 	
+	/**
+	 * This method generate a Collection containing all the Cards ( owned buy Match Players ) which
+	 * the Player passed buy parameter is able to buy.
+	 * 
+	 * @param buyer the Player who is going to buy some cards.
+	 * @return a Collection < SellableCard > containing all the Cards owned by other Players than
+	 * 		   the one passed by parameter which the buyer Player is able to buy. 
+	 */
 	private Collection < SellableCard > generateGettableCardList ( Player buyer ) 
 	{
 		Collection < SellableCard > res ;
@@ -441,15 +568,54 @@ public class GameController implements Runnable
 	{
 		Map <RegionType, Integer> regionValuesMap;
 		Map <Player, Integer> playerScoresMap;
-		playerScoresMap = new HashMap<Player, Integer>(match.getPlayers().size());
-		regionValuesMap = calculateRegionsValue();
-		for(Player p : match.getPlayers())
-			playerScoresMap.put(p, calculatePlayerScore(p, regionValuesMap));
-		
-		
+		playerScoresMap = new HashMap < Player , Integer> ( match.getNumberOfPlayers () ) ;
+		regionValuesMap = new HashMap < RegionType , Integer > ( RegionType.values ().length - 1 ) ;
+		for ( RegionType r : RegionType.values () )
+			if ( r != RegionType.SHEEPSBURG )
+				regionValuesMap.put ( r , calculateRegionValue ( r ) ) ;
+		for ( Player p : match.getPlayers () )
+			playerScoresMap.put(p, calculatePlayerScore ( p , regionValuesMap ) ) ;	
 	}
 	
-	private int calculatePlayerScore(Player player, Map <RegionType, Integer> regionValuesMap){
+	/**
+	 * This method calculate the value of the RegionType passed by parameter.
+	 * The procedure used to determine this value is the one specified by business rules.
+	 * 
+	 * @param rt the RegionType about that calculate the value.
+	 * @return the value of the RegionType passed by parameter.
+	 */
+	private int calculateRegionValue ( RegionType rt )
+	{
+		Iterable<Region> regions;
+		Iterable<Animal> animals;
+		int amount;
+		amount = 0;
+		regions = match.getGameMap().getRegionByType ( rt ) ;
+		for(Region r : regions)
+		{
+			animals = r.getContainedAnimals();
+			for ( Animal a : animals )
+				if ( ! ( a instanceof Wolf ) )
+				{
+					if ( a instanceof BlackSheep )
+						amount = amount + 2;
+					else 
+						amount = amount + 1;
+				}
+		}
+		return amount ;	
+	}
+	
+	/**
+	 * Calculate the score of the Player passed by parameter and returns it.
+	 * 
+	 * @param player the Player on which calculate the score.
+	 * @param regionValuesMap a map containing, for each RegionType, the value of that RegionType in
+	 *        this Match.
+	 * @return the score of the Player passed by parameter.
+	 */
+	private int calculatePlayerScore ( Player player , Map < RegionType , Integer > regionValuesMap )
+	{
 		int res;
 		Collection <Card> playerCards;
 		playerCards = new ArrayList<Card>(player.getSellableCards().size() + 1);
@@ -461,89 +627,6 @@ public class GameController implements Runnable
 		return 0;
 		
 		
-	}
-	
-	private Map <RegionType, Integer> calculateRegionsValue(){
-		Map <RegionType, Integer> regionValuesMap;
-		Iterable<Region> regions;
-		Iterable<Animal> animals;
-		int amount;
-		regionValuesMap = new HashMap<RegionType, Integer>(RegionType.values().length -1);
-		for(RegionType regionType: RegionType.values())	
-			if(regionType != RegionType.SHEEPSBURG)
-			{
-				amount = 0;
-				regions = match.getGameMap().getRegionByType(regionType);
-				for(Region r : regions){
-					animals = r.getContainedAnimals();
-					for(Animal a : animals){
-						if(!(a instanceof Wolf)){
-							if(a instanceof BlackSheep)
-								amount = amount + 2;
-							else {
-								amount = amount + 1;
-							}
-						}
-					}
-						
-				}
-				regionValuesMap.put(regionType, amount);
-			}
-		return regionValuesMap;
-	}
-	
-	private BlackSheep findBlackSheep () 
-	{
-		Iterable < Animal > sheepsburgAnimals ;
-		BlackSheep result ;
-		Region sheepsburg ;
-		sheepsburg = match.getGameMap().getRegionByType ( RegionType.SHEEPSBURG ).iterator().next () ;
-		sheepsburgAnimals = sheepsburg.getContainedAnimals () ;
-		result = null ;
-		for ( Animal a : sheepsburgAnimals )
-			if ( a instanceof BlackSheep )
-			{
-				result = ( BlackSheep ) a ;
-				break ;
-			}
-		return result ;
-	}
-	
-	private Wolf findWolf () 
-	{
-		Iterable < Animal > sheepsburgAnimals ;
-		Wolf result ;
-		Region sheepsburg ;
-		sheepsburg = match.getGameMap().getRegionByType ( RegionType.SHEEPSBURG ).iterator().next () ;
-		sheepsburgAnimals = sheepsburg.getContainedAnimals () ;
-		result = null ;
-		for ( Animal a : sheepsburgAnimals )
-			if ( a instanceof Wolf )
-			{
-				result = ( Wolf ) a ;
-				break ;
-			}
-		return result ;
-	}
-	
-	/**
-	 * This helper method genereta an Ovine choosing it's type ( sex ) with a simple
-	 * probabilistic process.
-	 * With p = 0.5, a Sheep.
-	 * With p = 0.5, a Ram.
-	 * 
-	 * @return the generated Ovine.
-	 */
-	private Ovine generateOvine ()  
-	{
-		final Ovine result ; 
-		final double chooseOvineType ;
-		chooseOvineType = Math.random () ;
-		if ( chooseOvineType < 0.5 )
-			result = animalsFactory.newAdultOvine ( "" ,  AdultOvineType.SHEEP ) ;
-		else
-			result = animalsFactory.newAdultOvine ( "" ,  AdultOvineType.RAM ) ;				
-		return result ;
 	}
 	
 	// INNER CLASSES
@@ -559,15 +642,15 @@ public class GameController implements Runnable
 		@Override
 		public void run ()
 		{
-			if ( match.getPlayers().size() >= 2 ) 
+			if ( match.getNumberOfPlayers() >= 2 ) 
 			{
 				match.setMatchState ( MatchState.INITIALIZATION ) ;
-				masterServer.notifyFinishAddingPlayers () ;
+				matchStartCommunicationController.notifyFinishAddingPlayers () ;
 				cancel () ;
 			}
 			else
 			{
-				masterServer.notifyFailure () ;
+				matchStartCommunicationController.notifyFailStartMatch () ;
 			}	
 		}
 		
@@ -618,43 +701,4 @@ public class GameController implements Runnable
 	
 	}
 	
-	// EXCEPTIONS
-	
-	/**
-	 * This Exceptions models the situation where a Client tries to invoke a Method of a
-	 * GameController while the GameController itself is in a state where that method 
-	 * can not be called. 
-	 */
-	public class WrongStateMethodCallException extends Exception 
-	{
-		
-		/**
-		 * The state where the System is when this Exception is thrown. 
-		 */
-		private MatchState actualState ;
-		
-		/**
-		 * @param actualState the state where the System is when this Exception is thrown. 
-		 * @throws IllegalArgumentException if the actualState parameter is null.
-		 */
-		WrongStateMethodCallException ( MatchState actualState ) 
-		{
-			if ( actualState != null )
-				this.actualState = actualState ;
-			else
-				throw new IllegalArgumentException () ;
-		}
-		
-		/**
-		 * Getter method for the actualState property.
-		 * 
-		 * @return the actualState property.
-		 */
-		public MatchState getActualState () 
-		{
-			return actualState ;
-		}
-		
-	}
-
 }
