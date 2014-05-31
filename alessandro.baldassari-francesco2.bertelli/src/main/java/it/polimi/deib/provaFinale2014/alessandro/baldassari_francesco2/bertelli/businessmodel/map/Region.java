@@ -125,6 +125,11 @@ public class Region extends GameMapElement
 		return result ;
 	}
 	
+	@Override
+	public String toString(){
+		return type.toString();
+	}
+	
 	// ENUMS
 	
 	/**
@@ -155,5 +160,6 @@ public class Region extends GameMapElement
 	// EXCEPTIONS
 	
 	public class NoRoadWithThisNumberException extends Exception {}
+	
 	
 }

@@ -3,12 +3,15 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Map;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.BlackSheepAlreadyGeneratedException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.BlackSheep;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
@@ -16,6 +19,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.CharacterDoesntMoveException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
@@ -28,6 +32,7 @@ public class BlackSheepTest {
 	 * Initializing variables test built the test environment using some static variables to bypass some technical problems with animalFactory
 	 */
 	static AdultOvine blackSheep;
+	static BlackSheep blackSheepReal;
 	static AnimalFactory animalFactory ;
 	static GameMap map;
 	static DummyMatchIdentifier dummyMatchIdentifier;
@@ -44,13 +49,21 @@ public class BlackSheepTest {
 		try {
 			blackSheep = (AdultOvine) animalFactory.newBlackSheep();
 		} catch (BlackSheepAlreadyGeneratedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
 			map = GameMapFactory.getInstance().newInstance(dummyMatchIdentifier);
+			
 			map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().getContainedAnimals().add(blackSheep);
-	
+			blackSheepReal = (BlackSheep) map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().getContainedAnimals().iterator().next();
+			blackSheepReal.moveTo(map.getRegionByType(RegionType.SHEEPSBURG).iterator().next());
+			try {
+				blackSheepReal.escape();
+			} catch (CharacterDoesntMoveException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		} catch (SingletonElementAlreadyGeneratedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -59,22 +72,27 @@ public class BlackSheepTest {
 	
 	@Test
 	public void escape() {
-		ArrayList <Road> borderRoads;
-		ArrayList <Region> borderRegions = new ArrayList<Region>();
+		LinkedList <Road> borderRoads;
+		LinkedList <Region> borderRegions = new LinkedList<Region>();
 		boolean blackSheepIsInside = false;
-		borderRoads = (ArrayList<Road>) map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().getBorderRoads();
+		borderRoads = (LinkedList<Road>) map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().getBorderRoads();
 		for(Road road : borderRoads){
+			System.out.println(road.toString());
 			if(road.getFirstBorderRegion().getType() != RegionType.SHEEPSBURG)
 				borderRegions.add(road.getFirstBorderRegion());
 			else
 				borderRegions.add(road.getSecondBorderRegion());
 		}
-		for(Region region : borderRegions)
+		for(Region region : borderRegions){
+			System.out.print(region.toString());
+			System.out.println(" " + region.getContainedAnimals().size());
 			if(region.getContainedAnimals().size() > 0){
 					blackSheepIsInside = true;
 					break;
 			}
+		}
 		assertTrue(blackSheepIsInside);
+		assertTrue(map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().getContainedAnimals().size() == 0);
 			
 	}
 	
@@ -89,4 +107,5 @@ public class BlackSheepTest {
 			return true;
 		}
 	}
+	
 }

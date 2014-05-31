@@ -10,7 +10,7 @@ public class MathUtilities
 	public static int launchDice () 
 	{ 
 		int res ;
-		res = random.nextInt ( 5 ) + 1 ;
+		res = random.nextInt ( 6 ) + 1 ;
 		return res ;
 	}
 	

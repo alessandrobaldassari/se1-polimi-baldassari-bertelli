@@ -157,4 +157,7 @@ public class Road extends GameMapElement
 		return elementContained ;
 	}
 	
+	public String toString(){
+		return "Road: num " + number + " firstBorderRegion " + firstBorderRegion + " secondBorderRegion " + secondBorderRegion; 
+	}
 }
