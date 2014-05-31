@@ -88,13 +88,11 @@ public class Match
 	 */
 	public void setPlayerOrder ( Map < Player , Integer > playersOrdering ) throws WrongStateMethodCallException 
 	{
-		int i ;
 		if ( state == MatchState.INITIALIZATION ) 
 		{
 			if ( playersOrdering.keySet ().containsAll ( players ) && players.containsAll ( playersOrdering.keySet() ) )
 			{
 				players.clear () ;
-				i = 0 ;
 				for ( Player p : playersOrdering.keySet () )
 					players.add ( playersOrdering.get ( p ) , p ) ;
 			}
@@ -191,7 +189,7 @@ public class Match
 	 * 
 	 * @return the state property.
 	 */
-	public MatchState getMatchState ()
+	public synchronized MatchState getMatchState ()
 	{
 		return state ;
 	}

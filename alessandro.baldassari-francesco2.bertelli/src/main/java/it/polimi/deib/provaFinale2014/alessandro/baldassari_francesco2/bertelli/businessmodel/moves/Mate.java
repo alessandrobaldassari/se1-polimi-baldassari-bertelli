@@ -1,16 +1,20 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.TurnNumberClock;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.CanNotMateWithHimException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.MateNotSuccesfullException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb.LambEvolver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
@@ -19,9 +23,14 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * This class models the Mate move.
  * A Sheperd wants a Mate process to happen in a given Region. 
  */
-public class Mate extends GameMove 
+public class Mate extends GameMove
 {
 
+	/**
+	 * The number of turns after a Lamb should become a Ram or a Sheep. 
+	 */
+	public static final int NUMBER_OF_TURN_AFTER_THOSE_A_LAMB_EVOLVE = 2 ;
+	
 	/**
 	 * The Sheperd who wants to perform this action. 
 	 */
@@ -32,19 +41,28 @@ public class Mate extends GameMove
 	 */
 	private Region whereMate ;
 	
+	/***/
+	private TurnNumberClock clockSource ;
+	
+	/***/
+	private LambEvolver lambEvolver ;
+	
 	/**
+	 * @param clockSource a component that will supply this Mate object information about the turn 
+	 *        changing, thing needed for eventually generated lambs to grow up.
 	 * @param theOneWhoWantsTheMate the Sheperd who wants to perform this action. 
 	 * @param whereMate the Region where this action has to take place. 
 	 * @throws IllegalArgumentException if the theOneWhoWantsTheMate or the whereMate parameters
 	 *         is null.
 	 */
-	Mate ( Sheperd theOneWhoWantsTheMate , Region whereMate ) 
+	Mate ( TurnNumberClock clockSource , LambEvolver lambEvolver , Sheperd theOneWhoWantsTheMate , Region whereMate ) 
 	{
-		if ( theOneWhoWantsTheMate != null && whereMate != null )
-		{
+		if ( clockSource != null && lambEvolver != null && theOneWhoWantsTheMate != null && whereMate != null ) {
+			this.clockSource = clockSource ;
+			this.lambEvolver = lambEvolver ;
 			this.theOneWhoWantsTheMate = theOneWhoWantsTheMate ;
 			this.whereMate = whereMate ;
-		}
+		} 
 		else
 			throw new IllegalArgumentException () ;
 	}
@@ -61,6 +79,8 @@ public class Mate extends GameMove
 	@Override
 	public void execute ( Match match ) throws MoveNotAllowedException 
 	{
+		Runnable lambGrowerLookerRunnable ;
+		Executor runnableExec ;
 		Road sheperdRoad ;
 		Lamb lamb ;
 		List < AdultOvine > adultOvines ;
@@ -80,6 +100,10 @@ public class Mate extends GameMove
 					{
 						lamb = sheep.mate ( ram ) ;
 						whereMate.getContainedAnimals ().add ( lamb ) ;
+						lamb.moveTo ( whereMate );
+						runnableExec = Executors.newSingleThreadExecutor () ;
+						lambGrowerLookerRunnable = new LambGrowerLookerRunnable ( clockSource , lamb , lambEvolver ) ;
+						runnableExec.execute ( lambGrowerLookerRunnable ) ;
 					} 
 					catch ( CanNotMateWithHimException e ) 
 					{
@@ -107,7 +131,7 @@ public class Mate extends GameMove
 	 * @param src the Collection where to perform the search.
 	 * @return a List containing all of the AdultOvines which are in the src parameter.
 	 */
-	private List < AdultOvine > extractAdultOvines ( Collection < Animal > src ) 
+	private List < AdultOvine > extractAdultOvines ( Iterable < Animal > src ) 
 	{
 		List < AdultOvine > res ;
 		res = new LinkedList < AdultOvine > () ;
@@ -137,5 +161,66 @@ public class Mate extends GameMove
 			res = src.get ( i ) ;
 		return res ;
 	}
-	
+
+	/***/
+	private class LambGrowerLookerRunnable implements Runnable 
+	{
+		
+		/***/
+		private TurnNumberClock turnNumberClock ;
+		
+		/***/
+		private Lamb lambToEvolve ;
+		
+		/***/
+		private LambEvolver lambEvolver ;
+		
+		private int initTurn ;
+		
+		/***/
+		LambGrowerLookerRunnable ( TurnNumberClock turnNumberClock , Lamb lambToEvolve , LambEvolver lambEvolver ) 
+		{
+			if ( turnNumberClock != null && lambToEvolve != null && lambEvolver != null )
+			{
+				try 
+				{
+					this.turnNumberClock = turnNumberClock ;
+					this.lambToEvolve = lambToEvolve ;
+					this.lambEvolver = lambEvolver ;
+					initTurn = turnNumberClock.getTurnNumber () ;
+				} 
+				catch (WrongStateMethodCallException e) 
+				{
+					e.printStackTrace();
+					throw new RuntimeException () ;
+				}
+			}
+			else
+				throw new IllegalArgumentException () ;
+		}
+		
+		@Override
+		public void run () 
+		{
+			int currentTurn ;
+			boolean finished = false ;
+			try 
+			{
+				while ( finished == false )
+				{
+					currentTurn = turnNumberClock.getTurnNumber () ;
+					if ( currentTurn - initTurn == NUMBER_OF_TURN_AFTER_THOSE_A_LAMB_EVOLVE )
+					{
+						lambEvolver.evolve ( lambToEvolve ) ;
+						finished = true ;
+					}
+				}
+			}
+			catch ( WrongStateMethodCallException e) 
+			{
+				e.printStackTrace();
+				throw new RuntimeException ( e ) ;
+			}
+		}
+	}
 }

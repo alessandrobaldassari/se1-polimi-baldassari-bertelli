@@ -9,6 +9,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.BlackSheepAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.WolfAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.BlackSheep;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb.LambEvolver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Ovine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Wolf;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
@@ -30,6 +32,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.MatchStartCommunicationController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MathUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
 
@@ -42,6 +45,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * This class is a core component of the Server Architecture of the System and also
@@ -53,7 +58,7 @@ import java.util.TimerTask;
  * The only true state variable of a GameController object is the GameMatch object;
  * so, every GameController, is potentially poolable.
  */
-public class GameController implements Runnable
+public class GameController implements Runnable , TurnNumberClock , LambEvolver
 {
 	
 	/**
@@ -64,7 +69,7 @@ public class GameController implements Runnable
 	/**
 	 * The Timer value about the time to wait before begin a Match. 
 	 */
-	private static final long DELAY = 150000;
+	private static final long DELAY = 60 * 1000;
 	
 	/**
 	 * The maximum number of Player for a Match. 
@@ -106,6 +111,20 @@ public class GameController implements Runnable
 	private AnimalFactory animalsFactory ;
 	
 	/**
+	 * A thread-safe queue object to offer the ADD PLAYER to decouple the adding Player operation
+	 * from the Match object.
+	 * Potentially useful also to avoid thead lock acquisition problems. 
+	 */
+	private BlockingQueue < Player > tempBlockingQueue ;
+	
+	/**
+	 * A field indicating in which turn number the game is.
+	 * 0 means the match has not began yet.
+	 * The access to this field will be permitted only during the TURNATION phase of the game. 
+	 */
+	private int turnNumber ;
+	
+	/**
 	 * @param matchStartCommunicationController the value for the matchStartCommunicationController field.
 	 * @throws IllegalArgumentException if the parameter passed is null.
 	 */
@@ -115,6 +134,38 @@ public class GameController implements Runnable
 		{
 			this.matchStartCommunicationController = matchStartCommunicationController ;
 			timer = new Timer();
+			tempBlockingQueue = new LinkedBlockingQueue < Player > () ;
+			turnNumber = 0 ;
+		}
+		else
+			throw new IllegalArgumentException () ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public int getTurnNumber () throws WrongStateMethodCallException
+	{
+		int res ;
+		if ( match.getMatchState () == MatchState.TURNATION )
+			res = turnNumber ;
+		else
+			throw new WrongStateMethodCallException ( match.getMatchState () ) ;
+		return res ;
+	} 
+	
+	public void evolve ( Lamb lamb ) 
+	{
+		Region whereTheLambIsNow ;
+		Ovine newOvine ;
+		if ( lamb != null )
+		{
+			whereTheLambIsNow = lamb.getPosition () ;
+			whereTheLambIsNow.getContainedAnimals().remove ( lamb ) ;
+			newOvine = animalsFactory.newAdultOvine ( "" , MathUtilities.genProbabilityValue() > 0.5 ? AdultOvineType.RAM : AdultOvineType.SHEEP ) ;
+			newOvine.moveTo ( whereTheLambIsNow ) ;
+			whereTheLambIsNow.getContainedAnimals().add ( newOvine ) ;
 		}
 		else
 			throw new IllegalArgumentException () ;
@@ -124,22 +175,18 @@ public class GameController implements Runnable
 	 * This is the logically second method of the Game Controller lifecycle.
 	 * Obviously is not called by this GameController itself; otherwise, other 
 	 * components will call it to add new Players.
-	 * This component is also responsible for control if the MAXIMUM NUMBER OF PLAYERS
-	 * is reached; if so, it sets the match state to the INITIALIZATION state, and the WAIT
-	 * FOR PLAYERS phase is considered concluded.
+	 * It enqueue the newPlayer parameter to a queue that will be checked by another
+	 * method that will dequeue it and add it to the Match object 
+	 * 
+	 * @param newPlayer the Player to add to the this GameController.
+	 * @throws WrongStateMethodCallException if this method is not called during the WAIT_FOR_PLAYERS
+	 *         phase.
+	 * 
 	 */
-	public void addPlayerAndCheck ( Player newPlayer ) throws WrongStateMethodCallException
+	public void addPlayer ( Player newPlayer ) throws WrongStateMethodCallException
 	{
 		if ( match.getMatchState () == Match.MatchState.WAIT_FOR_PLAYERS )
-		{
-			match.addPlayer ( newPlayer ) ;
-			if ( match.getNumberOfPlayers () == MAX_NUMBER_OF_PLAYERS ) 
-			{
-				timer.cancel () ;
-				match.setMatchState ( MatchState.INITIALIZATION ) ;
-				matchStartCommunicationController.notifyFinishAddingPlayers () ;
-			}
-		}
+			tempBlockingQueue.offer ( newPlayer ) ;
 		else
 			throw new WrongStateMethodCallException ( match.getMatchState () ) ;
 	}
@@ -151,18 +198,7 @@ public class GameController implements Runnable
 	public void run () 
 	{
 		creatingPhase () ;
-		synchronized ( match )
-		{
-			while ( match.getMatchState() != MatchState.INITIALIZATION )
-				try 
-				{	
-					wait () ;
-				}
-				catch ( InterruptedException e ) 
-				{
-					e.printStackTrace () ;
-				}
-		}
+		waitForPlayersPhase () ;
 		initializationPhase () ; 
 		turnationPhase () ;
 		resultsCalculationPhase () ;
@@ -198,6 +234,39 @@ public class GameController implements Runnable
 	}
 	
 	/**
+	 * This method is in the second phase of the Game lifecycle.
+	 * It wait for players to arrive.
+	 * When they do it, adds them to the Match, and if the MAX_NUMBER_OF_PLAYERS is reached,
+	 * cause the Match workflow to finish the INITIALIZATION phase and to move to the next phase. 
+	 */
+	private void waitForPlayersPhase () 
+	{
+		Player newPlayer ;
+		while ( match.getMatchState() != MatchState.INITIALIZATION )
+		{
+			try 
+			{
+				newPlayer = tempBlockingQueue.take () ;
+				match.addPlayer ( newPlayer ) ;
+				if ( match.getNumberOfPlayers () == MAX_NUMBER_OF_PLAYERS ) 
+				{
+					timer.cancel () ;
+					match.setMatchState ( MatchState.INITIALIZATION ) ;
+					matchStartCommunicationController.notifyFinishAddingPlayers () ;
+				}	
+			}
+			catch ( InterruptedException e ) 
+			{
+				e.printStackTrace () ;
+			} 
+			catch ( WrongStateMethodCallException e ) 
+			{
+				e.printStackTrace();
+			}			
+		}
+	}
+	
+	/**
 	 * This is the third method in the logical flow of the Game Controller.
 	 * It is divided in 4 phases:
 	 * 1. All the Sheeps are placed in the Regions.
@@ -222,18 +291,25 @@ public class GameController implements Runnable
 	 */
 	private void placeSheeps () 
 	{
+		Animal blackSheep ;
+		Animal wolf ;
 		Region sheepsburg ;
 		Ovine bornOvine ;
 		try 
 		{
 			for ( Region region : match.getGameMap ().getRegions () ) 
 			{
-				bornOvine = generateOvine () ;
+				bornOvine = animalsFactory.newAdultOvine ( "" , MathUtilities.genProbabilityValue() > 0.5 ? AdultOvineType.RAM : AdultOvineType.SHEEP ) ;
 				region.getContainedAnimals().add ( bornOvine ) ;
+				bornOvine.moveTo ( region ) ;
 			}
 			sheepsburg = match.getGameMap ().getRegionByType ( RegionType.SHEEPSBURG ).iterator().next() ;
+			blackSheep = animalsFactory.newBlackSheep () ;
+			wolf = animalsFactory.newWolf () ;
 			sheepsburg.getContainedAnimals ().add ( animalsFactory.newBlackSheep () ) ;
 			sheepsburg.getContainedAnimals().add ( animalsFactory.newWolf () ) ;
+			blackSheep.moveTo ( sheepsburg ) ;
+			wolf.moveTo ( sheepsburg ) ;
 		} 
 		catch ( BlackSheepAlreadyGeneratedException e ) 
 		{
@@ -245,26 +321,6 @@ public class GameController implements Runnable
 			e.printStackTrace();
 			throw new RuntimeException ( e ) ;
 		}
-	}
-	
-	/**
-	 * This helper method genereta an Ovine choosing it's type ( sex ) with a simple
-	 * probabilistic process.
-	 * With p = 0.5, a Sheep.
-	 * With p = 0.5, a Ram.
-	 * 
-	 * @return the generated Ovine.
-	 */
-	private Ovine generateOvine ()  
-	{
-		final Ovine result ; 
-		final double chooseOvineType ;
-		chooseOvineType = Math.random () ;
-		if ( chooseOvineType < 0.5 )
-			result = animalsFactory.newAdultOvine ( "" ,  AdultOvineType.SHEEP ) ;
-		else
-			result = animalsFactory.newAdultOvine ( "" ,  AdultOvineType.RAM ) ;				
-		return result ;
 	}
 	
 	/**
@@ -287,11 +343,16 @@ public class GameController implements Runnable
 				regions.remove ( 0 ) ;
 			}
 		}
-		catch ( NoMoreCardOfThisTypeException | WriteOncePropertyAlreadSetException e ) 
+		catch ( NoMoreCardOfThisTypeException e ) 
 		{
 			e.printStackTrace();
 			throw new RuntimeException ( e ) ;
 		}	
+		catch ( WriteOncePropertyAlreadSetException e ) 
+		{
+			e.printStackTrace () ;
+			throw new RuntimeException ( e ) ;
+		}
 	}
 	
 	/**
@@ -333,7 +394,8 @@ public class GameController implements Runnable
 			}
 			match.setPlayerOrder ( playersMapOrder ) ;
 		} 
-		catch (WrongStateMethodCallException e) {
+		catch ( WrongStateMethodCallException e ) 
+		{
 			e.printStackTrace();
 			throw new RuntimeException (e);
 		}
@@ -397,6 +459,7 @@ public class GameController implements Runnable
 		gamePlaying = true ;
 		while ( gamePlaying )
 		{
+			turnNumber ++ ;
 			try 
 			{
 				blackSheep.escape () ;
@@ -412,10 +475,10 @@ public class GameController implements Runnable
 				if ( match.getNumberOfPlayers () == 2 )
 				{
 					choosenSheperd = currentPlayer.chooseSheperdForATurn () ;
-					moveFactory = new TwoPlayersMatchMoveFactory ( choosenSheperd ) ;
+					moveFactory = new TwoPlayersMatchMoveFactory ( this , this , choosenSheperd ) ;
 				}
 				else
-					moveFactory = new MoveFactory () ;
+					moveFactory = new MoveFactory ( this , this ) ;
 				for ( moveIndex = 0 ; moveIndex < NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ )
 					try 
 					{
@@ -537,7 +600,9 @@ public class GameController implements Runnable
 					// non ha soldi per comperare nemmeno una carta.
 				}
 			}
-			catch ( NotSellableException | SellingPriceNotSetException | TooFewMoneyException n ) {}
+			catch ( NotSellableException n ) {}
+			catch ( SellingPriceNotSetException e ){}
+			catch ( TooFewMoneyException t ) {}
 		}
 	}
 	
@@ -647,6 +712,7 @@ public class GameController implements Runnable
 			{
 				match.setMatchState ( MatchState.INITIALIZATION ) ;
 				matchStartCommunicationController.notifyFinishAddingPlayers () ;
+				System.out.println ( "TIMER FINISHED" ) ;
 				cancel () ;
 			}
 			else

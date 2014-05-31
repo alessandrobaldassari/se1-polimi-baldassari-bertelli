@@ -57,10 +57,14 @@ public class CLIProtocolResponser implements CommunicationProtocolResponser
 		{
 			res = Byte.parseByte ( reader.readLine () ) ;
 		}
-		catch ( NumberFormatException | IOException e ) 
+		catch ( NumberFormatException e ) 
 		{
 			res = -1 ;
 		} 
+		catch ( IOException e )
+		{
+			res = -1 ;
+		}
 		while ( res < 1 || res > colors.size () )
 		{
 			System.err.println ( "Scelta non valida." );
@@ -75,9 +79,13 @@ public class CLIProtocolResponser implements CommunicationProtocolResponser
 			{
 				res = Byte.parseByte ( reader.readLine () ) ;
 			}
-			catch ( NumberFormatException | IOException e ) 
+			catch ( NumberFormatException e ) 
 			{
 				res = - 1 ;
+			}
+			catch ( IOException e ) 
+			{
+				res = -1 ;
 			}
 		}
 		return colors.get ( res - 1 ) ;

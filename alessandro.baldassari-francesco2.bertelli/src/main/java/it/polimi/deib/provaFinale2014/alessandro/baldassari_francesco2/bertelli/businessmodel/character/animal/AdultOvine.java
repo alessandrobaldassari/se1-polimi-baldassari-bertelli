@@ -1,7 +1,5 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal;
 
-import java.util.jar.Attributes.Name;
-
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MathUtilities;
 
 /**
@@ -30,7 +28,7 @@ public class AdultOvine extends Ovine
 		else
 			throw new IllegalArgumentException () ;
 	}
-
+	
 	/**
 	 * Getter for the type property.
 	 * 

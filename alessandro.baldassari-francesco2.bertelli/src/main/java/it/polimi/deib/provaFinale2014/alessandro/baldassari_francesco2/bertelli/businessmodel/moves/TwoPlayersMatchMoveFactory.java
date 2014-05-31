@@ -1,6 +1,8 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.TurnNumberClock;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb.LambEvolver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Ovine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
@@ -12,9 +14,9 @@ public class TwoPlayersMatchMoveFactory extends MoveFactory
 
 	private Sheperd choosenSheperd ;
 	
-	public TwoPlayersMatchMoveFactory ( Sheperd choosenSheperd ) 
+	public TwoPlayersMatchMoveFactory ( TurnNumberClock clockSource , LambEvolver lambEvolver , Sheperd choosenSheperd ) 
 	{
-		super () ;
+		super ( clockSource , lambEvolver ) ;
 		if ( choosenSheperd != null )
 			this.choosenSheperd = choosenSheperd ;
 		else

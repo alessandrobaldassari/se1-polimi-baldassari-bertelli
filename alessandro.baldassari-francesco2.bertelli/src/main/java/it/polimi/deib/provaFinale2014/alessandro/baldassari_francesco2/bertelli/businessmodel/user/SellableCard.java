@@ -43,7 +43,7 @@ public class SellableCard extends Card
 	SellableCard ( RegionType type , int id , int initialPrice ) 
 	{
 		super ( type , id ) ;
-		if ( initialPrice > 0 )
+		if ( initialPrice >= 0 )
 		{
 			this.initialPrice = initialPrice ;
 			sellingPrice = null ;

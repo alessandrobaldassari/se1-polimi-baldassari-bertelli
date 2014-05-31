@@ -85,23 +85,23 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 	@Override
 	public void run () 
 	{
-		ClientHandler newClientHandler;
+		ClientHandler newClientHandler = null ;
 		String name ;
 		threadExecutor.submit ( socketServer ) ;
 		threadExecutor.submit ( rmiServer ) ;
 		inFunction = true ;
 		while  ( inFunction )
 		{
-			System.out.println ( "MASTER_SERVER : WAITING FOR REQUESTS" ) ;
-			newClientHandler = nextClientHandler () ;
-			if ( currentGameController == null )
-				createAndLaunchNewGameController () ;
-			System.out.println ( "MASTER_SERVER : REQUEST CATCH" ) ;
 			try 
 			{
+				System.out.println ( "MASTER_SERVER : WAITING FOR REQUESTS" ) ;
+				newClientHandler = queue.take () ;
+				if ( currentGameController == null )
+					createAndLaunchNewGameController () ;
+				System.out.println ( "MASTER_SERVER : REQUEST CATCH" ) ;
 				System.out.println ( "MASTER_SERVER : ASKING_NAME " ) ;
 				name = newClientHandler.requestName () ;
-				currentGameController.addPlayerAndCheck ( new NetworkCommunicantPlayer ( name, newClientHandler ) ) ;
+				currentGameController.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler ) ) ;
 				System.out.println ( "MASTER_SERVER : NAME_CATCH " + name ) ;
 			} 
 			catch ( WrongStateMethodCallException e )
@@ -124,24 +124,13 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 			catch ( IOException e ) 
 			{
 				e.printStackTrace();
+			} 
+			catch ( InterruptedException e ) 
+			{
+				e.printStackTrace () ; 
 			}
 			
 		}
-	}
-
-	/**
-	 * Query the requests queue until finds a request in; then return it.
-	 * It's a thread-blocking method ;
-	 * 
-	 * @return the first request in the Players queue.
-	 */
-	private ClientHandler nextClientHandler () 
-	{
-		ClientHandler res ;
-		res = queue.poll () ;
-		while ( res == null ) 
-			res = queue.poll();
-		return res ;
 	}
 	
 	/**
@@ -192,7 +181,9 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 	@Override
 	public synchronized void notifyFinishAddingPlayers () 
 	{
+	
 		currentGameController = null ;
+		currentClientHandlers.clear () ;
 	}
 	
 }
