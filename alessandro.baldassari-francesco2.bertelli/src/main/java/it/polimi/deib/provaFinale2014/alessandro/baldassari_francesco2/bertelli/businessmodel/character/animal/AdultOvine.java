@@ -66,13 +66,13 @@ public class AdultOvine extends Ovine
 			{
 				if ( type == AdultOvineType.RAM )
 				{
-					mother = this ;
-					father = partner ;
+					mother = partner ;
+					father = this ;
 				}
 				else
 				{
-					mother = partner ;
-					father = this ;
+					mother = this ;
+					father = partner ;
 				}
 				res = new Lamb ( "" , 0 , father , mother ) ;
 			}

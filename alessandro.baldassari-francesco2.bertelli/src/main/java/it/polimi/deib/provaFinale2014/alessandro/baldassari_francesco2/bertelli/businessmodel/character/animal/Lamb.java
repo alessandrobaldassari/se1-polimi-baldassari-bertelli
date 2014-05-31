@@ -1,5 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal;
 
+import java.util.jar.Attributes.Name;
+
 /**
  * This class models a Lamb, the Ovine generated when a Ram and a Sheep mate.
  * A Lamb remains a Lamb only a given number of turns in the Game ( this parameter
@@ -38,7 +40,7 @@ public class Lamb extends Ovine
 	Lamb ( String name , int birthTurn , AdultOvine father , AdultOvine mother ) 
 	{
 		super ( name ) ;
-		if ( father != null && mother != null && birthTurn > 0 && father.getType () != mother.getType () )
+		if ( father != null && mother != null && birthTurn >= 0 && father.getType () != mother.getType () )
 		{
 			this.birthTurn = birthTurn ;
 			this.father = father ;
@@ -71,5 +73,9 @@ public class Lamb extends Ovine
 	{
 		return mother ;
 	}
+	
+	public String toString(){
+		return "Lamb: " + birthTurn + " " + father + " " + mother;
+	} 
 	
 }
