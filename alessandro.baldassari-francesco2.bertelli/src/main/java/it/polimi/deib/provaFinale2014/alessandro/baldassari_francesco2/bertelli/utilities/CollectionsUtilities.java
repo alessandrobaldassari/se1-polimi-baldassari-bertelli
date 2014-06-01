@@ -53,6 +53,7 @@ public class CollectionsUtilities
 		return res ;
 	}
 	
+	/***/
 	public static < T > void listMesh ( List < T > list ) 
 	{
 		final Random random ;
@@ -70,6 +71,7 @@ public class CollectionsUtilities
 		}
 	}
 	
+	/***/
 	public static < T > void swapElements ( List < T > list , int pos1 , int pos2 ) 
 	{
 		T temp ;
