@@ -1,6 +1,8 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodelTest;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Bank;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.BankFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Bank.CardPriceNotRightException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Bank.NoMoreCardOfThisTypeException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Bank.NoMoreFenceOfThisTypeException;
@@ -9,6 +11,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
 import java.util.ArrayList;
 
@@ -19,24 +23,30 @@ import org.junit.*;
 /*
  * This jUnit test class tests Bank.class
  */
-
-public class BankTest {
+public class BankTest 
+{
 	/*
 	 * Declaring all the variables needed to the correct execution of setUp() 
 	 */
+	private static int idInstance ;
 	private ArrayList <Fence> fences;
 	private ArrayList <Card> initCards;
 	private ArrayList <SellableCard> otherCards;
-	private int initialMoneyReserve;
 	private Bank bank;
 	
+	@BeforeClass
+	public static void setUpBeforeClass () 
+	{
+		idInstance = 0 ;
+	}
 	
 	/*
 	 * Initializing the previous variables to invoke Bank() and initialize bank variable
 	 * for the test
 	 */
 	@Before 
-	public void setUp(){
+	public void setUp()
+	{
 		fences = new ArrayList();
 		initCards = new ArrayList();
 		otherCards = new ArrayList();	
@@ -45,25 +55,73 @@ public class BankTest {
 		//initCards.add(new Card(RegionType.CULTIVABLE, 1));
 		//otherCards.add(new SellableCard(RegionType.DESERT, 3, 2));
 		//otherCards.add(new SellableCard(RegionType.DESERT, 2, 3));
-		initialMoneyReserve = 100;
-		//bank = Bank.newInstance ( null );
+		try 
+		{
+			bank = BankFactory.getInstance().newInstance ( new DummyMatchIdentifier ( idInstance ) );
+			idInstance ++ ;
+		}
+		catch (SingletonElementAlreadyGeneratedException e) 
+		{
+			e.printStackTrace();
+			throw new RuntimeException ( e ) ; 
+		}
 	}
 	
 	/*
 	 * This function tests getMoneyReserve()
 	 */
 	@Test 
-	public void getMoneyReserve(){
-		assertTrue(bank.getMoneyReserve() == initialMoneyReserve);
+	public void getMoneyReserve ()
+	{	
+		assertTrue ( bank.getMoneyReserve() == Bank.INITIAL_MONEY_RESERVE ) ;
 	}
 	
 	/*
 	 * This function tests receiveMoney()
 	 */
 	@Test 
-	public void receiveMoney(){
-		bank.receiveMoney(50);
-		assertTrue(bank.getMoneyReserve()== 150);
+	public void receiveMoney()
+	{
+		int increment ;
+		increment = 50 ;
+		bank.receiveMoney ( increment ) ;
+		assertTrue ( bank.getMoneyReserve() == Bank.INITIAL_MONEY_RESERVE + increment );
+	}
+	
+	@Test
+	public void hasAFenceOfThisType1 () 
+	{
+		assertTrue ( bank.hasAFenceOfThisType ( FenceType.FINAL ) ) ;
+		assertTrue ( bank.hasAFenceOfThisType ( FenceType.NON_FINAL ) ) ;
+	}
+	
+	/***/
+	@Test
+	public void hasAFenceOfThisType2 () 
+	{
+		for ( int i = 0 ; i < Bank.FINAL_FENCE_NUMBER ; i ++ )
+			try {
+				bank.getAFence ( FenceType.FINAL ) ;
+			} catch (NoMoreFenceOfThisTypeException e) {
+				e.printStackTrace();
+				fail ( "GET_A_FENCE_IMPLEMENTATION_ERROR" ) ;
+			}
+		assertFalse ( bank.hasAFenceOfThisType ( FenceType.FINAL ) ) ;
+		assertTrue ( bank.hasAFenceOfThisType ( FenceType.NON_FINAL ) ) ;
+	}
+	
+	@Test
+	public void hasAFenceOfThisType3 () 
+	{
+		for ( int i = 0 ; i < Bank.NON_FINAL_FENCE_NUMBER ; i ++ )
+			try {
+				bank.getAFence ( FenceType.NON_FINAL ) ;
+			} catch (NoMoreFenceOfThisTypeException e) {
+				e.printStackTrace();
+				fail ( "GET_A_FENCE_IMPLEMENTATION_ERROR" ) ;
+			}
+		assertTrue ( bank.hasAFenceOfThisType ( FenceType.FINAL ) ) ;
+		assertFalse ( bank.hasAFenceOfThisType ( FenceType.NON_FINAL ) ) ;
 	}
 	
 	/*
@@ -138,8 +196,29 @@ public class BankTest {
 	 */
 	@Test (expected = IllegalArgumentException.class)
 	public void BankFourthCondition() {
-		initialMoneyReserve = -1;
+		//initialMoneyReserve = -1;
 		//bank = new Bank(initialMoneyReserve, fences, initCards, otherCards);	
 	}
 
+	private class DummyMatchIdentifier implements Identifiable < Match > 
+	{
+
+		private final int id ;
+		
+		DummyMatchIdentifier ( int  id ) 
+		{
+			this.id = id ;
+		}
+		
+		@Override
+		public boolean isEqualsTo ( Identifiable<Match> otherObject ) 
+		{
+			if ( otherObject instanceof DummyMatchIdentifier )
+			return id == ( ( DummyMatchIdentifier ) otherObject ).id ;
+			else
+				return false ;
+		}
+		
+	}
+	
 }
