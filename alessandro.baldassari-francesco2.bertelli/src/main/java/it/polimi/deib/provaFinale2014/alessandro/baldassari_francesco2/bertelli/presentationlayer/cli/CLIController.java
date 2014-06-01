@@ -9,17 +9,20 @@ import java.util.List;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client.CommunicationProtocolResponser;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Terminable;
 
-public class CLIProtocolResponser implements CommunicationProtocolResponser
+public class CLIController extends ViewPresenter implements CommunicationProtocolResponser
 {
 
 	private BufferedReader reader ;
 	
 	private PrintStream writer ;
 	
-	public CLIProtocolResponser () 
+	public CLIController ( Terminable client ) 
 	{
+		super ( client ) ;
 		reader = new BufferedReader ( new InputStreamReader ( System.in ) ) ;
 		writer = System.out ;
 	}
@@ -125,6 +128,12 @@ public class CLIProtocolResponser implements CommunicationProtocolResponser
 	public GameMove onDoMove() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void startApp() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

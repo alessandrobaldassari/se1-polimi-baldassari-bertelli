@@ -1,10 +1,13 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui;
 
 import java.awt.Frame;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.LoginView.LoginViewObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.GraphicsUtilities;
@@ -17,27 +20,30 @@ import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 public class LoginView extends JDialog 
 {
 
-	private JPanel dataPanel ;
+	private LoginViewPanel loginViewPanel ;
 	
-	public LoginView () 
+	public LoginView ( LoginViewObserver observer ) 
 	{
 		super ( ( Frame ) null , "JSheepland - Login" , true ) ;
 		GridBagLayout g ;
 		Insets insets ;
-		dataPanel = new DataPanel () ;
+		loginViewPanel = new LoginViewPanel () ;
 		g = new GridBagLayout () ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
+		GraphicsUtilities.setComponentLayoutProperties ( loginViewPanel , g , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+		loginViewPanel.addObserver ( observer ) ;
 		setLayout ( g ) ;
 		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
-		GraphicsUtilities.setComponentLayoutProperties ( dataPanel , g , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
-		add ( dataPanel ) ;
+		add ( loginViewPanel ) ;
+		setSize ( GraphicsUtilities.getVGAResolution () ) ;
+		pack () ;
+		setResizable ( false ) ;
 	}
 	
 	interface LoginViewObserver extends Observer
@@ -49,17 +55,16 @@ public class LoginView extends JDialog
 		
 	}
 	
-	public static void main ( String [] args ) 
-	{
-		LoginView d = new LoginView () ;
-		d.show();
-	}
-	
 }
 
 /***/
-class DataPanel extends ObservableWithGridBagLayoutPanel < LoginViewObserver >
+class LoginViewPanel extends ObservableWithGridBagLayoutPanel < LoginViewObserver >
 {
+
+	private final String BACKGROUND_IMAGE_FILE_PATH ;
+	
+	/***/
+	private Image backgroundImage ;
 	
 	/***/
 	private JLabel textLabel ;
@@ -74,22 +79,41 @@ class DataPanel extends ObservableWithGridBagLayoutPanel < LoginViewObserver >
 	private JButton exitButton ;
 	
 	/***/
-	public DataPanel () 
+	public LoginViewPanel () 
 	{
 		super () ;
-		createCocmponents () ;
-		manageLayout () ;
-		bindListeners () ;
-		injectComponents () ;
+		try 
+		{
+			BACKGROUND_IMAGE_FILE_PATH = "sheepland_cover.jpg" ;
+			createCocmponents () ;
+			manageLayout () ;
+			bindListeners () ;
+			injectComponents () ;
+		}
+		catch ( IOException e ) 
+		{
+			e.printStackTrace();
+			throw new RuntimeException ( e ) ;
+		}
+		
 	}
 	
 	/***/
-	private void createCocmponents () 
+	@Override
+	public void paintComponent ( Graphics g ) 
+	{
+		super.paintComponent ( g ) ;
+		g.drawImage ( backgroundImage , 0 , 0 , getWidth () , getHeight () , this ) ;
+	}
+	
+	/***/
+	private void createCocmponents () throws IOException 
 	{
 		textLabel = new JLabel () ;
 		nameField = new JTextField () ;
 		enterButton = new JButton () ;
 		exitButton = new JButton () ;
+		backgroundImage = GraphicsUtilities.getImage ( BACKGROUND_IMAGE_FILE_PATH ) ;
 	}
 	
 	/***/
@@ -139,7 +163,7 @@ class DataPanel extends ObservableWithGridBagLayoutPanel < LoginViewObserver >
 		{
 			try 
 			{
-				DataPanel.this.notifyObservers ( "onEnter" ) ;
+				LoginViewPanel.this.notifyObservers ( "onEnter" ) ;
 			} 
 			catch ( MethodInvocationException e1 ) 
 			{
@@ -162,7 +186,7 @@ class DataPanel extends ObservableWithGridBagLayoutPanel < LoginViewObserver >
 		{
 			try 
 			{
-				DataPanel.this.notifyObservers ( "onExit" ) ;
+				LoginViewPanel.this.notifyObservers ( "onExit" ) ;
 			} 
 			catch ( MethodInvocationException e1 ) 
 			{

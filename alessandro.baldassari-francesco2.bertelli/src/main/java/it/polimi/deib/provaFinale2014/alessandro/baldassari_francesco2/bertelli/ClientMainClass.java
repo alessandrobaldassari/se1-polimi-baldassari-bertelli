@@ -4,7 +4,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client.CommunicationProtocolResponser;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client.RMIClient;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client.SocketClient;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.cli.CLIProtocolResponser;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.cli.CLIController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.GUIController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.LoginView;
 
@@ -126,22 +126,20 @@ public final class ClientMainClass
 			}
 			else
 			{
-				if ( viewChoosed == CLI_INDEX )
-					communicationProtocolResponser = new CLIProtocolResponser () ;
-				else
-				{
-					guiController = new GUIController () ;
-					LoginView d = new LoginView ();
-					d.pack () ;
-					d.setVisible ( true ) ;
-				}
 				if ( communicationProtocolChoosed == SOCKET_INDEX )
 					client = new SocketClient ( guiController ) ;
 				else
 					client = new RMIClient ( guiController ) ;
+				if ( viewChoosed == CLI_INDEX )
+					communicationProtocolResponser = new CLIController ( client ) ;
+				else
+				{
+					guiController = new GUIController ( client ) ;
+				}
 				executor = Executors.newSingleThreadExecutor () ;
 				client.openConnection () ;
 				executor.execute ( client ) ;
+				guiController.startApp () ;
 			}
 		}
 	}

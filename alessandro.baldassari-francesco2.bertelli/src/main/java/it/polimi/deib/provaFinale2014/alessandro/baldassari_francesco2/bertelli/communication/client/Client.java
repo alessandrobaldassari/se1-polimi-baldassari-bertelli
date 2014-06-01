@@ -1,5 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Terminable;
+
 import java.io.IOException;
 
 /**
@@ -8,7 +10,7 @@ import java.io.IOException;
  * class where subclasses has the chance to implement their server-listening logic, server-sending-messages
  * logic and so on.
  */
-public abstract class Client extends Thread
+public abstract class Client extends Thread implements Terminable
 {
 	
 	/**
@@ -47,6 +49,15 @@ public abstract class Client extends Thread
 	{
 		technicalConnect () ;
 		technicallyOn = true ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	public void terminate () 
+	{
+		if ( technicallyOn == true )
+			technicallyOn = false ;
 	}
 	
 	/**
