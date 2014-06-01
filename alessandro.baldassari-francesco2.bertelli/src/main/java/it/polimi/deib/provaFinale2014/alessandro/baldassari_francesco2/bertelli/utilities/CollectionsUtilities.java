@@ -9,6 +9,7 @@ import java.util.Random;
 public class CollectionsUtilities 
 {
 
+	/***/
 	public static < T > Collection < T > newCollectionFromIterable ( Iterable < T > src ) 
 	{
 		Collection < T > res ;
@@ -18,6 +19,7 @@ public class CollectionsUtilities
 		return res ; 
 	}
 	
+	/***/
 	public static < T > List < T > newListFromIterable ( Iterable < T > src ) 
 	{
 		List < T > res ;
@@ -27,6 +29,7 @@ public class CollectionsUtilities
 		return res ;
 	}
 	
+	/***/
 	public static < T > Iterable < T > newIterableFromArray ( T [] src ) 
 	{
 		Collection < T > res ;
@@ -36,6 +39,7 @@ public class CollectionsUtilities
 		return res ;
 	}
 	
+	/***/
 	public static < T > boolean contains ( Iterable < T > src , T key ) 
 	{
 		boolean res ;
