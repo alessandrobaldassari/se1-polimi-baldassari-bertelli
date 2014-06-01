@@ -15,6 +15,12 @@ public interface CommunicationProtocolResponser
 	public String onNameRequest () ;
 	
 	/***/
+	public void onNameRequestAck ( boolean isOk , String notes ) ;
+	
+	/***/
+	public void onNotifyMatchStart () ;
+	
+	/***/
 	public Color onSheperdColorRequest ( Iterable < Color > availableColors ) ;
 	
 	/***/

@@ -4,9 +4,10 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client.CommunicationProtocolResponser;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client.RMIClient;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client.SocketClient;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.cli.CLIController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.GUIController;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.LoginView;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -48,7 +49,7 @@ public final class ClientMainClass
 		final CommunicationProtocolResponser communicationProtocolResponser ;
 		final Client client ;
 		final Executor executor ;
-		GUIController guiController ;
+		ViewPresenter viewPresenter ;
 		int communicationProtocolChoosed ;
 		int viewChoosed ;
 		SOCKET_COMMUNICATION_PROTOCOL = "SOCKET" ;
@@ -56,7 +57,6 @@ public final class ClientMainClass
 		CLI_VIEW = "CLI" ;
 		GUI_VIEW = "GUI" ;
 		bufferedReader = new BufferedReader ( new InputStreamReader ( System.in ) ) ;
-		guiController = null ;
 		System.out.println ( "Benvenuto in JSheepland." ) ;
 		System.out.println ( "Prego, seleziona il metodo di comunicazione che vuoi utilizzare per giocare : " ) ;
 		System.out.println ( SOCKET_INDEX + ". " + SOCKET_COMMUNICATION_PROTOCOL ) ;
@@ -126,20 +126,31 @@ public final class ClientMainClass
 			}
 			else
 			{
-				if ( communicationProtocolChoosed == SOCKET_INDEX )
-					client = new SocketClient ( guiController ) ;
-				else
-					client = new RMIClient ( guiController ) ;
 				if ( viewChoosed == CLI_INDEX )
-					communicationProtocolResponser = new CLIController ( client ) ;
+				{
+					viewPresenter = new CLIController () ;
+				}
 				else
 				{
-					guiController = new GUIController ( client ) ;
+					viewPresenter = new GUIController () ;
+				}
+				if ( communicationProtocolChoosed == SOCKET_INDEX )
+					client = new SocketClient ( viewPresenter ) ;
+				else
+					client = new RMIClient ( viewPresenter ) ;
+				try 
+				{
+					viewPresenter.setClientToTerminate ( client ) ;
+				} 
+				catch ( WriteOncePropertyAlreadSetException e ) 
+				{
+					e.printStackTrace();
+					throw new RuntimeException ( e ) ;
 				}
 				executor = Executors.newSingleThreadExecutor () ;
 				client.openConnection () ;
 				executor.execute ( client ) ;
-				guiController.startApp () ;
+				viewPresenter.startApp () ;
 			}
 		}
 	}

@@ -12,7 +12,7 @@ import java.io.IOException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.LoginView.LoginViewObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObservableWithGridBagLayoutPanel;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObservableFrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Observer;
 
 import javax.swing.AbstractAction;
@@ -46,10 +46,15 @@ public class LoginView extends JDialog
 		setResizable ( false ) ;
 	}
 	
+	public void prepareView () 
+	{
+		loginViewPanel.prepareView () ;
+	}
+	
 	interface LoginViewObserver extends Observer
 	{
 		
-		public void onEnter () ;
+		public void onEnter ( String enteredName ) ;
 		
 		public void onExit () ;
 		
@@ -58,10 +63,10 @@ public class LoginView extends JDialog
 }
 
 /***/
-class LoginViewPanel extends ObservableWithGridBagLayoutPanel < LoginViewObserver >
+class LoginViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < LoginViewObserver >
 {
 
-	private final String BACKGROUND_IMAGE_FILE_PATH ;
+	private static final String BACKGROUND_IMAGE_FILE_PATH = "sheepland_cover.jpg" ; ;
 	
 	/***/
 	private Image backgroundImage ;
@@ -82,20 +87,11 @@ class LoginViewPanel extends ObservableWithGridBagLayoutPanel < LoginViewObserve
 	public LoginViewPanel () 
 	{
 		super () ;
-		try 
-		{
-			BACKGROUND_IMAGE_FILE_PATH = "sheepland_cover.jpg" ;
-			createCocmponents () ;
-			manageLayout () ;
-			bindListeners () ;
-			injectComponents () ;
-		}
-		catch ( IOException e ) 
-		{
-			e.printStackTrace();
-			throw new RuntimeException ( e ) ;
-		}
-		
+	}
+	
+	public void prepareView ()
+	{
+		nameField.setText ( "" ) ;
 	}
 	
 	/***/
@@ -107,17 +103,28 @@ class LoginViewPanel extends ObservableWithGridBagLayoutPanel < LoginViewObserve
 	}
 	
 	/***/
-	private void createCocmponents () throws IOException 
+	@Override
+	protected void createComponents ()  
 	{
-		textLabel = new JLabel () ;
-		nameField = new JTextField () ;
-		enterButton = new JButton () ;
-		exitButton = new JButton () ;
-		backgroundImage = GraphicsUtilities.getImage ( BACKGROUND_IMAGE_FILE_PATH ) ;
+		try 
+		{
+			backgroundImage = GraphicsUtilities.getImage ( BACKGROUND_IMAGE_FILE_PATH ) ;
+			textLabel = new JLabel () ;
+			nameField = new JTextField () ;
+			enterButton = new JButton () ;
+			exitButton = new JButton () ;
+			
+		} 
+		catch ( IOException e ) 
+		{
+			e.printStackTrace();
+			throw new RuntimeException ( e ) ;
+		}
 	}
 	
 	/***/
-	private void manageLayout () 
+	@Override
+	protected void manageLayout () 
 	{
 		Insets insets ; 
 		insets = new Insets ( 5 , 5 , 5 , 5 ) ;
@@ -130,7 +137,8 @@ class LoginViewPanel extends ObservableWithGridBagLayoutPanel < LoginViewObserve
 	}
 	
 	/***/
-	private void bindListeners () 
+	@Override
+	protected void bindListeners () 
 	{
 		Action okAction ;
 		Action exitAction ;
@@ -141,7 +149,8 @@ class LoginViewPanel extends ObservableWithGridBagLayoutPanel < LoginViewObserve
 	}
 	
 	/***/
-	private void injectComponents () 
+	@Override
+	protected void injectComponents () 
 	{
 		add ( textLabel ) ;
 		add ( nameField ) ;
@@ -149,7 +158,9 @@ class LoginViewPanel extends ObservableWithGridBagLayoutPanel < LoginViewObserve
 		add ( exitButton ) ;
 	}
 	
-	/***/
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	private class OkAction extends AbstractAction 
 	{
 
@@ -163,7 +174,7 @@ class LoginViewPanel extends ObservableWithGridBagLayoutPanel < LoginViewObserve
 		{
 			try 
 			{
-				LoginViewPanel.this.notifyObservers ( "onEnter" ) ;
+				LoginViewPanel.this.notifyObservers ( "onEnter" , nameField.getText () ) ;
 			} 
 			catch ( MethodInvocationException e1 ) 
 			{
@@ -173,14 +184,19 @@ class LoginViewPanel extends ObservableWithGridBagLayoutPanel < LoginViewObserve
 		
 	}
 	
+	/***/
 	private class ExitAction extends AbstractAction 
 	{
 
+		/***/
 		public ExitAction ( String frontEndText ) 
 		{
 			super ( frontEndText ) ;
 		}
 		
+		/**
+		 * AS THE SUPER'S ONE. 
+		 */
 		@Override
 		public void actionPerformed ( ActionEvent e ) 
 		{
@@ -195,6 +211,5 @@ class LoginViewPanel extends ObservableWithGridBagLayoutPanel < LoginViewObserve
 		}
 				
 	}
-	
 	
 }

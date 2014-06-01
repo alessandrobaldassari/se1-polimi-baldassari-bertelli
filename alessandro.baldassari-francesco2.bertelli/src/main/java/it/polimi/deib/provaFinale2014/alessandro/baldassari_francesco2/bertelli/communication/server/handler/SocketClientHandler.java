@@ -13,6 +13,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 
 /**
@@ -59,19 +60,19 @@ public class SocketClientHandler implements ClientHandler
 	@Override
 	public String requestName () throws IOException  
 	{
-		ClientHandlerClientCommunicationProtocolOperation op ;
+		ClientCommunicationProtocolMessage op ;
 		Message m ;
 		String res = null ;
 		try
 		{
-			op = ClientHandlerClientCommunicationProtocolOperation.NAME_REQUESTING_REQUEST ;
+			op = ClientCommunicationProtocolMessage.NAME_REQUESTING_REQUEST ;
 			m = Message.newInstance ( op , Collections.EMPTY_LIST ) ;
 			oos.writeObject ( m ) ;
 			oos.flush () ;
 			System.out.println ( "Socket Client Handler : Name Request Sent" ) ;
 			m = (Message) ois.readObject () ;
 			System.out.println ( res ) ;
-			if ( m.getOperation () == ClientHandlerClientCommunicationProtocolOperation.NAME_REQUESTING_RESPONSE )
+			if ( m.getOperation () == ClientCommunicationProtocolMessage.NAME_REQUESTING_RESPONSE )
 			{
 				System.out.println( res ) ;
 				res = (String) m.getParameters().iterator().next();
@@ -88,6 +89,31 @@ public class SocketClientHandler implements ClientHandler
 		
 		return res ;
 	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	public void notifyNameChoose ( boolean isNameOk , String note ) throws IOException 
+	{
+		Collection < Serializable > c ;
+		Message m ;
+		c = new ArrayList < Serializable > ( 2 ) ;
+		c.add ( isNameOk ) ;
+		c.add ( note ) ;
+ 		m = Message.newInstance ( ClientCommunicationProtocolMessage.NAME_REQUESTING_RESPONSE_RESPONSE , c ) ; 
+ 		oos.writeObject ( m ) ;
+ 		oos.flush () ;
+	}
+
+	/***/
+	public void notifyMatchStart () throws IOException 
+	{
+		Message m ;
+		m = Message.newInstance ( ClientCommunicationProtocolMessage.MATCH_STARTING_NOTIFICATION , Collections.EMPTY_LIST ) ;
+		oos.writeObject ( m ) ;
+		oos.flush () ;
+	}
+
 	
 	/**
 	 * AS THE SUPER'S ONE. 
@@ -96,8 +122,8 @@ public class SocketClientHandler implements ClientHandler
 	public void notifyMatchWillNotStart ( String message ) throws IOException 
 	{
 		Message m ;
-		ClientHandlerClientCommunicationProtocolOperation operation ;
-		operation = ClientHandlerClientCommunicationProtocolOperation.MATCH_WILL_NOT_START_NOTIFICATION ;
+		ClientCommunicationProtocolMessage operation ;
+		operation = ClientCommunicationProtocolMessage.MATCH_WILL_NOT_START_NOTIFICATION ;
 		m = Message.newInstance ( operation , Collections.EMPTY_LIST ) ;
 		oos.writeObject ( m ) ;
 		oos.flush () ;
@@ -111,12 +137,12 @@ public class SocketClientHandler implements ClientHandler
 	{
 		String res;
 		Color choosedColor = null;
-		oos.writeUTF(ClientHandlerClientCommunicationProtocolOperation.SHEPERD_COLOR_REQUESTING_REQUEST.toString());
+		oos.writeUTF(ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_REQUEST.toString());
 		oos.flush();
 		oos.writeObject(availableColors);
 		oos.flush();
 		res = ois.readUTF();
-		if ( ClientHandlerClientCommunicationProtocolOperation.valueOf( res ) == ClientHandlerClientCommunicationProtocolOperation.SHEPERD_COLOR_REQUESTING_RESPONSE )
+		if ( ClientCommunicationProtocolMessage.valueOf( res ) == ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE )
 		{
 			try 
 			{
@@ -143,7 +169,7 @@ public class SocketClientHandler implements ClientHandler
 	public void chooseCardsEligibleForSelling(Iterable<SellableCard> sellablecards) throws IOException 
 	{
 		String resp ;
-		oos.writeUTF ( ClientHandlerClientCommunicationProtocolOperation.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST.toString () ) ;
+		oos.writeUTF ( ClientCommunicationProtocolMessage.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST.toString () ) ;
 		oos.flush () ;
 		oos.writeObject ( sellablecards ) ;
 		oos.flush () ;
@@ -158,12 +184,12 @@ public class SocketClientHandler implements ClientHandler
 	{
 		String resp ;
 		Sheperd res = null ;
-		oos.writeUTF ( ClientHandlerClientCommunicationProtocolOperation.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_REQUEST.toString () ) ;
+		oos.writeUTF ( ClientCommunicationProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_REQUEST.toString () ) ;
 		oos.flush () ; 
 		oos.writeObject ( sheperdsOfThePlayer ) ;
 		oos.flush () ;
 		resp = ois.readUTF () ;
-		if ( ClientHandlerClientCommunicationProtocolOperation.valueOf ( resp ) == ClientHandlerClientCommunicationProtocolOperation.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_RESPONSE )
+		if ( ClientCommunicationProtocolMessage.valueOf ( resp ) == ClientCommunicationProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_RESPONSE )
 		{
 			try 
 			{
@@ -189,12 +215,12 @@ public class SocketClientHandler implements ClientHandler
 	{
 		String resp ;
 		SellableCard res = null ;
-		oos.writeUTF ( ClientHandlerClientCommunicationProtocolOperation.CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST.toString () ) ;
+		oos.writeUTF ( ClientCommunicationProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST.toString () ) ;
 		oos.flush () ;
 		oos.writeObject ( src ) ;
 		oos.flush () ;
 		resp = ois.readUTF () ;
-		if ( ClientHandlerClientCommunicationProtocolOperation.valueOf ( resp ) == ClientHandlerClientCommunicationProtocolOperation.CHOOSE_CARDS_TO_BUY_REQUESTING_RESPONSE )
+		if ( ClientCommunicationProtocolMessage.valueOf ( resp ) == ClientCommunicationProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_RESPONSE )
 		{
 			try 
 			{
@@ -220,14 +246,14 @@ public class SocketClientHandler implements ClientHandler
 	{
 		String resp ;
 		GameMove res = null ;
-		oos.writeUTF ( ClientHandlerClientCommunicationProtocolOperation.DO_MOVE_REQUESTING_REQUEST.toString () ) ;
+		oos.writeUTF ( ClientCommunicationProtocolMessage.DO_MOVE_REQUESTING_REQUEST.toString () ) ;
 		oos.flush () ; 
 		oos.writeObject ( gameFactory ) ;
 		oos.flush () ;
 		oos.writeObject ( gameMap ) ;
 		oos.flush () ;
 		resp = ois.readUTF () ;
-		if ( ClientHandlerClientCommunicationProtocolOperation.valueOf ( resp ) == ClientHandlerClientCommunicationProtocolOperation.DO_MOVE_REQUESTING_RESPONSE )
+		if ( ClientCommunicationProtocolMessage.valueOf ( resp ) == ClientCommunicationProtocolMessage.DO_MOVE_REQUESTING_RESPONSE )
 		{
 			try 
 			{
@@ -251,7 +277,7 @@ public class SocketClientHandler implements ClientHandler
 	@Override
 	public void genericNotification(String message) throws IOException 
 	{
-		oos.writeUTF(ClientHandlerClientCommunicationProtocolOperation.GENERIC_NOTIFICATION_NOTIFICATION.toString());
+		oos.writeUTF(ClientCommunicationProtocolMessage.GENERIC_NOTIFICATION_NOTIFICATION.toString());
 		oos.flush();
 		oos.writeUTF(message);
 		oos.flush();

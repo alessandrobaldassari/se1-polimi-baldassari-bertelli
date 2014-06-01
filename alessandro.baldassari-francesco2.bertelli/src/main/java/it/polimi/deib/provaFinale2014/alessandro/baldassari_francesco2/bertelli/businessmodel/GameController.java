@@ -145,13 +145,13 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public int getTurnNumber () throws WrongStateMethodCallException
+	public int getTurnNumber () throws WrongMatchStateMethodCallException
 	{
 		int res ;
 		if ( match.getMatchState () == MatchState.TURNATION )
 			res = turnNumber ;
 		else
-			throw new WrongStateMethodCallException ( match.getMatchState () ) ;
+			throw new WrongMatchStateMethodCallException ( match.getMatchState () ) ;
 		return res ;
 	} 
 	
@@ -179,16 +179,16 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 	 * method that will dequeue it and add it to the Match object 
 	 * 
 	 * @param newPlayer the Player to add to the this GameController.
-	 * @throws WrongStateMethodCallException if this method is not called during the WAIT_FOR_PLAYERS
+	 * @throws WrongMatchStateMethodCallException if this method is not called during the WAIT_FOR_PLAYERS
 	 *         phase.
 	 * 
 	 */
-	public void addPlayer ( Player newPlayer ) throws WrongStateMethodCallException
+	public void addPlayer ( Player newPlayer ) throws WrongMatchStateMethodCallException
 	{
 		if ( match.getMatchState () == Match.MatchState.WAIT_FOR_PLAYERS )
 			tempBlockingQueue.offer ( newPlayer ) ;
 		else
-			throw new WrongStateMethodCallException ( match.getMatchState () ) ;
+			throw new WrongMatchStateMethodCallException ( match.getMatchState () ) ;
 	}
 	
 	/**
@@ -259,7 +259,7 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 			{
 				e.printStackTrace () ;
 			} 
-			catch ( WrongStateMethodCallException e ) 
+			catch ( WrongMatchStateMethodCallException e ) 
 			{
 				e.printStackTrace();
 			}			
@@ -394,7 +394,7 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 			}
 			match.setPlayerOrder ( playersMapOrder ) ;
 		} 
-		catch ( WrongStateMethodCallException e ) 
+		catch ( WrongMatchStateMethodCallException e ) 
 		{
 			e.printStackTrace();
 			throw new RuntimeException (e);
@@ -708,17 +708,16 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 		@Override
 		public void run ()
 		{
+			System.out.println ( "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" ) ;
 			if ( match.getNumberOfPlayers() >= 2 ) 
 			{
 				match.setMatchState ( MatchState.INITIALIZATION ) ;
 				matchStartCommunicationController.notifyFinishAddingPlayers () ;
-				System.out.println ( "TIMER FINISHED" ) ;
-				cancel () ;
+				System.out.println ( "TIMER FINISHEDGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG" ) ;
 			}
 			else
-			{
 				matchStartCommunicationController.notifyFailStartMatch () ;
-			}	
+			cancel () ;
 		}
 		
 	}

@@ -10,6 +10,10 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 
 import java.awt.Color;
 import java.io.IOException;
+import java.io.Serializable;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 
 /**
@@ -54,7 +58,7 @@ public class RMIClientHandler implements ClientHandler
 		System.out.println ( "RMI CLIENT HANDLER : AFTER GO INTO CORE METHOD" ) ;
 		try 
 		{
-			m = Message.newInstance ( ClientHandlerClientCommunicationProtocolOperation.NAME_REQUESTING_REQUEST , Collections.EMPTY_LIST ) ;
+			m = Message.newInstance ( ClientCommunicationProtocolMessage.NAME_REQUESTING_REQUEST , Collections.EMPTY_LIST ) ;
 			rmiClientBroker.putNextMessage ( m ) ;
 		} 
 		catch ( AnotherCommandYetRunningException e ) 
@@ -64,7 +68,7 @@ public class RMIClientHandler implements ClientHandler
 		rmiClientBroker.setServerReady () ;
 		while ( rmiClientBroker.isClientReady () == false ) ;
 		m = rmiClientBroker.getNextMessage () ;
-		if ( m.getOperation () == ClientHandlerClientCommunicationProtocolOperation.NAME_REQUESTING_RESPONSE )
+		if ( m.getOperation () == ClientCommunicationProtocolMessage.NAME_REQUESTING_RESPONSE )
 		{
 			res = ( String ) m.getParameters().iterator().next () ;
 		}
@@ -73,6 +77,56 @@ public class RMIClientHandler implements ClientHandler
 			throw new IOException ();
 		}
 		return res ;
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	public void notifyNameChoose ( boolean isNameOk , String note ) throws IOException
+	{
+		Collection < Serializable > c ;
+		Message m ;
+		try 
+		{
+			c = new ArrayList < Serializable > ( 2 ) ;
+			while ( rmiClientBroker.isClientReady() == false ) ;
+			c.add ( isNameOk ) ;
+			c.add ( note ) ;
+	 		m = Message.newInstance ( ClientCommunicationProtocolMessage.NAME_REQUESTING_RESPONSE_RESPONSE , c ) ; 
+	 		rmiClientBroker.putNextMessage ( m ) ;
+	 		rmiClientBroker.setServerReady () ;
+		}
+		catch (RemoteException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (AnotherCommandYetRunningException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	public void notifyMatchStart () throws IOException 
+	{
+		Message m ;
+		try 
+		{
+			while ( rmiClientBroker.isClientReady () ) ;
+			m = Message.newInstance ( ClientCommunicationProtocolMessage.MATCH_STARTING_NOTIFICATION , Collections.EMPTY_LIST ) ;
+			rmiClientBroker.putNextMessage ( m ) ;
+			rmiClientBroker.setServerReady () ;
+		}
+		catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (AnotherCommandYetRunningException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	/**

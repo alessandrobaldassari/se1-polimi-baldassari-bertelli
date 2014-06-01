@@ -10,6 +10,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.CardFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
@@ -127,79 +128,63 @@ public class BankTest
 	/*
 	 * This function tests getAFence() exploring all the possibles method's executions then forcing the method to throw a NoMoreFenceOfThisTypeException
 	 */
-	@Test (expected = NoMoreFenceOfThisTypeException.class) 
-	public void getAFence() throws ArrayIndexOutOfBoundsException, NoMoreFenceOfThisTypeException {
-		assertFalse(bank.getAFence(FenceType.NON_FINAL).isFinal());
-		assertTrue(bank.getAFence(FenceType.FINAL).isFinal());
-		bank.getAFence(FenceType.FINAL);
+	@Test ( expected = NoMoreFenceOfThisTypeException.class ) 
+	public void getAFence() throws ArrayIndexOutOfBoundsException, NoMoreFenceOfThisTypeException 
+	{
+		int i ;
+		assertFalse ( bank.getAFence(FenceType.NON_FINAL).isFinal () ) ;
+		assertTrue ( bank.getAFence(FenceType.FINAL).isFinal () ) ;
+		for ( i = 0 ; i < Bank.FINAL_FENCE_NUMBER - 1 ; i ++ )
+			bank.getAFence ( FenceType.FINAL ) ;
+		bank.getAFence ( FenceType.FINAL ) ;
 	}
 	
 	/*
 	 * This function tests takeInitialCard() 
 	 */
-	@Test 
-	public void takeInitialCard(){
-		//assertTrue(bank.takeInitialCard(RegionType.CULTIVABLE).getRegionType() == RegionType.CULTIVABLE);
+	@Test ( expected = NoMoreCardOfThisTypeException.class )
+	public void takeInitialCard () throws NoMoreCardOfThisTypeException
+	{
+		assertTrue ( bank.takeInitialCard(RegionType.CULTIVABLE).getRegionType() == RegionType.CULTIVABLE ) ;
+		bank.takeInitialCard ( RegionType.CULTIVABLE ) ;
 	}
 	
 	/*
 	 * This function tests getPeekCardPrice() exploring all the possibles method's executions then forcing the method to throw a NoMoreCardOfThisTypeException
 	 */
-	@Test (expected = NoMoreCardOfThisTypeException.class)
-	public void getPeekCardPrice() throws NoMoreCardOfThisTypeException{
-		assertTrue(bank.getPeekCardPrice(RegionType.DESERT) == 3);
-		bank.getPeekCardPrice(RegionType.MOUNTAIN);
+	@Test ( expected = NoMoreCardOfThisTypeException.class )
+	public void getPeekCardPrice () throws NoMoreCardOfThisTypeException
+	{
+		int i ;
+		assertEquals ( bank.getPeekCardPrice ( RegionType.DESERT ) , 0 ) ;
+		try 
+		{
+			for ( i = 0 ; i < CardFactory.getInstance().NUMBER_OF_NON_INITIAL_CARDS_PER_REGION_TYPE ; i ++ )
+				bank.sellACard ( i , RegionType.DESERT ) ;
+			bank.sellACard ( 0 , RegionType.DESERT ) ;
+		} 
+		catch (CardPriceNotRightException e) 
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	/*
 	 * This function tests sellaACard() exploring all the possibles method's executions then forcing the method to throw a CardPriceNotRightException
 	 */
-	@Test (expected = CardPriceNotRightException.class)
-	public void sellACArd() throws CardPriceNotRightException, NoMoreCardOfThisTypeException{
-		SellableCard card = (SellableCard) bank.sellACard(3, RegionType.DESERT);
-		assertTrue(card.getInitialPrice() == 3);
-		assertTrue(card.getRegionType() == RegionType.DESERT);
-		assertTrue(card.getId() == 2);
-		card = (SellableCard) bank.sellACard(3, RegionType.DESERT);
-		
+	@Test ( expected = CardPriceNotRightException.class )
+	public void sellACArd() throws CardPriceNotRightException, NoMoreCardOfThisTypeException
+	{
+		SellableCard card ;
+		int price ;
+		price = bank.getPeekCardPrice ( RegionType.DESERT ) ;
+		card = bank.sellACard ( price , RegionType.DESERT ) ;
+		assertTrue ( card.getInitialPrice() == price ) ;
+		assertTrue(card.getRegionType() == RegionType.DESERT ) ;
+		price = bank.getPeekCardPrice ( RegionType.CULTIVABLE ) ;
+		card = bank.sellACard ( price + 1 , RegionType.CULTIVABLE ) ;
 	}
 	
-	/*
-	 * This function tests Bank() exploring the first method's if condition forcing it to throw a IllegalArgumentException
-	 */
-	@Test (expected = IllegalArgumentException.class)
-	public void BankFirstCondition() {
-		fences = null;
-		//bank = new Bank(initialMoneyReserve, fences, initCards, otherCards);	
-	}
-	
-	/*
-	 * This function tests Bank() exploring the second method's if condition forcing it to throw a IllegalArgumentException
-	 */
-	@Test (expected = IllegalArgumentException.class)
-	public void BankSecondCondition() {
-		initCards = null;
-	//	bank = new Bank(initialMoneyReserve, fences, initCards, otherCards);	
-	}
-	
-	/*
-	 * This function tests Bank() exploring the third method's if condition forcing it to throw a IllegalArgumentException
-	 */
-	@Test (expected = IllegalArgumentException.class)
-	public void BankThirdCondition() {
-		otherCards = null;
-		//bank = new Bank(initialMoneyReserve, fences, initCards, otherCards);	
-	}
-	
-	/*
-	 * This function tests Bank() exploring the fourth method's if condition forcing it to throw a IllegalArgumentException
-	 */
-	@Test (expected = IllegalArgumentException.class)
-	public void BankFourthCondition() {
-		//initialMoneyReserve = -1;
-		//bank = new Bank(initialMoneyReserve, fences, initCards, otherCards);	
-	}
-
 	private class DummyMatchIdentifier implements Identifiable < Match > 
 	{
 

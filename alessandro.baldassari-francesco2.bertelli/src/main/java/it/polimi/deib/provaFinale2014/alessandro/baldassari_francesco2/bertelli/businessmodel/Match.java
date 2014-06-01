@@ -64,11 +64,11 @@ public class Match
 	 * Add a new Player to this Match.
 	 * 
 	 * @param newPlayer the new Player to add.
-	 * @throws WrongStateMethodCallException if this method is called while this Match object is
+	 * @throws WrongMatchStateMethodCallException if this method is called while this Match object is
 	 *         not in the WAIT_FOR_PLAYERS state.
 	 * @throws IllegalArgumentException if the newPlayer parameter is null.
 	 */
-	public void addPlayer ( Player newPlayer ) throws WrongStateMethodCallException 
+	public void addPlayer ( Player newPlayer ) throws WrongMatchStateMethodCallException 
 	{
 		if ( state == MatchState.WAIT_FOR_PLAYERS )
 			if ( newPlayer != null )
@@ -76,17 +76,17 @@ public class Match
 			else
 				throw new IllegalArgumentException () ;
 		else
-			throw new WrongStateMethodCallException ( state ) ; 
+			throw new WrongMatchStateMethodCallException ( state ) ; 
 	}
 	
 	/**
 	 * This method simulates the phase of the Game where the Players' order is decided.
 	 * This method implements this functionality as a randomic list mesh of the Players's list. 
 	 * 
-	 * @throws WrongStateMethodCallException if this method is not called while the state attribute is
+	 * @throws WrongMatchStateMethodCallException if this method is not called while the state attribute is
 	 *         equals to INITIALIZATION.
 	 */
-	public void setPlayerOrder ( Map < Player , Integer > playersOrdering ) throws WrongStateMethodCallException 
+	public void setPlayerOrder ( Map < Player , Integer > playersOrdering ) throws WrongMatchStateMethodCallException 
 	{
 		if ( state == MatchState.INITIALIZATION ) 
 		{
@@ -100,7 +100,7 @@ public class Match
 				throw new IllegalArgumentException () ;
 		}
 		else
-			throw new WrongStateMethodCallException ( state ) ;
+			throw new WrongMatchStateMethodCallException ( state ) ;
 	}
 	
 	/**

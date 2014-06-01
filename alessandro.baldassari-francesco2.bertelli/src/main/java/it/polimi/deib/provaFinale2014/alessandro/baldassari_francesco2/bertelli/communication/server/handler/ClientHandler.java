@@ -31,6 +31,19 @@ public interface ClientHandler
 	public String requestName () throws IOException ;
 
 	/**
+	 * This method should notify the User if the name he choosed is ok or not. 
+	 * 
+	 * @param isNameOk if the name the User received is ok or note.
+	 * @param note eventually note associated with this event.
+	 */
+	public void notifyNameChoose ( boolean isNameOk , String note ) throws IOException ;
+	
+	/**
+	 * This method is just a notify to the user that the Match is starting. 
+	 */
+	public void notifyMatchStart () throws IOException ;
+	
+	/**
 	 * Sends a special message to the client, notifying him that the match that he was playing
 	 * for start will not start
 	 * 

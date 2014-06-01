@@ -5,11 +5,11 @@ import java.io.Serializable;
 public class Message implements Serializable 
 {
 
-	private ClientHandlerClientCommunicationProtocolOperation operation ;
+	private ClientCommunicationProtocolMessage operation ;
 	
 	private Iterable < Serializable > params ;
 	
-	private Message ( ClientHandlerClientCommunicationProtocolOperation operation , Iterable < Serializable > params )
+	private Message ( ClientCommunicationProtocolMessage operation , Iterable < Serializable > params )
 	{
 		if ( operation != null && params != null )
 		{
@@ -20,12 +20,12 @@ public class Message implements Serializable
 			throw new IllegalArgumentException () ;
 	}
 	
-	public static Message newInstance ( ClientHandlerClientCommunicationProtocolOperation operation , Iterable < Serializable > params ) 
+	public static Message newInstance ( ClientCommunicationProtocolMessage operation , Iterable < Serializable > params ) 
 	{
 		return new Message ( operation , params ) ;
 	}
 	
-	public ClientHandlerClientCommunicationProtocolOperation getOperation () 
+	public ClientCommunicationProtocolMessage getOperation () 
 	{
 		return operation ;
 	}

@@ -3,14 +3,14 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import java.lang.reflect.InvocationTargetException;
 
 /***/
-public class ObservableWithGridBagLayoutPanel < T extends Observer > extends WithGridBagLayoutPanel implements Observable < T > 
+public abstract class ObservableFrameworkedWithGridBagLayoutPanel < T extends Observer > extends FrameworkedWithGridBagLayoutPanel implements Observable < T > 
 {
 
 	/***/
 	private WithReflectionObservableSupport < T > s ;
 	
 	/***/
-	public ObservableWithGridBagLayoutPanel () 
+	public ObservableFrameworkedWithGridBagLayoutPanel () 
 	{
 		super () ;
 		s = new WithReflectionObservableSupport < T > () ;

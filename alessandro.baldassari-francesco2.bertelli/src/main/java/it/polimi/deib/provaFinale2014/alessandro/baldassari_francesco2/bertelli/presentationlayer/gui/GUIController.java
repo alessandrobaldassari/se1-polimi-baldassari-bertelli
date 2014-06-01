@@ -1,31 +1,53 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui;
 
 import java.awt.Color;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client.CommunicationProtocolResponser;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.LoginView.LoginViewObserver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Terminable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
-public class GUIController extends ViewPresenter implements CommunicationProtocolResponser , LoginViewObserver
+/***/
+public class GUIController extends ViewPresenter implements LoginViewObserver
 {
 
 	/***/
-	private JDialog initView ;
+	private static final String APP_NAME = "JSheepland" ;
 	
 	/***/
-	private JDialog loginView ;
+	private static final String SERVER_CONNECTION_MESSAGE = "Connessione al server, prego attendere ..." ;
 	
 	/***/
-	public GUIController ( Terminable client ) 
+	private static final String WAITING_FOR_OTHER_PLAYERS_MESSAGE = "Attendendo gli altri giocatori..." ;
+	
+	/***/
+	private static final String NAME_ACCEPTED_MESSAGE = "Complimenti!\nIl tuo nome è stato accettato dal Server di JSheeplan.\nOra aspetta pochi istanti l'arrivo degli altri giocatori per iniziare a giocare" ;
+	
+	/***/
+	private static final String NAME_REJECTED_MESSAGE = "Siamo spiacenti, ma il nome che hai proposto è già in uso nel contesto di JSheepland in questo momento.\nPrego, prova con un altro nome!" ;
+	
+	/***/
+	private WaitingView waitingView ;
+	
+	/***/
+	private LoginView loginView ;
+	
+	private GameView gameView ;
+	
+	private AtomicReference < String > name ;
+	
+	/***/
+	public GUIController () 
 	{
-		super ( client ) ;
+		super () ;
 		Runnable guiElementsCreator ;
+		name = new AtomicReference < String > () ;
+		name.set ( null ) ;
 		guiElementsCreator = new GUIElementsCreatorRunnable () ;
 		SwingUtilities.invokeLater ( guiElementsCreator ) ;
 	}
@@ -34,14 +56,15 @@ public class GUIController extends ViewPresenter implements CommunicationProtoco
 	public void startApp () 
 	{
 		SwingUtilities.invokeLater ( 
-				new Runnable () 
-				{ 
-					public void run () 
-					{
-						while ( initView == null ) ;
-						initView.setVisible ( true ) ;
+					new Runnable () 
+					{ 
+						public void run () 
+						{
+							while ( waitingView == null ) ;
+							waitingView.setText ( SERVER_CONNECTION_MESSAGE ) ;
+							waitingView.setVisible ( true ) ;
+						} 
 					} 
-				} 
 									);
 	}
 	
@@ -54,32 +77,67 @@ public class GUIController extends ViewPresenter implements CommunicationProtoco
 				{ 
 					public void run () 
 					{
-						while ( initView == null && loginView == null ) ;
-						initView.setVisible ( false ) ;
+						while ( waitingView == null && loginView == null ) ;
+						waitingView.setVisible ( false ) ;
 						loginView.setVisible ( true ) ;
 					} 
 				} 
 									);
-		return null;
+		while ( name.get () == null ) ;
+		return name.get() ;
 	}
 
-	/***/
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
-	public Color onSheperdColorRequest ( Iterable<Color> availableColors ) 
+	public void onNameRequestAck ( boolean isOk , String notes ) 
 	{
-		return null;
+		final Runnable r ;
+		final String koMessage ;
+		if ( isOk )
+		{
+			r = new Runnable () { 
+					public void run () 
+					{
+						JOptionPane.showMessageDialog ( loginView , NAME_ACCEPTED_MESSAGE , "JSheepland" , JOptionPane.INFORMATION_MESSAGE ) ;
+						loginView.setVisible ( false ) ;
+						waitingView.setText ( WAITING_FOR_OTHER_PLAYERS_MESSAGE ) ;
+						waitingView.setVisible ( true ) ;
+						loginView.dispose () ;
+					} 
+								} ;
+		}
+		else
+		{
+			r = new Runnable () { 
+				public void run () 
+				{
+					loginView.prepareView () ;
+					JOptionPane.showMessageDialog ( loginView , NAME_REJECTED_MESSAGE , "JSheepland" , JOptionPane.ERROR_MESSAGE ) ;
+				} 
+							} ;
+		}
+		SwingUtilities.invokeLater ( r ) ;
 	}
 
+	@Override
+	public void onNotifyMatchStart () 
+	{
+		
+	}
+	
 	@Override
 	public void onMatchWillNotStartNotification(String msg) {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
+	/***/
 	@Override
-	public void generationNotification(String msg) {
-		// TODO Auto-generated method stub
-		
+	public Color onSheperdColorRequest ( Iterable<Color> availableColors ) 
+	{
+		return null;
 	}
 
 	@Override
@@ -106,6 +164,12 @@ public class GUIController extends ViewPresenter implements CommunicationProtoco
 		return null;
 	}
 
+	@Override
+	public void generationNotification(String msg) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	/***/
 	private class GUIElementsCreatorRunnable implements Runnable 
 	{
@@ -116,8 +180,9 @@ public class GUIController extends ViewPresenter implements CommunicationProtoco
 		@Override
 		public void run () 
 		{
-			initView = new InitView () ;
+			waitingView = new WaitingView () ;
 			loginView = new LoginView ( GUIController.this ) ;
+			gameView = new GameView () ;
 		}
 		
 	}
@@ -126,9 +191,9 @@ public class GUIController extends ViewPresenter implements CommunicationProtoco
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void onEnter () 
+	public void onEnter ( String enteredName ) 
 	{
-		
+		name.set ( enteredName ) ;
 	}
 
 	/**
@@ -144,6 +209,15 @@ public class GUIController extends ViewPresenter implements CommunicationProtoco
 					{
 						JOptionPane.showMessageDialog ( null , "Grazie di avere utilizzato JSheepland\nArrivederci" , "JSheepland" , JOptionPane.INFORMATION_MESSAGE );
 						loginView.setVisible ( false ) ;
+						try 
+						{
+							terminateClient () ;
+						} 
+						catch (WrongStateMethodCallException e) 
+						{
+							e.printStackTrace();
+							throw new RuntimeException ( e ) ;
+						}
 					} 
 				} 
 									);

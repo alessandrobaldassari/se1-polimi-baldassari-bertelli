@@ -3,20 +3,22 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 /**
  * Enums containing all the possible net operations supported by this System. 
  */
-public enum ClientHandlerClientCommunicationProtocolOperation 
+public enum ClientCommunicationProtocolMessage 
 {
 
 	NAME_REQUESTING_REQUEST ,
 	
 	NAME_REQUESTING_RESPONSE,
 	
+	NAME_REQUESTING_RESPONSE_RESPONSE ,
+	
+	MATCH_STARTING_NOTIFICATION ,
+	
+	MATCH_WILL_NOT_START_NOTIFICATION,
+		
 	SHEPERD_COLOR_REQUESTING_REQUEST,
 	
 	SHEPERD_COLOR_REQUESTING_RESPONSE,
-	
-	MATCH_WILL_NOT_START_NOTIFICATION,
-	
-	GENERIC_NOTIFICATION_NOTIFICATION,
 	
 	CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST,
 	
@@ -32,6 +34,8 @@ public enum ClientHandlerClientCommunicationProtocolOperation
 
 	DO_MOVE_REQUESTING_REQUEST ,
 	
-	DO_MOVE_REQUESTING_RESPONSE
+	DO_MOVE_REQUESTING_RESPONSE ,
+	
+	GENERIC_NOTIFICATION_NOTIFICATION
 	
 }

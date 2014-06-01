@@ -11,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.GameController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match.MatchState;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongStateMethodCallException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.NetworkCommunicantPlayer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIServer;
@@ -26,6 +26,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 class MasterServer implements NetworkCommunicationController , MatchAdderCommunicationController , MatchStartCommunicationController
 {
 	
+	/***/
 	private static final long GAME_CONTROLLER_WAITING_DELAY = 1000L ;
 	
 	/**
@@ -98,13 +99,14 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 				newClientHandler = queue.take () ;
 				if ( currentGameController == null )
 					createAndLaunchNewGameController () ;
-				System.out.println ( "MASTER_SERVER : REQUEST CATCH" ) ;
 				System.out.println ( "MASTER_SERVER : ASKING_NAME " ) ;
 				name = newClientHandler.requestName () ;
 				currentGameController.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler ) ) ;
+				// if you want  to guarantee unique names, this is the position where doing it.
+				newClientHandler.notifyNameChoose ( true , null ) ;
 				System.out.println ( "MASTER_SERVER : NAME_CATCH " + name ) ;
 			} 
-			catch ( WrongStateMethodCallException e )
+			catch ( WrongMatchStateMethodCallException e )
 			{
 				if ( e.getActualState () == MatchState.CREATED ) // may be the Game Controller is late, give this Player another change to enter.
 				{
@@ -181,7 +183,6 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 	@Override
 	public synchronized void notifyFinishAddingPlayers () 
 	{
-	
 		currentGameController = null ;
 		currentClientHandlers.clear () ;
 	}

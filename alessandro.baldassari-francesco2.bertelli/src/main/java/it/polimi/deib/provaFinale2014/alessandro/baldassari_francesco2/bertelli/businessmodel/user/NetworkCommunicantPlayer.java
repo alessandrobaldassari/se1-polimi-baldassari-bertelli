@@ -9,11 +9,21 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 
+/***/
 public class NetworkCommunicantPlayer extends Player 
 {
 
+	/**
+	 * The ClientHandler object this Player object will use to obtain data when the System will
+	 * query each Player during the Game. 
+	 */
 	private ClientHandler clientHandler ;
 	
+	/**
+	 * @param name the name of this Player
+	 * @param clientHandler the value for the ClientHandler property.
+	 * @throws IllegalArgumentException if the clientHandler parameter is null.
+	 */
 	public NetworkCommunicantPlayer ( String name , ClientHandler clientHandler ) 
 	{
 		super ( name ) ;
@@ -23,6 +33,9 @@ public class NetworkCommunicantPlayer extends Player
 			throw new IllegalArgumentException();
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public void chooseCardsEligibleForSelling () 
 	{

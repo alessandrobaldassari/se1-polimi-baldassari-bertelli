@@ -5,21 +5,26 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 
+/***/
 public class WithReflectionObservableSupport < T extends Observer > 
 {
 
+	/***/
 	private Collection < T > observers ;
  
+	/***/
 	public WithReflectionObservableSupport () 
 	{
 		observers = new ArrayList < T > () ;
 	}
 	
+	/***/
 	public void addObserver ( T t ) 
 	{
 		observers.add ( t ) ;
 	}
 	
+	/***/
 	public void removeObserver ( T t ) 
 	{
 		observers.remove ( t ) ;

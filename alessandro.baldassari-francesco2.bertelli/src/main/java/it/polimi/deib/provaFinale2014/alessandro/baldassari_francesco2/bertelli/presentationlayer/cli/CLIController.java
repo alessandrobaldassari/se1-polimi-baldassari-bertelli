@@ -8,25 +8,28 @@ import java.io.PrintStream;
 import java.util.List;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client.CommunicationProtocolResponser;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Terminable;
 
-public class CLIController extends ViewPresenter implements CommunicationProtocolResponser
+/***/
+public class CLIController extends ViewPresenter
 {
 
+	/***/
 	private BufferedReader reader ;
 	
+	/***/
 	private PrintStream writer ;
 	
-	public CLIController ( Terminable client ) 
+	/***/
+	public CLIController () 
 	{
-		super ( client ) ;
+		super () ;
 		reader = new BufferedReader ( new InputStreamReader ( System.in ) ) ;
 		writer = System.out ;
 	}
 	
+	/***/
 	@Override
 	public String onNameRequest () 
 	{
@@ -43,6 +46,12 @@ public class CLIController extends ViewPresenter implements CommunicationProtoco
 		return res ;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void onNotifyMatchStart () {}
+	
 	@Override
 	public Color onSheperdColorRequest ( Iterable < Color > availableColors ) 
 	{
@@ -94,6 +103,8 @@ public class CLIController extends ViewPresenter implements CommunicationProtoco
 		return colors.get ( res - 1 ) ;
 	}
 
+	public void onNameRequestAck ( boolean isOk , String notes ) {}
+	
 	@Override
 	public void onMatchWillNotStartNotification(String msg) {
 		// TODO Auto-generated method stub

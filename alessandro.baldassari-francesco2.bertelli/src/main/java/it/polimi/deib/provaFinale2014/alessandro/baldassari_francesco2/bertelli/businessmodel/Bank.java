@@ -240,9 +240,11 @@ public class Bank
 		{
 			if ( cards.get ( regionType ).isEmpty () == false )
 			{ 
-				res = cards.get ( regionType ).pop () ;
-				if ( price != res.getInitialPrice() )
+				res = cards.get ( regionType ).peek () ;
+				if ( price != res.getInitialPrice () )
 					throw new CardPriceNotRightException ( price , res.getInitialPrice() ) ;
+				else
+					cards.get ( regionType ).pop () ;
 			}
 			else
 				throw new NoMoreCardOfThisTypeException ( regionType ) ;
@@ -353,7 +355,7 @@ public class Bank
 		 */
 		private CardPriceNotRightException ( int priceProposed , int rightPrice ) 
 		{
-			if ( priceProposed > 0 && rightPrice > 0 && priceProposed != rightPrice )
+			if ( rightPrice >= 0 && priceProposed != rightPrice )
 			{
 				this.proposedPrice = priceProposed ;
 				this.rightPrice = rightPrice ;

@@ -1,10 +1,11 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandlerClientCommunicationProtocolOperation;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientCommunicationProtocolMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.Message;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIClientBroker;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIClientBroker.AnotherCommandYetRunningException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -13,7 +14,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 /**
  * RMI-based implementation of the Client abstraction entity. 
@@ -80,30 +81,38 @@ public class RMIClient extends Client
 	@Override
 	protected void communicationProtocolImpl () 
 	{
-		Collection < Serializable > c ;
-		ClientHandlerClientCommunicationProtocolOperation nextOperation ;
+		List < Serializable > params ;
+		ClientCommunicationProtocolMessage nextOperation ;
 		String s ;
+	    Boolean b ;
 		Message m ;
 		try 
 		{
-			c = new ArrayList < Serializable > ( 2 ) ;
+			params = new ArrayList < Serializable > ( 2 ) ;
 			System.out.println ( "RMIClient : waiting for some commands " + clientBroker.isServerReady () ) ;
 			while ( clientBroker.isServerReady () == false ) ;
-			System.out.println ( "cliennt passed" ) ;
 			m = clientBroker.getNextMessage () ;
 			switch ( m.getOperation () )
 			{
 				case NAME_REQUESTING_REQUEST :
 					s = getDataPicker ().onNameRequest () ;
-					c.add  ( s ) ;
-					m = Message.newInstance ( ClientHandlerClientCommunicationProtocolOperation.NAME_REQUESTING_RESPONSE , c ) ;
+					params.add  ( s ) ;
+					m = Message.newInstance ( ClientCommunicationProtocolMessage.NAME_REQUESTING_RESPONSE , params ) ;
 					clientBroker.putNextMessage ( m ) ;
 					clientBroker.setClientReady () ;
-				break ;	
-				case SHEPERD_COLOR_REQUESTING_REQUEST:
-				
-				break;
+				break ;
 				case MATCH_WILL_NOT_START_NOTIFICATION:
+					break;
+				case MATCH_STARTING_NOTIFICATION :
+					getDataPicker ().onNotifyMatchStart () ;
+					clientBroker.setClientReady () ;
+				break ;
+				case SHEPERD_COLOR_REQUESTING_REQUEST:
+					params = CollectionsUtilities.newListFromIterable ( m.getParameters() ) ;
+					s = (String) params.get ( 1 ) ;
+					b = ( Boolean ) params.get ( 0 ) ;
+					getDataPicker ().onNameRequestAck  ( b , s ) ;
+					clientBroker.setClientReady () ;
 				break;
 				case GENERIC_NOTIFICATION_NOTIFICATION:
 				break;

@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.TurnNumberClock;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongStateMethodCallException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.CanNotMateWithHimException;
@@ -189,7 +189,7 @@ public class Mate extends GameMove
 					this.lambEvolver = lambEvolver ;
 					initTurn = turnNumberClock.getTurnNumber () ;
 				} 
-				catch (WrongStateMethodCallException e) 
+				catch (WrongMatchStateMethodCallException e) 
 				{
 					e.printStackTrace();
 					throw new RuntimeException () ;
@@ -216,7 +216,7 @@ public class Mate extends GameMove
 					}
 				}
 			}
-			catch ( WrongStateMethodCallException e) 
+			catch ( WrongMatchStateMethodCallException e) 
 			{
 				e.printStackTrace();
 				throw new RuntimeException ( e ) ;
