@@ -22,6 +22,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+/*
+ * This jUnit test class test Lamb
+ */
 public class LambTest {
 
 	static AdultOvine ram;
@@ -30,6 +33,10 @@ public class LambTest {
 	static DummyMatchIdentifier dummyMatchIdentifier;
 	static Lamb lamb;
 	
+	
+	/*
+	 * Setting up the environment for the test
+	 */
 	@BeforeClass
 	public static void setUpBeforeClass()
 	{
@@ -51,21 +58,33 @@ public class LambTest {
 		
 	}
 	
+	/*
+	 * Testing getBirthTurn() method
+	 */
 	@Test
 	public void getBirthTurn(){
 		assertTrue(lamb.getBirthTurn() == 0);
 	}
 	
+	/*
+	 * Testing getFather() method
+	 */
 	@Test
 	public void getFather(){
 		assertTrue(lamb.getFather() == ram);
 	}
 	
+	/*
+	 * Testing getMother() method
+	 */
 	@Test
 	public void getMother(){
 		assertTrue(lamb.getMother() == sheep);
 	}
 	
+	/*
+	 * Declaring a dummy MatchIdentifier to initialize animalFactory correctly
+	 */
 	public static class DummyMatchIdentifier implements Identifiable<Match>{
 
 		public DummyMatchIdentifier() {
