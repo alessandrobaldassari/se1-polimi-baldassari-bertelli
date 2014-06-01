@@ -70,10 +70,9 @@ public class AdultOvineTest {
 		}
 	}
 		
-}
 	
 
-	class DummyMatchIdentifier implements Identifiable<Match>{
+	public static class DummyMatchIdentifier implements Identifiable<Match>{
 
 		public DummyMatchIdentifier() {
 			// TODO Auto-generated constructor stub
@@ -85,3 +84,5 @@ public class AdultOvineTest {
 		}
 		
 	}
+	
+}
