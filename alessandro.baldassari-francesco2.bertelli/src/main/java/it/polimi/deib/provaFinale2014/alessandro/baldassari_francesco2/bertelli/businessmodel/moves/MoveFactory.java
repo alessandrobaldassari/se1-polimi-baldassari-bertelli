@@ -29,7 +29,7 @@ public class MoveFactory
 	private LambEvolver lambEvolver ;
 	
 	/***/
-	public MoveFactory ( TurnNumberClock clockSource , LambEvolver lambEvolver ) 
+	MoveFactory ( TurnNumberClock clockSource , LambEvolver lambEvolver ) 
 	{
 		if ( clockSource != null && lambEvolver != null )
 		{
@@ -43,6 +43,24 @@ public class MoveFactory
 			throw new IllegalArgumentException () ;
 	}
 	
+	/***/
+	public static MoveFactory newInstance ( boolean forTwoPlayersMatch , TurnNumberClock clockSource , LambEvolver lambEvolver , Sheperd choosenSheperd ) 
+	{
+		MoveFactory res ;
+		if ( clockSource != null && lambEvolver != null )
+			if ( forTwoPlayersMatch )
+				if ( choosenSheperd != null )
+					res = new TwoPlayersMatchMoveFactory ( clockSource , lambEvolver , choosenSheperd ) ;
+				else
+					throw new IllegalArgumentException () ;
+			else
+				res = new MoveFactory ( clockSource , lambEvolver ) ;
+		else
+			throw new IllegalArgumentException () ;
+		return res ;
+	}
+	
+	/***/
 	public GameMove newBreakDownMove ( Sheperd breaker , Animal animalToBreak ) throws CannotDoThisMoveException 
 	{
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )

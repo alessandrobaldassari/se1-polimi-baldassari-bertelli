@@ -34,6 +34,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MathUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
 
 import java.awt.Color;
@@ -69,7 +70,7 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 	/**
 	 * The Timer value about the time to wait before begin a Match. 
 	 */
-	private static final long DELAY = 60 * 1000;
+	private static final long DELAY = 30 * Utilities.MILLISECONDS_PER_SECOND ;
 	
 	/**
 	 * The maximum number of Player for a Match. 
@@ -162,10 +163,10 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 		if ( lamb != null )
 		{
 			whereTheLambIsNow = lamb.getPosition () ;
-			whereTheLambIsNow.getContainedAnimals().remove ( lamb ) ;
+			whereTheLambIsNow.removeAnimal ( lamb ) ;
 			newOvine = animalsFactory.newAdultOvine ( "" , MathUtilities.genProbabilityValue() > 0.5 ? AdultOvineType.RAM : AdultOvineType.SHEEP ) ;
 			newOvine.moveTo ( whereTheLambIsNow ) ;
-			whereTheLambIsNow.getContainedAnimals().add ( newOvine ) ;
+			whereTheLambIsNow.addAnimal ( newOvine ) ;
 		}
 		else
 			throw new IllegalArgumentException () ;
@@ -300,14 +301,14 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 			for ( Region region : match.getGameMap ().getRegions () ) 
 			{
 				bornOvine = animalsFactory.newAdultOvine ( "" , MathUtilities.genProbabilityValue() > 0.5 ? AdultOvineType.RAM : AdultOvineType.SHEEP ) ;
-				region.getContainedAnimals().add ( bornOvine ) ;
+				region.addAnimal ( bornOvine ) ;
 				bornOvine.moveTo ( region ) ;
 			}
 			sheepsburg = match.getGameMap ().getRegionByType ( RegionType.SHEEPSBURG ).iterator().next() ;
 			blackSheep = animalsFactory.newBlackSheep () ;
 			wolf = animalsFactory.newWolf () ;
-			sheepsburg.getContainedAnimals ().add ( animalsFactory.newBlackSheep () ) ;
-			sheepsburg.getContainedAnimals().add ( animalsFactory.newWolf () ) ;
+			sheepsburg.addAnimal ( animalsFactory.newBlackSheep () ) ;
+			sheepsburg.addAnimal ( animalsFactory.newWolf () ) ;
 			blackSheep.moveTo ( sheepsburg ) ;
 			wolf.moveTo ( sheepsburg ) ;
 		} 
@@ -475,10 +476,10 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 				if ( match.getNumberOfPlayers () == 2 )
 				{
 					choosenSheperd = currentPlayer.chooseSheperdForATurn () ;
-					moveFactory = new TwoPlayersMatchMoveFactory ( this , this , choosenSheperd ) ;
+					moveFactory = MoveFactory.newInstance ( true , this , this , choosenSheperd ) ;
 				}
 				else
-					moveFactory = new MoveFactory ( this , this ) ;
+					moveFactory = MoveFactory.newInstance ( false , this , this , null ) ;
 				for ( moveIndex = 0 ; moveIndex < NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ )
 					try 
 					{
@@ -708,12 +709,10 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 		@Override
 		public void run ()
 		{
-			System.out.println ( "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" ) ;
 			if ( match.getNumberOfPlayers() >= 2 ) 
 			{
 				match.setMatchState ( MatchState.INITIALIZATION ) ;
 				matchStartCommunicationController.notifyFinishAddingPlayers () ;
-				System.out.println ( "TIMER FINISHEDGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG" ) ;
 			}
 			else
 				matchStartCommunicationController.notifyFailStartMatch () ;

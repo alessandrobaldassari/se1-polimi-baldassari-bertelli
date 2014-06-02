@@ -31,7 +31,7 @@ public class RMIClientHandler implements ClientHandler
 	 * A RMIClientBroker object this Handler will use to synchronize with the Client. 
 	 */
 	private RMIClientBroker rmiClientBroker;
-
+	
 	/**
 	 * @param rmiClientBroker the value for the rmiClientBroker field
 	 * @throws IllegalArgumentException if the parameter is null. 
@@ -53,9 +53,7 @@ public class RMIClientHandler implements ClientHandler
 		Message m ;
 
 		String res ;
-		System.out.println ( "RMI CLIENT HANDLER : BEFORE GO INTO CORE METHOD" ) ;
 		while ( rmiClientBroker.isClientReady () == false ) ;
-		System.out.println ( "RMI CLIENT HANDLER : AFTER GO INTO CORE METHOD" ) ;
 		try 
 		{
 			m = Message.newInstance ( ClientCommunicationProtocolMessage.NAME_REQUESTING_REQUEST , Collections.EMPTY_LIST ) ;
@@ -73,15 +71,14 @@ public class RMIClientHandler implements ClientHandler
 			res = ( String ) m.getParameters().iterator().next () ;
 		}
 		else
-		{
 			throw new IOException ();
-		}
 		return res ;
 	}
 
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
+	@Override
 	public void notifyNameChoose ( boolean isNameOk , String note ) throws IOException
 	{
 		Collection < Serializable > c ;
@@ -109,12 +106,13 @@ public class RMIClientHandler implements ClientHandler
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
+	@Override
 	public void notifyMatchStart () throws IOException 
 	{
 		Message m ;
 		try 
 		{
-			while ( rmiClientBroker.isClientReady () ) ;
+			while ( rmiClientBroker.isClientReady () == false ) ;
 			m = Message.newInstance ( ClientCommunicationProtocolMessage.MATCH_STARTING_NOTIFICATION , Collections.EMPTY_LIST ) ;
 			rmiClientBroker.putNextMessage ( m ) ;
 			rmiClientBroker.setServerReady () ;
@@ -135,6 +133,17 @@ public class RMIClientHandler implements ClientHandler
 	@Override
 	public void notifyMatchWillNotStart(String message) throws IOException 
 	{
+		Message m ;
+		try 
+		{
+			while ( rmiClientBroker.isClientReady () == false ) ;
+			m = Message.newInstance ( ClientCommunicationProtocolMessage.MATCH_WILL_NOT_START_NOTIFICATION , Collections.singleton ( ( Serializable ) message ) ) ;
+			rmiClientBroker.putNextMessage ( m ) ;
+			rmiClientBroker.setServerReady () ;
+		} catch (AnotherCommandYetRunningException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 

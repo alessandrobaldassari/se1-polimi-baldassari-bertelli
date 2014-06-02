@@ -158,4 +158,13 @@ class RMIClientBrokerImpl implements RMIClientBroker
 		return ! flag.get () ;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public String toString () 
+	{
+		return "Class : RMIClientBrokerImpl" ;
+	}
+	
 }

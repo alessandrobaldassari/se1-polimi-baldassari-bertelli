@@ -9,6 +9,7 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Window;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -53,9 +54,9 @@ public final class GraphicsUtilities
 	}
 	
 	/***/
-	public static Image getImage ( String filePath ) throws IOException 
+	public static BufferedImage getImage ( String filePath ) throws IOException 
 	{ 
-		Image res ; 
+		BufferedImage res ; 
 		res = ImageIO.read ( new File ( filePath ) ) ;
 		return res ;
 	}

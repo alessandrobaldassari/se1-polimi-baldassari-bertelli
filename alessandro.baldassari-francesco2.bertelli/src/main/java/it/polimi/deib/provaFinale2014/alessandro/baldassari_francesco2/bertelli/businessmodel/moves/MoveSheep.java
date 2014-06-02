@@ -68,9 +68,9 @@ public class MoveSheep extends GameMove
 		{
 			if ( ( ovineInitialRegion.equals ( sheperdFirstBorderRegion ) || ovineInitialRegion.equals ( sheperdSecondBorderRegion ) ) && ( ovineDestinationRegion.equals ( sheperdFirstBorderRegion ) == true || ovineDestinationRegion.equals ( sheperdSecondBorderRegion ) == true ) )
 			{
-				ovineInitialRegion.getContainedAnimals().remove ( movingOvine ) ;
+				ovineInitialRegion.removeAnimal ( movingOvine ) ;
 				movingOvine.moveTo ( ovineDestinationRegion ) ;
-				ovineDestinationRegion.getContainedAnimals ().add ( movingOvine ) ;
+				ovineDestinationRegion.addAnimal ( movingOvine ) ;
 			}
 			else
 				throw new MoveNotAllowedException () ;

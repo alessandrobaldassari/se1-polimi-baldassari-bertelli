@@ -57,11 +57,9 @@ public class RMIClient extends Client
 		registry = LocateRegistry.getRegistry ( SERVER_IP_ADDRESS , SERVER_PORT ) ;
 		try 
 		{
-			System.out.println ( "RMI_CLIENT : BEGIN TECHNICAL CONNECT " ) ;
 			server = ( RMIServer ) registry.lookup ( RMIServer.LOGICAL_SERVER_NAME ) ;
 			key = server.addPlayer () ; 
 			clientBroker = ( RMIClientBroker ) registry.lookup ( key ) ;
-			System.out.println ( "RMI_CLIENT : END TECHNICAL CONNECT" ) ;
 		} 
 		catch ( NotBoundException e ) 
 		{
@@ -101,20 +99,27 @@ public class RMIClient extends Client
 					clientBroker.putNextMessage ( m ) ;
 					clientBroker.setClientReady () ;
 				break ;
+				case NAME_REQUESTING_RESPONSE_RESPONSE :
+					params = CollectionsUtilities.newListFromIterable ( m.getParameters () ) ;
+					s = (String) params.get ( 1 ) ;
+					b = ( Boolean ) params.get ( 0 ) ;
+					getDataPicker ().onNameRequestAck  ( b , s ) ;
+					clientBroker.setClientReady() ;
+				break ;
 				case MATCH_WILL_NOT_START_NOTIFICATION:
-					break;
+					getDataPicker ().onMatchWillNotStartNotification ( ( String ) m.getParameters().iterator().next() ) ;
+					clientBroker.setClientReady () ;
+				break;
 				case MATCH_STARTING_NOTIFICATION :
 					getDataPicker ().onNotifyMatchStart () ;
 					clientBroker.setClientReady () ;
 				break ;
 				case SHEPERD_COLOR_REQUESTING_REQUEST:
-					params = CollectionsUtilities.newListFromIterable ( m.getParameters() ) ;
-					s = (String) params.get ( 1 ) ;
-					b = ( Boolean ) params.get ( 0 ) ;
-					getDataPicker ().onNameRequestAck  ( b , s ) ;
-					clientBroker.setClientReady () ;
-				break;
-				case GENERIC_NOTIFICATION_NOTIFICATION:
+					//params = CollectionsUtilities.newListFromIterable ( m.getParameters() ) ;
+					//s = (String) params.get ( 1 ) ;
+					//b = ( Boolean ) params.get ( 0 ) ;
+					//getDataPicker ().onNameRequestAck  ( b , s ) ;
+					//clientBroker.setClientReady () ;
 				break;
 				case CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST:
 					
@@ -127,6 +132,8 @@ public class RMIClient extends Client
 				break ;
 				default :
 				break ;
+				case GENERIC_NOTIFICATION_NOTIFICATION:
+				break;	
 			}
 		}
 		catch (RemoteException e) {

@@ -18,7 +18,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -123,7 +122,7 @@ public class SocketClient extends Client
 					getDataPicker ().onNotifyMatchStart () ;
 				break ;
 				case MATCH_WILL_NOT_START_NOTIFICATION:
-					s = ois.readUTF();
+					getDataPicker ().onMatchWillNotStartNotification ( (String) m.getParameters().iterator().next() ) ;
 				break ;
 				case SHEPERD_COLOR_REQUESTING_REQUEST:
 					/*colors = ( Iterable<Color> ) ois.readObject () ;

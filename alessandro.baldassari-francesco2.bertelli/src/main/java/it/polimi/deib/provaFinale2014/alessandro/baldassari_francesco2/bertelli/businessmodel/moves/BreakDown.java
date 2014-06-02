@@ -81,7 +81,7 @@ public class BreakDown extends GameMove
 			breaker.getOwner().pay ( adjacentPlayers.size () * AMOUNT_TO_PAY_FOR_SILENCE ) ;
 			for ( Player player : adjacentPlayers )
 				player.receiveMoney ( AMOUNT_TO_PAY_FOR_SILENCE );
-			animalToBreak.getPosition ().getContainedAnimals ().remove ( animalToBreak ) ;
+			animalToBreak.getPosition ().removeAnimal ( animalToBreak ) ;
 			animalToBreak.moveTo ( null ) ;
 		} 
 		catch ( TooFewMoneyException e ) 

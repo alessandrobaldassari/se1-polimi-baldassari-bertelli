@@ -41,9 +41,8 @@ public class LoginView extends JDialog
 		setLayout ( g ) ;
 		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
 		add ( loginViewPanel ) ;
-		setSize ( GraphicsUtilities.getVGAResolution () ) ;
-		pack () ;
 		setResizable ( false ) ;
+		setAlwaysOnTop ( true ) ;
 	}
 	
 	public void prepareView () 

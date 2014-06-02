@@ -8,7 +8,12 @@ public abstract class GameMapElement
 {
 
 	// ATTRIBUTES
-		
+	
+	/**
+	 * The GameMapElementType of this Object. 
+	 */
+	private GameMapElementType gameMapElementType ;
+	
 	/**
 	 * The UID for this region, unique for every component of the map that extends this class
 	 */
@@ -20,14 +25,27 @@ public abstract class GameMapElement
 	 * @param uid the uid of this GameMapElement
 	 * @throws IllegalArgumentException if the parameter is < 0  
 	 */
-	GameMapElement ( int uid ) 
+	GameMapElement ( GameMapElementType gameMapElementType , int uid ) 
 	{
-		if ( uid >= 0 )
+		if ( gameMapElementType != null && uid >= 0 )
+		{
+			this.gameMapElementType = gameMapElementType ;
 			this.uid = uid ;
+		}
 		else
 			throw new IllegalArgumentException () ;
 	}
 
+	/**
+	 * Getter method for the gameMapElementType property.
+	 * 
+	 * @return the gameMapElementType property.
+	 */
+	public GameMapElementType getGameMapElementType () 
+	{
+		return gameMapElementType ;
+	}
+	
 	/**
 	 * @return the uid property. 
 	 */
@@ -51,6 +69,17 @@ public abstract class GameMapElement
 		else
 			res = false ;
 		return res ;
+		
+	}
+	
+	// ENUMERATIONS
+	
+	public enum GameMapElementType
+	{
+		
+		REGION ,
+		
+		ROAD
 		
 	}
 	

@@ -17,6 +17,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.CharacterDoesntMoveException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
@@ -54,7 +55,7 @@ public class WolfTestClosed {
 		}
 		try {
 			map = GameMapFactory.getInstance().newInstance(dummyMatchIdentifier);
-			map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().getContainedAnimals().add(wolf);
+			map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().addAnimal(wolf);
 			wolf.moveTo(map.getRegionByType(RegionType.SHEEPSBURG).iterator().next());
 		} catch (SingletonElementAlreadyGeneratedException e) {
 			// TODO Auto-generated catch block
@@ -94,14 +95,13 @@ public class WolfTestClosed {
 		}
 		for(Region region : borderRegions){
 			System.out.print(region.toString());
-			System.out.println(" " + region.getContainedAnimals().size());
-			if(region.getContainedAnimals().size() > 0){
+			if ( CollectionsUtilities.iterableSize( region.getContainedAnimals() ) > 0){
 					wolfIsInside = true;
 					break;
 			}
 		}
 		assertTrue(wolfIsInside);
-		assertTrue(map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().getContainedAnimals().size() == 0);
+		assertTrue ( CollectionsUtilities.iterableSize( map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().getContainedAnimals() ) == 0);
 	}	
 	
 	/*

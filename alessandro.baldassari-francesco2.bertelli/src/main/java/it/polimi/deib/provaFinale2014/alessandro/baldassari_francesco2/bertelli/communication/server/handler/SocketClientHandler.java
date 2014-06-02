@@ -124,7 +124,7 @@ public class SocketClientHandler implements ClientHandler
 		Message m ;
 		ClientCommunicationProtocolMessage operation ;
 		operation = ClientCommunicationProtocolMessage.MATCH_WILL_NOT_START_NOTIFICATION ;
-		m = Message.newInstance ( operation , Collections.EMPTY_LIST ) ;
+		m = Message.newInstance ( operation , Collections.singleton ( ( Serializable ) message ) ) ;
 		oos.writeObject ( m ) ;
 		oos.flush () ;
 	}

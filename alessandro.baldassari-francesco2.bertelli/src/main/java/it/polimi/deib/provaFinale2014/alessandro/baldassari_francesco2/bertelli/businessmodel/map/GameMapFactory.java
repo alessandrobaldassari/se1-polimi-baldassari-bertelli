@@ -14,6 +14,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.FactorySupport;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
 /**
  * Factory class for the GameMap object.
@@ -34,11 +35,6 @@ public class GameMapFactory
 	 * The path where find the file path of the Roads CSV file. 
 	 */
 	private static final String ROADS_FILE_PATH = "roads.csv" ;
-	
-	/**
-	 * The character used as a delimiter in the CSV InputStreams used to load the data of the map 
-	 */
-	private static final String DATA_FILES_DELIMITER = "," ;
 	
 	/**
 	 * This class instance to realize the Singleton pattern. 
@@ -134,7 +130,7 @@ public class GameMapFactory
 		scanner = new Scanner ( regionsCSVInputStream ) ;
 		while ( scanner.hasNextLine () )
 		{
-			lineComponents = scanner.nextLine().split ( DATA_FILES_DELIMITER ) ;
+			lineComponents = scanner.nextLine().split ( Utilities.CSV_FILE_FIELD_DELIMITER ) ;
 			region = new Region ( Region.RegionType.valueOf ( lineComponents [ 1 ] ) , Integer.parseInt ( lineComponents [ 0 ] ) ) ;		
 			borderRoadsUID = new int [ lineComponents.length - 2 ] ;
 			for ( i = 2 ; i < lineComponents.length ; i ++ )
@@ -166,7 +162,7 @@ public class GameMapFactory
 		scanner = new Scanner ( roadsCSVInputStream ) ;
 		while ( scanner.hasNextLine () )
 		{
-			lineComponents = scanner.nextLine ().split ( DATA_FILES_DELIMITER ) ;
+			lineComponents = scanner.nextLine ().split ( Utilities.CSV_FILE_FIELD_DELIMITER ) ;
 			road = new Road ( Integer.parseInt ( lineComponents [ 1 ] ) , Integer.parseInt ( lineComponents [ 0 ] ) , regionsMap.get ( Integer.parseInt ( lineComponents [ 2 ] ) ).getFirstObject () , regionsMap.get ( Integer.parseInt ( lineComponents [ 3 ] ) ).getFirstObject () ) ;
 			adjacentRoadsUID = new int [ lineComponents.length - 4 ] ;
 			for ( i = 4 ; i < lineComponents.length ; i ++ )

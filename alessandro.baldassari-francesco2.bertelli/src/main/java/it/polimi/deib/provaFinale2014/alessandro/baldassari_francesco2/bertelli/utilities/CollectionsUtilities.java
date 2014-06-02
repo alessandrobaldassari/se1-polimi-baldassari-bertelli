@@ -10,6 +10,16 @@ public class CollectionsUtilities
 {
 
 	/***/
+	public static < T > int iterableSize ( Iterable < T > src ) 
+	{
+		int res ;
+		res = 0 ;
+		for ( T t : src )
+			res ++ ;
+		return res ;
+	}
+	
+	/***/
 	public static < T > Collection < T > newCollectionFromIterable ( Iterable < T > src ) 
 	{
 		Collection < T > res ;

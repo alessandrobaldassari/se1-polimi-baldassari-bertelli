@@ -3,6 +3,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import static org.junit.Assert.*;
 
 import java.util.LinkedList;
+
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
@@ -14,6 +15,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.CharacterDoesntMoveException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
@@ -48,7 +50,7 @@ public class BlackSheepTest {
 		try {
 			map = GameMapFactory.getInstance().newInstance(dummyMatchIdentifier);
 			
-			map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().getContainedAnimals().add(blackSheep);
+			map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().addAnimal(blackSheep);
 			blackSheepReal = (BlackSheep) map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().getContainedAnimals().iterator().next();
 			blackSheepReal.moveTo(map.getRegionByType(RegionType.SHEEPSBURG).iterator().next());
 			try {
@@ -79,14 +81,15 @@ public class BlackSheepTest {
 		}
 		for(Region region : borderRegions){
 			System.out.print(region.toString());
-			System.out.println(" " + region.getContainedAnimals().size());
-			if(region.getContainedAnimals().size() > 0){
+			System.out.println(" " + CollectionsUtilities.iterableSize( region.getContainedAnimals() ) ) ;
+			if( CollectionsUtilities.iterableSize ( region.getContainedAnimals() ) > 0)
+			{
 					blackSheepIsInside = true;
 					break;
 			}
 		}
 		assertTrue(blackSheepIsInside);
-		assertTrue(map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().getContainedAnimals().size() == 0);
+		assertTrue( CollectionsUtilities.iterableSize( map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().getContainedAnimals() ) == 0);
 			
 	}
 	

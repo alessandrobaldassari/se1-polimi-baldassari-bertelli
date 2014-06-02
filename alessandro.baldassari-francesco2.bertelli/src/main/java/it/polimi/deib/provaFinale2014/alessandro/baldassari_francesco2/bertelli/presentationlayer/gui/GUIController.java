@@ -1,15 +1,16 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui;
 
 import java.awt.Color;
+import java.awt.Frame;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.LoginView.LoginViewObserver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
 /***/
@@ -32,13 +33,18 @@ public class GUIController extends ViewPresenter implements LoginViewObserver
 	private static final String NAME_REJECTED_MESSAGE = "Siamo spiacenti, ma il nome che hai proposto è già in uso nel contesto di JSheepland in questo momento.\nPrego, prova con un altro nome!" ;
 	
 	/***/
+	private static final String MATCH_STARTING_MESSAGE = "Tutto è pronto!\nGli avversari sono arrivati!\nPreparati alla partita!" ;
+	
+	/***/
 	private WaitingView waitingView ;
 	
 	/***/
 	private LoginView loginView ;
 	
+	/***/
 	private GameView gameView ;
 	
+	/***/
 	private AtomicReference < String > name ;
 	
 	/***/
@@ -52,7 +58,10 @@ public class GUIController extends ViewPresenter implements LoginViewObserver
 		SwingUtilities.invokeLater ( guiElementsCreator ) ;
 	}
 	
-	/***/
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
 	public void startApp () 
 	{
 		SwingUtilities.invokeLater ( 
@@ -94,7 +103,6 @@ public class GUIController extends ViewPresenter implements LoginViewObserver
 	public void onNameRequestAck ( boolean isOk , String notes ) 
 	{
 		final Runnable r ;
-		final String koMessage ;
 		if ( isOk )
 		{
 			r = new Runnable () { 
@@ -124,13 +132,41 @@ public class GUIController extends ViewPresenter implements LoginViewObserver
 	@Override
 	public void onNotifyMatchStart () 
 	{
-		
+		SwingUtilities.invokeLater ( new Runnable () 
+						{ 
+							public void run () 
+							{
+								JOptionPane.showMessageDialog ( waitingView , MATCH_STARTING_MESSAGE , APP_NAME , JOptionPane.INFORMATION_MESSAGE ) ;
+								waitingView.setVisible( false ) ;
+								gameView.setVisible ( true ) ;
+							} 
+						} 
+								   ) ;
 	}
 	
 	@Override
-	public void onMatchWillNotStartNotification(String msg) {
-		// TODO Auto-generated method stub
-		
+	public void onMatchWillNotStartNotification ( final String msg ) 
+	{
+		SwingUtilities.invokeLater ( new Runnable () 
+		{ 
+			public void run () 
+			{
+				JOptionPane.showMessageDialog ( waitingView , msg , APP_NAME , JOptionPane.ERROR_MESSAGE) ;
+				waitingView.setVisible ( false ) ;
+				loginView.dispose () ;
+				waitingView.dispose () ;
+				try 
+				{
+					terminateClient () ;
+				} 
+				catch (WrongStateMethodCallException e) 
+				{
+					e.printStackTrace();
+					throw new RuntimeException ( e ) ;
+				}
+			} 
+		} 
+				   ) ;
 	}
 	
 	/***/
@@ -183,6 +219,9 @@ public class GUIController extends ViewPresenter implements LoginViewObserver
 			waitingView = new WaitingView () ;
 			loginView = new LoginView ( GUIController.this ) ;
 			gameView = new GameView () ;
+			waitingView.setSize ( GraphicsUtilities.getVGAResolution () ) ;
+			loginView.setSize ( GraphicsUtilities.getVGAResolution () ) ;
+			gameView.setExtendedState ( Frame.MAXIMIZED_BOTH );
 		}
 		
 	}

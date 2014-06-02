@@ -3,6 +3,14 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 /***/
 public class Utilities 
 {
+	
+	/**
+	 * The character used as a delimiter in the CSV format. 
+	 */
+	public static final String CSV_FILE_FIELD_DELIMITER = "," ;
+	
+	/***/
+	public static final int MILLISECONDS_PER_SECOND = 1000 ;
 
 	/***/
 	public static Class < ? > [] getTypes ( Object ... src ) 

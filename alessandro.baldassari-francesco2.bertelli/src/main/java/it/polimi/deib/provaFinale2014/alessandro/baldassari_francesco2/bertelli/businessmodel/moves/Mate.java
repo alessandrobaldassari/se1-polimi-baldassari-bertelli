@@ -99,7 +99,7 @@ public class Mate extends GameMove
 					try 
 					{
 						lamb = sheep.mate ( ram ) ;
-						whereMate.getContainedAnimals ().add ( lamb ) ;
+						whereMate.addAnimal ( lamb ) ;
 						lamb.moveTo ( whereMate );
 						runnableExec = Executors.newSingleThreadExecutor () ;
 						lambGrowerLookerRunnable = new LambGrowerLookerRunnable ( clockSource , lamb , lambEvolver ) ;

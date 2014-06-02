@@ -28,6 +28,9 @@ public class WaitingView extends JDialog
 		super ( ( Frame ) null , "JSheepland" , true ) ;
 		i = new InitViewPanel () ;
 		add ( i ) ;
+		setResizable ( false ) ;
+		setAlwaysOnTop ( true ) ;
+		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
 	}
 	
 	public void setText ( String text ) 
@@ -50,13 +53,16 @@ class InitViewPanel extends FrameworkedWithGridBagLayoutPanel
 	/***/
 	private JLabel textLabel ;
 	
+	/***/
 	private JProgressBar p ;
 	
+	/***/
 	InitViewPanel () 
 	{
 		super () ;
 	}
 	
+	/***/
 	public void setText ( String text ) 
 	{
 		if ( text != null )

@@ -44,8 +44,8 @@ public class Wolf extends Animal
 					destRegion = winnerRoad.getSecondBorderRegion () ;
 				else
 					destRegion = winnerRoad.getFirstBorderRegion () ;
-				initRegion.getContainedAnimals().remove ( this ) ;
-				destRegion.getContainedAnimals().add ( this ) ;
+				initRegion.removeAnimal ( this ) ;
+				destRegion.addAnimal ( this ) ;
 				setPosition ( destRegion ) ;
 			}
 			else

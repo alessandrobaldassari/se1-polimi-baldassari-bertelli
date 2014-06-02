@@ -49,8 +49,8 @@ public class BlackSheep extends AdultOvine
 				destinationRegion = winnerRoad.getSecondBorderRegion () ;
 			else
 				destinationRegion = winnerRoad.getFirstBorderRegion () ;
-			destinationRegion.getContainedAnimals ().add ( this ) ;
-			myRegion.getContainedAnimals ().remove ( this ) ;
+			destinationRegion.addAnimal ( this ) ;
+			myRegion.removeAnimal ( this ) ;
 			
 			moveTo ( destinationRegion ) ;
 		}

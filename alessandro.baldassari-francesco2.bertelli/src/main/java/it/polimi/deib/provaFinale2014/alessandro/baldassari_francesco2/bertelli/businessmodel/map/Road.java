@@ -70,7 +70,7 @@ public class Road extends GameMapElement
 	 */
 	Road ( int number , int uid , Region firstBorderRegion , Region secondBorderRegion ) 
 	{
-		super ( uid ) ;
+		super ( GameMapElementType.ROAD , uid ) ;
 		if ( number >= MIN_NUMBER && number <= MAX_NUMBER && firstBorderRegion != null && secondBorderRegion != null && firstBorderRegion.equals ( secondBorderRegion ) == false )
 		{
 			this.number = number ;

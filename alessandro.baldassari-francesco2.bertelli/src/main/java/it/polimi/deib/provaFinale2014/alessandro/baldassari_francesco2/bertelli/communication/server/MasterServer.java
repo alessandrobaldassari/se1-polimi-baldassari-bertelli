@@ -80,6 +80,7 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 	}
 	
 	/**
+	 * AS THE SUPER0'S ONE.
 	 * The run method of this Runnable object.
 	 * Essentially it consists of an infinite loop which has to maintain this Runnable alive. 
 	 */
@@ -102,6 +103,7 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 				System.out.println ( "MASTER_SERVER : ASKING_NAME " ) ;
 				name = newClientHandler.requestName () ;
 				currentGameController.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler ) ) ;
+				currentClientHandlers.add ( newClientHandler ) ;
 				// if you want  to guarantee unique names, this is the position where doing it.
 				newClientHandler.notifyNameChoose ( true , null ) ;
 				System.out.println ( "MASTER_SERVER : NAME_CATCH " + name ) ;
@@ -175,6 +177,7 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 			{
 				e.printStackTrace();
 			}
+		notifyFinishAddingPlayers () ;
 	}
 	
 	/**
@@ -183,6 +186,14 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 	@Override
 	public synchronized void notifyFinishAddingPlayers () 
 	{
+		for ( ClientHandler c : currentClientHandlers )
+			try 
+			{
+				c.notifyMatchStart () ;
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+			}
 		currentGameController = null ;
 		currentClientHandlers.clear () ;
 	}

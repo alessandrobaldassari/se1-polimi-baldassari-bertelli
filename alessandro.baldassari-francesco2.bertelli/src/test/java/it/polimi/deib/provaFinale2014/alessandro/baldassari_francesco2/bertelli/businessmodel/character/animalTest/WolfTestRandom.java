@@ -51,7 +51,7 @@ public class WolfTestRandom {
 		}
 		try {
 			map = GameMapFactory.getInstance().newInstance(dummyMatchIdentifier);
-			map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().getContainedAnimals().add(wolf);
+			map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().addAnimal(wolf);
 			wolf.moveTo(map.getRegionByType(RegionType.SHEEPSBURG).iterator().next());
 		} catch (SingletonElementAlreadyGeneratedException e) {
 			// TODO Auto-generated catch block

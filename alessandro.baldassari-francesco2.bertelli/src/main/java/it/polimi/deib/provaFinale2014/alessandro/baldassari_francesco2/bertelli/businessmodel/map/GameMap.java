@@ -1,7 +1,10 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElement.GameMapElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementReference;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Observer;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -141,7 +144,7 @@ public class GameMap
 	}
 
 	/**
-	 * EXACTLY AS THE SUPER ONE'S
+	 * AS THE SUPER ONE'S
 	 */
 	@Override
 	public String toString () 
@@ -152,6 +155,18 @@ public class GameMap
 		stringBuffer.append ( "Class : " + getClass ().getName() );
 		res = stringBuffer.toString () ;
 		return res ;
+	}
+	
+	/***/
+	interface GameMapObserver extends Observer 
+	{
+		
+		/***/
+		public void onPositionableElementAdded ( PositionableElementReference addedElem , GameMapElementType whereType , int whereId ) ;
+	
+		/***/
+		public void onPositionableElementRemoved ( PositionableElementReference removedElem , GameMapElementType whereType , int whereId ) ;
+		
 	}
 	
 }

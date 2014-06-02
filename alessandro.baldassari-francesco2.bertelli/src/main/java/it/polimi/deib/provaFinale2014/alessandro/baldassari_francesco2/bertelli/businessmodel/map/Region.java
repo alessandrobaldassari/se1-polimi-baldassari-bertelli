@@ -41,7 +41,7 @@ public class Region extends GameMapElement
 	 */
 	Region ( RegionType type , int uid ) 
 	{
-		super ( uid ) ;
+		super ( GameMapElementType.REGION , uid ) ;
 		if ( type != null )
 		{
 			this.type = type ;
@@ -101,12 +101,22 @@ public class Region extends GameMapElement
 		return res ;
 	}
 	
+	public void addAnimal ( Animal newAnimal ) 
+	{
+		containedAnimals.add ( newAnimal ) ;
+	}
+	
+	public void removeAnimal ( Animal animal ) 
+	{
+		containedAnimals.remove ( animal ) ;
+	}
+	
 	/**
 	 * Getter for the containedAnimals property.
 	 * 
 	 * @return the containedAnimals property.
 	 */
-	public Collection < Animal > getContainedAnimals () 
+	public Iterable < Animal > getContainedAnimals () 
 	{
 		return containedAnimals ;
 	}
@@ -159,6 +169,7 @@ public class Region extends GameMapElement
 	
 	// EXCEPTIONS
 	
+	/***/
 	public class NoRoadWithThisNumberException extends Exception {}
 	
 	

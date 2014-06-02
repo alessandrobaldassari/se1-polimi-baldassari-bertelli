@@ -9,12 +9,14 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 
+/***/
 public class TwoPlayersMatchMoveFactory extends MoveFactory 
 {
 
+	/***/
 	private Sheperd choosenSheperd ;
 	
-	public TwoPlayersMatchMoveFactory ( TurnNumberClock clockSource , LambEvolver lambEvolver , Sheperd choosenSheperd ) 
+	TwoPlayersMatchMoveFactory ( TurnNumberClock clockSource , LambEvolver lambEvolver , Sheperd choosenSheperd ) 
 	{
 		super ( clockSource , lambEvolver ) ;
 		if ( choosenSheperd != null )
@@ -23,11 +25,15 @@ public class TwoPlayersMatchMoveFactory extends MoveFactory
 			throw new IllegalArgumentException () ;
 	}
 	
+	/***/
 	private boolean sheperdCorrect ( Sheperd otherSh ) 
 	{
 		return otherSh.equals ( choosenSheperd ) ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE.
+	 */
 	@Override
 	public GameMove newBreakDownMove ( Sheperd breaker , Animal animalToBreak ) throws CannotDoThisMoveException 
 	{
