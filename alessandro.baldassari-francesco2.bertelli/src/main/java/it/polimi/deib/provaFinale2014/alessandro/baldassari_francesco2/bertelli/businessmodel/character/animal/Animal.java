@@ -14,9 +14,9 @@ public abstract class Animal extends Character < Region >
 	/**
 	 * @param name the name of this Animal 
 	 */
-	Animal ( String name ) 
+	Animal ( PositionableElementType positionableElementType , String name ) 
 	{
-		super ( name ) ;
+		super ( positionableElementType , name ) ;
 	}
 
 }

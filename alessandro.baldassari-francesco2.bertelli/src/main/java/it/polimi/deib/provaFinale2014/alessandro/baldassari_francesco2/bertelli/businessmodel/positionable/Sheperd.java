@@ -35,7 +35,7 @@ public class Sheperd extends Character < Road >
 	 */
 	public Sheperd ( String name , Color color , Player owner ) 
 	{
-		super ( name ) ;
+		super ( PositionableElementType.SHEPERD , name ) ;
 		if ( color != null && owner != null )
 		{
 			this.color = color ;

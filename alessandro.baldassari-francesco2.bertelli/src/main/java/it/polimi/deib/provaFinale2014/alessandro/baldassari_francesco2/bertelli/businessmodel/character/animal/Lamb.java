@@ -37,7 +37,7 @@ public class Lamb extends Ovine
 	 */
 	Lamb ( String name , int birthTurn , AdultOvine father , AdultOvine mother ) 
 	{
-		super ( name ) ;
+		super ( PositionableElementType.LAMB , name ) ;
 		if ( father != null && mother != null && birthTurn >= 0 && father.getType () != mother.getType () )
 		{
 			this.birthTurn = birthTurn ;

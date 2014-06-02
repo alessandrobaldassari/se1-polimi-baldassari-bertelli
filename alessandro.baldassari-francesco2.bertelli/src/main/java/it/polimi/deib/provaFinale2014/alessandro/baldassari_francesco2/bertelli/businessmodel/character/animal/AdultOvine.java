@@ -22,7 +22,12 @@ public class AdultOvine extends Ovine
 	 */
 	AdultOvine ( String name , AdultOvineType type ) 
 	{
-		super ( name ) ;
+		super ( type == AdultOvineType.RAM ? PositionableElementType.RAM : PositionableElementType.SHEEP , name ) ;
+	}
+	
+	AdultOvine ( PositionableElementType positionableElementType , String name , AdultOvineType type )
+	{
+		super ( positionableElementType , name ) ;
 		if ( type != null )
 			this.type = type ;
 		else

@@ -5,7 +5,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
@@ -17,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -29,6 +29,10 @@ import javax.swing.JSplitPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElement.GameMapElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElement.PositionableElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementReference;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObservableFrameworkedWithGridBagLayoutPanel;
@@ -185,12 +189,17 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		add ( splitPane ) ;
 	}
 	
+	/***/
 	private class DrawingPanel extends JPanel 
 	{
 		
 		/***/
+		private Map < PositionableElementType , BufferedImage > positionableElementsImages ;
+		
+		/***/
 		private BufferedImage backgroundImage ;
-				
+		
+		/***/
 		private Dimension preferredDimension ;
 		
 		/***/
@@ -199,11 +208,26 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 			super () ;
 			if ( backgroundImage != null )
 			{
-				this.backgroundImage = backgroundImage ;
-				preferredDimension = new Dimension ( backgroundImage.getWidth() , backgroundImage.getHeight() ) ;
-				setOpaque ( false );
-				setDoubleBuffered ( true ) ;
-				setLayout ( null ) ;
+				try 
+				{
+					this.backgroundImage = backgroundImage ;
+					positionableElementsImages = new HashMap < PositionableElementType , BufferedImage > ( PositionableElementType.values().length ) ;
+					positionableElementsImages.put ( PositionableElementType.FENCE , GraphicsUtilities.getImage ( "sheepland_fence.jpg" ) ) ;
+					positionableElementsImages.put ( PositionableElementType.SHEPERD ,GraphicsUtilities.getImage ( "sheepland_sheperd.png" )) ;
+					positionableElementsImages.put ( PositionableElementType.WOLF , GraphicsUtilities.getImage ( "sheepland_wolf.jpg" ) ) ;
+					positionableElementsImages.put ( PositionableElementType.LAMB , GraphicsUtilities.getImage ( "sheepland_lamb.jpg" ) ) ;
+					positionableElementsImages.put ( PositionableElementType.RAM , GraphicsUtilities.getImage ( "sheepland_ram.jpg" ) ) ;
+					positionableElementsImages.put ( PositionableElementType.SHEEP , GraphicsUtilities.getImage ( "sheepland_sheep.jpg" ) ) ;
+					positionableElementsImages.put ( PositionableElementType.BLACK_SHEEP , GraphicsUtilities.getImage ( "sheepland_black_sheep.png" ) ) ;
+					preferredDimension = new Dimension ( backgroundImage.getWidth() , backgroundImage.getHeight() ) ;
+					setOpaque ( false );
+					setDoubleBuffered ( true ) ;
+					setLayout ( null ) ;
+				} 
+				catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			else
 				throw new IllegalArgumentException () ;
@@ -224,6 +248,7 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		@Override
 		public void paintComponent ( Graphics g ) 
 		{ 	
+			BufferedImage b ;
 			int x0 ;
 			int y0 ;
 			super.paintComponent ( g ) ;
@@ -236,6 +261,8 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 			else
 				y0 = 0 ;
 			g.drawImage ( backgroundImage , x0 , y0 , backgroundImage.getWidth() , backgroundImage.getHeight() , this );
+			b = positionableElementsImages.get ( PositionableElementType.BLACK_SHEEP ) ;
+			g.drawImage ( b , ( int ) m.roadsCoordinates.get ( 2 ).getMinX() , ( int ) m.roadsCoordinates.get ( 2 ).getMinY() , b.getWidth () , b.getHeight () , this ) ;
 		}
 		
 		/***/
@@ -262,6 +289,7 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		
 	}
 
+	/***/
 	private class CommandPanel extends FrameworkedWithGridBagLayoutPanel 
 	{
 		
@@ -364,6 +392,7 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		
 	}
 	
+	/***/
 	private class MapMeasurementCoordinatesManager
 	{
 	
@@ -463,8 +492,16 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
  		
 	}
 	
+	/***/
 	private class PositionableElementCoordinatesManager 
 	{
+		
+		private Map < Couple < PositionableElementType , Integer > , PositionableElementReference > elems ; 
+		
+		PositionableElementCoordinatesManager () 
+		{
+			elems = new LinkedHashMap < Couple < PositionableElementType , Integer > , PositionableElementReference > () ;
+		}
 		
 	}
 	

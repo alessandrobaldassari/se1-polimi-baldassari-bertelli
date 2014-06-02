@@ -23,8 +23,9 @@ public abstract class Character < T extends GameMapElement > extends Positionabl
 	 * @param name the Name of this Character.
 	 * @throws IllegalArgumentException if the name parameter is null.
 	 */
-	protected Character ( String name ) 
+	protected Character ( PositionableElementType positionableElementType , String name ) 
 	{
+		super ( positionableElementType ) ;
 		if ( name != null )
 			this.name = name ;
 		else

@@ -19,7 +19,7 @@ public class Wolf extends Animal
 	 */
 	Wolf ( String name ) 
 	{
-		super ( name ) ;
+		super ( PositionableElementType.WOLF , name ) ;
 	}
 	
 	/**

@@ -11,14 +11,38 @@ public abstract class PositionableElement < T extends GameMapElement >
 	// ATTRIBUTES
 	
 	/**
+	 * The type of this PositionableElement. 
+	 */
+	private PositionableElementType positionableElementType ;
+	
+	/**
 	 * The position of this element in the GameMap.
 	 * It must refer to an Object contained in the GameMap element.
 	 */
 	private T position ;
 	
 	// METHODS
+
+	/**
+	 * @throw IllegalArgumentException if the parameter is null. 
+	 */
+	protected PositionableElement ( PositionableElementType positionableElementType ) 
+	{
+		if ( positionableElementType != null )
+			this.positionableElementType = positionableElementType ;
+		else
+			throw new IllegalArgumentException () ;
+	}
 	
-	protected PositionableElement () {}
+	/**
+	 * Getter method for the positionableElementType property.
+	 * 
+	 * @return the positionableElementType value.
+	 */
+	public PositionableElementType getPositionableElementType () 
+	{
+		return positionableElementType ;
+	}
 	
 	/**
 	 * Setter for the position property.
@@ -38,6 +62,27 @@ public abstract class PositionableElement < T extends GameMapElement >
 	public T getPosition () 
 	{
 		return position ;
+	}
+	
+	// ENUMERATIONS
+	
+	public enum PositionableElementType 
+	{
+		
+		FENCE ,
+		
+		SHEPERD ,
+	
+		WOLF ,
+
+		LAMB ,
+
+		RAM ,
+		
+		SHEEP ,
+		
+		BLACK_SHEEP ,
+			
 	}
 	
 }

@@ -25,6 +25,7 @@ public class Fence extends PositionableElement < Road >
 	 */
 	public Fence ( FenceType type ) 
 	{
+		super ( PositionableElementType.FENCE ) ;
 		if ( type != null )
 		{
 			this.type = type ;

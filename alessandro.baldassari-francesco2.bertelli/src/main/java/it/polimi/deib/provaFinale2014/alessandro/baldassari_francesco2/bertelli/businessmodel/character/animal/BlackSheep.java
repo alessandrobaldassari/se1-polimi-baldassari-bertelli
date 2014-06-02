@@ -1,7 +1,5 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal;
 
-import java.util.NoSuchElementException;
-
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.CharacterDoesntMoveException;
@@ -19,7 +17,7 @@ public class BlackSheep extends AdultOvine
 	 */
 	BlackSheep ( String name ) 
 	{
-		super ( name , AdultOvineType.SHEEP ) ; 
+		super ( PositionableElementType.BLACK_SHEEP , name , AdultOvineType.SHEEP ) ; 
 	}
 
 	/**
