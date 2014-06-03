@@ -20,7 +20,7 @@ public class WrongMatchStateMethodCallException extends WrongStateMethodCallExce
 	 * @param actualState the state where the System is when this Exception is thrown. 
 	 * @throws IllegalArgumentException if the actualState parameter is null.
 	 */
-	WrongMatchStateMethodCallException ( MatchState actualState ) 
+	protected WrongMatchStateMethodCallException ( MatchState actualState ) 
 	{
 		if ( actualState != null )
 			this.actualState = actualState ;
