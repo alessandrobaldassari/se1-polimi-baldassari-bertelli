@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
@@ -21,6 +22,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -37,97 +39,143 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObservableFrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
-/***/
+/**
+ * This class is a JFrame wrapper for the GameView. 
+ */
 public class GameView extends JFrame
 {
 
-	/***/
+	/**
+	 * The GameViewPanel object that will render the the GameView. 
+	 */
 	private GameViewPanel gameViewPanel ;
 
 	/***/
 	public GameView () 
 	{
 		super () ;
+		GridBagLayout g ;
+		Insets insets ;
 		gameViewPanel = new GameViewPanel () ; 
-		add ( gameViewPanel ) ;
-		setResizable ( true ) ;
+		g = new GridBagLayout () ;
+		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
+		GraphicsUtilities.setComponentLayoutProperties ( gameViewPanel , g , 0 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 		setDefaultCloseOperation ( EXIT_ON_CLOSE ) ;
+		setLayout ( g ) ;
+		setResizable ( true ) ;
+		add ( gameViewPanel ) ;
 	}
 	
 	public static void main ( String [] args ) 
 	{
 		GameView g ;
 		g = new GameView () ;
-		//g.setVisible(true) ;  
-		GraphicsUtilities.showWindow ( GameView.class , null ) ;
+		g.setVisible(true) ;  
 	}
 	
 }
 
+/**
+ * The true View for the Game 
+ */
 class GameViewPanel extends FrameworkedWithGridBagLayoutPanel 
 {
 
-	/***/
-	private MapViewPanel mapViewPanel ;
+	/**
+	 * A MapView to render the Map and let the User interact with it. 
+	 */
+	private MapViewPanel mapPanel ;
 	
-	/***/
+	/**
+	 * A PlayersCardView to manage the Cards a User owns. 
+	 */
 	private PlayersCardViewPanel playersCardPanel ;
 	
-	/***/
-	private PlayersMovePanel playersMovePanel ;
+	/**
+	 * A PlayersMoveView to manage the  move a User can do.
+	 */
+	private PlayersMoveViewPanel playersMovePanel ;
 	
+	/***/
 	GameViewPanel () 
 	{
 		super () ;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void createComponents () 
 	{
-		mapViewPanel = new MapViewPanel () ;
+		mapPanel = new MapViewPanel () ;
 		playersCardPanel = new PlayersCardViewPanel () ;
-		playersMovePanel = new PlayersMovePanel () ;
+		playersMovePanel = new PlayersMoveViewPanel () ;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void manageLayout () 
 	{
 		Insets insets ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
 		layoutComponent ( playersCardPanel , 0 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.VERTICAL , GridBagConstraints.WEST , insets ) ;
-		layoutComponent ( mapViewPanel , 1 , 0 , 25 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+		layoutComponent ( mapPanel , 1 , 0 , 25 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 		layoutComponent ( playersMovePanel , 2 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.VERTICAL , GridBagConstraints.EAST , insets ) ;
 
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void bindListeners () {}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void injectComponents () 
 	{
-		add ( mapViewPanel ) ;
+		add ( mapPanel ) ;
 		add ( playersCardPanel ) ;
+		add ( playersMovePanel ) ;
 	}
 	
 }
 
+/**
+ * A comoponent that manage the rendering of the Map and the interaction of the User with it. 
+ */
 class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel  
 {
 
-	/***/
+	/**
+	 * A split pane to show both the map and some commands button about zoom and other things. 
+	 */
 	private JSplitPane splitPane ;
 	
-	/***/
+	/**
+	 * A Scroll Pane to scroll the Map. 
+	 */
 	private JScrollPane scrollPane ;
 	
-	/***/
+	/**
+	 * A Command Panel to host some commands about the Map ( zoom and other stuff ).
+	 */
 	private CommandPanel commandPanel ;
 	
-	/***/
+	/**
+	 * A Drawing Panel to effectively draw the Map.
+	 */
 	private DrawingPanel drawingPanel ;
 	
-	private MapMeasurementCoordinatesManager m ;
+	/**
+	 * A component to manage the coordinates of the Map and the Objects on the Map. 
+	 */
+	private MapMeasurementCoordinatesManager coordinatesManager ;
 	
 	/***/
 	MapViewPanel () 
@@ -135,23 +183,17 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		super () ;	
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void createComponents () 
 	{
-		BufferedImage backgroundImage ;
-		try 
-		{
-			backgroundImage = GraphicsUtilities.getImage ( "sheepland_map.jpg" ) ;
-			splitPane = new JSplitPane () ;
-			scrollPane = new JScrollPane () ;
-			drawingPanel = new DrawingPanel ( backgroundImage ) ;
-			commandPanel = new CommandPanel () ;	
-			m = new MapMeasurementCoordinatesManager () ;
-		}
-		catch ( IOException e) 
-		{
-			e.printStackTrace();
-		}
+		splitPane = new JSplitPane () ;
+		scrollPane = new JScrollPane () ;
+		drawingPanel = new DrawingPanel () ;
+		commandPanel = new CommandPanel () ;	
+		coordinatesManager = new MapMeasurementCoordinatesManager () ;
 	}
 
 	/**
@@ -166,11 +208,10 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		splitPane.setBottomComponent ( commandPanel );
 		splitPane.setOrientation ( JSplitPane.VERTICAL_SPLIT );
 		splitPane.setOneTouchExpandable ( true ) ;
-		splitPane.setDividerLocation ( ( int ) ( 82.5 * getHeight () ) / 100  ) ;
 		scrollPane.setViewportView ( drawingPanel ) ;
 		scrollPane.setVerticalScrollBarPolicy ( ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED ) ;
 		scrollPane.setHorizontalScrollBarPolicy ( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED ) ;
-		layoutComponent ( splitPane, 0 , 0 , 1 , 50 , 2 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+		layoutComponent ( splitPane, 0 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 		
 	}
 
@@ -189,48 +230,52 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		add ( splitPane ) ;
 	}
 	
-	/***/
+	/**
+	 * The class that effectively draw the GameMap on the screen. 
+	 */
 	private class DrawingPanel extends JPanel 
 	{
 		
-		/***/
+		/**
+		 * A Map containing the images of the elements to draw on the GameMap.
+		 */
 		private Map < PositionableElementType , BufferedImage > positionableElementsImages ;
 		
-		/***/
+		/**
+		 * The image representing the GameMap on the screen. 
+		 */
 		private BufferedImage backgroundImage ;
 		
-		/***/
+		/**
+		 * The preferred Dimension of this component. 
+		 */
 		private Dimension preferredDimension ;
 		
 		/***/
-		public DrawingPanel ( BufferedImage backgroundImage ) 
+		public DrawingPanel () 
 		{
 			super () ;
-			if ( backgroundImage != null )
+			try 
 			{
-				try 
-				{
-					this.backgroundImage = backgroundImage ;
-					positionableElementsImages = new HashMap < PositionableElementType , BufferedImage > ( PositionableElementType.values().length ) ;
-					positionableElementsImages.put ( PositionableElementType.FENCE , GraphicsUtilities.getImage ( "sheepland_fence.jpg" ) ) ;
-					positionableElementsImages.put ( PositionableElementType.SHEPERD ,GraphicsUtilities.getImage ( "sheepland_sheperd.png" )) ;
-					positionableElementsImages.put ( PositionableElementType.WOLF , GraphicsUtilities.getImage ( "sheepland_wolf.jpg" ) ) ;
-					positionableElementsImages.put ( PositionableElementType.LAMB , GraphicsUtilities.getImage ( "sheepland_lamb.jpg" ) ) ;
-					positionableElementsImages.put ( PositionableElementType.RAM , GraphicsUtilities.getImage ( "sheepland_ram.jpg" ) ) ;
-					positionableElementsImages.put ( PositionableElementType.SHEEP , GraphicsUtilities.getImage ( "sheepland_sheep.jpg" ) ) ;
-					positionableElementsImages.put ( PositionableElementType.BLACK_SHEEP , GraphicsUtilities.getImage ( "sheepland_black_sheep.png" ) ) ;
-					preferredDimension = new Dimension ( backgroundImage.getWidth() , backgroundImage.getHeight() ) ;
-					setOpaque ( false );
-					setDoubleBuffered ( true ) ;
-					setLayout ( null ) ;
-				} 
-				catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				positionableElementsImages = new HashMap < PositionableElementType , BufferedImage > ( PositionableElementType.values().length ) ;
+				backgroundImage = GraphicsUtilities.getImage ( "sheepland_map.jpg" ) ;
+				positionableElementsImages.put ( PositionableElementType.FENCE , GraphicsUtilities.getImage ( "sheepland_fence.jpg" ) ) ;
+				positionableElementsImages.put ( PositionableElementType.SHEPERD ,GraphicsUtilities.getImage ( "sheepland_sheperd.png" )) ;
+				positionableElementsImages.put ( PositionableElementType.WOLF , GraphicsUtilities.getImage ( "sheepland_wolf.jpg" ) ) ;
+				positionableElementsImages.put ( PositionableElementType.LAMB , GraphicsUtilities.getImage ( "sheepland_lamb.jpg" ) ) ;
+				positionableElementsImages.put ( PositionableElementType.RAM , GraphicsUtilities.getImage ( "sheepland_ram.jpg" ) ) ;
+				positionableElementsImages.put ( PositionableElementType.SHEEP , GraphicsUtilities.getImage ( "sheepland_sheep.jpg" ) ) ;
+				positionableElementsImages.put ( PositionableElementType.BLACK_SHEEP , GraphicsUtilities.getImage ( "sheepland_black_sheep.png" ) ) ;
+				preferredDimension = new Dimension ( backgroundImage.getWidth() , backgroundImage.getHeight() ) ;
+				setDoubleBuffered ( true ) ;
+				setLayout ( null ) ;
+				setOpaque ( false );
+			} 
+			catch ( IOException e ) 
+			{
+				e.printStackTrace () ;
+				throw new RuntimeException ( e ) ;
 			}
-			else
-				throw new IllegalArgumentException () ;
 		}
 		
 		/**
@@ -262,10 +307,14 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 				y0 = 0 ;
 			g.drawImage ( backgroundImage , x0 , y0 , backgroundImage.getWidth() , backgroundImage.getHeight() , this );
 			b = positionableElementsImages.get ( PositionableElementType.BLACK_SHEEP ) ;
-			g.drawImage ( b , ( int ) m.roadsCoordinates.get ( 2 ).getMinX() , ( int ) m.roadsCoordinates.get ( 2 ).getMinY() , b.getWidth () , b.getHeight () , this ) ;
+			g.drawImage ( b , ( int ) coordinatesManager.roadsCoordinates.get ( 2 ).getMinX() + ( getWidth() - backgroundImage.getWidth() ) /2 , ( int ) coordinatesManager.roadsCoordinates.get ( 2 ).getMinY() , coordinatesManager.ROADS_RADIUS * 2 , coordinatesManager.ROADS_RADIUS * 2 , this ) ;
 		}
 		
-		/***/
+		/**
+		 * Zooms this GameView, the GameMap it represents and also every component drawed on it. 
+		 * 
+		 * @param factor the factor of the zoom.
+		 */
 		public void zoom ( float factor  ) 
 		{
 			BufferedImage original ;
@@ -285,18 +334,25 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		    g.dispose();
 		    backgroundImage = resized ;
 		    SwingUtilities.updateComponentTreeUI ( MapViewPanel.this ) ;
+		    coordinatesManager.scale(factor); 
 		}
 		
 	}
 
-	/***/
+	/**
+	 * A class that manages all the commands associated with a MapView.
+	 */
 	private class CommandPanel extends FrameworkedWithGridBagLayoutPanel 
 	{
 		
-		/***/
+		/**
+		 * Button for the zoom less action. 
+		 */
 		private JButton zoomLessButton ;
 		
-		/***/
+		/**
+		 * Button for the zoom plus action. 
+		 */
 		private JButton zoomPlusButton ;
 
 		/***/
@@ -334,8 +390,12 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		@Override
 		protected void bindListeners() 
 		{
-			zoomLessButton.setAction ( new ZoomLessAction () ) ;
-			zoomPlusButton.setAction ( new ZoomPlusAction () ) ;	
+			Action zoomLessAction ;
+			Action zoomPlusAction ;
+			zoomLessAction = new ZoomLessAction () ;
+			zoomPlusAction = new ZoomPlusAction () ;
+			zoomLessButton.setAction ( zoomLessAction ) ;
+			zoomPlusButton.setAction ( zoomPlusAction ) ;	
 		}
 
 		/**
@@ -348,14 +408,18 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 			add ( zoomPlusButton ) ;	
 		}
 		
-		/***/
+		/**
+		 * Action that manages the zoom less action. 
+		 */
 		private class ZoomLessAction extends AbstractAction 
 		{
 
+			private static final String LABEL = "ZOOM -" ;
+			
 			/***/
 			public ZoomLessAction () 
 			{
-				super ( "ZOOM -" ) ;
+				super ( LABEL ) ;
 			}
 			
 			/**
@@ -369,14 +433,18 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 			
 		}
 		
-		/***/
+		/**
+		 * Action that manages the zoom plus action. 
+		 */
 		private class ZoomPlusAction extends AbstractAction 
 		{
+			
+			private static final String LABEL = "ZOOM +" ;
 			
 			/***/
 			public ZoomPlusAction () 
 			{
-				super ( "ZOOM +" ) ;
+				super ( LABEL ) ;
 			}
 
 			/**
@@ -392,7 +460,9 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		
 	}
 	
-	/***/
+	/**
+	 * Class 
+	 */
 	private class MapMeasurementCoordinatesManager
 	{
 	
@@ -403,7 +473,7 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		private final String ROADS_CSV_FILE_PATH = "roadsCentralPoints.csv" ;
 		
 		/***/
-		private final int ROADS_RADIUS = 25 ;
+		int ROADS_RADIUS = 25 ;
 	
 		/***/
 		private Map < Integer , Polygon > regionsCoordinates ;
@@ -488,6 +558,7 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 				}
 			for ( Ellipse2D p : roadsCoordinates.values () )
 				p.setFrame ( p.getX () * factor , p.getY () * factor , p.getWidth () * factor , p.getHeight () * factor ) ;
+			ROADS_RADIUS = (int) (ROADS_RADIUS * factor) ;
 		}
  		
 	}
@@ -541,10 +612,10 @@ class PlayersCardViewPanel extends FrameworkedWithGridBagLayoutPanel
 
 }
 
-class PlayersMovePanel extends FrameworkedWithGridBagLayoutPanel 
+class PlayersMoveViewPanel extends FrameworkedWithGridBagLayoutPanel 
 {
 
-	PlayersMovePanel () 
+	PlayersMoveViewPanel () 
 	{
 		super () ;
 	}

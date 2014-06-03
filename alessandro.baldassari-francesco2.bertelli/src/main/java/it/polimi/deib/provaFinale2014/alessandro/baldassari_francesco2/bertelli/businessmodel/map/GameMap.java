@@ -43,7 +43,7 @@ public class GameMap
 	 * @param regionsCSVInputStream the InputStream where take the raw data about the regions
 	 * @param roadsCSVInputStream the InputStream where take the raw data about the roads
 	 */
-	GameMap ( Map < Integer , Couple < Region , int [] > > regionsMap , Map < Integer , Couple < Road , int [] > > roadsMap ) 
+	protected GameMap ( Map < Integer , Couple < Region , int [] > > regionsMap , Map < Integer , Couple < Road , int [] > > roadsMap ) 
 	{
 		Collection < Road > borderRoads ;
 		Collection < Road > adjacentRoads ;

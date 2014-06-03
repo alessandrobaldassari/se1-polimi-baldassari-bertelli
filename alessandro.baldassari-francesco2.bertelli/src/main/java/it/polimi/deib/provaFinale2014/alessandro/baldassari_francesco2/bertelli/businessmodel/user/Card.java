@@ -35,7 +35,7 @@ public class Card
 	 * @throws IllegalArgumentException if the region type is null or the id is < 0 or if the
 	 *         regionType is Sheepsburg.
 	 */
-	Card ( RegionType regionType , int id ) 
+	protected Card ( RegionType regionType , int id ) 
 	{
 		if ( regionType != null && regionType != RegionType.SHEEPSBURG && id >=0 )
 		{

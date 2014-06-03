@@ -10,6 +10,7 @@ import java.util.List;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
 /***/
 public class CLIController extends ViewPresenter
@@ -38,6 +39,7 @@ public class CLIController extends ViewPresenter
 		{
 			writer.println ( "Prego, inserisci il nome con cui vuoi giocare : " );
 			res = reader.readLine ().trim () ;
+			writer.println ( "Attendi che il Server controlli se il tuo nome è ok." ) ;
 		} 
 		catch (IOException e) 
 		{
@@ -50,7 +52,19 @@ public class CLIController extends ViewPresenter
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void onNotifyMatchStart () {}
+	public void onNotifyMatchStart () 
+	{
+		writer.println ( "Tutti i giocatori sono arrivati.\nIl gioco sta per cominciare." ) ;
+	}
+	
+	@Override
+	public void onNameRequestAck ( boolean isOk , String notes ) 
+	{
+		if ( isOk ) 
+			writer.println ( "Nome valido.\nAttendi gli altri giocatori!" ) ;
+		else
+			writer.println( notes ) ;
+	}
 	
 	@Override
 	public Color onSheperdColorRequest ( Iterable < Color > availableColors ) 
@@ -103,12 +117,21 @@ public class CLIController extends ViewPresenter
 		return colors.get ( res - 1 ) ;
 	}
 
-	public void onNameRequestAck ( boolean isOk , String notes ) {}
+
 	
 	@Override
-	public void onMatchWillNotStartNotification(String msg) {
-		// TODO Auto-generated method stub
-		
+	public void onMatchWillNotStartNotification ( String msg ) 
+	{
+		try 
+		{
+			System.exit ( 0 ) ; 
+			writer.println ( msg ) ;
+			terminateClient () ;
+		}
+		catch ( WrongStateMethodCallException e ) 
+		{
+			e.printStackTrace();
+		}
 	}
 
 	@Override

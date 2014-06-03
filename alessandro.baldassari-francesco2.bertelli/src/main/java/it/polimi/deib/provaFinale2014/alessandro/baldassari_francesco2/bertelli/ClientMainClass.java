@@ -127,13 +127,9 @@ public final class ClientMainClass
 			else
 			{
 				if ( viewChoosed == CLI_INDEX )
-				{
 					viewPresenter = new CLIController () ;
-				}
 				else
-				{
 					viewPresenter = new GUIController () ;
-				}
 				if ( communicationProtocolChoosed == SOCKET_INDEX )
 					client = new SocketClient ( viewPresenter ) ;
 				else

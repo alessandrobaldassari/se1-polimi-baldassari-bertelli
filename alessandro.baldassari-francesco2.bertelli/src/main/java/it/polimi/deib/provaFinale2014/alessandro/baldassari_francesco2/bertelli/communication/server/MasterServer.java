@@ -59,6 +59,9 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 	 */
 	private Collection < ClientHandler > currentClientHandlers ;
 	
+	/***/
+	private Collection < String > currentClientNames ;
+	
 	/**
 	 * A flag indicating if this MasterServer is on or not.
 	 */
@@ -76,6 +79,7 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 		currentGameController = null ;
 		threadExecutor = Executors.newCachedThreadPool () ;
 		currentClientHandlers = new LinkedList < ClientHandler > () ;
+		currentClientNames = new LinkedList < String > () ;
 		inFunction = false ;
 	}
 	
@@ -92,21 +96,36 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 		threadExecutor.submit ( socketServer ) ;
 		threadExecutor.submit ( rmiServer ) ;
 		inFunction = true ;
+		System.out.println ( "MASTER SERVER : INIZIO FUNZIONAMENTO" ) ;
 		while  ( inFunction )
 		{
 			try 
 			{
-				System.out.println ( "MASTER_SERVER : WAITING FOR REQUESTS" ) ;
+				System.out.println ( "MASTER SERVER : ATTENDENDO CLIENT" ) ;
 				newClientHandler = queue.take () ;
+				System.out.println ( "MASTER SERVER : CLIENT ACCETTATO" ) ;
 				if ( currentGameController == null )
 					createAndLaunchNewGameController () ;
-				System.out.println ( "MASTER_SERVER : ASKING_NAME " ) ;
+				System.out.println ( "MASTER SERVER : CHIEDENDO NOME AL CLIENT" ) ;
 				name = newClientHandler.requestName () ;
+				System.out.println ( "MASTER SERVER : NOME RICEVUTO DAL CLIENT, nome = " + name ) ;
+				while ( currentClientNames.contains ( name ) )
+				{
+					System.out.println ( "MASTER SERVER : NOME " + name + " GIA' IN USO" ) ;
+					System.out.println ( "MASTER SERVER : NOTIFICA AL CLIENT DI NOME + " + name + " NOME GIA' IN USO" ) ;
+					newClientHandler.notifyNameChoose ( false , "Nome già in uso." ) ;					
+					System.out.println ( "MASTER SERVER : CHIEDENDO NOME AL CLIENT" ) ;
+					name = newClientHandler.requestName () ;
+					System.out.println ( "MASTER SERVER : NOME RICEVUTO DAL CLIENT, nome = " + name ) ;
+				}
+				System.out.println ( "MASTER SERVER : NOME + " +name + " NON IN USO" ) ;
+				System.out.println ( "MASTER SERVER : AGGIUNGENDO PLAYER ALLA PARTITA DI NOME " + name ) ;
 				currentGameController.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler ) ) ;
+				System.out.println ( "MASTER SERVER : PLAYER DI NOME " + name + "AGGIUNTO ALLA PARTITA" ) ;
 				currentClientHandlers.add ( newClientHandler ) ;
-				// if you want  to guarantee unique names, this is the position where doing it.
+				currentClientNames.add ( name ) ;
+				System.out.println ( "MASTER SERVER : NOTIFICA AL CLIENT DI NOME " + name + "CHE IL SUO NOME E' CORRETTO" ) ;
 				newClientHandler.notifyNameChoose ( true , null ) ;
-				System.out.println ( "MASTER_SERVER : NAME_CATCH " + name ) ;
 			} 
 			catch ( WrongMatchStateMethodCallException e )
 			{
@@ -196,6 +215,7 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 			}
 		currentGameController = null ;
 		currentClientHandlers.clear () ;
+		currentClientNames.clear () ;
 	}
 	
 }

@@ -69,7 +69,7 @@ public class Bank
 	 * @throws IllegalArgumentException if the fences or initCards or otherCards parameter
 	 *         is null or the initialMoneyReserve is < 0
 	 */
-	Bank ( int initialMoneyReserve , Iterable < Fence > fences , Iterable < Card > initCards , Iterable < SellableCard > otherCards ) 
+	protected Bank ( int initialMoneyReserve , Iterable < Fence > fences , Iterable < Card > initCards , Iterable < SellableCard > otherCards ) 
 	{
 		if ( fences != null && initCards != null && otherCards != null && initialMoneyReserve >= 0 )
 		{
