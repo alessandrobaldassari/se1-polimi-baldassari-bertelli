@@ -5,7 +5,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.SocketClientHandler;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -52,12 +51,14 @@ public class SocketServer extends RequestAccepterServer
 		Socket client ;
 		try 
 		{
-			System.out.println ( "SOCKET_SERVER : BEGIN ACCEPT REQUEST" + hashCode () ) ;
+			System.out.println ( "SOCKET_SERVER : ACCETTO RICHIESTA " ) ;
 			client = serverSocket.accept () ;
-			System.out.println ( "SOCKET_SERVER : REQUEST ACCEPTED - PROCESSING" ) ;
+			System.out.println ( "SOCKET_SERVER : RICHIESTA ACCETTATA" ) ;
 			clientHandler = new SocketClientHandler ( client ) ;
+			System.out.println ( "SOCKET_SERVER : CREO CLIENT HANDLER PER RICHIESTA" ) ;			
 			submitToMatchAdderCommunicationController ( clientHandler ) ;
-			System.out.println ( "SOCKET_SERVER : END_ACCEPT_REQUEST" ) ;
+			System.out.println ( "SOCKET_SERVER : SOTTOMETTO CLIENT HANDLER AL MATCH ADDER COMMUNICATION CONTROLLER" ) ;
+			System.out.println ( "SOCKET_SERVER : FINE GESTIONE RICHIESTA" ) ;
 		}
 		catch ( IOException e ) 
 		{

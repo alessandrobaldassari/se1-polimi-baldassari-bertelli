@@ -5,6 +5,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -60,7 +61,7 @@ public interface ClientHandler
 	 * @return the color the client chooses.
 	 * @throws IOException if something goes wrong with the communication.
 	 */
-	public Color requestSheperdColor( Iterable <Color> availableColors ) throws IOException;
+	public NamedColor requestSheperdColor( Iterable < NamedColor > availableColors ) throws IOException;
 	
 	/**
 	 * Ask the client to say which of his cards are eligible for selling and at what price.

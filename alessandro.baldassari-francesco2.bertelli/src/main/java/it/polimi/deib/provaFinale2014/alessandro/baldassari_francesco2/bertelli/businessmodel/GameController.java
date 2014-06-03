@@ -19,7 +19,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove.MoveNotAllowedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.TwoPlayersMatchMoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.CharacterDoesntMoveException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
@@ -33,6 +32,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MathUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
@@ -70,7 +71,7 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 	/**
 	 * The Timer value about the time to wait before begin a Match. 
 	 */
-	private static final long DELAY = 30 * Utilities.MILLISECONDS_PER_SECOND ;
+	private static final long DELAY = 60 * Utilities.MILLISECONDS_PER_SECOND ;
 	
 	/**
 	 * The maximum number of Player for a Match. 
@@ -198,11 +199,19 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 	 */
 	public void run () 
 	{
+		System.out.println ( "GAME CONTROLLER : PRIMA DELLA CREATING PHASE" ) ;
 		creatingPhase () ;
+		System.out.println ( "GAME CONTROLLER : PRIMA DELLA WAIT FOR PLAYER " ) ;
 		waitForPlayersPhase () ;
-		initializationPhase () ; 
-		turnationPhase () ;
-		resultsCalculationPhase () ;
+		synchronized ( match )
+		{
+			System.out.println ( "GAME CONTROLLER : PRIMA DELLA INITIALIZATION PHASE" ) ;
+			initializationPhase () ; 
+			System.out.println ( "GAME CONTROLLER : PRIMA DELLA TURNATION PHASE" ) ;
+			turnationPhase () ;
+			System.out.println ( "GAME CONTROLLER : PRIMA DELLA RESULTS CALCULATION PHASE" ) ;
+			resultsCalculationPhase () ;
+		}
 	}
 	
 	/**
@@ -219,7 +228,7 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 		try 
 		{
 			lastMatchIdentifierUID ++ ;
-			matchIdentifier = new MatchIdentifier ( lastMatchIdentifierUID ++ ) ;
+			matchIdentifier = new MatchIdentifier ( lastMatchIdentifierUID ) ;
 			animalsFactory = AnimalFactory.newAnimalFactory ( matchIdentifier ) ;
 			gameMap = GameMapFactory.getInstance().newInstance ( matchIdentifier ) ;
 			bank = BankFactory.getInstance().newInstance ( matchIdentifier ) ;
@@ -243,28 +252,35 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 	private void waitForPlayersPhase () 
 	{
 		Player newPlayer ;
+		System.out.println ( "GAME CONTROLLER : WAIT FOR PLAYER PHASE - INIZIO" ) ;
 		while ( match.getMatchState() != MatchState.INITIALIZATION )
 		{
 			try 
 			{
-				newPlayer = tempBlockingQueue.take () ;
-				match.addPlayer ( newPlayer ) ;
-				if ( match.getNumberOfPlayers () == MAX_NUMBER_OF_PLAYERS ) 
+				System.out.println ( "GAME CONTROLLER : WAIT FOR PLAYERS PHASE - ATTENDENDO UN PLAYER" ) ;
+					newPlayer = tempBlockingQueue.poll() ;
+				while ( newPlayer == null && match.getMatchState() != MatchState.INITIALIZATION )
+					newPlayer = tempBlockingQueue.poll() ;
+				if ( newPlayer != null )
 				{
-					timer.cancel () ;
-					match.setMatchState ( MatchState.INITIALIZATION ) ;
-					matchStartCommunicationController.notifyFinishAddingPlayers () ;
-				}	
+					System.out.println ( "GAME CONTROLLER : WAIT FOR PLAYERS PHASE - PLAYER ACCETTATO" ) ;
+					match.addPlayer ( newPlayer ) ;
+					System.out.println ( "GAME CONTROLLER : WAIT FOR PLAYERS PHASE - PLAYER AGGIUNTO AL MATCH" ) ;
+					if ( match.getNumberOfPlayers () == MAX_NUMBER_OF_PLAYERS ) 
+					{
+						System.out.println ( "GAME CONTROLLER : WAIT FOR PLAYERS PHASE - MASSIMO NUMERO DI GIOCATORI RAGGIUNTO" ) ;
+						timer.cancel () ;
+						match.setMatchState ( MatchState.INITIALIZATION ) ;
+						matchStartCommunicationController.notifyFinishAddingPlayers () ;
+					}
+				}
 			}
-			catch ( InterruptedException e ) 
-			{
-				e.printStackTrace () ;
-			} 
 			catch ( WrongMatchStateMethodCallException e ) 
 			{
 				e.printStackTrace();
 			}			
 		}
+		System.out.println ( "GAME CONTROLLER : WAIT FOR PLAYER PHASE - FINE" ) ;
 	}
 	
 	/**
@@ -277,10 +293,15 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 	 */
 	public void initializationPhase ()
 	{
+		System.out.println ( "GAME CONTROLLER : INITIALIZATION PHASE, PRIMA DI PLACE SHEEPS" ) ;
 		placeSheeps () ;
+		System.out.println ( "GAME CONTROLLER : INITIALIZATION PHASE, PRIMA DI DISTRIBUTE INITIAL CARDS" ) ;
 		distributeInitialCards () ;
+		System.out.println ( "GAME CONTROLLER : INITIALIZATION PHASE, PRIMA DI MONEY DISTRIBUTION" ) ;	
 		moneyDistribution () ;
+		System.out.println ( "GAME CONTROLLER : INITIALIZATION PHASE, PRIMA DI CHOOSE PLAYERS ORDER" ) ;
 		choosePlayersOrder () ;
+		System.out.println ( "GAME CONTROLLER : INITIALIZATION PHASE, PRIMA DI DISTRIBUTE SHEPERDS" ) ;
 		distributeSheperds () ;
 		match.setMatchState ( MatchState.TURNATION );
 	}
@@ -298,6 +319,7 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 		Ovine bornOvine ;
 		try 
 		{
+			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - PLACE SHEEPS : INIZIO " ) ;
 			for ( Region region : match.getGameMap ().getRegions () ) 
 			{
 				bornOvine = animalsFactory.newAdultOvine ( "" , MathUtilities.genProbabilityValue() > 0.5 ? AdultOvineType.RAM : AdultOvineType.SHEEP ) ;
@@ -305,12 +327,17 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 				bornOvine.moveTo ( region ) ;
 			}
 			sheepsburg = match.getGameMap ().getRegionByType ( RegionType.SHEEPSBURG ).iterator().next() ;
+			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - PLACE SHEEPS : PRIMA DI GENERAZIONE PECORA NERA." ) ;
 			blackSheep = animalsFactory.newBlackSheep () ;
+			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - PLACE SHEEPS : PECORA NERA GENERATA." ) ;
+			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - PLACE SHEEPS : PRIMA DI GENERAZIONE LUPO." ) ;
 			wolf = animalsFactory.newWolf () ;
-			sheepsburg.addAnimal ( animalsFactory.newBlackSheep () ) ;
-			sheepsburg.addAnimal ( animalsFactory.newWolf () ) ;
+			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - PLACE SHEEPS : LUPO GENERATO." ) ;
+			sheepsburg.addAnimal ( blackSheep ) ;
+			sheepsburg.addAnimal ( wolf ) ;
 			blackSheep.moveTo ( sheepsburg ) ;
 			wolf.moveTo ( sheepsburg ) ;
+			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - PLACE SHEEPS : FINE " ) ;
 		} 
 		catch ( BlackSheepAlreadyGeneratedException e ) 
 		{
@@ -330,19 +357,18 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 	 */
 	private void distributeInitialCards ()
 	{
-		List < RegionType > regions ;
+		Stack < RegionType > regions ;
 		try 
 		{
-			regions = new ArrayList <RegionType> ( RegionType.values().length ) ;
-			for ( RegionType type : RegionType.values () )
-				regions.add ( type ) ;
+			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE INITIAL CARDS : INIZIO " ) ;
+			regions = new Stack < RegionType > () ;
+			for ( RegionType type : RegionType.values () ) 
+				regions.push ( type ) ;
 			regions.remove ( RegionType.SHEEPSBURG ) ;
 			CollectionsUtilities.listMesh ( regions ) ;
-			for( Player player : match.getPlayers ())
-			{
-					player.setInitialCard ( match.getBank ().takeInitialCard ( regions.get ( 0 ) ) ) ;
-				regions.remove ( 0 ) ;
-			}
+			for( Player player : match.getPlayers () )
+				player.setInitialCard ( match.getBank ().takeInitialCard ( regions.pop() ) ) ;
+			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE INITIAL CARDS : FINE " ) ;
 		}
 		catch ( NoMoreCardOfThisTypeException e ) 
 		{
@@ -364,12 +390,19 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 	private void moneyDistribution ()
 	{
 		int moneyToDistribute;
+		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - MONEY DISTRIBUTION : INIZIO " ) ;
 		if ( match.getNumberOfPlayers () == 2 )
 			moneyToDistribute = 30 ;
 		else
 			moneyToDistribute = 20 ;
+		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - MONEY DISTRIBUTION : DISTRIBUISCO " + moneyToDistribute + " AD OGNI GIOCATORE" ) ;
 		for( Player player : match.getPlayers () )
+		{
+			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - MONEY DISTRIBUTION : DISTRIBUISCO SOLDI AL PLAYER " + player.getName () ) ;
 			player.receiveMoney ( moneyToDistribute ) ;
+			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - MONEY DISTRIBUTION : IL PLAYER " + player.getName () + " HA RICEVUTO I SOLDI INIZIALI." ) ;
+		}
+		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - MONEY DISTRIBUTION : FINE " ) ;
 	}
 	
 	/**
@@ -379,27 +412,34 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 	 */
 	private void choosePlayersOrder () 
 	{
+		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - CHOOSE PLAYER ORDER PHASE : INIZIO " ) ;
 		Map < Player , Integer > playersMapOrder ;
 		List < Player > orderedPlayers ;
 		int i ;
 		try 
 		{
 			orderedPlayers = CollectionsUtilities.newListFromIterable ( match.getPlayers () ) ;
+			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - CHOOSE PLAYER ORDER PHASE : RANDOMIZZANDO I GIOCATORI " ) ;
 			CollectionsUtilities.listMesh ( orderedPlayers );
+			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - CHOOSE PLAYER ORDER PHASE : GIOCATORI RANDOMIZZATI" ) ;
 			playersMapOrder = new HashMap < Player , Integer > ( orderedPlayers.size () ) ;
 			i = 0 ;
+			System.out.println ( "IIIIIIIIIIIIIIIIIII" ) ;			
 			for ( Player p : orderedPlayers )
 			{
 				playersMapOrder.put ( p , i ) ;
 				i ++ ;
 			}
+			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - CHOOSE PLAYER ORDER PHASE : IMPOSTANDO L'ORDINE DEI GIOCATORI NEL MATCH." ) ;
 			match.setPlayerOrder ( playersMapOrder ) ;
+			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - CHOOSE PLAYER ORDER PHASE : ORDINE DEI GIOCATORI NEL MATCH IMPOSTATO." ) ;			
 		} 
 		catch ( WrongMatchStateMethodCallException e ) 
 		{
 			e.printStackTrace();
 			throw new RuntimeException (e);
 		}
+		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - CHOOSE PLAYER ORDER PHASE : FINE " ) ;
 	}
 	
 	/**
@@ -410,11 +450,18 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 	 */
 	private void distributeSheperds () 
 	{
-		final Color[] colors = { Color.RED , Color.BLUE , Color.GREEN , Color.YELLOW } ;
+		final Collection < NamedColor > colors ;
+		NamedColor choosenColor ;
 		Sheperd [] sheperds ; 
 		byte numberOfSheperdsPerPlayer ;
 		byte sheperdIndex ;
 		byte colorIndex ;
+		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : INIZIO " ) ;
+		colors = new LinkedList < NamedColor > () ;
+		colors.add ( new NamedColor ( Color.RED.getRed() , Color.RED.getGreen() , Color.RED.getBlue() , "RED" ) ) ;
+		colors.add ( new NamedColor ( Color.BLUE.getRed() , Color.BLUE.getGreen() , Color.BLUE.getBlue() , "BLUE" ) ) ;
+		colors.add ( new NamedColor ( Color.GREEN.getRed() , Color.GREEN.getGreen() , Color.GREEN.getBlue() , "GREEN" ) ) ;
+		colors.add ( new NamedColor ( Color.YELLOW.getRed () , Color.YELLOW.getGreen () , Color.YELLOW.getBlue () , "YELLOW" ) ) ;
 		if ( match.getNumberOfPlayers() == 2 )
 			numberOfSheperdsPerPlayer = 2 ;
 		else
@@ -423,24 +470,26 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 		for ( Player p : match.getPlayers () )
 		{
 			sheperds = new Sheperd [ numberOfSheperdsPerPlayer ] ;
+		
 			for ( sheperdIndex = 0 ; sheperdIndex < numberOfSheperdsPerPlayer ; sheperdIndex ++ )
-			{	sheperds [ sheperdIndex ] = new Sheperd ( "" , colors [ colorIndex ] , p ) ;
-				colorIndex ++ ;
-				if ( colorIndex == colors.length )
-					colorIndex = 0 ;
+			{	
+				choosenColor = p.getColorForSheperd ( colors ) ;
+				colors.remove ( choosenColor ) ;
+				sheperds [ sheperdIndex ] = new Sheperd ( p.getName () + "_" + sheperdIndex , choosenColor , p ) ;
 			}
 			try 
 			{
 				p.initializeSheperds ( sheperds ) ;
 			}
-			catch (WriteOncePropertyAlreadSetException e) {
-				e.printStackTrace();
+			catch ( WriteOncePropertyAlreadSetException e ) 
+			{
+				e.printStackTrace () ;
 				throw new RuntimeException ( e ) ;
 			}
 		}
+		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : FINE " ) ;
 	}
 		
-	// fare cambiare età agli agnelli !
 	/**
 	 * This methods implements the core phase of the Game, the time when every player
 	 * makes his moves.
@@ -711,11 +760,15 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 		{
 			if ( match.getNumberOfPlayers() >= 2 ) 
 			{
+				System.out.println ( "GAME CONTROLLER - TIMER SCATTATO : NUMERO DI GIOCATORI : " + match.getNumberOfPlayers() ) ;
 				match.setMatchState ( MatchState.INITIALIZATION ) ;
 				matchStartCommunicationController.notifyFinishAddingPlayers () ;
 			}
 			else
+			{
+				System.out.println ( "GAME CONTROLLER - TIMER SCATTATO : NUMERO DI GIOCATORI : " + match.getNumberOfPlayers() + ", PARTITA RESPINTA." ) ;				
 				matchStartCommunicationController.notifyFailStartMatch () ;
+			}
 			cancel () ;
 		}
 		

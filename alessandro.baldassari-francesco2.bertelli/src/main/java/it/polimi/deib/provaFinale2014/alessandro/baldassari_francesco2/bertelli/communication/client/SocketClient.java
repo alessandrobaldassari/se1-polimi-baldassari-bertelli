@@ -8,6 +8,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.Message;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.SocketServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -91,16 +93,15 @@ public class SocketClient extends Client
 		GameMap gameMap ;
 		Iterable < Sheperd > sheperds ;
 		Iterable <SellableCard> sellableCards;
-		Iterable <Color> colors ;
+		Iterable < NamedColor > colors ;
 		String command ;
+		NamedColor n ;
 		String s ;
 		Boolean b ;
 		try 
 		{
 			params = new ArrayList < Serializable > ( 2 ) ;
-			System.out.println ( "Socket Client : Before Receiving Command" ) ;
 			m = ( Message ) ois.readObject () ;
-			System.out.println ( "Socket Client : command received" );
 			switch ( m.getOperation () )  
 			{
 				case NAME_REQUESTING_REQUEST :
@@ -125,12 +126,13 @@ public class SocketClient extends Client
 					getDataPicker ().onMatchWillNotStartNotification ( (String) m.getParameters().iterator().next() ) ;
 				break ;
 				case SHEPERD_COLOR_REQUESTING_REQUEST:
-					/*colors = ( Iterable<Color> ) ois.readObject () ;
-					oos.writeUTF( ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE.toString() );
-					oos.flush();
-					oos.writeObject(Color.BLUE);
-					oos.flush();
-					System.out.println("sent color");*/
+					colors = ( Iterable < NamedColor > ) m.getParameters().iterator().next() ;
+					n = getDataPicker ().onSheperdColorRequest ( colors ) ;
+					params.clear(); 
+					params.add(n);
+					m = Message.newInstance ( ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE , params ) ;
+					oos.writeObject ( m ) ;
+					oos.flush () ;
 				break;
 				case GENERIC_NOTIFICATION_NOTIFICATION:
 					s = ois.readUTF();

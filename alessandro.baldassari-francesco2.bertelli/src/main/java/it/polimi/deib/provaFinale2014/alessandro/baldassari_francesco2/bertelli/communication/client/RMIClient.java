@@ -6,6 +6,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIClientBroker.AnotherCommandYetRunningException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -81,6 +82,8 @@ public class RMIClient extends Client
 	{
 		List < Serializable > params ;
 		ClientCommunicationProtocolMessage nextOperation ;
+		Iterable < NamedColor > colors ;
+		NamedColor n ;
 		String s ;
 	    Boolean b ;
 		Message m ;
@@ -115,11 +118,13 @@ public class RMIClient extends Client
 					clientBroker.setClientReady () ;
 				break ;
 				case SHEPERD_COLOR_REQUESTING_REQUEST:
-					//params = CollectionsUtilities.newListFromIterable ( m.getParameters() ) ;
-					//s = (String) params.get ( 1 ) ;
-					//b = ( Boolean ) params.get ( 0 ) ;
-					//getDataPicker ().onNameRequestAck  ( b , s ) ;
-					//clientBroker.setClientReady () ;
+					colors = ( Iterable < NamedColor > ) m.getParameters().iterator().next() ;
+					n = getDataPicker ().onSheperdColorRequest ( colors ) ;
+					params.clear(); 
+					params.add(n);
+					m = Message.newInstance ( ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE , params ) ;
+					clientBroker.putNextMessage ( m ) ;
+					clientBroker.setServerReady () ;
 				break;
 				case CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST:
 					

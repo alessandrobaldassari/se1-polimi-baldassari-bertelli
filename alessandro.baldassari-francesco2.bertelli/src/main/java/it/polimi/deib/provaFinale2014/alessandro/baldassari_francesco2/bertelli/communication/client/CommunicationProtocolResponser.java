@@ -1,6 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 
 import java.awt.Color;
 
@@ -21,7 +22,7 @@ public interface CommunicationProtocolResponser
 	public void onNotifyMatchStart () ;
 	
 	/***/
-	public Color onSheperdColorRequest ( Iterable < Color > availableColors ) ;
+	public NamedColor onSheperdColorRequest ( Iterable < NamedColor > availableColors ) ;
 	
 	/***/
 	public void onMatchWillNotStartNotification ( String msg ) ;

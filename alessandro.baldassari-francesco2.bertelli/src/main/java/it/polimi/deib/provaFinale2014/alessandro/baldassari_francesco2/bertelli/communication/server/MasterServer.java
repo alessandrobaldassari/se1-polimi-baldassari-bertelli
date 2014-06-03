@@ -120,12 +120,12 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 				}
 				System.out.println ( "MASTER SERVER : NOME + " +name + " NON IN USO" ) ;
 				System.out.println ( "MASTER SERVER : AGGIUNGENDO PLAYER ALLA PARTITA DI NOME " + name ) ;
-				currentGameController.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler ) ) ;
-				System.out.println ( "MASTER SERVER : PLAYER DI NOME " + name + "AGGIUNTO ALLA PARTITA" ) ;
 				currentClientHandlers.add ( newClientHandler ) ;
 				currentClientNames.add ( name ) ;
-				System.out.println ( "MASTER SERVER : NOTIFICA AL CLIENT DI NOME " + name + "CHE IL SUO NOME E' CORRETTO" ) ;
+				System.out.println ( "CLIENT DI NOME " + name + " NOTIFICATO CHE IL SUO NOME E' CORRETTO" ) ;
 				newClientHandler.notifyNameChoose ( true , null ) ;
+				System.out.println ( "MASTER SERVER : PLAYER DI NOME " + name + "AGGIUNTO ALLA PARTITA" ) ;
+				currentGameController.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler ) ) ;
 			} 
 			catch ( WrongMatchStateMethodCallException e )
 			{
@@ -187,6 +187,7 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 	@Override
 	public synchronized void notifyFailStartMatch () 
 	{
+		System.out.println ( "MASTER SERVER : NOTIFICA CLIENTS CHE IL MATCH NON PARTIRA'" ) ;
 		for ( ClientHandler c : currentClientHandlers )
 			try 
 			{
@@ -205,6 +206,7 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 	@Override
 	public synchronized void notifyFinishAddingPlayers () 
 	{
+		System.out.println ( "MASTER SERVER : NOTIFICA AI CLIENT CHE IL MATCH STA PARTENDO" ) ;
 		for ( ClientHandler c : currentClientHandlers )
 			try 
 			{

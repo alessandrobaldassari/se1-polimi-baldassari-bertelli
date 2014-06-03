@@ -7,6 +7,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIClientBroker;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIClientBroker.AnotherCommandYetRunningException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -151,10 +152,30 @@ public class RMIClientHandler implements ClientHandler
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public Color requestSheperdColor(Iterable<Color> availableColors)
-			throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+	public NamedColor requestSheperdColor ( Iterable < NamedColor > availableColors ) throws IOException 
+	{
+		Message m ;
+		NamedColor res ;
+		try 
+		{
+			res = null ;
+			while ( rmiClientBroker.isClientReady () == false ) ;
+			m = Message.newInstance ( ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_REQUEST , Collections.singleton ( ( Serializable ) availableColors ) ) ;
+			rmiClientBroker.putNextMessage ( m ) ;
+			rmiClientBroker.setServerReady () ;
+			while ( rmiClientBroker.isClientReady () == false ) ;		
+			m = rmiClientBroker.getNextMessage () ;
+			if ( m.getOperation () == ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE )
+				res = ( NamedColor ) m.getParameters ().iterator ().next () ;
+			else 
+				throw new RuntimeException () ;
+		} 
+		catch ( AnotherCommandYetRunningException e ) 
+		{
+			e.printStackTrace();
+			throw new RuntimeException ( e ) ;
+		}
+		return res ;
 	}
 
 	/**

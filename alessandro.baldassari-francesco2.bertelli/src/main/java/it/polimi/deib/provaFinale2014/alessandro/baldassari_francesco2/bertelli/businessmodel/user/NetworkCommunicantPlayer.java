@@ -8,6 +8,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 
 /***/
 public class NetworkCommunicantPlayer extends Player 
@@ -91,10 +92,13 @@ public class NetworkCommunicantPlayer extends Player
 		return res ;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
-	public Color getColorForSheperd ( Iterable < Color > availableColors ) 
+	public NamedColor getColorForSheperd ( Iterable < NamedColor > availableColors ) 
 	{
-		Color res = null; 
+		NamedColor res = null; 
 		try 
 		{
 			res = clientHandler.requestSheperdColor(availableColors);
@@ -106,6 +110,9 @@ public class NetworkCommunicantPlayer extends Player
 		return res;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public void genericNotification ( String message ) 
 	{

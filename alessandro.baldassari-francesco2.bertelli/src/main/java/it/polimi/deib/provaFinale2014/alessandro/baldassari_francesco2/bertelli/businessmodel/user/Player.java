@@ -6,6 +6,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MathUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
 
 import java.awt.Color;
@@ -164,7 +165,7 @@ public abstract class Player
 	 */
 	public void setInitialCard ( Card initialCard ) throws WriteOncePropertyAlreadSetException 
 	{
-		if ( this.initialCard != null )
+		if ( this.initialCard == null )
 		{
 			if ( initialCard != null )
 				this.initialCard = initialCard ;
@@ -196,7 +197,10 @@ public abstract class Player
 	public void receiveMoney ( int amountToReceive ) 
 	{
 		if ( amountToReceive >= 0 )
-			money = money + amountToReceive ;
+			if ( money == null )
+				money = amountToReceive ;
+			else
+				money = money + amountToReceive ;
 		else 
 			throw new IllegalArgumentException () ;
 	}
@@ -332,7 +336,7 @@ public abstract class Player
 	 * @param availableColors the Iterable containing the colors available for choosing.
 	 * @return the choosen color that has to be in the availableColors Iterable.
 	 */
-	public abstract Color getColorForSheperd ( Iterable < Color > availableColors ) ;
+	public abstract NamedColor getColorForSheperd ( Iterable < NamedColor > availableColors ) ;
 	
 	/**
 	 * This is a generic method the System can call to notify a Player of something that

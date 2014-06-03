@@ -19,7 +19,7 @@ public class Match
 	/**
 	 * A list containing the players who are playing this Match. 
 	 */
-	private final List < Player > players ;
+	private List < Player > players ;
 	
 	/**
 	 * The GameMap object associated with this Match. 
@@ -92,9 +92,10 @@ public class Match
 		{
 			if ( playersOrdering.keySet ().containsAll ( players ) && players.containsAll ( playersOrdering.keySet() ) )
 			{
-				players.clear () ;
-				for ( Player p : playersOrdering.keySet () )
-					players.add ( playersOrdering.get ( p ) , p ) ;
+				players = new ArrayList < Player > ( playersOrdering.keySet() ) ;
+				//players.clear () ;
+				//for ( Player p : playersOrdering.keySet () )
+					//players.add ( playersOrdering.get ( p ) , p ) ;
 			}
 			else
 				throw new IllegalArgumentException () ;

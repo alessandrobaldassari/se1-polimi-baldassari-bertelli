@@ -10,6 +10,7 @@ import java.util.List;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
 /***/
@@ -67,9 +68,9 @@ public class CLIController extends ViewPresenter
 	}
 	
 	@Override
-	public Color onSheperdColorRequest ( Iterable < Color > availableColors ) 
+	public NamedColor onSheperdColorRequest ( Iterable < NamedColor > availableColors ) 
 	{
-		List < Color > colors = CollectionsUtilities.newListFromIterable ( availableColors ) ;
+		List < NamedColor > colors = CollectionsUtilities.newListFromIterable ( availableColors ) ;
 		byte res ;
 		byte i ;
 		System.out.println ( "Prego, inserisci il numero del colore che vuoi scegliere per il tuo pastore" ) ;
@@ -114,11 +115,10 @@ public class CLIController extends ViewPresenter
 				res = -1 ;
 			}
 		}
+		System.out.println ( "Colore scelto : " + colors.get ( res - 1 ).getName () ) ;
 		return colors.get ( res - 1 ) ;
 	}
 
-
-	
 	@Override
 	public void onMatchWillNotStartNotification ( String msg ) 
 	{
@@ -135,14 +135,14 @@ public class CLIController extends ViewPresenter
 	}
 
 	@Override
-	public void generationNotification(String msg) {
-		// TODO Auto-generated method stub
-		
+	public void generationNotification ( String msg ) 
+	{
+		writer.println ( msg ) ;
 	}
 
 	@Override
-	public void onChooseCardsEligibleForSelling() {
-		// TODO Auto-generated method stub
+	public void onChooseCardsEligibleForSelling () 
+	{
 		
 	}
 
@@ -153,7 +153,8 @@ public class CLIController extends ViewPresenter
 	}
 
 	@Override
-	public void onChoseCardToBuy() {
+	public void onChoseCardToBuy () 
+	{
 		// TODO Auto-generated method stub
 		
 	}

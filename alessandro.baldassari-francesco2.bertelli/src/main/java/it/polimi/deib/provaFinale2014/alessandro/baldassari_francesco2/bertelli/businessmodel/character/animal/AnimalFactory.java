@@ -29,7 +29,7 @@ public class AnimalFactory
 	/**
 	 * The support for the Factory behavior of the static part of this class. 
 	 */
-	private static FactorySupport globalFactorySupport = new FactorySupport () ;
+	private static FactorySupport < Match > globalFactorySupport ;
 	
 	/**
 	 * A flag indicating that, if true, indicates that the Singleton Wolf instance has
@@ -61,11 +61,13 @@ public class AnimalFactory
 	 * @throws AnimalFactoryAlreadyGeneratedForThisMatchException if a Match which has 
 	 *         already called this method, calls it again.
 	 */
-	public static AnimalFactory newAnimalFactory ( Identifiable < Match > matchIdentifier ) throws SingletonElementAlreadyGeneratedException  
+	public static synchronized AnimalFactory newAnimalFactory ( Identifiable < Match > matchIdentifier ) throws SingletonElementAlreadyGeneratedException  
 	{
 		AnimalFactory res ; 
 		boolean alreadyCalled ;
-		if(matchIdentifier != null)
+		if ( globalFactorySupport == null )
+			globalFactorySupport = new FactorySupport < Match > () ;
+		if ( matchIdentifier != null )
 		{
 			alreadyCalled = globalFactorySupport.isAlreadyUser( matchIdentifier ) ;
 			if ( alreadyCalled == false )
@@ -76,9 +78,8 @@ public class AnimalFactory
 			else 
 				throw new SingletonElementAlreadyGeneratedException () ;
 		}
-		else {
+		else 
 			throw new IllegalArgumentException();
-		}
 		return res ;
 	}
 	

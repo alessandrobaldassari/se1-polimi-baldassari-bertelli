@@ -5,6 +5,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -133,32 +134,30 @@ public class SocketClientHandler implements ClientHandler
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public Color requestSheperdColor ( Iterable<Color> availableColors ) throws IOException 
+	public NamedColor requestSheperdColor ( Iterable< NamedColor > availableColors ) throws IOException 
 	{
-		String res;
-		Color choosedColor = null;
-		oos.writeUTF(ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_REQUEST.toString());
-		oos.flush();
-		oos.writeObject(availableColors);
-		oos.flush();
-		res = ois.readUTF();
-		if ( ClientCommunicationProtocolMessage.valueOf( res ) == ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE )
+		Message m ;
+		NamedColor res ;
+		try 
 		{
-			try 
+			res = null ;
+			m = Message.newInstance ( ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_REQUEST , Collections.singleton ( ( Serializable ) availableColors ) ) ;
+			oos.writeObject( m ) ;
+			oos.flush();
+			m = ( Message ) ois.readObject () ;
+			if ( m.getOperation () == ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE )
+				res = ( NamedColor ) m.getParameters ().iterator ().next () ;
+			else 
 			{
-				choosedColor = (Color) ois.readObject();
-			}
-			catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new RuntimeException () ;
 			}
 		}
-		else 
+		catch ( ClassNotFoundException e ) 
 		{
-			//error management strategy
+			e.printStackTrace () ;
+			throw new RuntimeException ( e ) ;
 		}
-			
-		return choosedColor;
+		return res ;
 		
 	}
 	
