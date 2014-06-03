@@ -23,12 +23,12 @@ public class BankFactory
 	/**
 	 * The object needed to implement the Factory pattern 
 	 */
-	private FactorySupport factorySupport ;
+	private FactorySupport < Match > factorySupport ;
 	
 	/***/
 	private BankFactory () 
 	{
-		factorySupport = new FactorySupport () ; 
+		factorySupport = new FactorySupport < Match > () ; 
 	}
 	
 	/**

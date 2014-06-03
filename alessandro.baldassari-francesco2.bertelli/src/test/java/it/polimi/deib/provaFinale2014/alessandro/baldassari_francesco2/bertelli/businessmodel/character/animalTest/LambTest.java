@@ -17,7 +17,8 @@ import org.junit.Test;
 /*
  * This jUnit test class test Lamb
  */
-public class LambTest {
+public class LambTest 
+{
 
 	static AdultOvine ram;
 	static AdultOvine sheep;
@@ -55,7 +56,7 @@ public class LambTest {
 	 */
 	@Test
 	public void getBirthTurn(){
-		assertTrue(lamb.getBirthTurn() == 0);
+		assertTrue ( lamb.getBirthTurn() == 0);
 	}
 	
 	/*

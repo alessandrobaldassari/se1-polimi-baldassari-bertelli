@@ -29,7 +29,6 @@ import javax.swing.JSplitPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElement.GameMapElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElement.PositionableElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementReference;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
@@ -46,7 +45,7 @@ public class GameView extends JFrame
 	private GameViewPanel gameViewPanel ;
 
 	/***/
-	GameView () 
+	public GameView () 
 	{
 		super () ;
 		gameViewPanel = new GameViewPanel () ; 
@@ -59,7 +58,8 @@ public class GameView extends JFrame
 	{
 		GameView g ;
 		g = new GameView () ;
-		g.setVisible(true) ; 
+		//g.setVisible(true) ;  
+		GraphicsUtilities.showWindow ( GameView.class , null ) ;
 	}
 	
 }

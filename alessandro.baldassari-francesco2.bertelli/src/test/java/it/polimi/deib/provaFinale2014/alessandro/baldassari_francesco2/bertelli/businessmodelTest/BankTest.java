@@ -2,7 +2,6 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Bank;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.BankFactory;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Bank.CardPriceNotRightException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Bank.NoMoreCardOfThisTypeException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Bank.NoMoreFenceOfThisTypeException;
@@ -12,7 +11,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.CardFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
 import java.util.ArrayList;
@@ -183,27 +182,6 @@ public class BankTest
 		assertTrue(card.getRegionType() == RegionType.DESERT ) ;
 		price = bank.getPeekCardPrice ( RegionType.CULTIVABLE ) ;
 		card = bank.sellACard ( price + 1 , RegionType.CULTIVABLE ) ;
-	}
-	
-	private class DummyMatchIdentifier implements Identifiable < Match > 
-	{
-
-		private final int id ;
-		
-		DummyMatchIdentifier ( int  id ) 
-		{
-			this.id = id ;
-		}
-		
-		@Override
-		public boolean isEqualsTo ( Identifiable<Match> otherObject ) 
-		{
-			if ( otherObject instanceof DummyMatchIdentifier )
-			return id == ( ( DummyMatchIdentifier ) otherObject ).id ;
-			else
-				return false ;
-		}
-		
 	}
 	
 }

@@ -16,6 +16,20 @@ public class CollectionUtilitiesTest
 	
 	/***/
 	@Test
+	public void iterableSize () 
+	{
+		List < Integer > l ;
+		int s ;
+		l = new ArrayList < Integer > ( 3 ) ;
+		l.add ( -4 ) ;
+		l.add ( 0 ) ;
+		l.add ( 1 ) ;
+		s = CollectionsUtilities.iterableSize ( l ) ;
+		assertEquals ( s , 3 ) ;
+	}
+	
+	/***/
+	@Test
 	public void newCollectionFromIterable () 
 	{
 		List < Integer > in ;

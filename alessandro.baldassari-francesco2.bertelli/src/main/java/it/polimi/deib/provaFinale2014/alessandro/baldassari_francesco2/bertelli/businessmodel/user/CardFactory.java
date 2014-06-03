@@ -38,19 +38,19 @@ public class CardFactory
 	 * An object needed to know and manage the Match objects that already created 
 	 * their initial cards. 
 	 */
-	private final FactorySupport factorySupportInitialCards ;
+	private final FactorySupport < Match > factorySupportInitialCards ;
 
 	/**
 	 * An object needed to know and manage the Match objects that already created
 	 * their sellable cards. 
 	 */
-	private final FactorySupport factorySupportSellableCards ;
+	private final FactorySupport < Match > factorySupportSellableCards ;
 	
 	/***/
 	private CardFactory () 
 	{
-		factorySupportInitialCards = new FactorySupport () ;
-		factorySupportSellableCards = new FactorySupport () ;
+		factorySupportInitialCards = new FactorySupport < Match > () ;
+		factorySupportSellableCards = new FactorySupport < Match > () ;
 	}
 	
 	/**

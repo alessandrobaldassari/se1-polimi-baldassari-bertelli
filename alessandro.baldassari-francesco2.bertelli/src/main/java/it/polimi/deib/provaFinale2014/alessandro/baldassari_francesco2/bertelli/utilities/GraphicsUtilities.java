@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Window;
@@ -14,6 +13,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import javax.imageio.ImageIO;
 
@@ -22,6 +23,8 @@ public final class GraphicsUtilities
 
 	/***/
 	private static GraphicsUtilities instance ;
+	
+	private static Executor exec ;
 	
 	/***/
 	private static Dimension vgaResolution ; 
@@ -35,22 +38,27 @@ public final class GraphicsUtilities
 	}
 	
 	/***/
-	public static void setComponentLayoutProperties ( Component component , GridBagLayout layout , int gridx , int gridy , double weightx , double weighty , int gridwidth , int gridheight , int ipadx , int ipady , int fill , int anchor , Insets insets ) 
+	public static void setComponentLayoutProperties ( Component component , GridBagLayout layout , int gridX , int gridY , double weightX , double weightY , int gridwidth , int gridheight , int ipadx , int ipady , int fill , int anchor , Insets insets ) 
 	{	
 		GridBagConstraints gridBagConstraints ;
 		gridBagConstraints = new GridBagConstraints () ;
-		gridBagConstraints.gridx = gridx ;
-		gridBagConstraints.gridy = gridy ;
-		gridBagConstraints.weightx = weightx ;
-		gridBagConstraints.weighty = weighty ;
-		gridBagConstraints.gridwidth = gridwidth ;
-		gridBagConstraints.gridheight = gridheight ;
-		gridBagConstraints.ipadx = ipadx ;
-		gridBagConstraints.ipady = ipady ;
-		gridBagConstraints.fill = fill ;
-		gridBagConstraints.anchor = anchor ;
-		gridBagConstraints.insets = insets ;
-		layout.setConstraints ( component , gridBagConstraints ) ;
+		if ( gridX >=0 && gridY >=0 && weightX >=0 && weightY >= 0 &&  insets != null )
+		{
+			gridBagConstraints.gridx = gridX ;
+			gridBagConstraints.gridy = gridY ;
+			gridBagConstraints.weightx = weightX ;
+			gridBagConstraints.weighty = weightY ;
+			gridBagConstraints.gridwidth = gridwidth ;
+			gridBagConstraints.gridheight = gridheight ;
+			gridBagConstraints.ipadx = ipadx ;
+			gridBagConstraints.ipady = ipady ;
+			gridBagConstraints.fill = fill ;
+			gridBagConstraints.anchor = anchor ;
+			gridBagConstraints.insets = insets ;
+			layout.setConstraints ( component , gridBagConstraints ) ;
+		}
+		else
+			throw new IllegalArgumentException () ;
 	}
 	
 	/***/
@@ -66,17 +74,13 @@ public final class GraphicsUtilities
 		Runnable runnable ;
 		if ( instance == null )
 			instance = new GraphicsUtilities () ;
-		runnable = instance.new WindowLauncherRunnable ( windowClass , args ) ;
-	}
-	
-	/***/
-	public static void placeInCenter ( Window w ) 
-	{
-		Point c ;
-		c = GraphicsEnvironment.getLocalGraphicsEnvironment ().getCenterPoint () ;
-		c.x = c.x -  w.getWidth () / 2 ;
-		c.y = c.x - w.getHeight () / 2 ;
-		w.setLocation ( c );
+		if ( windowClass != null && Window.class.isAssignableFrom ( windowClass )  )
+			runnable = instance.new WindowLauncherRunnable ( windowClass , args ) ;
+		else
+			throw new IllegalArgumentException () ;
+		if ( exec == null )
+			exec = Executors.newCachedThreadPool () ;
+		exec.execute ( runnable ) ;
 	}
 	
 	/***/
@@ -89,10 +93,13 @@ public final class GraphicsUtilities
 		
 		public WindowLauncherRunnable ( Class windowClass , Object ... args ) 
 		{
-			if ( windowClass != null && args != null )
+			if ( windowClass != null && Window.class.isAssignableFrom ( windowClass ) ) 
 			{
 				this.c = windowClass ;
-				this.args = args ;
+				if ( args != null )
+					this.args = args ;
+				else
+					this.args = new Object [ 0 ] ;
 			}
 		}
 		
@@ -104,6 +111,8 @@ public final class GraphicsUtilities
 			try 
 			{
 				ctor = c.getConstructor( Utilities.getTypes ( args ) ) ;
+				if ( args.length == 0 )
+					args = null ;
 				w = ( Window ) ctor.newInstance( args ) ;
 				w.setVisible ( true ) ;
 			}

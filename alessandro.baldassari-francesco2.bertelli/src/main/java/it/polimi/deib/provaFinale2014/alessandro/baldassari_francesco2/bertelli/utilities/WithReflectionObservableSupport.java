@@ -30,6 +30,13 @@ public class WithReflectionObservableSupport < T extends Observer >
 		observers.remove ( t ) ;
 	}
 
+	/***/
+	public boolean containsObserver ( T t ) 
+	{
+		return observers.contains ( t ) ;
+	}
+	
+	/***/
 	public void notifyObservers ( String methodName , Object ... args ) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException 
 	{
 		Method m ; 

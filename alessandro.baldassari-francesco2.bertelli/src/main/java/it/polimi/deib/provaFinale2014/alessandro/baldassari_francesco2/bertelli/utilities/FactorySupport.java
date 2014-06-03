@@ -1,30 +1,29 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match;
-
 import java.util.Collection;
 import java.util.LinkedList;
 
-public class FactorySupport 
+/***/
+public class FactorySupport < T >
 {
 
-	private Collection < Identifiable < Match > > alreadyUsers ;
+	private Collection < Identifiable < T > > alreadyUsers ;
 	
 	public FactorySupport () 
 	{
-		alreadyUsers = new LinkedList < Identifiable < Match > > () ;
+		alreadyUsers = new LinkedList < Identifiable < T > > () ;
 	}
 	
-	public void addUser ( Identifiable < Match > newUser ) 
+	public void addUser ( Identifiable < T > newUser ) 
 	{
 		alreadyUsers.add ( newUser ) ;
 	} 
 	
-	public boolean isAlreadyUser ( Identifiable < Match > key ) 
+	public boolean isAlreadyUser ( Identifiable < T > key ) 
 	{
 		boolean res ;
 		res = false ;
-		for ( Identifiable < Match > identifiable : alreadyUsers )
+		for ( Identifiable < T > identifiable : alreadyUsers )
 			if ( key.isEqualsTo ( identifiable ) )
 			{
 				res = true;

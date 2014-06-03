@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.FactorySupport;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 
@@ -15,13 +16,13 @@ public class FactorySupportTest
 {
 
 	/***/
-	private FactorySupport factorySupport ;
+	private FactorySupport < Match > factorySupport ;
 	
 	/***/
 	@Before
 	public void setUp () 
 	{
-		factorySupport = new FactorySupport () ;
+		factorySupport = new FactorySupport < Match > () ;
 	}
 	
 	/***/
@@ -44,27 +45,6 @@ public class FactorySupportTest
 		factorySupport.addUser ( id1 ) ;
 		assertTrue ( factorySupport.isAlreadyUser ( id1 ) ) ;
 		assertFalse ( factorySupport.isAlreadyUser ( id2 ) ) ;
-	}
-	
-	private class DummyMatchIdentifier implements Identifiable < Match > 
-	{
-
-		private final int id ;
-		
-		DummyMatchIdentifier ( int  id ) 
-		{
-			this.id = id ;
-		}
-		
-		@Override
-		public boolean isEqualsTo ( Identifiable<Match> otherObject ) 
-		{
-			if ( otherObject instanceof DummyMatchIdentifier )
-			return id == ( ( DummyMatchIdentifier ) otherObject ).id ;
-			else
-				return false ;
-		}
-		
 	}
 	
 }

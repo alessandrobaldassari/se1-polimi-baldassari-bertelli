@@ -44,7 +44,7 @@ public class GameMapFactory
 	/**
 	 * Support component to ensure the one GameMap per Match idea. 
 	 */
-	private final FactorySupport factorySupport ;
+	private final FactorySupport < Match > factorySupport ;
 	
 	/**
 	 * A complex object containing the partial loaded data about the Regions in the GameMap 
@@ -71,7 +71,7 @@ public class GameMapFactory
 			roadsCSVInputStream = Files.newInputStream ( Paths.get ( ROADS_FILE_PATH ) , StandardOpenOption.READ ) ;
 			regionsMap = readRegionsDataFile ( regionsCSVInputStream ) ;
 			roadsMap = readRoadsDataFile ( roadsCSVInputStream , regionsMap ) ;
-			factorySupport = new FactorySupport () ;
+			factorySupport = new FactorySupport < Match > () ;
 			regionsCSVInputStream.close () ;
 			roadsCSVInputStream.close () ;
 		} 

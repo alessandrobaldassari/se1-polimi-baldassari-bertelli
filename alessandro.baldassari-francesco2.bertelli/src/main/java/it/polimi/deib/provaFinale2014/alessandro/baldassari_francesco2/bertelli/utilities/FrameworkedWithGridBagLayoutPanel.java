@@ -1,8 +1,10 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities;
 
+/***/
 public abstract class FrameworkedWithGridBagLayoutPanel extends WithGridBagLayoutPanel
 {
 
+	/***/
 	protected FrameworkedWithGridBagLayoutPanel () 
 	{
 		super () ;

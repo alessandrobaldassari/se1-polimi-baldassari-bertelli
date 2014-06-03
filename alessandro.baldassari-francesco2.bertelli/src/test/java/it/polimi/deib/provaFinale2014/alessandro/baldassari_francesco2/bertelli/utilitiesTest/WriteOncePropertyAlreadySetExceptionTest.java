@@ -11,8 +11,10 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class WriteOncePropertyAlreadySetExceptionTest 
 {
 
+	/***/
 	private WriteOncePropertyAlreadSetException w ;
 	
+	/***/
 	private String propertyName ;
 	
 	@Before
@@ -20,6 +22,13 @@ public class WriteOncePropertyAlreadySetExceptionTest
 	{
 		propertyName = "DUMMY_METHOD" ;
 		w = new WriteOncePropertyAlreadSetException ( propertyName ) ;
+	}
+	
+	/***/
+	@Test ( expected = IllegalArgumentException.class )
+	public void constructor () 
+	{
+		w = new WriteOncePropertyAlreadSetException ( null ) ;
 	}
 	
 	@Test
