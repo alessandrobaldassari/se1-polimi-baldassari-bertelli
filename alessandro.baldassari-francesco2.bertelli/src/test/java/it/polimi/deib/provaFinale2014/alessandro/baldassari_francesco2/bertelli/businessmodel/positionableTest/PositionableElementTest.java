@@ -15,11 +15,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /*
- * This JUnit test test Character class
+ * This jUnit test tests PositionableElement class
  */
-public class CharacterTest {
+public class PositionableElementTest {
+	
 	/*
-	 * Declaring variables tha are going to be use for the setup fase
+	 * Declaring all the variables needed for the setup phase of the test
 	 */
 	static AdultOvine sheep;
 	static AnimalFactory animalFactory ;
@@ -27,7 +28,7 @@ public class CharacterTest {
 	static DummyMatchIdentifier dummyMatchIdentifier;
 	
 	/*
-	 * Building the environment for the test
+	 * Building the test environment
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass()
@@ -50,32 +51,15 @@ public class CharacterTest {
 	}
 	
 	/*
-	 * This test tests moveTo() method
+	 * This test tests the getPosition() method
 	 */
 	@Test
-	public void moveTo() {
-		sheep.moveTo(map.getRegionByType(RegionType.SHEEPSBURG).iterator().next());
+	public void getPosition() {
 		assertTrue(sheep.getPosition().getType() == RegionType.SHEEPSBURG);
 	}
 	
 	/*
-	 * This test tests getName() method 
-	 */
-	@Test
-	public void getName(){
-		assertTrue(sheep.getName() == "Sheep");
-	}
-	
-	/*
-	 * This test tests equals() method override
-	 */
-	@Test
-	public void equals(){
-		assertTrue(sheep.equals(sheep));
-	}
-	
-	/*
-	 * Dummy matchIdentifier used to build animalFactory
+	 * This dummy matchIdentifier is used to build the animalfactory
 	 */
 	public static class DummyMatchIdentifier implements Identifiable<Match>{
 
