@@ -6,6 +6,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Observer;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,7 +19,7 @@ import java.util.Map;
  * they need to interact with it.
  * The object is immutable, also if the regions and roads contained here are not.
  */
-public class GameMap 
+public class GameMap implements Serializable
 {
 
 	// ATTRIBUTES

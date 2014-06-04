@@ -1,11 +1,13 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable;
 
+import java.io.Serializable;
+
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElement;
 
 /**
  * This class models a generic element which can be positioned on the GameMap element. 
  */
-public abstract class PositionableElement < T extends GameMapElement > 
+public abstract class PositionableElement < T extends GameMapElement > implements Serializable
 {
 
 	// ATTRIBUTES

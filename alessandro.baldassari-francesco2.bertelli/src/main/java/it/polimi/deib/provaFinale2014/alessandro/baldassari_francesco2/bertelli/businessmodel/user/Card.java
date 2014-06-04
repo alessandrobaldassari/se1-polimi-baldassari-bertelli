@@ -1,12 +1,14 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user;
 
+import java.io.Serializable;
+
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 
 /**
  * This class model the concept of a Card of the Game.
  * This details the static part ( about its structure ) of a card.
  */
-public class Card 
+public class Card implements Serializable
 {
 
 	// ATTRIBUTES

@@ -7,7 +7,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 
-import java.awt.Color;
 import java.io.IOException;
 
 /**
@@ -15,7 +14,7 @@ import java.io.IOException;
  * A ClientHandler is a server component whose target is to manage the connection between the server
  * itself and the client. 
  */
-public interface ClientHandler 
+public interface ClientHandler
 {
 
 	/**
@@ -62,14 +61,14 @@ public interface ClientHandler
 	 * @throws IOException if something goes wrong with the communication.
 	 */
 	public NamedColor requestSheperdColor( Iterable < NamedColor > availableColors ) throws IOException;
-	
+		
 	/**
 	 * Ask the client to say which of his cards are eligible for selling and at what price.
 	 * 
 	 * @param the client cards, those he has to set the selling properties.
 	 * @throws IOException if something goes wrong with the communication.
 	 */
-	public void chooseCardsEligibleForSelling(Iterable <SellableCard> sellablecards) throws IOException;
+	public Iterable < SellableCard > chooseCardsEligibleForSelling ( Iterable <SellableCard> sellablecards ) throws IOException;
 	
 	/**
 	 * Ask the client to choose a Sheperd he will use for the current Game Turn.

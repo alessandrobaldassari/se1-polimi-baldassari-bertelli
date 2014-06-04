@@ -1,13 +1,15 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user;
 
-import java.awt.Color;
 import java.io.IOException;
+import java.util.Collection;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 
 /***/
@@ -18,7 +20,7 @@ public class NetworkCommunicantPlayer extends Player
 	 * The ClientHandler object this Player object will use to obtain data when the System will
 	 * query each Player during the Game. 
 	 */
-	private ClientHandler clientHandler ;
+	private transient ClientHandler clientHandler ;
 	
 	/**
 	 * @param name the name of this Player
@@ -40,9 +42,16 @@ public class NetworkCommunicantPlayer extends Player
 	@Override
 	public void chooseCardsEligibleForSelling () 
 	{
+		Collection < SellableCard > arrived ;
 		try 
 		{
-			clientHandler.chooseCardsEligibleForSelling ( getSellableCards () );
+			arrived = CollectionsUtilities.newCollectionFromIterable ( clientHandler.chooseCardsEligibleForSelling ( getSellableCards () ) );
+			for ( SellableCard s : arrived )
+				if ( getSellableCards ().contains ( s ) )
+				{
+					getSellableCards ().remove ( s ) ;
+					getSellableCards ().add ( s ) ;
+				}
 		}
 		catch ( IOException e ) 
 		{
@@ -50,6 +59,9 @@ public class NetworkCommunicantPlayer extends Player
 		}		
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public GameMove doMove ( MoveFactory moveFactory , GameMap gameMap ) 
 	{
@@ -123,6 +135,13 @@ public class NetworkCommunicantPlayer extends Player
 		catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/***/
+	@Override
+	public Road chooseInitialRegionForASheperd ( Iterable < Road > availableRoads ) 
+	{
+		return null ;
 	}
 
 }

@@ -7,7 +7,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.LoginView.LoginViewObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.GraphicsUtilities;
@@ -180,25 +184,27 @@ public class GUIController extends ViewPresenter implements LoginViewObserver
 	}
 
 	@Override
-	public void onChooseCardsEligibleForSelling() {
-		// TODO Auto-generated method stub
+	public Iterable < SellableCard > onChooseCardsEligibleForSelling ( Iterable < SellableCard > playerCards ) 
+	{
+		return null ;
+	}
+
+	@Override
+	public Sheperd onChooseSheperdForATurn ( Iterable < Sheperd > sheperds )
+	{
+		return null ;
+	}
+
+	@Override
+	public SellableCard onChoseCardToBuy ( Iterable < SellableCard > acquirables ) 
+	{
+		return null ;
 		
 	}
 
 	@Override
-	public void onChooseSheperdForATurn() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onChoseCardToBuy() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public GameMove onDoMove() {
+	public GameMove onDoMove ( MoveFactory f , GameMap m ) 
+	{
 		// TODO Auto-generated method stub
 		return null;
 	}

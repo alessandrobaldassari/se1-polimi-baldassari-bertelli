@@ -1,6 +1,8 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
@@ -9,7 +11,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
 
-import java.awt.Color;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -19,7 +21,7 @@ import java.util.LinkedList;
  * This class is widely used in the whole model of the Game, so also if the implemented methods are not declared final, they should
  * not be overridden, and in the case, the contract ( particularly the raising of exceptions ) should be onered.
  */
-public abstract class Player 
+public abstract class Player implements Serializable
 {
 
 	// ATTRIBUTES
@@ -123,7 +125,7 @@ public abstract class Player
 	 */
 	public void initializeSheperds ( Sheperd [] sheperds ) throws WriteOncePropertyAlreadSetException
 	{
-		if ( this.sheperds != null )
+		if ( this.sheperds == null )
 		{
 			if ( sheperds != null )
 				this.sheperds = sheperds ;
@@ -149,7 +151,7 @@ public abstract class Player
 	 * 
 	 * @return an Iterable containing all the Sheperds that this Player has.
 	 */
-	protected Iterable < Sheperd > getSheperds () 
+	public Iterable < Sheperd > getSheperds () 
 	{
 		Iterable < Sheperd > res ;
 		res = CollectionsUtilities.newIterableFromArray ( sheperds ) ;
@@ -337,6 +339,15 @@ public abstract class Player
 	 * @return the choosen color that has to be in the availableColors Iterable.
 	 */
 	public abstract NamedColor getColorForSheperd ( Iterable < NamedColor > availableColors ) ;
+	
+	/**
+	 * This method is called by the System during the initialization phase to ask 
+	 * this Player where initially Place one of his Sheperds.
+	 * 
+	 * @param availableRoads the Roads where the Player can place one of his Sheperds.
+	 * @return the choosen Road.
+	 */
+	public abstract Road chooseInitialRegionForASheperd ( Iterable < Road > availableRoads ) ;
 	
 	/**
 	 * This is a generic method the System can call to notify a Player of something that

@@ -1,5 +1,10 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientCommunicationProtocolMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.Message;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIClientBroker;
@@ -81,71 +86,104 @@ public class RMIClient extends Client
 	protected void communicationProtocolImpl () 
 	{
 		List < Serializable > params ;
-		ClientCommunicationProtocolMessage nextOperation ;
+		Iterable < SellableCard > sellableCards ;
 		Iterable < NamedColor > colors ;
+		Iterable < Sheperd > sheperds ;
 		NamedColor n ;
+		SellableCard c ;
+		Sheperd sh ;
 		String s ;
 	    Boolean b ;
 		Message m ;
+		GameMap map ;
+		MoveFactory gf ;
+		GameMove move ;
 		try 
 		{
 			params = new ArrayList < Serializable > ( 2 ) ;
-			System.out.println ( "RMIClient : waiting for some commands " + clientBroker.isServerReady () ) ;
+			System.out.println ( "RMICLIENT : ATTENDENDO COMANDI IN ARRIVO " ) ;
 			while ( clientBroker.isServerReady () == false ) ;
 			m = clientBroker.getNextMessage () ;
+			params = CollectionsUtilities.newListFromIterable ( m.getParameters() ) ;
+			System.out.println ( "RMI CLIENT : MESSAGGIO RICEVUTO : " + m.getOperation () ) ;
 			switch ( m.getOperation () )
 			{
 				case NAME_REQUESTING_REQUEST :
+					// ask the interactive component for a name
 					s = getDataPicker ().onNameRequest () ;
+					params.clear () ;
 					params.add  ( s ) ;
 					m = Message.newInstance ( ClientCommunicationProtocolMessage.NAME_REQUESTING_RESPONSE , params ) ;
 					clientBroker.putNextMessage ( m ) ;
-					clientBroker.setClientReady () ;
 				break ;
 				case NAME_REQUESTING_RESPONSE_RESPONSE :
-					params = CollectionsUtilities.newListFromIterable ( m.getParameters () ) ;
 					s = (String) params.get ( 1 ) ;
 					b = ( Boolean ) params.get ( 0 ) ;
 					getDataPicker ().onNameRequestAck  ( b , s ) ;
-					clientBroker.setClientReady() ;
 				break ;
 				case MATCH_WILL_NOT_START_NOTIFICATION:
-					getDataPicker ().onMatchWillNotStartNotification ( ( String ) m.getParameters().iterator().next() ) ;
-					clientBroker.setClientReady () ;
+					getDataPicker ().onMatchWillNotStartNotification ( ( String ) params.get ( 0 ) ) ;
 				break;
 				case MATCH_STARTING_NOTIFICATION :
 					getDataPicker ().onNotifyMatchStart () ;
-					clientBroker.setClientReady () ;
 				break ;
 				case SHEPERD_COLOR_REQUESTING_REQUEST:
-					colors = ( Iterable < NamedColor > ) m.getParameters().iterator().next() ;
+					colors = ( Iterable < NamedColor > ) params.get ( 0 ) ;
+					// ask the interactive component for a color.
 					n = getDataPicker ().onSheperdColorRequest ( colors ) ;
 					params.clear(); 
 					params.add(n);
 					m = Message.newInstance ( ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE , params ) ;
 					clientBroker.putNextMessage ( m ) ;
-					clientBroker.setServerReady () ;
 				break;
 				case CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST:
-					
+					sellableCards = (Iterable<SellableCard>) params.get ( 0 ) ;
+					sellableCards = getDataPicker ().onChooseCardsEligibleForSelling ( sellableCards );
+					params.clear () ;
+					params.add ( ( Serializable ) sellableCards ) ;
+					m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_RESPONSE , params ) ;
+					clientBroker.putNextMessage ( m ) ;
 				break ;
 				case CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_REQUEST :
+					sheperds = (Iterable<Sheperd>) params.get ( 0 ) ;
+					sh = getDataPicker ().onChooseSheperdForATurn ( sheperds ) ;
+					params.clear () ;
+					params.add ( ( Serializable ) sh ) ;
+					m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_RESPONSE , params ) ;
+					clientBroker.putNextMessage ( m ) ;
 				break ;
 				case CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST :
+					sellableCards = ( Iterable < SellableCard > ) params.get ( 0 ) ;
+					c = getDataPicker ().onChoseCardToBuy ( sellableCards ) ; 
+					params.clear () ;
+					params.add ( ( Serializable ) c ) ;
+					m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_RESPONSE , params ) ;
+					clientBroker.putNextMessage ( m ) ;
 				break ;
 				case DO_MOVE_REQUESTING_REQUEST :
+					gf = ( MoveFactory ) params.get ( 0 ) ;
+					map = ( GameMap ) params.get ( 1 ) ;
+					move = getDataPicker ().onDoMove ( gf , map ) ;
+					params.clear () ;
+					params.add ( move ) ;
+					m = Message.newInstance ( ClientCommunicationProtocolMessage.DO_MOVE_REQUESTING_RESPONSE , params ) ;
+					clientBroker.putNextMessage (m ) ;
 				break ;
+				case GENERIC_NOTIFICATION_NOTIFICATION :
+					
+				break;	
 				default :
 				break ;
-				case GENERIC_NOTIFICATION_NOTIFICATION:
-				break;	
 			}
+			// the client has finished is job.
+			clientBroker.setClientReady () ;
 		}
-		catch (RemoteException e) {
-			// TODO Auto-generated catch block
+		catch ( RemoteException e) 
+		{
 			e.printStackTrace();
-		} catch (AnotherCommandYetRunningException e) {
-			// TODO Auto-generated catch block
+		}
+		catch ( AnotherCommandYetRunningException e ) 
+		{
 			e.printStackTrace();
 		}
 		

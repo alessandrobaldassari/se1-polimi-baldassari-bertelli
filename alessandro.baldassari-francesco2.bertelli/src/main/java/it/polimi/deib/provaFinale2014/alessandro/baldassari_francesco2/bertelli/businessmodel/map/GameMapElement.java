@@ -1,10 +1,12 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map;
 
+import java.io.Serializable;
+
 /**
  * This class represent a generic element which composes the GameMapElement.
  * It is an immutable class, also if it is expectable that its subclasses will not.
  */
-public abstract class GameMapElement 
+public abstract class GameMapElement implements Serializable
 {
 
 	// ATTRIBUTES

@@ -17,6 +17,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove.MoveNotAllowedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.CharacterDoesntMoveException;
@@ -71,7 +73,7 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 	/**
 	 * The Timer value about the time to wait before begin a Match. 
 	 */
-	private static final long DELAY = 60 * Utilities.MILLISECONDS_PER_SECOND ;
+	private static final long DELAY = 30 * Utilities.MILLISECONDS_PER_SECOND ;
 	
 	/**
 	 * The maximum number of Player for a Match. 
@@ -203,15 +205,12 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 		creatingPhase () ;
 		System.out.println ( "GAME CONTROLLER : PRIMA DELLA WAIT FOR PLAYER " ) ;
 		waitForPlayersPhase () ;
-		synchronized ( match )
-		{
-			System.out.println ( "GAME CONTROLLER : PRIMA DELLA INITIALIZATION PHASE" ) ;
-			initializationPhase () ; 
-			System.out.println ( "GAME CONTROLLER : PRIMA DELLA TURNATION PHASE" ) ;
-			turnationPhase () ;
-			System.out.println ( "GAME CONTROLLER : PRIMA DELLA RESULTS CALCULATION PHASE" ) ;
-			resultsCalculationPhase () ;
-		}
+		System.out.println ( "GAME CONTROLLER : PRIMA DELLA INITIALIZATION PHASE" ) ;
+		initializationPhase () ; 
+		System.out.println ( "GAME CONTROLLER : PRIMA DELLA TURNATION PHASE" ) ;
+		turnationPhase () ;
+		System.out.println ( "GAME CONTROLLER : PRIMA DELLA RESULTS CALCULATION PHASE" ) ;
+		resultsCalculationPhase () ;
 	}
 	
 	/**
@@ -452,10 +451,9 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 	{
 		final Collection < NamedColor > colors ;
 		NamedColor choosenColor ;
-		Sheperd [] sheperds ; 
+		Sheperd [] sheperds ;
+		Road selectedRoad ;
 		byte numberOfSheperdsPerPlayer ;
-		byte sheperdIndex ;
-		byte colorIndex ;
 		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : INIZIO " ) ;
 		colors = new LinkedList < NamedColor > () ;
 		colors.add ( new NamedColor ( Color.RED.getRed() , Color.RED.getGreen() , Color.RED.getBlue() , "RED" ) ) ;
@@ -466,25 +464,34 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 			numberOfSheperdsPerPlayer = 2 ;
 		else
 			numberOfSheperdsPerPlayer = 1 ;
-		colorIndex = 0 ;
+		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : INIZIO " ) ;
 		for ( Player p : match.getPlayers () )
 		{
-			sheperds = new Sheperd [ numberOfSheperdsPerPlayer ] ;
-		
-			for ( sheperdIndex = 0 ; sheperdIndex < numberOfSheperdsPerPlayer ; sheperdIndex ++ )
-			{	
-				choosenColor = p.getColorForSheperd ( colors ) ;
-				colors.remove ( choosenColor ) ;
-				sheperds [ sheperdIndex ] = new Sheperd ( p.getName () + "_" + sheperdIndex , choosenColor , p ) ;
-			}
+			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : GESTITSCO IL PLAYER " + p.getName () ) ;
+			sheperds = new Sheperd [ numberOfSheperdsPerPlayer ] ;		
+			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : CHIDEDENDO AL PLAYER " + p.getName () + " DI SCEGLIERE UN COLORE." ) ;
+			choosenColor = p.getColorForSheperd ( colors ) ;
+			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : IL PLAYER " + p.getName () + " HA SCELTO IL COLORE " + choosenColor.getName () ) ;
+			colors.remove ( choosenColor ) ;				
+			sheperds [ 0 ] = new Sheperd ( p.getName () + "_#" + 0 , choosenColor , p ) ;
+			if ( numberOfSheperdsPerPlayer == 2 )
+				sheperds [ 1 ] = new Sheperd ( p.getName () + "_#" + 1 , choosenColor , p ) ;				
 			try 
 			{
+				System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : SETTANDO I PASTORI PER IL PLAYER " + p.getName () ) ;
 				p.initializeSheperds ( sheperds ) ;
 			}
 			catch ( WriteOncePropertyAlreadSetException e ) 
 			{
 				e.printStackTrace () ;
 				throw new RuntimeException ( e ) ;
+			}
+			for ( Sheperd s : p.getSheperds () )
+			{
+				//selectedRoad = p.chooseInitialRegionForASheperd ( match.getGameMap ().getFreeRoads () ) ;
+				selectedRoad = match.getGameMap ().getFreeRoads ().iterator().next () ;
+				s.moveTo ( selectedRoad ) ;
+				selectedRoad.setElementContained ( s ) ;
 			}
 		}
 		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : FINE " ) ;
@@ -498,60 +505,82 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 	 */
 	private void turnationPhase () 
 	{
+		GameMove choosenMove ;
 		Sheperd choosenSheperd ;
 		MoveFactory moveFactory ;
 		BlackSheep blackSheep ;
 		Wolf wolf ;
 		byte moveIndex ;
 		boolean gamePlaying ;
+		System.out.println ( "GAME CONTROLLER - TURNATION PHASE : INIZIO " ) ;
 		blackSheep = findBlackSheep () ;
 		wolf = findWolf () ;
 		gamePlaying = true ;
 		while ( gamePlaying )
 		{
 			turnNumber ++ ;
+			System.out.println ( "GAME CONTROLLER - TURNATION PHASE - NUMERO TURNO : " + turnNumber ) ;
 			try 
 			{
+				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PECORA NERA PROVA A SCAPPARE " ) ;
 				blackSheep.escape () ;
+				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PECORA NERA SI MUOVE " ) ;
 			}
 			catch ( CharacterDoesntMoveException e1 ) 
 			{
-				// if you want communicate to users.
+				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PECORA NERA NON SI MUOVE " ) ;
 			}
 			for ( Player currentPlayer : match.getPlayers() )
 			{
+				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - TURNO DEL PLAYER : " + currentPlayer.getName () ) ;
+
 				if ( match.isInFinalPhase () )
 					break ;
 				if ( match.getNumberOfPlayers () == 2 )
 				{
+					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - CHIDENDO AL PLAYER : " + currentPlayer.getName () + " DI SCEGLIERE UN PASTORE" ) ;					
 					choosenSheperd = currentPlayer.chooseSheperdForATurn () ;
-					moveFactory = MoveFactory.newInstance ( true , this , this , choosenSheperd ) ;
+					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - IL PLAYER : " + currentPlayer.getName () + " HA SCELTO IL PASTORE " + choosenSheperd.getName () ) ;									
+					moveFactory = MoveFactory.newInstance ( choosenSheperd , this , this ) ;
 				}
 				else
-					moveFactory = MoveFactory.newInstance ( false , this , this , null ) ;
+					moveFactory = MoveFactory.newInstance ( currentPlayer.getSheperds ().iterator ().next () , this , this ) ;
 				for ( moveIndex = 0 ; moveIndex < NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ )
+				{	
 					try 
 					{
-						currentPlayer.doMove ( moveFactory , match.getGameMap () ).execute ( match );
+						System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - CHIEDENDO DI FARE UNA MOSSA " ) ;				
+						choosenMove = currentPlayer.doMove ( moveFactory , match.getGameMap () ) ;
+						System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - MOSSA SCELTA " + choosenMove.toString () ) ;									
+						choosenMove.execute ( match ) ;
+						System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " HA ESEGUITO LA MOSSA." ) ;									
 					} 
-					catch (MoveNotAllowedException e) {
+					catch ( MoveNotAllowedException e ) 
+					{
+						System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - ERRORE DURANTE L'ESECUZIONE DELLA MOSSA." ) ;									
 						e.printStackTrace();
 					} 
+				}
 				if ( match.isInFinalPhase () == false && match.getBank().hasAFenceOfThisType ( FenceType.NON_FINAL ) == false )
 					try 
 					{
+						System.out.println ( "GAME CONTROLLER - TURNATION PHASE - ENTRO NELLA FASE FINALE " ) ;															
 						match.enterFinalPhase () ;
 					} 
 					catch ( AlreadyInFinalPhaseException e ) {}
 			}
+			System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PRIMA DELLA FASE DI MARKET." ) ;															
 			marketPhase () ;
+			System.out.println ( "GAME CONTROLLER - TURNATION PHASE - DOPO LA FASE DI MARKET." ) ;															
 			try 
 			{
+				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - IL LUPO PROVA A SCAPPARE " ) ;															
 				wolf.escape () ;
+				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - IL LUPO PROVA E' SCAPPATO " ) ;															
 			}
 			catch (CharacterDoesntMoveException e) 
 			{
-				// if you want communicate the user of the thing...
+				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - IL LUPO NON E' RIUSCITO A SCAPPARE " ) ;															
 			}
 			if ( match.isInFinalPhase () )
 				gamePlaying = false ;

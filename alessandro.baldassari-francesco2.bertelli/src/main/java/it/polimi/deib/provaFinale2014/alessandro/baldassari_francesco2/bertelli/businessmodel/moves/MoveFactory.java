@@ -1,5 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves;
 
+import java.io.Serializable;
+
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.TurnNumberClock;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb.LambEvolver;
@@ -10,11 +12,11 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 
 /***/
-public class MoveFactory 
+public class MoveFactory implements Serializable
 {
 
 	/***/
-	private final TurnNumberClock clockSource ;
+	private final transient TurnNumberClock clockSource ;
 	
 	/***/
 	private Move lastMove ;
@@ -26,13 +28,17 @@ public class MoveFactory
 	private boolean sheperdMoved ;
 	
 	/***/
-	private LambEvolver lambEvolver ;
+	private transient LambEvolver lambEvolver ;
 	
 	/***/
-	MoveFactory ( TurnNumberClock clockSource , LambEvolver lambEvolver ) 
+	private Sheperd sheperd ;
+	
+	/***/
+	MoveFactory ( Sheperd sheperd , TurnNumberClock clockSource , LambEvolver lambEvolver ) 
 	{
-		if ( clockSource != null && lambEvolver != null )
+		if ( sheperd != null && clockSource != null && lambEvolver != null )
 		{
+			this.sheperd = sheperd ;
 			this.clockSource = clockSource ;
 			this.lambEvolver = lambEvolver ;
 			lastMove = null ;
@@ -44,24 +50,18 @@ public class MoveFactory
 	}
 	
 	/***/
-	public static MoveFactory newInstance ( boolean forTwoPlayersMatch , TurnNumberClock clockSource , LambEvolver lambEvolver , Sheperd choosenSheperd ) 
+	public static MoveFactory newInstance ( Sheperd s , TurnNumberClock clockSource , LambEvolver lambEvolver ) 
 	{
 		MoveFactory res ;
-		if ( clockSource != null && lambEvolver != null )
-			if ( forTwoPlayersMatch )
-				if ( choosenSheperd != null )
-					res = new TwoPlayersMatchMoveFactory ( clockSource , lambEvolver , choosenSheperd ) ;
-				else
-					throw new IllegalArgumentException () ;
-			else
-				res = new MoveFactory ( clockSource , lambEvolver ) ;
+		if ( s != null && clockSource != null && lambEvolver != null )
+			res = new MoveFactory ( s , clockSource , lambEvolver ) ;
 		else
 			throw new IllegalArgumentException () ;
 		return res ;
 	}
 	
 	/***/
-	public GameMove newBreakDownMove ( Sheperd breaker , Animal animalToBreak ) throws CannotDoThisMoveException 
+	public GameMove newBreakDownMove ( Animal animalToBreak ) throws CannotDoThisMoveException 
 	{
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new CannotDoThisMoveException () ;
@@ -70,14 +70,14 @@ public class MoveFactory
 			{
 				numberOfMovesDone ++ ;
 				lastMove = Move.BREAK_DOWN ;
-				return new BreakDown ( breaker , animalToBreak ) ;
+				return new BreakDown ( sheperd , animalToBreak ) ;
 			}
 			else
 				throw new CannotDoThisMoveException () ;
 	} 
 	
 	/***/
-	public GameMove newBuyCard ( Sheperd buyer , RegionType buyingCardType ) throws CannotDoThisMoveException 
+	public GameMove newBuyCard ( RegionType buyingCardType ) throws CannotDoThisMoveException 
 	{
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new CannotDoThisMoveException () ; 
@@ -86,14 +86,14 @@ public class MoveFactory
 			{
 				numberOfMovesDone ++ ;
 				lastMove = Move.BUY_CARD ;
-				return new BuyCard ( buyer , buyingCardType ) ;
+				return new BuyCard ( sheperd , buyingCardType ) ;
 			}
 			else
 				throw new CannotDoThisMoveException () ; 
 	}
 	
 	/***/
-	public GameMove newMate ( Sheperd theOneWhoWantsTheMate , Region whereMate ) throws CannotDoThisMoveException 
+	public GameMove newMate ( Region whereMate ) throws CannotDoThisMoveException 
 	{
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new CannotDoThisMoveException () ; 
@@ -102,14 +102,14 @@ public class MoveFactory
 			{
 				numberOfMovesDone ++ ;
 				lastMove = Move.MATE ;
-				return new Mate ( clockSource , lambEvolver , theOneWhoWantsTheMate , whereMate ) ;
+				return new Mate ( clockSource , lambEvolver , sheperd , whereMate ) ;
 			}
 			else
 				throw new CannotDoThisMoveException () ; 
 	}
 	
 	/***/
-	public GameMove newMoveSheep ( Sheperd moverSheperd , Ovine movingOvine , Region ovineDestinationRegion ) throws CannotDoThisMoveException 
+	public GameMove newMoveSheep ( Ovine movingOvine , Region ovineDestinationRegion ) throws CannotDoThisMoveException 
 	{
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new CannotDoThisMoveException () ; 
@@ -118,18 +118,18 @@ public class MoveFactory
 			{
 				numberOfMovesDone ++ ;
 				lastMove = Move.MATE ;
-				return new MoveSheep ( moverSheperd , movingOvine , ovineDestinationRegion ) ;
+				return new MoveSheep ( sheperd , movingOvine , ovineDestinationRegion ) ;
 			}
 			else
 				throw new CannotDoThisMoveException () ;  
 		}
 	
 	/***/
-	public GameMove newMoveSheperd ( Sheperd sheperdToMove , Road roadWhereGo ) throws CannotDoThisMoveException
+	public GameMove newMoveSheperd ( Road roadWhereGo ) throws CannotDoThisMoveException
 	{
 		sheperdMoved = true ;
 		numberOfMovesDone ++ ;
-		return new MoveSheperd ( sheperdToMove , roadWhereGo ) ;
+		return new MoveSheperd ( sheperd , roadWhereGo ) ;
 	}
 	
 	// ENUMERATIONS

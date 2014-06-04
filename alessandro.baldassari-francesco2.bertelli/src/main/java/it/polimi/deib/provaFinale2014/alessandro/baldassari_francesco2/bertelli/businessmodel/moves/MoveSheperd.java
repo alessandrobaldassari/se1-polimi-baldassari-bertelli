@@ -36,7 +36,7 @@ public class MoveSheperd extends GameMove
 	 * @param roadWhereGo the Road where the Sheperd wants to go. 
 	 * @throws IllegalArgumentException if the sheperdToMove or the roadWhereGo parameter is null.
 	 */
-	MoveSheperd ( Sheperd sheperdToMove , Road roadWhereGo ) 
+	protected MoveSheperd ( Sheperd sheperdToMove , Road roadWhereGo ) 
 	{
 		if ( sheperdToMove != null && roadWhereGo != null && roadWhereGo.getElementContained () == null )
 		{
@@ -60,13 +60,20 @@ public class MoveSheperd extends GameMove
 	public void execute ( Match match ) throws MoveNotAllowedException  
 	{
 		Road whereTheSheperdIsNow ;
+		System.out.println ( "MOVE SHEPERD : INIZIO " ) ;
+		System.out.println ( "MOVE SHEPERD : RECUPERO POSIZIONE PASTORE " ) ;		
 		whereTheSheperdIsNow = sheperdToMove.getPosition () ; 
+		System.out.println ( "MOVE SHEPERD : POSIZIONE PASTORE RECUPERATA : " + whereTheSheperdIsNow ) ;		
+		// se la regione dove il pastore vuole andare non è adiacente a dove sta ora, fallo pagare.
 		if ( CollectionsUtilities.contains ( whereTheSheperdIsNow.getAdjacentRoads () , roadWhereGo ) == false )
 		{
+			System.out.println ( "MOVE SHEPERD : REGIONE DESTINAZIONE NON ADIACENTE " ) ;		
 			try 
 			{
+				System.out.println ( "MOVE SHEPERD : INIZIO PAGAMENTO." ) ;		
 				sheperdToMove.getOwner().pay ( MONEY_TO_PAY_IF_ROADS_NON_ADJACENT ) ;
 				match.getBank ().receiveMoney ( MONEY_TO_PAY_IF_ROADS_NON_ADJACENT ) ;
+				System.out.println ( "MOVE SHEPERD : FINE PAGAMENTO." ) ;		
 			} 
 			catch ( TooFewMoneyException e ) 
 			{
@@ -74,11 +81,14 @@ public class MoveSheperd extends GameMove
 				throw new MoveNotAllowedException () ;
 			}
 		}
+		System.out.println ( "MOVE SHEPERD : INIZIO MOVIMENTO PASTORE." ) ;		
 		sheperdToMove.moveTo ( roadWhereGo ) ;
 		roadWhereGo.setElementContained ( sheperdToMove ) ;
+		System.out.println ( "MOVE SHEPERD : FINE MOVIMENTO PASTORE" ) ;		
 		try 
 		{
 			whereTheSheperdIsNow.setElementContained ( match.getBank ().getAFence ( FenceType.NON_FINAL ) ) ;
+			System.out.println ( "MOVE SHEPERD : RECINTO MESSO NELLA REGIONE DI PARTENZA." ) ;		
 		}
 		catch ( NoMoreFenceOfThisTypeException e ) 
 		{
@@ -93,6 +103,7 @@ public class MoveSheperd extends GameMove
 				throw new RuntimeException ( e1 ) ;
 			}				
 		}
+		System.out.println ( "MOVE SHEPERD : FINE " ) ;
 	}
 
 }

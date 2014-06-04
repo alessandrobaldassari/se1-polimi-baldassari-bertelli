@@ -6,6 +6,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.Stack;
  * This class models the Component of the Game which is the Bank, a background element
  * that contains the not yet selled cards, the not placed fences and the reserve of money.
  */
-public class Bank 
+public class Bank implements Serializable
 {
 	
 	// ATTRIBUTES

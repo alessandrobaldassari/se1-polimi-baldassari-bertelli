@@ -1,9 +1,11 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
-
-import java.awt.Color;
 
 /**
  * Abstraction interface that contains all the method a class has to implement to answer requests for 
@@ -25,21 +27,21 @@ public interface CommunicationProtocolResponser
 	public NamedColor onSheperdColorRequest ( Iterable < NamedColor > availableColors ) ;
 	
 	/***/
+	public Sheperd onChooseSheperdForATurn ( Iterable < Sheperd > playersSheperd ) ;
+	
+	/***/
 	public void onMatchWillNotStartNotification ( String msg ) ;
 	
 	/***/
 	public void generationNotification ( String msg ) ;
 	
 	/***/
-	public void onChooseCardsEligibleForSelling () ;
+	public Iterable < SellableCard > onChooseCardsEligibleForSelling ( Iterable < SellableCard > sellableCards ) ;
 	
 	/***/
-	public void onChooseSheperdForATurn () ;
+	public SellableCard onChoseCardToBuy ( Iterable < SellableCard > acquirables ) ;
 	
 	/***/
-	public void onChoseCardToBuy () ;
-	
-	/***/
-	public GameMove onDoMove () ;
+	public GameMove onDoMove ( MoveFactory f , GameMap m ) ;
 	
 }

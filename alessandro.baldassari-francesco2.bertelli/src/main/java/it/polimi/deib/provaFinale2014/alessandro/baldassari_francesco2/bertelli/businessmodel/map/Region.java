@@ -39,7 +39,7 @@ public class Region extends GameMapElement
 	 * @param type the Type of this Region.
 	 * @throws IllegalArgumentException if the type parameter is null.
 	 */
-	Region ( RegionType type , int uid ) 
+	protected Region ( RegionType type , int uid ) 
 	{
 		super ( GameMapElementType.REGION , uid ) ;
 		if ( type != null )

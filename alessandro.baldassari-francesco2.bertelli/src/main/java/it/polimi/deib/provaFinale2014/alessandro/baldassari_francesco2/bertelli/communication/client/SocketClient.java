@@ -10,7 +10,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -19,7 +18,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -44,12 +42,19 @@ public class SocketClient extends Client
 	private ObjectOutputStream oos ;
 		
 	/**
+	 * A list for the communication parameters.
+	 * Here for efficiency. 
+	 */
+	private List < Serializable > communicationParameters ;
+	
+	/**
 	 * @param communicationProtocolResponser the value for the communicationProtocolResponser field.
 	 */
 	public SocketClient ( CommunicationProtocolResponser communicationProtocolResponser )   
 	{
 		super ( communicationProtocolResponser ) ;
 		channel = new Socket () ;
+		communicationParameters = new ArrayList < Serializable > ( 2 ) ;
 		ois = null ;
 		oos = null ;
 	}
@@ -86,7 +91,6 @@ public class SocketClient extends Client
 	@Override
 	protected void communicationProtocolImpl () 
 	{
-		List < Serializable > params ;
 		ClientCommunicationProtocolMessage op ;
 		Message m ;
 		MoveFactory moveFactory ;
@@ -96,27 +100,27 @@ public class SocketClient extends Client
 		Iterable < NamedColor > colors ;
 		String command ;
 		NamedColor n ;
+		Sheperd choosenSheperd ;
 		String s ;
 		Boolean b ;
 		try 
 		{
-			params = new ArrayList < Serializable > ( 2 ) ;
+			System.out.println ( "SOCKET CLIENT : ASPETTANDO UN MESSAGGIO" ) ;
 			m = ( Message ) ois.readObject () ;
+			System.out.println ( "SOCKET CLIENT : MESSAGGIO RICEVUTO : " + m.getOperation () ) ;
 			switch ( m.getOperation () )  
 			{
 				case NAME_REQUESTING_REQUEST :
-					op = ClientCommunicationProtocolMessage.NAME_REQUESTING_RESPONSE ;
 					s = getDataPicker ().onNameRequest () ;
-					params.add ( s ) ;
-					System.out.println ( "SOCKET CLIENT : " + s ) ;
-					m = Message.newInstance ( op , params ) ;
+					communicationParameters.add ( s ) ;
+					m = Message.newInstance ( ClientCommunicationProtocolMessage.NAME_REQUESTING_RESPONSE , communicationParameters ) ;
 					oos.writeObject ( m ) ;
 					oos.flush () ;
 				break ;	
 				case NAME_REQUESTING_RESPONSE_RESPONSE :
-					params = CollectionsUtilities.newListFromIterable ( m.getParameters () ) ;
-					s = (String) params.get ( 1 ) ;
-					b = ( Boolean ) params.get ( 0 ) ;
+					communicationParameters.addAll ( CollectionsUtilities.newCollectionFromIterable ( m.getParameters () ) ) ;
+					b = ( Boolean ) communicationParameters.get ( 0 ) ;
+					s = ( String ) communicationParameters.get ( 1 ) ;
 					getDataPicker ().onNameRequestAck  ( b , s ) ;
 				break ;
 				case MATCH_STARTING_NOTIFICATION :
@@ -128,23 +132,27 @@ public class SocketClient extends Client
 				case SHEPERD_COLOR_REQUESTING_REQUEST:
 					colors = ( Iterable < NamedColor > ) m.getParameters().iterator().next() ;
 					n = getDataPicker ().onSheperdColorRequest ( colors ) ;
-					params.clear(); 
-					params.add(n);
-					m = Message.newInstance ( ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE , params ) ;
+					communicationParameters.clear(); 
+					communicationParameters.add( n );
+					System.out.println ( "SOCKET CLIENT : SHEPERD COLOR REQUEST REQUEST - CREANDO MESSAGGIO DI RISPOSTA " ) ;
+					m = Message.newInstance ( ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE , communicationParameters ) ;
+					System.out.println ( "SOCKET CLIENT : SHEPERD COLOR REQUEST REQUEST - SCRIVENDO MESSAGGIO DI RISPOSTA" ) ;
 					oos.writeObject ( m ) ;
 					oos.flush () ;
 				break;
-				case GENERIC_NOTIFICATION_NOTIFICATION:
-					s = ois.readUTF();
-				break;
+				case CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_REQUEST :
+					sheperds = ( Iterable < Sheperd > ) m.getParameters ().iterator().next () ;
+					choosenSheperd = getDataPicker ().onChooseSheperdForATurn ( sheperds ) ;
+					communicationParameters.clear () ;
+					communicationParameters.add ( choosenSheperd ) ;
+					m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_RESPONSE , communicationParameters ) ;
+					oos.writeObject ( m ) ;
+					oos.flush () ;
+				break ;
 				case CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST:
 					sellableCards = (Iterable<SellableCard>) ois.readObject();
 					oos.writeUTF ( ClientCommunicationProtocolMessage.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_RESPONSE.toString () );
 					oos.flush();
-				break ;
-				case CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_REQUEST :
-					sheperds = ( Iterable<Sheperd> ) ois.readObject () ;
-					oos.writeUTF ( ClientCommunicationProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_RESPONSE.toString () ) ;
 				break ;
 				case CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST :
 					sellableCards = (Iterable<SellableCard>) ois.readObject () ;
@@ -155,20 +163,22 @@ public class SocketClient extends Client
 					gameMap = (GameMap) ois.readObject () ;
 					oos.writeUTF ( ClientCommunicationProtocolMessage.DO_MOVE_REQUESTING_RESPONSE.toString () ) ;
 				break ;
+				case GENERIC_NOTIFICATION_NOTIFICATION:
+					s = ois.readUTF();
+				break;
 				default :
 				break ;
 			}
+			communicationParameters.clear();
 		} 
-		catch (IOException e) 
+		catch ( IOException e ) 
 		{
-			e.printStackTrace();
+			e.printStackTrace () ;
 		}	
-		catch (ClassNotFoundException e) 
+		catch ( ClassNotFoundException e ) 
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
 	}
-	
-	
+		
 }
