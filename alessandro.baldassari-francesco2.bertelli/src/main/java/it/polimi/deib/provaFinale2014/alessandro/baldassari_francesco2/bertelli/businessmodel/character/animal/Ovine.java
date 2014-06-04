@@ -10,7 +10,7 @@ public abstract class Ovine extends Animal
 	/**
 	 * @param name the name of this ovine. 
 	 */
-	Ovine ( PositionableElementType positionableElementType , String name ) 
+	protected Ovine ( PositionableElementType positionableElementType , String name ) 
 	{
 		super ( positionableElementType , name ) ;
 	}
