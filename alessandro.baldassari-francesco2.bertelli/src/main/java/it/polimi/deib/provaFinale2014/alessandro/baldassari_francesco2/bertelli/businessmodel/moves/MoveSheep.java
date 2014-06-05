@@ -73,10 +73,10 @@ public class MoveSheep extends GameMove
 				ovineDestinationRegion.addAnimal ( movingOvine ) ;
 			}
 			else
-				throw new MoveNotAllowedException () ;
+				throw new MoveNotAllowedException ( "" ) ;
 		}
 		else
-			throw new MoveNotAllowedException () ;
+			throw new MoveNotAllowedException ( "" ) ;
 	}
 	
 }

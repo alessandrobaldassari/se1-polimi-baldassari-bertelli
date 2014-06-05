@@ -4,7 +4,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Bank.NoMoreCardOfThisTypeException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player.TooFewMoneyException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
@@ -29,14 +28,20 @@ public class BuyCard extends GameMove
 	/**
 	 * @param buyer the Sheperd who required to do this move.
 	 * @param buyingCardType the RegionType the buyer is interested in.
+	 * @throws MoveNotAllowedException if some business rules are broken by the parameters
 	 * @throws IllegalArgumentException if the buyer or the buyingCardType parameter is null.
 	 */
-	BuyCard ( Sheperd buyer , RegionType buyingCardType )
+	protected BuyCard ( Sheperd buyer , RegionType buyingCardType ) throws MoveNotAllowedException
 	{
 		if ( buyer != null && buyingCardType != null ) 
 		{
-			this.buyer = buyer ;
-			this.buyingCardType = buyingCardType ;
+			if ( buyingCardType == buyer.getPosition().getFirstBorderRegion ().getType () || buyingCardType == buyer.getPosition().getSecondBorderRegion ().getType () )
+			{ 
+				this.buyer = buyer ;
+				this.buyingCardType = buyingCardType ;
+			}
+			else
+				throw new MoveNotAllowedException ( "This Player can not do this move." ) ;
 		}
 		else
 			throw new IllegalArgumentException () ;
@@ -52,49 +57,44 @@ public class BuyCard extends GameMove
 	 * @throws TooFewMoneyException if the buyer has not enough money to buy the wanted Card.
 	 * @throws CardPriceNotRightException if the buyer tries to buy a wrong price for the wanted Card.
 	 * @throws MoveNotAllowedException if the Player is not in a position from which he can buy the wanted Card.
+	 * 
+	 * @PRECONDITIONS:
+	 *  1. match != null
+	 * @EXCEPTIONS_POSTCONDITIONS
+	 *  1. bank.cards [ buying_card_type ] is empty && NoMoreCardOfThisTypeException raised
+	 *  2. bank.peekcardprice [ buying_card_type ] > buyer ( in ).money && TooFewMoneyException
+	 * @POSTCONDITIONS
+	 *  3. AFTER bank.cards [ buying_card_type ].peek.price = PREV bank.cards [ buying_card_type ].peek.price + 1
+	 *  4. buyer.has ( PREV bank.cards [ buying_card_type ] )
+	 *  5. AFTER buyer.money == PREV buyer.money - bank.cards [ buying_card_type ].peek.price
+	 *    
 	 */
 	@Override
 	public void execute ( Match match ) throws MoveNotAllowedException 
 	{
 		SellableCard theCard ;
 		int price ;
-		if ( canThisBuyerBuyThisCard () )
+		try 
 		{
-			try 
-			{
-				price = match.getBank().getPeekCardPrice ( buyingCardType ) ;
-				buyer.getOwner ().pay ( price ) ;
-				theCard = match.getBank ().sellACard ( price , buyingCardType ) ;
-				buyer.getOwner().getSellableCards ().add ( theCard ) ;
-			} 
-			catch ( NoMoreCardOfThisTypeException e ) 
-			{
-				e.printStackTrace();
-				throw new MoveNotAllowedException () ;
-			} 
-			catch ( TooFewMoneyException e ) 
-			{
-				e.printStackTrace();
-				throw new MoveNotAllowedException () ;
-			} 
-			catch ( CardPriceNotRightException e ) 
-			{
-				e.printStackTrace();
-				throw new RuntimeException () ;
-			}
-		}
-		else
-			throw new MoveNotAllowedException () ;
-	}
-
-	/***/
-	private boolean canThisBuyerBuyThisCard () 
-	{
-		Road buyerPosition ;
-		boolean res ;
-		buyerPosition = buyer.getPosition () ;
-	    res = ( buyingCardType == buyerPosition.getFirstBorderRegion ().getType () || buyingCardType == buyerPosition.getSecondBorderRegion ().getType () ) ;
-	    return res ;
+			price = match.getBank().getPeekCardPrice ( buyingCardType ) ;
+			buyer.getOwner ().pay ( price ) ;
+			theCard = match.getBank ().sellACard ( price , buyingCardType ) ;
+			buyer.getOwner().getSellableCards ().add ( theCard ) ;
+		} 
+		catch ( NoMoreCardOfThisTypeException e ) 
+		{
+			throw new MoveNotAllowedException ( "This player can not do this move" ) ;
+		} 
+		catch ( TooFewMoneyException e ) 
+		{
+			throw new MoveNotAllowedException ( "This player can not do this move" ) ;
+		} 
+		catch ( CardPriceNotRightException e ) 
+		{
+			throw new RuntimeException ( e ) ;
+		}	
 	}
 	
 }
+
+

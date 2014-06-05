@@ -25,6 +25,9 @@ public class AnimalFactory
 	 * The default Black Sheep name, equals for every match. 
 	 */
 	private static final String BLACK_SHEEP_NAME = "THE_BLACK_SHEEP" ;
+
+	/***/
+	private static final String OVINE_BASE_NAME = "OVINE " ;
 	
 	/**
 	 * The support for the Factory behavior of the static part of this class. 
@@ -44,10 +47,14 @@ public class AnimalFactory
 	private boolean blackSheepGenerated ;
 	
 	/***/
+	private short lastIndexEmitted ;
+	
+	/***/
 	private AnimalFactory () 
 	{
 		wolfGenerated = false ;
 		blackSheepGenerated = false ;
+		lastIndexEmitted = - 1 ;
 	}
 	
 	/**
@@ -94,6 +101,16 @@ public class AnimalFactory
 			res = new AdultOvine ( name , type ) ;
 		else 
 			throw new IllegalArgumentException () ;
+		return res ;
+	}
+	
+	/***/
+	public Ovine newAdultOvine ( AdultOvineType type ) 
+	{
+		Ovine res ;
+		res = null ;
+		lastIndexEmitted ++ ;
+		res = newAdultOvine ( OVINE_BASE_NAME + lastIndexEmitted , type ) ;
 		return res ;
 	}
 	

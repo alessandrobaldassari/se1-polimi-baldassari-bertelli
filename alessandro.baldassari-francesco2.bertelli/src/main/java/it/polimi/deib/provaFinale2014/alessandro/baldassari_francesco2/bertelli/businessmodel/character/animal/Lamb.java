@@ -35,7 +35,7 @@ public class Lamb extends Ovine
 	 *         parameter is null, or the birthTurn is < 0, or the father's parameter type is 
 	 *         equals to the mother's parameter type.
 	 */
-	Lamb ( String name , int birthTurn , AdultOvine father , AdultOvine mother ) 
+	protected Lamb ( String name , int birthTurn , AdultOvine father , AdultOvine mother ) 
 	{
 		super ( PositionableElementType.LAMB , name ) ;
 		if ( father != null && mother != null && birthTurn >= 0 && father.getType () != mother.getType () )
@@ -80,6 +80,17 @@ public class Lamb extends Ovine
 	{
 		return "Lamb : " + birthTurn + " " + father + " " + mother;
 	} 
+	
+	@Override
+	public boolean equals ( Object obj ) 
+	{
+		boolean res ;
+		if ( obj instanceof Lamb )
+			res = super.equals ( obj ) ;
+		else
+			res = false ;
+		return res ;
+	}
 	
 	// INNER INTERFACES
 	

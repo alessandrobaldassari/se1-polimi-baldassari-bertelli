@@ -56,4 +56,15 @@ public class BlackSheep extends AdultOvine
 			throw new CharacterDoesntMoveException ( this ) ;
 	}
 	
+	@Override
+	public boolean equals ( Object obj ) 
+	{
+		boolean res ;
+		if ( obj instanceof BlackSheep )
+			res = super.equals ( obj ) ;
+		else
+			res = false ;
+		return res ;
+	}
+	
 }

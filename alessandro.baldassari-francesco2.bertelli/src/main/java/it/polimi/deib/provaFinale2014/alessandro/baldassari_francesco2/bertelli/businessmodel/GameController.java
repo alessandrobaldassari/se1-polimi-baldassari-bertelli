@@ -19,8 +19,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove.MoveNotAllowedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveNotAllowedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.CharacterDoesntMoveException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
@@ -171,7 +171,7 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 		{
 			whereTheLambIsNow = lamb.getPosition () ;
 			whereTheLambIsNow.removeAnimal ( lamb ) ;
-			newOvine = animalsFactory.newAdultOvine ( "" , MathUtilities.genProbabilityValue() > 0.5 ? AdultOvineType.RAM : AdultOvineType.SHEEP ) ;
+			newOvine = animalsFactory.newAdultOvine ( MathUtilities.genProbabilityValue() > 0.5 ? AdultOvineType.RAM : AdultOvineType.SHEEP ) ;
 			newOvine.moveTo ( whereTheLambIsNow ) ;
 			whereTheLambIsNow.addAnimal ( newOvine ) ;
 		}
@@ -325,7 +325,7 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - PLACE SHEEPS : INIZIO " ) ;
 			for ( Region region : match.getGameMap ().getRegions () ) 
 			{
-				bornOvine = animalsFactory.newAdultOvine ( "" , MathUtilities.genProbabilityValue() > 0.5 ? AdultOvineType.RAM : AdultOvineType.SHEEP ) ;
+				bornOvine = animalsFactory.newAdultOvine ( MathUtilities.genProbabilityValue() > 0.5 ? AdultOvineType.RAM : AdultOvineType.SHEEP ) ;
 				region.addAnimal ( bornOvine ) ;
 				bornOvine.moveTo ( region ) ;
 			}

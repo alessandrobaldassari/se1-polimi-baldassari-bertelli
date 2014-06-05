@@ -52,16 +52,23 @@ public class Mate extends GameMove
 	 *        changing, thing needed for eventually generated lambs to grow up.
 	 * @param theOneWhoWantsTheMate the Sheperd who wants to perform this action. 
 	 * @param whereMate the Region where this action has to take place. 
+	 * @throws MoveNotAllowedException if the parameters do not meet the business rules.
 	 * @throws IllegalArgumentException if the theOneWhoWantsTheMate or the whereMate parameters
 	 *         is null.
 	 */
-	Mate ( TurnNumberClock clockSource , LambEvolver lambEvolver , Sheperd theOneWhoWantsTheMate , Region whereMate ) 
+	Mate ( TurnNumberClock clockSource , LambEvolver lambEvolver , Sheperd theOneWhoWantsTheMate , Region whereMate ) throws MoveNotAllowedException 
 	{
-		if ( clockSource != null && lambEvolver != null && theOneWhoWantsTheMate != null && whereMate != null ) {
-			this.clockSource = clockSource ;
-			this.lambEvolver = lambEvolver ;
-			this.theOneWhoWantsTheMate = theOneWhoWantsTheMate ;
-			this.whereMate = whereMate ;
+		if ( clockSource != null && lambEvolver != null && theOneWhoWantsTheMate != null && whereMate != null ) 
+		{
+			if ( theOneWhoWantsTheMate.getPosition ().getFirstBorderRegion ().equals( whereMate ) || theOneWhoWantsTheMate.getPosition ().getSecondBorderRegion ().equals ( whereMate ) )
+			{
+				this.clockSource = clockSource ;
+				this.lambEvolver = lambEvolver ; 
+				this.theOneWhoWantsTheMate = theOneWhoWantsTheMate ;
+				this.whereMate = whereMate ;
+			}
+			else
+				throw new MoveNotAllowedException ( "" ) ;
 		} 
 		else
 			throw new IllegalArgumentException () ;
@@ -75,54 +82,48 @@ public class Mate extends GameMove
 	 * 
 	 * @param match the Match on which the action is performed.
 	 * @throws MoveNotAllowedException if something goes wrong.
+	 * 
+	 * 
 	 */
 	@Override
 	public void execute ( Match match ) throws MoveNotAllowedException 
 	{
 		Runnable lambGrowerLookerRunnable ;
 		Executor runnableExec ;
-		Road sheperdRoad ;
 		Lamb lamb ;
 		List < AdultOvine > adultOvines ;
 		AdultOvine ram ;
 		AdultOvine sheep ;
-		sheperdRoad = theOneWhoWantsTheMate.getPosition () ;
-		if ( sheperdRoad.getFirstBorderRegion ().equals( whereMate ) || sheperdRoad.getSecondBorderRegion ().equals ( whereMate ) )
+		adultOvines = extractAdultOvines ( whereMate.getContainedAnimals () ) ;
+		ram = lookForAnOvine ( adultOvines , AdultOvineType.RAM ) ;
+		if ( ram != null )
 		{
-			adultOvines = extractAdultOvines ( whereMate.getContainedAnimals () ) ;
-			ram = lookForAnOvine ( adultOvines , AdultOvineType.RAM ) ;
-			if ( ram != null )
+			sheep = lookForAnOvine ( adultOvines , AdultOvineType.SHEEP ) ;
+			if ( sheep != null )
 			{
-				sheep = lookForAnOvine ( adultOvines , AdultOvineType.SHEEP ) ;
-				if ( sheep != null )
+				try 
 				{
-					try 
-					{
-						lamb = sheep.mate ( ram ) ;
-						whereMate.addAnimal ( lamb ) ;
-						lamb.moveTo ( whereMate );
-						runnableExec = Executors.newSingleThreadExecutor () ;
-						lambGrowerLookerRunnable = new LambGrowerLookerRunnable ( clockSource , lamb , lambEvolver ) ;
-						runnableExec.execute ( lambGrowerLookerRunnable ) ;
-					} 
-					catch ( CanNotMateWithHimException e ) 
-					{
-						e.printStackTrace();
-						throw new RuntimeException () ;
-					} 
-					catch ( MateNotSuccesfullException e ) 
-					{
-						e.printStackTrace () ;
-					}
+					lamb = sheep.mate ( ram ) ;
+					whereMate.addAnimal ( lamb ) ;
+					lamb.moveTo ( whereMate );
+					runnableExec = Executors.newSingleThreadExecutor () ;	
+					lambGrowerLookerRunnable = new LambGrowerLookerRunnable ( clockSource , lamb , lambEvolver ) ;
+					runnableExec.execute ( lambGrowerLookerRunnable ) ;
+				} 
+				catch ( CanNotMateWithHimException e ) 
+				{
+					throw new RuntimeException ( e ) ;
+				} 
+				catch ( MateNotSuccesfullException e ) 
+				{
+					throw new MoveNotAllowedException ( "Mate not successfull." ) ;
 				}
-				else
-					throw new RuntimeException () ;
 			}
 			else
-				throw new MoveNotAllowedException () ;
-		}
+				throw new RuntimeException () ;
+			}
 		else
-			throw new MoveNotAllowedException () ;
+			throw new MoveNotAllowedException ( "" ) ;
 	}
 
 	/**
@@ -175,10 +176,11 @@ public class Mate extends GameMove
 		/***/
 		private LambEvolver lambEvolver ;
 		
+		/***/
 		private int initTurn ;
 		
 		/***/
-		LambGrowerLookerRunnable ( TurnNumberClock turnNumberClock , Lamb lambToEvolve , LambEvolver lambEvolver ) 
+		public LambGrowerLookerRunnable ( TurnNumberClock turnNumberClock , Lamb lambToEvolve , LambEvolver lambEvolver ) 
 		{
 			if ( turnNumberClock != null && lambToEvolve != null && lambEvolver != null )
 			{

@@ -59,4 +59,15 @@ public class Wolf extends Animal
 		
 	}
 	
+	@Override
+	public boolean equals ( Object obj )
+	{
+		boolean res ;
+		if ( obj instanceof Wolf )
+			res = super.equals(obj) ;
+		else
+			res = false ;
+		return res ;
+	}
+	
 }

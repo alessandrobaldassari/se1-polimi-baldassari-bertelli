@@ -20,12 +20,12 @@ public class AdultOvine extends Ovine
 	 * @type the type ( sex ) of this AdultOvine, Sheep XOR Ram.
 	 * @throws IllegalArgumentException if the type parameter is null.
 	 */
-	AdultOvine ( String name , AdultOvineType type ) 
+	protected AdultOvine ( String name , AdultOvineType type ) 
 	{
 		this ( type == AdultOvineType.RAM ? PositionableElementType.RAM : PositionableElementType.SHEEP , name , type ) ;
 	}
 	
-	AdultOvine ( PositionableElementType positionableElementType , String name , AdultOvineType type )
+	protected AdultOvine ( PositionableElementType positionableElementType , String name , AdultOvineType type )
 	{
 		super ( positionableElementType , name ) ;
 		if ( type != null )
@@ -87,7 +87,27 @@ public class AdultOvine extends Ovine
 		return res ;
 	}
 	
-	public String toString(){
+	@Override
+	public boolean equals ( Object obj ) 
+	{
+		boolean res ;
+		AdultOvine otherAdOv ;
+		if ( obj instanceof AdultOvine )
+		{
+			otherAdOv = ( AdultOvine ) obj ;
+			if ( otherAdOv.getType () == type )
+				res = super.equals ( obj ) ;
+			else
+				res = false ;
+		}
+		else 
+			res = false ;
+		return res ;
+	}
+	
+	@Override
+	public String toString ()
+	{
 		return "AdultOvine: " + type;
 		
 	}
@@ -134,7 +154,7 @@ public class AdultOvine extends Ovine
 		 * @throws IllegalArgumentException if the firstPartner or the secondPartner
 		 *	       parameter is null. 
 		 */
-		MatingException ( AdultOvine firstPartner , AdultOvine secondPartner ) 
+		protected MatingException ( AdultOvine firstPartner , AdultOvine secondPartner ) 
 		{
 			super () ;
 			if ( firstPartner != null && secondPartner != null )
@@ -171,7 +191,7 @@ public class AdultOvine extends Ovine
 	public class CanNotMateWithHimException extends MatingException 
 	{
 
-		CanNotMateWithHimException ( AdultOvine firstPartner , AdultOvine secondPartner ) 
+		protected CanNotMateWithHimException ( AdultOvine firstPartner , AdultOvine secondPartner ) 
 		{
 			super ( firstPartner , secondPartner ) ;
 		}		
@@ -184,7 +204,7 @@ public class AdultOvine extends Ovine
 	public class MateNotSuccesfullException extends MatingException 
 	{
 		
-		MateNotSuccesfullException ( AdultOvine firstPartner , AdultOvine secondPartner ) 
+		protected MateNotSuccesfullException ( AdultOvine firstPartner , AdultOvine secondPartner ) 
 		{
 			super ( firstPartner , secondPartner ) ;
 		}		

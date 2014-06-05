@@ -22,18 +22,4 @@ public abstract class GameMove implements Serializable
 	 */
 	public abstract void execute ( Match match ) throws MoveNotAllowedException ;
 	
-	/**
-	 * This Exception class models the situation where a GameMove can not be executed for some reasons. 
-	 */
-	public class MoveNotAllowedException extends Exception 
-	{
-		
-		/***/
-		protected MoveNotAllowedException () 
-		{
-			super () ;
-		}
-		
-	}
-	
 }

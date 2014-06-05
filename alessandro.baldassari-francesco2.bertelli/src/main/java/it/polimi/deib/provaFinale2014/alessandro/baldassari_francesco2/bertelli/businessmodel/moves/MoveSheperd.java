@@ -78,7 +78,7 @@ public class MoveSheperd extends GameMove
 			catch ( TooFewMoneyException e ) 
 			{
 				e.printStackTrace ();
-				throw new MoveNotAllowedException () ;
+				throw new MoveNotAllowedException ( "" ) ;
 			}
 		}
 		System.out.println ( "MOVE SHEPERD : INIZIO MOVIMENTO PASTORE." ) ;		

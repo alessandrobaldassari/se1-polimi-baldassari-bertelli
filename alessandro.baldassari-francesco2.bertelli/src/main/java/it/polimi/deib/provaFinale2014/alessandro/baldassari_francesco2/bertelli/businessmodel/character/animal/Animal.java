@@ -19,4 +19,18 @@ public abstract class Animal extends Character < Region >
 		super ( positionableElementType , name ) ;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public boolean equals ( Object obj ) 
+	{
+		boolean res ;
+		if ( obj instanceof Animal )
+			res = super.equals ( obj ) ;
+		else
+			res = false ;
+		return res ;
+	}
+	
 }

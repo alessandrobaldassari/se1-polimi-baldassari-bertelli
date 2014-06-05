@@ -101,11 +101,17 @@ public class Region extends GameMapElement
 		return res ;
 	}
 	
+	/**
+	 * Insert an Animal into this Region.
+	 * 
+	 * @param newAnimal the Animal to add into this Region 
+	 */
 	public void addAnimal ( Animal newAnimal ) 
 	{
 		containedAnimals.add ( newAnimal ) ;
 	}
 	
+	/***/
 	public void removeAnimal ( Animal animal ) 
 	{
 		containedAnimals.remove ( animal ) ;
@@ -140,12 +146,15 @@ public class Region extends GameMapElement
 		return type.toString();
 	}
 	
+	@Override
 	public boolean equals ( Object obj ) 
 	{
+		boolean res ;
 		if ( obj instanceof Region )
-			return super.equals ( obj ) ;
+			res = super.equals ( obj ) ;
 		else
-			return false ;
+			res = false ;
+		return res ;
 	}
 	
 	// ENUMS

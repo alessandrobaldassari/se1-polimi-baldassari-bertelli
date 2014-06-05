@@ -7,11 +7,11 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.BlackSheepAlreadyGeneratedException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.WolfAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapFactory;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.AutomaticPlayer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
@@ -36,33 +36,43 @@ public class DummyMatch
 	
 	public Bank bank ;
 	
-	public DummyMatch () throws SingletonElementAlreadyGeneratedException, WriteOncePropertyAlreadSetException, NoMoreCardOfThisTypeException 
+	public AnimalFactory animalFactory ;
+	
+	public DummyMatch () 
 	{
 		Identifiable < Match > matchIdentifier ;
 		GameMap gameMap ;
-		AnimalFactory animalFactory ;
-		Region re ;
-		Road ro ;
-		matchIdentifier = new DummyMatchIdentifier ( 0 ) ;
-		gameMap = GameMapFactory.getInstance ().newInstance ( matchIdentifier ) ;
-		animalFactory = AnimalFactory.newAnimalFactory ( matchIdentifier ) ;
+		int ind ;
+		ind = 0 ;
+		do 
+		{
+			try 
+			{
+				matchIdentifier = new DummyMatchIdentifier ( ind ) ;
+				gameMap = GameMapFactory.getInstance ().newInstance ( matchIdentifier ) ;
+				animalFactory = AnimalFactory.newAnimalFactory ( matchIdentifier ) ;
+				bank = BankFactory.getInstance().newInstance ( matchIdentifier ) ;	
+				match = new Match ( gameMap , bank ) ;
+			} 
+			catch ( SingletonElementAlreadyGeneratedException e ) 
+			{
+				ind ++ ;
+			} 
+		}
+		while ( bank == null ) ;
+	}
+
+	public void initializePlayersAndSheperds () throws WriteOncePropertyAlreadSetException, NoMoreCardOfThisTypeException 
+	{
 		byte i ;
-		bank = BankFactory.getInstance().newInstance ( matchIdentifier ) ;	
 		players = new ArrayList < Player > () ;
 		sheperds = new ArrayList < Sheperd > () ;
-		animals = new ArrayList < Animal > () ;
-		players.add( new AutomaticPlayer ( "P1" ) ) ;
-		players.add ( new AutomaticPlayer ( "P2" ) ) ;
-		players.add ( new AutomaticPlayer ( "P3" ) ) ;
-		sheperds.add ( new Sheperd ( "3" , Color.red , players.get (2) ) ) ;
+		players.add( new DummyPlayer ( "P1" ) ) ;
+		players.add ( new DummyPlayer ( "P2" ) ) ;
+		players.add ( new DummyPlayer ( "P3" ) ) ;
+		sheperds.add ( new Sheperd ( "3" , Color.red , players.get (0) ) ) ;
 		sheperds.add ( new Sheperd ( "1" , Color.red , players.get (1) ) ) ;
-		sheperds.add ( new Sheperd ( "2" , Color.red , players.get (0) ) ) ; 
-		animals.add( animalFactory.newWolf () ) ;
-		animals.add ( animalFactory.newBlackSheep () ) ;
-		for ( byte b = 0 ; b < 4 ; b ++ )
-			animals.add ( animalFactory.newAdultOvine ( "" , AdultOvineType.RAM )  ) ;
-		for ( byte b = 0 ; b < 4 ; b ++ )
-			animals.add (animalFactory.newAdultOvine ( "" , AdultOvineType.SHEEP )  ) ;
+		sheperds.add ( new Sheperd ( "2" , Color.red , players.get (2) ) ) ; 
 		i = 0 ;
 		for ( Player p : players )
 		{
@@ -70,19 +80,18 @@ public class DummyMatch
 			p.receiveMoney ( 5 ) ;
 			i ++ ;
 		}
-		for ( Sheperd s : sheperds )
-		{
-			ro = gameMap.getRoadByUID ( Math.round ( ( float ) ( Math.random () * 41 ) ) + 1 ) ;
-			ro.setElementContained ( s ) ;
-			s.moveTo ( ro );
-		}
-		for ( Animal a : animals )
-		{
-			re = gameMap.getRegionByUID ( Math.round ( ( float ) ( Math.random () * 18 ) ) + 1 ) ;
-			re.addAnimal ( a ) ;
-			a.moveTo ( re );
-		}
-		match = new Match ( gameMap , bank ) ;
+		
 	}
-
+	
+	public void initializeAnimals () throws WolfAlreadyGeneratedException, BlackSheepAlreadyGeneratedException 
+	{
+		animals = new ArrayList < Animal > () ;
+		animals.add( animalFactory.newWolf () ) ;
+		animals.add ( animalFactory.newBlackSheep () ) ;
+		for ( byte b = 0 ; b < 4 ; b ++ )
+			animals.add ( animalFactory.newAdultOvine ( AdultOvineType.RAM )  ) ;
+		for ( byte b = 0 ; b < 4 ; b ++ )
+			animals.add (animalFactory.newAdultOvine ( AdultOvineType.SHEEP )  ) ;
+	}
+	
 }

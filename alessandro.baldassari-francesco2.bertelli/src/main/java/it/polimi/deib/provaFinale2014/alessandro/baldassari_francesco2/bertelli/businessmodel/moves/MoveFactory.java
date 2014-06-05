@@ -61,10 +61,10 @@ public class MoveFactory implements Serializable
 	}
 	
 	/***/
-	public GameMove newBreakDownMove ( Animal animalToBreak ) throws CannotDoThisMoveException 
+	public GameMove newBreakDownMove ( Animal animalToBreak ) throws MoveNotAllowedException
 	{
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
-			throw new CannotDoThisMoveException () ;
+			throw new MoveNotAllowedException ( "" ) ;
 		else 
 			if ( lastMove == null || lastMove != Move.BREAK_DOWN )
 			{
@@ -73,14 +73,14 @@ public class MoveFactory implements Serializable
 				return new BreakDown ( sheperd , animalToBreak ) ;
 			}
 			else
-				throw new CannotDoThisMoveException () ;
+				throw new MoveNotAllowedException ( "" ) ; 
 	} 
 	
 	/***/
-	public GameMove newBuyCard ( RegionType buyingCardType ) throws CannotDoThisMoveException 
+	public GameMove newBuyCard ( RegionType buyingCardType ) throws MoveNotAllowedException 
 	{
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
-			throw new CannotDoThisMoveException () ; 
+			throw new MoveNotAllowedException ( "" ) ; 
 		else 
 			if ( lastMove == null || lastMove != Move.BUY_CARD )
 			{
@@ -89,14 +89,14 @@ public class MoveFactory implements Serializable
 				return new BuyCard ( sheperd , buyingCardType ) ;
 			}
 			else
-				throw new CannotDoThisMoveException () ; 
+				throw new MoveNotAllowedException ( "" ) ; 
 	}
 	
 	/***/
-	public GameMove newMate ( Region whereMate ) throws CannotDoThisMoveException 
+	public GameMove newMate ( Region whereMate ) throws MoveNotAllowedException  
 	{
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
-			throw new CannotDoThisMoveException () ; 
+			throw new MoveNotAllowedException ( "" ) ; 
 		else  
 			if ( lastMove == null || lastMove != Move.BUY_CARD )
 			{
@@ -105,14 +105,14 @@ public class MoveFactory implements Serializable
 				return new Mate ( clockSource , lambEvolver , sheperd , whereMate ) ;
 			}
 			else
-				throw new CannotDoThisMoveException () ; 
+				throw new MoveNotAllowedException ( "" ) ; 
 	}
 	
 	/***/
-	public GameMove newMoveSheep ( Ovine movingOvine , Region ovineDestinationRegion ) throws CannotDoThisMoveException 
+	public GameMove newMoveSheep ( Ovine movingOvine , Region ovineDestinationRegion ) throws MoveNotAllowedException 
 	{
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
-			throw new CannotDoThisMoveException () ; 
+			throw new MoveNotAllowedException ( "" ) ; 
 		else  
 			if ( lastMove == null || lastMove != Move.BUY_CARD )
 			{
@@ -121,11 +121,11 @@ public class MoveFactory implements Serializable
 				return new MoveSheep ( sheperd , movingOvine , ovineDestinationRegion ) ;
 			}
 			else
-				throw new CannotDoThisMoveException () ;  
+				throw new MoveNotAllowedException ( "" ) ; 
 		}
 	
 	/***/
-	public GameMove newMoveSheperd ( Road roadWhereGo ) throws CannotDoThisMoveException
+	public GameMove newMoveSheperd ( Road roadWhereGo ) throws MoveNotAllowedException 
 	{
 		sheperdMoved = true ;
 		numberOfMovesDone ++ ;

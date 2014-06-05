@@ -8,12 +8,17 @@ import java.util.List;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.WolfAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Ovine;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Wolf;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.NoRoadWithThisNumberException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceAlreadyPlacedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatchIdentifier;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,15 +30,17 @@ public class RegionTest {
 	ArrayList <Road> borderRoads;
 	Ovine sheep;
 	Fence fence;
- 	@Before
-	public void setUp(){
+ 	
+	@Before
+	public void setUp()
+ 	{
 		region = new Region(RegionType.CULTIVABLE, 1);
 		borderRegion = new Region(RegionType.LACUSTRINE, 2);
 		road = new Road(1, 1, region, borderRegion);
 		borderRoads = new ArrayList<Road>();
 		borderRoads.add(road);
 		fence = new Fence(FenceType.NON_FINAL);
-		sheep = new Sheep();
+		sheep = new Sheep ( "t1" );
 	}
 	
 	@Test (expected = IllegalArgumentException.class)
@@ -84,7 +91,41 @@ public class RegionTest {
 	}
 	
 	@Test
-	public void getContainedAnimal(){
+	public void removeAnimal () 
+	{
+		Sheep s1 ;
+		Sheep s2 ;
+		Animal w ;
+		s1 = new Sheep ( "t2" ) ;
+		s2 = new Sheep ( "t3" ) ;
+		int i = 0 ;
+		w = null ;
+		do
+		{
+			try 
+			{
+				w = AnimalFactory.newAnimalFactory ( new DummyMatchIdentifier ( i ) ).newWolf();
+			} 
+			catch (WolfAlreadyGeneratedException e) 
+			{} 
+			catch (SingletonElementAlreadyGeneratedException e ) 
+			{
+				i ++ ;
+			}
+		}
+		while ( w == null ) ;
+		region.addAnimal ( s1 ) ;
+		region.addAnimal ( s2 ) ;
+		region.addAnimal ( w ) ;
+		region.removeAnimal(w) ;
+		assertTrue ( CollectionsUtilities.contains ( region.getContainedAnimals () , s1 ) ) ;
+		assertTrue ( CollectionsUtilities.contains ( region.getContainedAnimals () , s2 ) ) ;
+		assertFalse ( CollectionsUtilities.contains ( region.getContainedAnimals () , w ) ) ;	
+	}
+	
+	@Test
+	public void getContainedAnimal()
+	{
 		LinkedList <Animal> animals = new LinkedList<Animal>();
 		region.addAnimal(sheep);
 		assertTrue(region.getContainedAnimals().iterator().next().equals(sheep));
@@ -93,7 +134,8 @@ public class RegionTest {
 	}
 	
 	@Test
-	public void isClosed(){
+	public void isClosed()
+	{
 		region.setBorderRoads(borderRoads);
 		assertFalse(region.isClosed());
 		try {
@@ -106,8 +148,9 @@ public class RegionTest {
 	}
 
 	public class Sheep extends Ovine{
-		public Sheep(){
-			super(PositionableElementType.SHEEP, "test");
+		public Sheep ( String name )
+		{
+			super(PositionableElementType.SHEEP, name ) ;
 		}
 	}
 }

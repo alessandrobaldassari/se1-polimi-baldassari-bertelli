@@ -15,4 +15,15 @@ public abstract class Ovine extends Animal
 		super ( positionableElementType , name ) ;
 	}
 
+	@Override
+	public boolean equals ( Object obj ) 
+	{
+		boolean res ;
+		if ( obj instanceof Ovine )
+			res = super.equals ( obj ) ;
+		else
+			res = false ;
+		return res ;
+	}
+	
 }

@@ -5,6 +5,7 @@ import java.util.LinkedList;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
@@ -22,14 +23,14 @@ public class BreakDown extends GameMove
 	 * during this BreakDown process.
 	 * It's a business rule.
 	 */
-	private static final int MINIMUM_POINTS_TO_BE_PAYED = 5 ;
+	public static final int MINIMUM_POINTS_TO_BE_PAYED = 5 ;
 	
 	/**
 	 * The amount of money a Sheperd will be payed for his silence during this
 	 * BreakDown process.
 	 * It's a business rule.
 	 */
-	private static final int AMOUNT_TO_PAY_FOR_SILENCE = 2 ;
+	public static final int AMOUNT_TO_PAY_FOR_SILENCE = 2 ;
 	
 	/**
 	 * The Sheperd who wants to do this BreakDown. 
@@ -50,7 +51,7 @@ public class BreakDown extends GameMove
 	 * @throws IllegalArgumentException if the breaker or the animalToBreak parameter
 	 *         is null. 
 	 */
-	protected BreakDown ( Sheperd breaker , Animal animalToBreak ) throws CannotDoThisMoveException 
+	protected BreakDown ( Sheperd breaker , Animal animalToBreak ) throws MoveNotAllowedException  
 	{
 		if ( breaker != null && animalToBreak != null )
 			if ( breaker.getPosition ().getFirstBorderRegion ().equals ( animalToBreak.getPosition() ) || breaker.getPosition ().getSecondBorderRegion ().equals ( animalToBreak.getPosition () ) )
@@ -59,7 +60,7 @@ public class BreakDown extends GameMove
 				this.animalToBreak = animalToBreak ;
 			}
 			else
-				throw new CannotDoThisMoveException () ;
+				throw new MoveNotAllowedException ( "" ) ;
 		else
 			throw new IllegalArgumentException () ;
 	}
@@ -74,31 +75,45 @@ public class BreakDown extends GameMove
 	 * @param match the Match on which the action is performed.
 	 * @throws MotNotAllowedException if the breaker Player has not enough money 
 	 *         to pay all the selected Players
+	 *         
+	 * @PRECONDITIONS 
+	 * 	1. match != null
+	 * @POSTCONDITIONS 
+	 *  1. breaker.money ( out ) = breaker.money ( in ) - AMOUNT_TO_PAY_FOR_SILENCE * # adjacent_players
+	 *  2. forall ( adjacent player p : p ( out).money = p ( in ).money + AMOUNT_TO_PAY_FOR_SILENCE.
+	 *  3. animalToBreak.position == null.
+	 *  4. position ( in ) of animalToBreaker NOT CONTAINS animalToBreak
+	 * @EXCEPTIONS_POSTCONDITIONS :
+	 *  1. TOO_FEW_MONEY_EXCEPTION_RAISED && breaker.money < # adjacent players * AMOUNT_TO_PAY_FOR_SILENCE.
 	 */
 	@Override
 	public void execute ( Match match ) throws MoveNotAllowedException 
 	{
 		Collection < Player > adjacentPlayers ;
-		// trovo coloro che potrei dover pagare per il silenzio
-		adjacentPlayers = retrieveAdjacentPlayers () ;
-		// i potenziali testimoni lanciano il dado
-		adjacentPlayersDiceLaunching ( adjacentPlayers ) ;
-		try 
+		if ( match != null )
 		{
-			// pago per il silenzio
-			breaker.getOwner().pay ( adjacentPlayers.size () * AMOUNT_TO_PAY_FOR_SILENCE ) ;
-			// ogni testimone precedentemente selezionato riceve la somma
-			for ( Player player : adjacentPlayers )
-				player.receiveMoney ( AMOUNT_TO_PAY_FOR_SILENCE );
-			// effettivo abbattimento dell'animale
-			animalToBreak.getPosition ().removeAnimal ( animalToBreak ) ;
-			animalToBreak.moveTo ( null ) ;
-		} 
-		catch ( TooFewMoneyException e ) 
-		{
-			e.printStackTrace();
-			throw new MoveNotAllowedException () ;
+			// trovo coloro che potrei dover pagare per il silenzio
+			adjacentPlayers = retrieveAdjacentPlayers () ;
+			// i potenziali testimoni lanciano il dado
+			adjacentPlayersDiceLaunching ( adjacentPlayers ) ;
+			try 
+			{
+				// pago per il silenzio
+				breaker.getOwner().pay ( adjacentPlayers.size () * AMOUNT_TO_PAY_FOR_SILENCE ) ;
+				// ogni testimone precedentemente selezionato riceve la somma
+				for ( Player player : adjacentPlayers )
+					player.receiveMoney ( AMOUNT_TO_PAY_FOR_SILENCE );
+				// effettivo abbattimento dell'animale
+				animalToBreak.getPosition ().removeAnimal ( animalToBreak ) ;
+				animalToBreak.moveTo ( null ) ;
+			} 
+			catch ( TooFewMoneyException e ) 
+			{
+				throw new MoveNotAllowedException ( "This player has too few money to do this move." ) ;
+			}
 		}
+		else
+			throw new IllegalArgumentException ( "The match parameter can not be null." ) ;
 	}
 
 	/**
