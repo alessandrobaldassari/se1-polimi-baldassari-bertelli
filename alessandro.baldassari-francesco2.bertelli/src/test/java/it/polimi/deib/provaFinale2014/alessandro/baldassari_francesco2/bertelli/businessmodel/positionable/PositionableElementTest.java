@@ -34,29 +34,34 @@ public class PositionableElementTest {
 	@BeforeClass
 	public static void setUpBeforeClass()
 	{
-		dummyMatchIdentifier = new DummyMatchIdentifier ( 0 );
-		try {
-			animalFactory = AnimalFactory.newAnimalFactory(dummyMatchIdentifier);
-		} catch (SingletonElementAlreadyGeneratedException e) {
-			e.printStackTrace();
+		int i ;
+		i = 0 ;
+		animalFactory = null ;
+		do 
+		{
+			try 
+			{
+				dummyMatchIdentifier = new DummyMatchIdentifier ( i );
+				animalFactory = AnimalFactory.newAnimalFactory(dummyMatchIdentifier);
+				map = GameMapFactory.getInstance().newInstance(dummyMatchIdentifier);
+				sheep = (AdultOvine) animalFactory.newAdultOvine("Sheep", AdultOvineType.SHEEP);
+				sheep.moveTo(map.getRegionByType(RegionType.SHEEPSBURG).iterator().next());
+			} 
+			catch (SingletonElementAlreadyGeneratedException e) 
+			{
+				i ++ ;
+			}
 		}
-		sheep = (AdultOvine) animalFactory.newAdultOvine("Sheep", AdultOvineType.SHEEP);
-		
-		try {
-			map = GameMapFactory.getInstance().newInstance(dummyMatchIdentifier);
-		} catch (SingletonElementAlreadyGeneratedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		sheep.moveTo(map.getRegionByType(RegionType.SHEEPSBURG).iterator().next());
+		while ( animalFactory == null ) ;
 	}
 	
 	/*
 	 * This test tests the getPosition() method
 	 */
 	@Test
-	public void getPosition() {
-		assertTrue(sheep.getPosition().getType() == RegionType.SHEEPSBURG);
+	public void getPosition () 
+	{
+		assertTrue ( sheep.getPosition().getType () == RegionType.SHEEPSBURG ) ;
 	}
 	
 }

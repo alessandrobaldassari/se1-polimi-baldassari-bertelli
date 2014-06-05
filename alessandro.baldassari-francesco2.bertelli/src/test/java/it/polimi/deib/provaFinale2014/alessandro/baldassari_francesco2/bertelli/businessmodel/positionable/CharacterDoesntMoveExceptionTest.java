@@ -30,13 +30,22 @@ public class CharacterDoesntMoveExceptionTest {
 	@BeforeClass
 	public static void setUpBeforeClass()
 	{
-		dummyMatchIdentifier = new DummyMatchIdentifier ( 0 ) ;
-		try {
-			animalFactory = AnimalFactory.newAnimalFactory(dummyMatchIdentifier);
-		} catch (SingletonElementAlreadyGeneratedException e) {
-			e.printStackTrace();
-		}
-		sheep =  animalFactory.newAdultOvine("Sheep", AdultOvineType.SHEEP);
+		int i ;
+		i = 0 ;
+		do
+		{
+			try 
+			{
+				dummyMatchIdentifier = new DummyMatchIdentifier ( i ) ;
+				animalFactory = AnimalFactory.newAnimalFactory ( dummyMatchIdentifier);
+				sheep =  animalFactory.newAdultOvine("Sheep", AdultOvineType.SHEEP);
+			} 
+			catch (SingletonElementAlreadyGeneratedException e) 
+			{
+				i ++ ;
+			}
+		} 
+		while ( animalFactory == null ) ;
 	}
 	
 	/*

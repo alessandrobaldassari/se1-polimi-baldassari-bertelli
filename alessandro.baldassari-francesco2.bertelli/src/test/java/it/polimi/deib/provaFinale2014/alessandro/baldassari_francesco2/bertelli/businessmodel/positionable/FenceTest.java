@@ -28,29 +28,27 @@ public class FenceTest
 	@BeforeClass
 	public static void setUpBeforeClass()
 	{
-		dummyMatchIdentifier = new DummyMatchIdentifier ( 0 );
-
-		try 
+		int i ;
+		i = 0 ; 
+		do 
 		{
-			map = GameMapFactory.getInstance().newInstance ( dummyMatchIdentifier ) ;
+			try 
+			{
+				dummyMatchIdentifier = new DummyMatchIdentifier ( i );
+				map = GameMapFactory.getInstance().newInstance ( dummyMatchIdentifier ) ;
+				fenceNonFinal.place(map.getRoadByUID(1));
+				fenceFinal.place(map.getRoadByUID(2));
+			}
+			catch (SingletonElementAlreadyGeneratedException e) 
+			{
+				i ++ ;
+			}
+			catch ( FenceAlreadyPlacedException e ) 
+			{
+				throw new RuntimeException ( e ) ;
+			}
 		}
-		catch (SingletonElementAlreadyGeneratedException e) 
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			fenceNonFinal.place(map.getRoadByUID(1));
-		} catch (FenceAlreadyPlacedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			fenceFinal.place(map.getRoadByUID(2));
-		} catch (FenceAlreadyPlacedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		while ( map == null ) ;
 	}
 	
 	@Test

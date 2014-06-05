@@ -33,21 +33,24 @@ public class CharacterTest {
 	@BeforeClass
 	public static void setUpBeforeClass()
 	{
-		dummyMatchIdentifier = new DummyMatchIdentifier ( 0 );
-		try {
-			animalFactory = AnimalFactory.newAnimalFactory(dummyMatchIdentifier);
-		} catch (SingletonElementAlreadyGeneratedException e) {
-			e.printStackTrace();
+		int i ;
+		i = 0 ;
+		do
+		{
+			try 
+			{
+				dummyMatchIdentifier = new DummyMatchIdentifier ( i );
+				animalFactory = AnimalFactory.newAnimalFactory(dummyMatchIdentifier);
+				sheep = (AdultOvine) animalFactory.newAdultOvine("Sheep", AdultOvineType.SHEEP);
+				map = GameMapFactory.getInstance().newInstance(dummyMatchIdentifier);
+				sheep.moveTo(map.getRegionByType(RegionType.SHEEPSBURG).iterator().next());
+			}
+			catch (SingletonElementAlreadyGeneratedException e) 
+			{
+				i ++ ;
+			}
 		}
-		sheep = (AdultOvine) animalFactory.newAdultOvine("Sheep", AdultOvineType.SHEEP);
-		
-		try {
-			map = GameMapFactory.getInstance().newInstance(dummyMatchIdentifier);
-		} catch (SingletonElementAlreadyGeneratedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		sheep.moveTo(map.getRegionByType(RegionType.SHEEPSBURG).iterator().next());
+		while ( animalFactory == null ) ;
 	}
 	
 	/*
