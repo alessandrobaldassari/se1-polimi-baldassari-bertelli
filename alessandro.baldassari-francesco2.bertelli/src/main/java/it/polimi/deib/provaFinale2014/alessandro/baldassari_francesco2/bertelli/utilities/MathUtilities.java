@@ -12,9 +12,7 @@ public class MathUtilities
 	/***/
 	public static int launchDice () 
 	{ 
-		int res ;
-		res = random.nextInt ( 6 ) + 1 ;
-		return res ;
+		return random ( 1 , 6 ) ;
 	}
 	
 	/***/
@@ -22,6 +20,14 @@ public class MathUtilities
 	{
 		double res ;
 		res = random.nextDouble () ;
+		return res ;
+	}
+	
+	/***/
+	public static int random ( int min , int max ) 
+	{
+		int res ;
+		res = random.nextInt ( max - min + 1 ) + min ;
 		return res ;
 	}
 	

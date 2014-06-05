@@ -66,7 +66,7 @@ class RMIServerImpl extends RequestAccepterServer implements RMIServer
 	 * @throws IllegalArgumentException if the localhostAddress parameter is null or the registryPort
 	 *         parameter is < 0
 	 */
-	RMIServerImpl ( MatchAdderCommunicationController matchAdderCommunicationController , String localhostAddress , int registryPort ) throws RemoteException 
+	protected RMIServerImpl ( MatchAdderCommunicationController matchAdderCommunicationController , String localhostAddress , int registryPort ) throws RemoteException 
 	{
 		super ( matchAdderCommunicationController ) ;
 		if ( localhostAddress != null && registryPort >= 0 )

@@ -157,6 +157,14 @@ public class Road extends GameMapElement
 		return elementContained ;
 	}
 	
+	public boolean equals ( Object obj ) 
+	{
+		if ( obj instanceof Road )
+			return super.equals ( obj ) ;
+		else
+			return false ;
+	}
+	
 	public String toString(){
 		return "Road: num " + number + " firstBorderRegion " + firstBorderRegion + " secondBorderRegion " + secondBorderRegion; 
 	}

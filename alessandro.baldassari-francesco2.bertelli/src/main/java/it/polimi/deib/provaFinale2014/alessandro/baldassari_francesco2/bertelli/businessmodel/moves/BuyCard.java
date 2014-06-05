@@ -56,11 +56,9 @@ public class BuyCard extends GameMove
 	@Override
 	public void execute ( Match match ) throws MoveNotAllowedException 
 	{
-		Road buyerPosition ;
 		SellableCard theCard ;
 		int price ;
-		buyerPosition = buyer.getPosition () ;
-		if ( buyingCardType == buyerPosition.getFirstBorderRegion ().getType () || buyingCardType == buyerPosition.getSecondBorderRegion ().getType () )
+		if ( canThisBuyerBuyThisCard () )
 		{
 			try 
 			{
@@ -89,6 +87,14 @@ public class BuyCard extends GameMove
 			throw new MoveNotAllowedException () ;
 	}
 
-	
+	/***/
+	private boolean canThisBuyerBuyThisCard () 
+	{
+		Road buyerPosition ;
+		boolean res ;
+		buyerPosition = buyer.getPosition () ;
+	    res = ( buyingCardType == buyerPosition.getFirstBorderRegion ().getType () || buyingCardType == buyerPosition.getSecondBorderRegion ().getType () ) ;
+	    return res ;
+	}
 	
 }

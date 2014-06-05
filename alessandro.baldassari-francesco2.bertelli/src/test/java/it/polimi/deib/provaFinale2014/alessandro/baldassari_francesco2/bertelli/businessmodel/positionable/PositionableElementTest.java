@@ -8,6 +8,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
@@ -25,7 +26,7 @@ public class PositionableElementTest {
 	static AdultOvine sheep;
 	static AnimalFactory animalFactory ;
 	static GameMap map;
-	static DummyMatchIdentifier dummyMatchIdentifier;
+	static Identifiable < Match > dummyMatchIdentifier;
 	
 	/*
 	 * Building the test environment
@@ -33,7 +34,7 @@ public class PositionableElementTest {
 	@BeforeClass
 	public static void setUpBeforeClass()
 	{
-		dummyMatchIdentifier = new DummyMatchIdentifier();
+		dummyMatchIdentifier = new DummyMatchIdentifier ( 0 );
 		try {
 			animalFactory = AnimalFactory.newAnimalFactory(dummyMatchIdentifier);
 		} catch (SingletonElementAlreadyGeneratedException e) {
@@ -58,18 +59,4 @@ public class PositionableElementTest {
 		assertTrue(sheep.getPosition().getType() == RegionType.SHEEPSBURG);
 	}
 	
-	/*
-	 * This dummy matchIdentifier is used to build the animalfactory
-	 */
-	public static class DummyMatchIdentifier implements Identifiable<Match>{
-
-		public DummyMatchIdentifier() {
-			// TODO Auto-generated constructor stub
-		}
-
-		public boolean isEqualsTo(Identifiable<Match> otherObject) {
-			// TODO Auto-generated method stub
-			return true;
-		}
-	}
 }

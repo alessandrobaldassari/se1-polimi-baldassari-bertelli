@@ -26,36 +26,10 @@ public class MatchTest
 	public void setUp () 
 	{
 		Identifiable < Match > i ;
-		Constructor < Match > c ;
-		try 
-		{
-			i = new DummyMatchIdentifier ( 0 ) ;
-			c = Match.class.getDeclaredConstructor ( GameMap.class , Bank.class ) ;
-			c.setAccessible ( true ) ;
-			m = c.newInstance ( GameMapFactory.getInstance().newInstance ( i ) , BankFactory.getInstance().newInstance ( i ) ) ;
-		}
-		catch (NoSuchMethodException e) 
-		{
-			e.printStackTrace();
-		}
-		catch (SecurityException e) {
-			e.printStackTrace();
-		}
-		catch (InstantiationException e) {
-			e.printStackTrace();
-		}
-		catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} 
-		catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} 
-		catch (InvocationTargetException e) 
-		{
-			e.printStackTrace();
-		}
-		catch (SingletonElementAlreadyGeneratedException e) 
-		{
+		i = new DummyMatchIdentifier ( 0 ) ;
+		try {
+			m = new Match ( GameMapFactory.getInstance().newInstance ( i ) , BankFactory.getInstance().newInstance ( i ) ) ;
+		} catch (SingletonElementAlreadyGeneratedException e) {
 			e.printStackTrace();
 		}
  	}

@@ -40,7 +40,7 @@ public class NetworkCommunicantPlayer extends Player
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void chooseCardsEligibleForSelling () 
+	public void chooseCardsEligibleForSellingImpl () 
 	{
 		Collection < SellableCard > arrived ;
 		try 
@@ -78,7 +78,7 @@ public class NetworkCommunicantPlayer extends Player
 	}
 
 	@Override
-	public Sheperd chooseSheperdForATurn () 
+	public Sheperd chooseSheperdForATurnImpl () 
 	{
 		Sheperd res = null ;
 		try {
@@ -90,7 +90,7 @@ public class NetworkCommunicantPlayer extends Player
 	}
 
 	@Override
-	public SellableCard chooseCardToBuy ( Iterable<SellableCard > src ) 
+	public SellableCard chooseCardToBuyImpl ( Iterable<SellableCard > src ) 
 	{
 		SellableCard res = null ;
 		try 

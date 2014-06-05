@@ -15,6 +15,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.CharacterDoesntMoveException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
@@ -31,12 +32,12 @@ public class BlackSheepTest {
 	static BlackSheep blackSheepReal;
 	static AnimalFactory animalFactory ;
 	static GameMap map;
-	static DummyMatchIdentifier dummyMatchIdentifier;
+	static Identifiable < Match > dummyMatchIdentifier;
 	
 	@BeforeClass
 	public static void setUpBeforeClass()
 	{
-		dummyMatchIdentifier = new DummyMatchIdentifier();
+		dummyMatchIdentifier = new DummyMatchIdentifier ( 0 );
 		try {
 			animalFactory = AnimalFactory.newAnimalFactory(dummyMatchIdentifier);
 		} catch (SingletonElementAlreadyGeneratedException e) {
@@ -91,18 +92,6 @@ public class BlackSheepTest {
 		assertTrue(blackSheepIsInside);
 		assertTrue( CollectionsUtilities.iterableSize( map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().getContainedAnimals() ) == 0);
 			
-	}
-	
-	static class DummyMatchIdentifier implements Identifiable<Match>{
-
-		public DummyMatchIdentifier() {
-			// TODO Auto-generated constructor stub
-		}
-
-		public boolean isEqualsTo(Identifiable<Match> otherObject) {
-			// TODO Auto-generated method stub
-			return true;
-		}
 	}
 	
 }

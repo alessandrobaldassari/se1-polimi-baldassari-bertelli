@@ -66,7 +66,7 @@ public abstract class GameMapElement implements Serializable
 		if ( obj instanceof GameMapElement ) 
 		{
 			other = ( GameMapElement ) obj ;
-			res = uid == other.getUID () ;
+			res = ( uid == other.getUID () ) ;
 		}
 		else
 			res = false ;

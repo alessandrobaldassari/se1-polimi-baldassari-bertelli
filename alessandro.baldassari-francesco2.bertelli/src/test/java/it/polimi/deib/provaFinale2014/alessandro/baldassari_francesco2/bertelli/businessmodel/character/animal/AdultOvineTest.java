@@ -3,6 +3,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
@@ -10,6 +11,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.MateNotSuccesfullException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
@@ -31,9 +33,11 @@ public class AdultOvineTest {
 	 */
 	static 
 	{
-		try {
-			animalFactory = AnimalFactory.newAnimalFactory(new DummyMatchIdentifier());
-		} catch (SingletonElementAlreadyGeneratedException e) {
+		try
+		{
+			animalFactory = AnimalFactory.newAnimalFactory ( new DummyMatchIdentifier ( 0 ) ) ;
+		}
+		catch (SingletonElementAlreadyGeneratedException e) {
 			e.printStackTrace();
 		}
 		ram = (AdultOvine) animalFactory.newAdultOvine("ram", AdultOvineType.RAM);
@@ -44,7 +48,8 @@ public class AdultOvineTest {
 	 * This test tests if getType() is correctly implemented using ram and sheep (builded by animalFactory)
 	 */
 	@Test
-	public void getType() {
+	public void getType () 
+	{
 		assertTrue(ram.getType() == AdultOvineType.RAM);
 		assertTrue(sheep.getType() == AdultOvineType.SHEEP);
 	}
@@ -52,34 +57,28 @@ public class AdultOvineTest {
 	/*
 	 * This test tests mate() checking if the returned lamb is correctly initialized. It tests also an incorrect invocation to check the CanNotMateWithHimExeption
 	 */
-	@Test (expected = MateNotSuccesfullException.class)
-	public void mate() throws CanNotMateWithHimException, MateNotSuccesfullException{
-		try {
+	@Test 
+	public void mate()
+	{
+		try 
+		{
 			lamb = ram.mate(sheep);
-			if (lamb != null) {
+			if (lamb != null) 
+			{
 				assertTrue(lamb.getBirthTurn() == 0);
-				assertTrue(lamb.getFather() == ram);
-				assertTrue(lamb.getMother() == sheep);
+				assertTrue(lamb.getFather().equals( ram ) ) ;
+				assertTrue(lamb.getMother().equals ( sheep ) );
 				assertTrue(lamb.getName() == "");
 			}	
-		} catch (CanNotMateWithHimException e) {
-			assertFalse(false);
 		}
-	}
-		
-	
-
-	public static class DummyMatchIdentifier implements Identifiable<Match>{
-
-		public DummyMatchIdentifier() {
-			// TODO Auto-generated constructor stub
+		catch (CanNotMateWithHimException e) 
+		{
+			fail () ;
 		}
-
-		public boolean isEqualsTo(Identifiable<Match> otherObject) {
-			// TODO Auto-generated method stub
-			return true;
+		catch ( MateNotSuccesfullException m )
+		{
+			assertTrue ( lamb == null ) ;
 		}
-		
 	}
 	
 }

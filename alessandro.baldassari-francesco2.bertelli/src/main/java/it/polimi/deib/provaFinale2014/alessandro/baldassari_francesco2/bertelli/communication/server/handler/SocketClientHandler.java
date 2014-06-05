@@ -69,7 +69,7 @@ public class SocketClientHandler implements ClientHandler , Serializable
 			m = Message.newInstance ( op , Collections.EMPTY_LIST ) ;
 			oos.writeObject ( m ) ;
 			oos.flush () ;
-			System.out.println ( "Socket Client Handler : Name Request Sent" ) ;
+			System.out.println ( "SOCKET CLIENT HANDLER - REQUEST NAME : MESSAGGIO DI RICHIESTA INVIATO." ) ;
 			m = (Message) ois.readObject () ;
 			System.out.println ( res ) ;
 			if ( m.getOperation () == ClientCommunicationProtocolMessage.NAME_REQUESTING_RESPONSE )
@@ -151,7 +151,7 @@ public class SocketClientHandler implements ClientHandler , Serializable
 			System.out.println ( "SOCKET CLIENT HANDLER - REQUEST SHEPERD COLOR : MESSAGGIO DI RISPOSTA RICEVUTO : " + m.getOperation () ) ;
 			if ( m.getOperation () == ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE )
 			{	
-				System.out.println ( "SOCKET CLIENT HANDLER - REQUEST SHEPERD COLOR - COLORE RICEVUTO : " + ( ( NamedColor ) m.getParameters ().iterator ().next () ).getName () ) ;				
+				System.out.println ( "SOCKET CLIENT HANDLER - REQUEST SHEPERD COLOR - COLORE RICEVUTO : " + ( m.getParameters ().iterator ().next ().getClass() ) ) ;				
 				res = ( NamedColor ) m.getParameters ().iterator ().next () ;
 			}
 			else 

@@ -7,30 +7,35 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceAlreadyPlacedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class FenceTest {
+public class FenceTest 
+{
 
 	/*
 	 * Initializing variables test built the test environment using some static variables to bypass some technical problems with animalFactory
 	 */
 	static GameMap map;
-	static DummyMatchIdentifier dummyMatchIdentifier;
+	static Identifiable < Match > dummyMatchIdentifier;
 	static Fence fenceNonFinal = new Fence(FenceType.NON_FINAL);
 	static Fence fenceFinal = new Fence(FenceType.FINAL);
 	
 	@BeforeClass
 	public static void setUpBeforeClass()
 	{
-		dummyMatchIdentifier = new DummyMatchIdentifier();
+		dummyMatchIdentifier = new DummyMatchIdentifier ( 0 );
 
-		try {
-			map = GameMapFactory.getInstance().newInstance(dummyMatchIdentifier);
-		} catch (SingletonElementAlreadyGeneratedException e) {
+		try 
+		{
+			map = GameMapFactory.getInstance().newInstance ( dummyMatchIdentifier ) ;
+		}
+		catch (SingletonElementAlreadyGeneratedException e) 
+		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -81,16 +86,4 @@ public class FenceTest {
 		assertFalse(fenceFinal.equals(fenceNonFinal));
 	}
 	
-	static class DummyMatchIdentifier implements Identifiable<Match>{
-
-		public DummyMatchIdentifier() {
-			// TODO Auto-generated constructor stub
-		}
-
-		public boolean isEqualsTo(Identifiable<Match> otherObject) {
-			// TODO Auto-generated method stub
-			return true;
-		}
-	}
-
 }

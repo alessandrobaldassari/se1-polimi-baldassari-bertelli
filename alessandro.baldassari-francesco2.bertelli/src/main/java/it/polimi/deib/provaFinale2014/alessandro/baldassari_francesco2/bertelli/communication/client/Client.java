@@ -27,7 +27,7 @@ public abstract class Client extends Thread implements Terminable
 	 * @param dataPicker the value for the dataPicker field.
 	 * @throws IllegalArgumentException if the dataPicker field is null.
 	 */
-	Client ( CommunicationProtocolResponser dataPicker )
+	protected Client ( CommunicationProtocolResponser dataPicker )
 	{
 		if ( dataPicker != null )
 		{

@@ -51,6 +51,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeoutException;
 
 /**
  * This class is a core component of the Server Architecture of the System and also
@@ -74,6 +75,9 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 	 * The Timer value about the time to wait before begin a Match. 
 	 */
 	private static final long DELAY = 30 * Utilities.MILLISECONDS_PER_SECOND ;
+	
+	/***/
+	public static final long SUSPENSION_TIME = 60 * Utilities.MILLISECONDS_PER_SECOND ;
 	
 	/**
 	 * The maximum number of Player for a Match. 
@@ -506,7 +510,7 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 	private void turnationPhase () 
 	{
 		GameMove choosenMove ;
-		Sheperd choosenSheperd ;
+		Sheperd choosenSheperd = null ;
 		MoveFactory moveFactory ;
 		BlackSheep blackSheep ;
 		Wolf wolf ;
@@ -531,15 +535,19 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PECORA NERA NON SI MUOVE " ) ;
 			}
 			for ( Player currentPlayer : match.getPlayers() )
-			{
+			{				
 				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - TURNO DEL PLAYER : " + currentPlayer.getName () ) ;
-
 				if ( match.isInFinalPhase () )
 					break ;
 				if ( match.getNumberOfPlayers () == 2 )
 				{
 					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - CHIDENDO AL PLAYER : " + currentPlayer.getName () + " DI SCEGLIERE UN PASTORE" ) ;					
-					choosenSheperd = currentPlayer.chooseSheperdForATurn () ;
+					try {
+						choosenSheperd = currentPlayer.chooseSheperdForATurn () ;
+					} catch (TimeoutException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - IL PLAYER : " + currentPlayer.getName () + " HA SCELTO IL PASTORE " + choosenSheperd.getName () ) ;									
 					moveFactory = MoveFactory.newInstance ( choosenSheperd , this , this ) ;
 				}
@@ -643,7 +651,11 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 		SellableCard sellableCard ;
 		int amount ;
 		for ( Player currentPlayer : match.getPlayers() )
-			currentPlayer.chooseCardsEligibleForSelling () ;
+			try {
+				currentPlayer.chooseCardsEligibleForSelling () ;
+			} catch (TimeoutException e1) {
+				e1.printStackTrace();
+			}
 		for ( Player currentPlayer : match.getPlayers () )
 		{
 			try
@@ -682,6 +694,7 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 			catch ( NotSellableException n ) {}
 			catch ( SellingPriceNotSetException e ){}
 			catch ( TooFewMoneyException t ) {}
+			catch ( TimeoutException t ) {}
 		}
 	}
 	

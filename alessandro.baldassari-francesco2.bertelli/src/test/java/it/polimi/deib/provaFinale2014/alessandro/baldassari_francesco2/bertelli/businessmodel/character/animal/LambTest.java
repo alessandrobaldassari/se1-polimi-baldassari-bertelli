@@ -8,6 +8,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
@@ -33,7 +34,7 @@ public class LambTest
 	@BeforeClass
 	public static void setUpBeforeClass()
 	{
-		dummyMatchIdentifier = new DummyMatchIdentifier();
+		dummyMatchIdentifier = new DummyMatchIdentifier ( 0 );
 		try {
 			animalFactory = AnimalFactory.newAnimalFactory(dummyMatchIdentifier);
 		} catch (SingletonElementAlreadyGeneratedException e) {
@@ -41,13 +42,13 @@ public class LambTest
 		}
 		sheep = (AdultOvine) animalFactory.newAdultOvine("sheep", AdultOvineType.SHEEP);
 		ram = (AdultOvine) animalFactory.newAdultOvine("ram", AdultOvineType.RAM);		
+		lamb = null ;
+		while ( lamb == null )
 		try {
 			lamb = ram.mate(sheep);
-		} catch (CanNotMateWithHimException e) {
-			System.out.println("c");
-		} catch (MateNotSuccesfullException e) {
-			System.out.println("m");
 		}
+		catch (CanNotMateWithHimException e) {}
+		catch (MateNotSuccesfullException e) {}
 		
 	}
 	
@@ -64,7 +65,7 @@ public class LambTest
 	 */
 	@Test
 	public void getFather(){
-		assertTrue(lamb.getFather() == ram);
+		assertTrue(lamb.getFather().equals(ram));
 	}
 	
 	/*
@@ -72,23 +73,7 @@ public class LambTest
 	 */
 	@Test
 	public void getMother(){
-		assertTrue(lamb.getMother() == sheep);
-	}
-	
-	/*
-	 * Declaring a dummy MatchIdentifier to initialize animalFactory correctly
-	 */
-	public static class DummyMatchIdentifier implements Identifiable<Match>{
-
-		public DummyMatchIdentifier() {
-			// TODO Auto-generated constructor stub
-		}
-
-		public boolean isEqualsTo(Identifiable<Match> otherObject) {
-			// TODO Auto-generated method stub
-			return true;
-		}
-		
+		assertTrue(lamb.getMother().equals(sheep));
 	}
 
 }

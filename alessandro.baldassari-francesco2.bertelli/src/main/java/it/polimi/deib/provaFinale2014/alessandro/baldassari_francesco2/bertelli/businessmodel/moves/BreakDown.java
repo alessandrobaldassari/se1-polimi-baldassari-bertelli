@@ -45,16 +45,21 @@ public class BreakDown extends GameMove
 	 * @param breaker the Sheperd who wants to do this BreakDown action.
 	 * @param animalToBreak the Animal that will be broken down if this process
 	 *        will go well.
+	 * @throws CannotDoThisMoveException if the breaker sheperd is not near the Region where the animalToBreak
+	 *         is located.
 	 * @throws IllegalArgumentException if the breaker or the animalToBreak parameter
 	 *         is null. 
 	 */
-	BreakDown ( Sheperd breaker , Animal animalToBreak ) 
+	protected BreakDown ( Sheperd breaker , Animal animalToBreak ) throws CannotDoThisMoveException 
 	{
-		if ( breaker != null )
-		{
-			this.breaker = breaker ;
-			this.animalToBreak = animalToBreak ;
-		}
+		if ( breaker != null && animalToBreak != null )
+			if ( breaker.getPosition ().getFirstBorderRegion ().equals ( animalToBreak.getPosition() ) || breaker.getPosition ().getSecondBorderRegion ().equals ( animalToBreak.getPosition () ) )
+			{
+				this.breaker = breaker ;
+				this.animalToBreak = animalToBreak ;
+			}
+			else
+				throw new CannotDoThisMoveException () ;
 		else
 			throw new IllegalArgumentException () ;
 	}
@@ -74,13 +79,18 @@ public class BreakDown extends GameMove
 	public void execute ( Match match ) throws MoveNotAllowedException 
 	{
 		Collection < Player > adjacentPlayers ;
+		// trovo coloro che potrei dover pagare per il silenzio
 		adjacentPlayers = retrieveAdjacentPlayers () ;
+		// i potenziali testimoni lanciano il dado
 		adjacentPlayersDiceLaunching ( adjacentPlayers ) ;
 		try 
 		{
+			// pago per il silenzio
 			breaker.getOwner().pay ( adjacentPlayers.size () * AMOUNT_TO_PAY_FOR_SILENCE ) ;
+			// ogni testimone precedentemente selezionato riceve la somma
 			for ( Player player : adjacentPlayers )
 				player.receiveMoney ( AMOUNT_TO_PAY_FOR_SILENCE );
+			// effettivo abbattimento dell'animale
 			animalToBreak.getPosition ().removeAnimal ( animalToBreak ) ;
 			animalToBreak.moveTo ( null ) ;
 		} 

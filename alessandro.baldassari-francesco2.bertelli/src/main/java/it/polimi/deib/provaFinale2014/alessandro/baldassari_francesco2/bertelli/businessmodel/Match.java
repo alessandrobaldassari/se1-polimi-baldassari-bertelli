@@ -46,7 +46,7 @@ public class Match
 	 * @param bank the Bank object associated with this Match. 
 	 * @throws IllegalArgumentException if the gameMap or the bank parameter is null.
 	 */
-	protected Match ( GameMap gameMap , Bank bank ) 
+	public Match ( GameMap gameMap , Bank bank ) 
 	{
 		if ( gameMap != null && bank != null )
 		{

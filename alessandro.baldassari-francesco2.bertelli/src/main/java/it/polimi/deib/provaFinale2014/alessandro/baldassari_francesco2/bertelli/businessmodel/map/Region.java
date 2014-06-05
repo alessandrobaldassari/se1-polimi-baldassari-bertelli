@@ -140,6 +140,14 @@ public class Region extends GameMapElement
 		return type.toString();
 	}
 	
+	public boolean equals ( Object obj ) 
+	{
+		if ( obj instanceof Region )
+			return super.equals ( obj ) ;
+		else
+			return false ;
+	}
+	
 	// ENUMS
 	
 	/**
