@@ -1,8 +1,9 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Bank.NoMoreCardOfThisTypeException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match.AlreadyInFinalPhaseException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match.MatchState;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank.Bank;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank.BankFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank.Bank.NoMoreCardOfThisTypeException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
@@ -18,6 +19,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.AlreadyInFinalPhaseException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.MatchState;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveNotAllowedException;
@@ -30,7 +33,10 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.NotSellableException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.SellingPriceNotSetException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.MatchStartCommunicationController;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ConnectionLoosingManager;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ConnectionLoosingManager.ConnectionLoosingManagerObserver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.Suspendable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunchercommunicationcontroller.MatchStartCommunicationController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MathUtilities;
@@ -63,7 +69,7 @@ import java.util.concurrent.TimeoutException;
  * The only true state variable of a GameController object is the GameMatch object;
  * so, every GameController, is potentially poolable.
  */
-public class GameController implements Runnable , TurnNumberClock , LambEvolver
+public class GameController implements Runnable , TurnNumberClock , LambEvolver , ConnectionLoosingManagerObserver
 {
 	
 	/**
@@ -75,9 +81,6 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 	 * The Timer value about the time to wait before begin a Match. 
 	 */
 	private static final long DELAY = 30 * Utilities.MILLISECONDS_PER_SECOND ;
-	
-	/***/
-	public static final long SUSPENSION_TIME = 60 * Utilities.MILLISECONDS_PER_SECOND ;
 	
 	/**
 	 * The maximum number of Player for a Match. 
@@ -131,7 +134,7 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 	 * The access to this field will be permitted only during the TURNATION phase of the game. 
 	 */
 	private int turnNumber ;
-	
+		
 	/**
 	 * @param matchStartCommunicationController the value for the matchStartCommunicationController field.
 	 * @throws IllegalArgumentException if the parameter passed is null.
@@ -471,31 +474,41 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : INIZIO " ) ;
 		for ( Player p : match.getPlayers () )
 		{
-			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : GESTITSCO IL PLAYER " + p.getName () ) ;
-			sheperds = new Sheperd [ numberOfSheperdsPerPlayer ] ;		
-			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : CHIDEDENDO AL PLAYER " + p.getName () + " DI SCEGLIERE UN COLORE." ) ;
-			choosenColor = p.getColorForSheperd ( colors ) ;
-			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : IL PLAYER " + p.getName () + " HA SCELTO IL COLORE " + choosenColor.getName () ) ;
-			colors.remove ( choosenColor ) ;				
-			sheperds [ 0 ] = new Sheperd ( p.getName () + "_#" + 0 , choosenColor , p ) ;
-			if ( numberOfSheperdsPerPlayer == 2 )
-				sheperds [ 1 ] = new Sheperd ( p.getName () + "_#" + 1 , choosenColor , p ) ;				
-			try 
+			if ( p.isSuspended() == false )
 			{
-				System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : SETTANDO I PASTORI PER IL PLAYER " + p.getName () ) ;
-				p.initializeSheperds ( sheperds ) ;
-			}
-			catch ( WriteOncePropertyAlreadSetException e ) 
-			{
-				e.printStackTrace () ;
-				throw new RuntimeException ( e ) ;
-			}
-			for ( Sheperd s : p.getSheperds () )
-			{
-				//selectedRoad = p.chooseInitialRegionForASheperd ( match.getGameMap ().getFreeRoads () ) ;
-				selectedRoad = match.getGameMap ().getFreeRoads ().iterator().next () ;
-				s.moveTo ( selectedRoad ) ;
-				selectedRoad.setElementContained ( s ) ;
+				try 
+				{
+					System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : GESTITSCO IL PLAYER " + p.getName () ) ;
+					sheperds = new Sheperd [ numberOfSheperdsPerPlayer ] ;		
+					System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : CHIDEDENDO AL PLAYER " + p.getName () + " DI SCEGLIERE UN COLORE." ) ;
+					choosenColor = p.getColorForSheperd ( colors ) ;
+					System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : IL PLAYER " + p.getName () + " HA SCELTO IL COLORE " + choosenColor.getName () ) ;
+					colors.remove ( choosenColor ) ;				
+					sheperds [ 0 ] = new Sheperd ( p.getName () + "_#" + 0 , choosenColor , p ) ;
+					if ( numberOfSheperdsPerPlayer == 2 )
+						sheperds [ 1 ] = new Sheperd ( p.getName () + "_#" + 1 , choosenColor , p ) ;				
+					try 
+					{
+						System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : SETTANDO I PASTORI PER IL PLAYER " + p.getName () ) ;
+						p.initializeSheperds ( sheperds ) ;
+					}
+					catch ( WriteOncePropertyAlreadSetException e ) 
+					{
+						e.printStackTrace () ;
+						throw new RuntimeException ( e ) ;
+					}
+					for ( Sheperd s : p.getSheperds () )
+					{
+						//selectedRoad = p.chooseInitialRegionForASheperd ( match.getGameMap ().getFreeRoads () ) ;
+						selectedRoad = match.getGameMap ().getFreeRoads ().iterator().next () ;
+						s.moveTo ( selectedRoad ) ;
+						selectedRoad.setElementContained ( s ) ;
+					}
+				} 
+				catch ( TimeoutException e1 ) 
+				{					
+					notifyPlayerDisconnected ( p ) ;
+				}
 			}
 		}
 		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : FINE " ) ;
@@ -542,32 +555,38 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 				if ( match.getNumberOfPlayers () == 2 )
 				{
 					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - CHIDENDO AL PLAYER : " + currentPlayer.getName () + " DI SCEGLIERE UN PASTORE" ) ;					
-					try {
+					try 
+					{
 						choosenSheperd = currentPlayer.chooseSheperdForATurn () ;
-					} catch (TimeoutException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					} 
+					catch ( TimeoutException e ) {}
 					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - IL PLAYER : " + currentPlayer.getName () + " HA SCELTO IL PASTORE " + choosenSheperd.getName () ) ;									
 					moveFactory = MoveFactory.newInstance ( choosenSheperd , this , this ) ;
 				}
 				else
 					moveFactory = MoveFactory.newInstance ( currentPlayer.getSheperds ().iterator ().next () , this , this ) ;
-				for ( moveIndex = 0 ; moveIndex < NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ )
-				{	
-					try 
-					{
-						System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - CHIEDENDO DI FARE UNA MOSSA " ) ;				
-						choosenMove = currentPlayer.doMove ( moveFactory , match.getGameMap () ) ;
-						System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - MOSSA SCELTA " + choosenMove.toString () ) ;									
-						choosenMove.execute ( match ) ;
-						System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " HA ESEGUITO LA MOSSA." ) ;									
-					} 
-					catch ( MoveNotAllowedException e ) 
-					{
-						System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - ERRORE DURANTE L'ESECUZIONE DELLA MOSSA." ) ;									
-						e.printStackTrace();
-					} 
+				try
+				{
+					for ( moveIndex = 0 ; moveIndex < NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ )
+					{	
+						try 
+						{
+							System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - CHIEDENDO DI FARE UNA MOSSA " ) ;				
+							choosenMove = currentPlayer.doMove ( moveFactory , match.getGameMap () ) ;
+							System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - MOSSA SCELTA " + choosenMove.toString () ) ;									
+							choosenMove.execute ( match ) ;
+							System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " HA ESEGUITO LA MOSSA." ) ;									
+						} 
+						catch ( MoveNotAllowedException e ) 
+						{
+							System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - ERRORE DURANTE L'ESECUZIONE DELLA MOSSA." ) ;									
+							e.printStackTrace();
+						} 
+					}
+				}
+				catch ( TimeoutException t ) 
+				{
+					notifyPlayerDisconnected ( currentPlayer );
 				}
 				if ( match.isInFinalPhase () == false && match.getBank().hasAFenceOfThisType ( FenceType.NON_FINAL ) == false )
 					try 
@@ -650,51 +669,54 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 		Collection < SellableCard > sellableCards ;
 		SellableCard sellableCard ;
 		int amount ;
-		for ( Player currentPlayer : match.getPlayers() )
-			try {
-				currentPlayer.chooseCardsEligibleForSelling () ;
-			} catch (TimeoutException e1) {
-				e1.printStackTrace();
-			}
-		for ( Player currentPlayer : match.getPlayers () )
+		try
 		{
-			try
+			for ( Player currentPlayer : match.getPlayers() )
+				currentPlayer.chooseCardsEligibleForSelling () ;
+			for ( Player currentPlayer : match.getPlayers () )
 			{
-				amount = 0 ;
-				choosenCards = new LinkedList < SellableCard > () ;
-				sellableCards = generateGettableCardList ( currentPlayer ) ;
-				sellableCard = currentPlayer.chooseCardToBuy ( sellableCards ) ;
-				if ( sellableCard != null && currentPlayer.getMoney () >= sellableCard.getSellingPrice () )
+				try
 				{
-					amount = amount + sellableCard.getSellingPrice () ;
-					choosenCards.add ( sellableCard ) ;
-					sellableCards.remove ( sellableCard ) ;
+					amount = 0 ;
+					choosenCards = new LinkedList < SellableCard > () ;
+					sellableCards = generateGettableCardList ( currentPlayer ) ;
 					sellableCard = currentPlayer.chooseCardToBuy ( sellableCards ) ;
-					while ( sellableCard != null && currentPlayer.getMoney () >= amount + sellableCard.getSellingPrice () )
+					if ( sellableCard != null && currentPlayer.getMoney () >= sellableCard.getSellingPrice () )
 					{
 						amount = amount + sellableCard.getSellingPrice () ;
 						choosenCards.add ( sellableCard ) ;
 						sellableCards.remove ( sellableCard ) ;
 						sellableCard = currentPlayer.chooseCardToBuy ( sellableCards ) ;
+						while ( sellableCard != null && currentPlayer.getMoney () >= amount + sellableCard.getSellingPrice () )
+						{
+							amount = amount + sellableCard.getSellingPrice () ;
+							choosenCards.add ( sellableCard ) ;
+							sellableCards.remove ( sellableCard ) ;
+							sellableCard = currentPlayer.chooseCardToBuy ( sellableCards ) ;
+						}
+						for ( SellableCard s : choosenCards )
+						{
+							s.getOwner().getSellableCards().remove ( s ) ;
+							s.getOwner().receiveMoney ( s.getSellingPrice () ) ;
+							currentPlayer.getSellableCards().add ( s ) ;
+							currentPlayer.pay ( s.getSellingPrice() ) ;
+							s.setOwner ( currentPlayer ) ;
+						}
 					}
-					for ( SellableCard s : choosenCards )
+					else
 					{
-						s.getOwner().getSellableCards().remove ( s ) ;
-						s.getOwner().receiveMoney ( s.getSellingPrice () ) ;
-						currentPlayer.getSellableCards().add ( s ) ;
-						currentPlayer.pay ( s.getSellingPrice() ) ;
-						s.setOwner ( currentPlayer ) ;
+						// non ha soldi per comperare nemmeno una carta.
 					}
 				}
-				else
-				{
-					// non ha soldi per comperare nemmeno una carta.
-				}
+				catch ( NotSellableException n ) {}
+				catch ( SellingPriceNotSetException e ){}
+				catch ( TooFewMoneyException t ) {}
 			}
-			catch ( NotSellableException n ) {}
-			catch ( SellingPriceNotSetException e ){}
-			catch ( TooFewMoneyException t ) {}
-			catch ( TimeoutException t ) {}
+		}
+		catch ( TimeoutException t ) 
+		{
+			for ( Player p : match.getPlayers() )
+				p.genericNotification ( "One of the players is not connected yet, so this market phase can not go away.\nIt's not our fault, it's his !!!" );
 		}
 	}
 	
@@ -782,9 +804,15 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 		res = 0;
 		for(Card card : playerCards)
 			res = res + regionValuesMap.get(card.getRegionType());
-		return 0;
-		
-		
+		return 0;	
+	}
+	
+	private void notifyPlayerDisconnected ( Player disconnectedPlayer ) 
+	
+	{
+		for ( Player p : match.getPlayers() )
+			if ( p.isSuspended() == false )
+				p.genericNotification ( "The game is going to continue without " + disconnectedPlayer.getName() + "\nMay be he will come back later..." );
 	}
 	
 	// INNER CLASSES
@@ -859,6 +887,28 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver
 			return false ;
 		}
 	
+	}
+
+	@Override
+	public void onConnectionRetrieved ( Suspendable retrievedElem ) 
+	{
+		
+	}
+
+	@Override
+	public void onBeginSuspensionControl ( Suspendable pendant ) 
+	{
+		for ( Player p : match.getPlayers() )
+			if ( p.equals ( pendant ) == false )
+				p.genericNotification ( "We all wait a few time to retrieve a pendant player..." );
+	}
+
+	@Override
+	public void onEndSuspensionControl ( boolean suspendedRetrieved ) 
+	{
+		if ( suspendedRetrieved )
+			for ( Player p : match.getPlayers() )
+				p.genericNotification ( "We are all ok again.\nThe show can go on!" );
 	}
 	
 }

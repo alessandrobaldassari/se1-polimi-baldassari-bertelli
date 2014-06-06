@@ -60,10 +60,15 @@ public class RMIClient extends Client
 		RMIServer server ;
 		String key ;
 		Registry registry ;
-		registry = LocateRegistry.getRegistry ( SERVER_IP_ADDRESS , SERVER_PORT ) ;
 		try 
 		{
+			System.out.println ( "RMI - TECHNICAL CONNECT : BEGIN" ) ;
+			System.out.println ( "RMI - TECHNICAL CONNECT : LOCATING RMI REGISTRY." ) ;
+			registry = LocateRegistry.getRegistry ( SERVER_IP_ADDRESS , SERVER_PORT ) ;
+			System.out.println ( "RMI - TECHNICAL CONNECT : RMI REGISTRY LOCATED." ) ;
+			System.out.println ( "RMI - TECHNICAL CONNECT : RETRIEVING INITIAL CONNECTION SERVER." ) ;
 			server = ( RMIServer ) registry.lookup ( RMIServer.LOGICAL_SERVER_NAME ) ;
+			System.out.println ( "RMI - TECHNICAL CONNECT : INITIAL CONNECTION SERVER RETRIEVED." ) ;
 			key = server.addPlayer () ; 
 			clientBroker = ( RMIClientBroker ) registry.lookup ( key ) ;
 		} 
@@ -83,111 +88,42 @@ public class RMIClient extends Client
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	protected void communicationProtocolImpl () 
+	protected Message read () throws IOException 
 	{
-		List < Serializable > params ;
-		Iterable < SellableCard > sellableCards ;
-		Iterable < NamedColor > colors ;
-		Iterable < Sheperd > sheperds ;
-		NamedColor n ;
-		SellableCard c ;
-		Sheperd sh ;
-		String s ;
-	    Boolean b ;
-		Message m ;
-		GameMap map ;
-		MoveFactory gf ;
-		GameMove move ;
+		Message res ;
+		System.out.println ( "SOCKET_CLIENT - READ : WAITING FOR A MESSAGE." ) ; 			
+		while ( clientBroker.isServerReady () == false ) ;
+		res = clientBroker.getNextMessage () ;
+		System.out.println ( "SOCKET_CLIENT - READ : MESSAGE READ." ) ;
+		return res ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	protected void write ( Message m ) throws IOException 
+	{
 		try 
 		{
-			params = new ArrayList < Serializable > ( 2 ) ;
-			System.out.println ( "RMICLIENT : ATTENDENDO COMANDI IN ARRIVO " ) ;
-			while ( clientBroker.isServerReady () == false ) ;
-			m = clientBroker.getNextMessage () ;
-			params = CollectionsUtilities.newListFromIterable ( m.getParameters() ) ;
-			System.out.println ( "RMI CLIENT : MESSAGGIO RICEVUTO : " + m.getOperation () ) ;
-			switch ( m.getOperation () )
-			{
-				case NAME_REQUESTING_REQUEST :
-					// ask the interactive component for a name
-					s = getDataPicker ().onNameRequest () ;
-					params.clear () ;
-					params.add  ( s ) ;
-					m = Message.newInstance ( ClientCommunicationProtocolMessage.NAME_REQUESTING_RESPONSE , params ) ;
-					clientBroker.putNextMessage ( m ) ;
-				break ;
-				case NAME_REQUESTING_RESPONSE_RESPONSE :
-					s = (String) params.get ( 1 ) ;
-					b = ( Boolean ) params.get ( 0 ) ;
-					getDataPicker ().onNameRequestAck  ( b , s ) ;
-				break ;
-				case MATCH_WILL_NOT_START_NOTIFICATION:
-					getDataPicker ().onMatchWillNotStartNotification ( ( String ) params.get ( 0 ) ) ;
-				break;
-				case MATCH_STARTING_NOTIFICATION :
-					getDataPicker ().onNotifyMatchStart () ;
-				break ;
-				case SHEPERD_COLOR_REQUESTING_REQUEST:
-					colors = ( Iterable < NamedColor > ) params.get ( 0 ) ;
-					// ask the interactive component for a color.
-					n = getDataPicker ().onSheperdColorRequest ( colors ) ;
-					params.clear(); 
-					params.add(n);
-					m = Message.newInstance ( ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE , params ) ;
-					clientBroker.putNextMessage ( m ) ;
-				break;
-				case CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST:
-					sellableCards = (Iterable<SellableCard>) params.get ( 0 ) ;
-					sellableCards = getDataPicker ().onChooseCardsEligibleForSelling ( sellableCards );
-					params.clear () ;
-					params.add ( ( Serializable ) sellableCards ) ;
-					m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_RESPONSE , params ) ;
-					clientBroker.putNextMessage ( m ) ;
-				break ;
-				case CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_REQUEST :
-					sheperds = ( Iterable < Sheperd > ) params.get ( 0 ) ;
-					sh = getDataPicker ().onChooseSheperdForATurn ( sheperds ) ;
-					System.out.println ( "RMIClient : CHOOSE SHEPERD FOR A TURN REQUESTING REQUEST : VALUE RECEIVED : " + sh ) ;
-					params = new ArrayList < Serializable > ( 1 ) ;
-					params.add ( ( Serializable ) sh ) ;
-					m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_RESPONSE , params ) ;
-					clientBroker.putNextMessage ( m ) ;
-				break ;
-				case CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST :
-					sellableCards = ( Iterable < SellableCard > ) params.get ( 0 ) ;
-					c = getDataPicker ().onChoseCardToBuy ( sellableCards ) ; 
-					params.clear () ;
-					params.add ( ( Serializable ) c ) ;
-					m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_RESPONSE , params ) ;
-					clientBroker.putNextMessage ( m ) ;
-				break ;
-				case DO_MOVE_REQUESTING_REQUEST :
-					gf = ( MoveFactory ) params.get ( 0 ) ;
-					map = ( GameMap ) params.get ( 1 ) ;
-					move = getDataPicker ().onDoMove ( gf , map ) ;
-					params.clear () ;
-					params.add ( move ) ;
-					m = Message.newInstance ( ClientCommunicationProtocolMessage.DO_MOVE_REQUESTING_RESPONSE , params ) ;
-					clientBroker.putNextMessage (m ) ;
-				break ;
-				case GENERIC_NOTIFICATION_NOTIFICATION :
-					
-				break;	
-				default :
-				break ;
-			}
-			// the client has finished is job.
-			clientBroker.setClientReady () ;
-		}
-		catch ( RemoteException e) 
-		{
-			e.printStackTrace();
+			System.out.println ( "SOCKET_CLIENT - WRITE : WRITING MESSAGE" ) ; 
+			clientBroker.putNextMessage ( m ) ;
+			System.out.println ( "SOCKET_CLIENT - WRITE : MESSAGE WRITTEN" ) ;
 		}
 		catch ( AnotherCommandYetRunningException e ) 
 		{
-			e.printStackTrace();
+			throw new IOException ( e ) ;
 		}
-		
 	}
+	
+	/***
+	 * AS THE SUPER'S ONE
+	 */
+	@Override
+	protected void operationFinished () throws IOException 
+	{
+		clientBroker.setClientReady () ;
+	}
+
 	
 }

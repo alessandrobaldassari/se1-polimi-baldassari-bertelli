@@ -1,8 +1,21 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientCommunicationProtocolMessage;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.Message;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Terminable;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * This class implements the communication end-point by the Client side.
@@ -89,10 +102,21 @@ public abstract class Client extends Thread implements Terminable
 	protected abstract void technicalDisconnect () throws IOException ;
 	
 	/**
-	 * The effective protocol implementation method.
-	 * Here subclasses have to implement their logic related to the with-the-server communication. 
+	 * @return
+	 * @throws 
 	 */
-	protected abstract void communicationProtocolImpl () ;
+	protected abstract Message read () throws IOException ;
+		
+	/**
+	 * @return
+	 * @throws 
+	 */
+	protected abstract void write ( Message m ) throws IOException ;
+	
+	/**
+	 * @throws IOException
+	 */
+	protected abstract void operationFinished () throws IOException ;
 	
 	/**
 	 * Getter method for the dataPicker property.
@@ -124,8 +148,105 @@ public abstract class Client extends Thread implements Terminable
 	@Override
 	public void run () 
 	{
+		List < Serializable > inParams ;
+		List < Serializable > outParams ;
+		Iterable < NamedColor > colors ;
+		Iterable < SellableCard > cards ;
+		Iterable < Sheperd > sheperds ;
+		GameMove move ;
+		MoveFactory gf ;
+		GameMap gm ;
+		SellableCard c ;
+		NamedColor n ;
+		Message m ;
+		String s ;
+		Sheperd sh ;
+		boolean b ;
+		outParams = new LinkedList < Serializable > () ;
 		while ( technicallyOn )
-			communicationProtocolImpl () ;
+		{
+			try 
+			{
+				System.out.println ( "CLIENT : WAITING FOR A MESSAGE." ) ;
+				m = read () ;
+				System.out.println ( "CLIENT : MESSAGE RECEIVED." ) ;
+				inParams = CollectionsUtilities.newListFromIterable ( m.getParameters () ) ;
+				System.out.println ( "CLIENT : PARAMETERS LOADED." ) ;
+				outParams.clear () ;
+				switch ( m.getOperation() ) 
+				{
+					case NAME_REQUESTING_REQUEST :
+						s = dataPicker.onNameRequest () ;
+						outParams.add ( s ) ;
+						m = Message.newInstance ( ClientCommunicationProtocolMessage.NAME_REQUESTING_RESPONSE , outParams ) ;
+						write ( m ) ;
+					break ;
+					case NAME_REQUESTING_RESPONSE_RESPONSE :
+						b = ( Boolean ) inParams.get ( 0 ) ;
+						s = (String) inParams.get ( 1 ) ;
+						dataPicker.onNameRequestAck  ( b , s ) ;
+					break ;
+					case MATCH_STARTING_NOTIFICATION :
+						dataPicker.onNotifyMatchStart () ;
+					break ;
+					case MATCH_WILL_NOT_START_NOTIFICATION:
+						s = ( String ) inParams.get ( 0 ) ;
+						dataPicker.onMatchWillNotStartNotification ( s ) ;
+					break ;
+					case SHEPERD_COLOR_REQUESTING_REQUEST:
+						colors = ( Iterable < NamedColor > ) inParams.get ( 0 ) ;
+						n = dataPicker.onSheperdColorRequest ( colors ) ;
+						outParams.clear();
+						outParams.add ( n ) ;
+						System.out.println ( outParams ) ;
+						m = Message.newInstance ( ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE , outParams ) ;
+						write ( m ) ;
+					break;
+					case CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST:
+						cards = (Iterable<SellableCard>) inParams.get ( 0 ) ;
+						cards = dataPicker.onChooseCardsEligibleForSelling ( cards ) ;
+						outParams.add ( ( Serializable ) cards ) ;
+						m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_RESPONSE , outParams ) ;
+						write ( m ) ;
+					break ;
+					case CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_REQUEST :
+						sheperds = (Iterable<Sheperd>) inParams.get ( 0 ) ;
+						sh = getDataPicker ().onChooseSheperdForATurn ( sheperds ) ;
+						outParams.add ( sh ) ;
+						m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_RESPONSE , outParams ) ;
+						write ( m ) ;
+					break ;
+					case CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST :
+						cards = ( Iterable < SellableCard > ) inParams.get ( 0 ) ;
+						c = getDataPicker ().onChoseCardToBuy ( cards ) ; 
+						outParams.add ( c ) ;
+						m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_RESPONSE , outParams ) ;
+						write ( m ) ;
+					break ;
+					case DO_MOVE_REQUESTING_REQUEST :
+						gf = ( MoveFactory ) inParams.get ( 0 ) ;
+						gm = ( GameMap ) inParams.get ( 1 ) ;
+						move = dataPicker.onDoMove ( gf , gm ) ;
+						outParams.add ( move ) ;
+						m = Message.newInstance ( ClientCommunicationProtocolMessage.DO_MOVE_REQUESTING_RESPONSE , outParams ) ;
+						write ( m ) ;
+					break ;
+					case GENERIC_NOTIFICATION_NOTIFICATION :
+						s = ( String ) inParams.get ( 0 ) ;
+						dataPicker.generationNotification ( s ) ;
+					break;
+					default :
+						throw new IOException ( "UNMANAGED_OPERATION" ) ;
+				}
+				operationFinished () ;
+				inParams.clear () ;
+				System.out.println ( "CLIENT : OPERATION FINISHED." ) ;
+			}
+			catch ( IOException e ) 
+			{
+				throw new RuntimeException ( e ) ;
+			}
+		}
 	}
 	
 }

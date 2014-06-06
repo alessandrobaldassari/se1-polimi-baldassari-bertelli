@@ -1,6 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match.MatchState;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.MatchState;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
 /**
@@ -20,7 +20,7 @@ public class WrongMatchStateMethodCallException extends WrongStateMethodCallExce
 	 * @param actualState the state where the System is when this Exception is thrown. 
 	 * @throws IllegalArgumentException if the actualState parameter is null.
 	 */
-	protected WrongMatchStateMethodCallException ( MatchState actualState ) 
+	public WrongMatchStateMethodCallException ( MatchState actualState ) 
 	{
 		if ( actualState != null )
 			this.actualState = actualState ;

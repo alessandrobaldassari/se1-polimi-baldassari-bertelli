@@ -1,27 +1,18 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.GameController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.Suspendable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MathUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.PropertyNotSetYetException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOnceProperty;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -30,7 +21,7 @@ import java.util.concurrent.TimeoutException;
  * This class is widely used in the whole model of the Game, so also if the implemented methods are not declared final, they should
  * not be overridden, and in the case, the contract ( particularly the raising of exceptions ) should be onered.
  */
-public abstract class Player implements Serializable
+public abstract class Player implements Serializable , Suspendable
 {
 
 	// ATTRIBUTES
@@ -70,10 +61,6 @@ public abstract class Player implements Serializable
 	 * Anyway, from the point of view of this class there is no difference if the reason why the value is false is ( 1 ) or ( 2 ).
 	 */
 	private boolean suspended ;
-		
-	private WriteOnceProperty < Boolean > methodCompleted ;
-	
-	private transient ExecutorService executorService ;
 	
 	// METHODS
 	
@@ -91,8 +78,6 @@ public abstract class Player implements Serializable
 			initialCard = null ;
 			money = null ;
 			suspended = false ;
-			executorService = Executors.newCachedThreadPool () ;
-			methodCompleted = new WriteOnceProperty < Boolean > () ;
 		}
 		else 
 			throw new IllegalArgumentException () ;
@@ -107,42 +92,8 @@ public abstract class Player implements Serializable
 	 * want to sell this Card anymore at the turn t+1, he has to explicitly make it not sellable ( or modify its price if he wants ), 
 	 * otherwise the system will consider the selling state the same as the turn t.
 	 */
-	public void chooseCardsEligibleForSelling () throws TimeoutException 
-	{
-		Runnable realMethodExecutor ;
-		new Timer ().schedule ( new TimeoutExpirationTimerTask () , GameController.SUSPENSION_TIME ) ;
-		realMethodExecutor = new Runnable () 
-							{
-								@Override
-								public void run () 
-								{
-									chooseCardsEligibleForSellingImpl () ;
-									try 
-									{
-										methodCompleted.setValue ( true ) ;
-									} 
-									catch ( WriteOncePropertyAlreadSetException e ) 
-									{
-										e.printStackTrace();
-									}
-								}  
-							} ;
-		executorService.execute ( realMethodExecutor ) ;
-		while ( methodCompleted.isValueSet () == false ) ;
-		try 
-		{
-			if ( methodCompleted.getValue () == false )
-				throw new TimeoutException () ;
-		}
-		catch ( PropertyNotSetYetException e ) 
-		{
-			e.printStackTrace();
-			throw new RuntimeException ( e ) ;
-		}
-	}
-	
-	protected abstract void chooseCardsEligibleForSellingImpl () ;
-	
+	public abstract void chooseCardsEligibleForSelling () throws TimeoutException ;
+		
 	/**
 	 * Getter methods for the sellableCards property.
 	 * 
@@ -194,57 +145,8 @@ public abstract class Player implements Serializable
 	 * @return the Sheperd a this Player chooses to play in a given turn.
 	 * @throws TimeoutException 
 	 */
-	public Sheperd chooseSheperdForATurn () throws TimeoutException 
-	{
-		Sheperd res  ;
-		Future < Sheperd > f ;
-		new Timer ().schedule ( new TimeoutExpirationTimerTask () , GameController.SUSPENSION_TIME ) ;
-		f = executorService.submit ( new Callable < Sheperd > () 
-							{
-								@Override
-								public Sheperd call () 
-								{
-									Sheperd res ;
-									res = chooseSheperdForATurnImpl () ;
-									try 
-									{
-										methodCompleted.setValue ( true ) ;
-									} 
-									catch ( WriteOncePropertyAlreadSetException e ) 
-									{
-										e.printStackTrace();
-									}
-									return res ;
-								}  
-							} ) ;
-		while ( methodCompleted.isValueSet () == false ) ;
-		try 
-		{
-			if ( methodCompleted.getValue() == true )
-				res = f.get () ;
-			else
-				throw new TimeoutException () ;
-		}
-		catch ( PropertyNotSetYetException e ) 
-		{
-			e.printStackTrace();
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (InterruptedException e) 
-		{
-			e.printStackTrace();
-			throw new RuntimeException ( e ) ;
-		}
-		catch ( ExecutionException e ) 
-		{
-			e.printStackTrace();
-			throw new RuntimeException ( e ) ;
-		}
-		return res ;
-	}
-	
-	protected abstract Sheperd chooseSheperdForATurnImpl () ;
-	
+	public abstract Sheperd chooseSheperdForATurn () throws TimeoutException ;
+		
 	/**
 	 * Accessor method useful for subclasses that want to know all the Sheperds.
 	 * 
@@ -343,6 +245,7 @@ public abstract class Player implements Serializable
 	 * Suspend this Player from the Game.
 	 * Technically set the suspended property to true.
 	 */
+	@Override
 	public void suspend () 
 	{
 		suspended = true ;
@@ -352,6 +255,7 @@ public abstract class Player implements Serializable
 	 * Resume this Player and re-admits him to the Game.
 	 * Technically set the suspended property to false.
 	 */
+	@Override
 	public void resume () 
 	{
 		suspended = false ;
@@ -362,6 +266,7 @@ public abstract class Player implements Serializable
 	 * 
 	 * @return true if this Player has been suspended, false else.
 	 */
+	@Override
 	public boolean isSuspended () 
 	{
 		return suspended ;
@@ -414,56 +319,7 @@ public abstract class Player implements Serializable
 	 *         wants to buy, or null if this Player does not want to buy any Card.
 	 * @throws TimeoutException 
 	 */
-	public SellableCard chooseCardToBuy ( final Iterable < SellableCard > src ) throws TimeoutException 
-	{
-		SellableCard res  ;
-		Future < SellableCard > f ;
-		new Timer ().schedule ( new TimeoutExpirationTimerTask () , GameController.SUSPENSION_TIME ) ;
-		f = executorService.submit ( new Callable < SellableCard > () 
-							{
-								@Override
-								public SellableCard call () 
-								{
-									SellableCard res ;
-									res = chooseCardToBuyImpl ( src ) ;
-									try 
-									{
-										methodCompleted.setValue ( true ) ;
-									} 
-									catch ( WriteOncePropertyAlreadSetException e ) 
-									{
-										e.printStackTrace();
-									}
-									return res ;
-								}  
-							} ) ;
-		while ( methodCompleted.isValueSet () == false ) ;
-		try 
-		{
-			if ( methodCompleted.getValue() == true )
-				res = f.get () ;
-			else
-				throw new TimeoutException () ;
-		}
-		catch ( PropertyNotSetYetException e ) 
-		{
-			e.printStackTrace();
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (InterruptedException e) 
-		{
-			e.printStackTrace();
-			throw new RuntimeException ( e ) ;
-		}
-		catch ( ExecutionException e ) 
-		{
-			e.printStackTrace();
-			throw new RuntimeException ( e ) ;
-		}
-		return res ;
-	}
-	
-	protected abstract SellableCard chooseCardToBuyImpl ( Iterable < SellableCard > src ) ;
+	public abstract SellableCard chooseCardToBuy ( Iterable < SellableCard > src ) throws TimeoutException ;
 	
 	/**
 	 * This is the central method for the Player class ( and its subclasses too ) because it models the most important 
@@ -476,9 +332,10 @@ public abstract class Player implements Serializable
 	 * @param moveFactory the object which the Player use to create GameMove objects.
 	 * @param gameMap the map of the Game containing all the Character , Region and so on objects composing the game
 	 * @return a GameMove object which represents the move the Player wants to make.
+	 * @throws TimeoutException 
 	 */
-	public abstract GameMove doMove ( MoveFactory moveFactory , GameMap gameMap ) ;
-	
+	public abstract GameMove doMove ( final MoveFactory moveFactory , final GameMap gameMap ) throws TimeoutException ; 
+		
 	/**
 	 * This method is called by the System during the initialization phase to ask
 	 * this Player which Color to assign to one of his Sheperd.
@@ -486,17 +343,19 @@ public abstract class Player implements Serializable
 	 * 
 	 * @param availableColors the Iterable containing the colors available for choosing.
 	 * @return the choosen color that has to be in the availableColors Iterable.
+	 * @throws TimeoutException 
 	 */
-	public abstract NamedColor getColorForSheperd ( Iterable < NamedColor > availableColors ) ;
-	
+	public abstract NamedColor getColorForSheperd ( final Iterable < NamedColor > availableColors ) throws TimeoutException ;	
 	/**
 	 * This method is called by the System during the initialization phase to ask 
 	 * this Player where initially Place one of his Sheperds.
 	 * 
 	 * @param availableRoads the Roads where the Player can place one of his Sheperds.
 	 * @return the choosen Road.
+	 * @throws TimeoutException 
 	 */
-	public abstract Road chooseInitialRegionForASheperd ( Iterable < Road > availableRoads ) ;
+	public abstract Road chooseInitialRegionForASheperd ( final Iterable < Road > availableRoads ) throws TimeoutException ;
+
 	
 	/**
 	 * This is a generic method the System can call to notify a Player of something that
@@ -510,28 +369,6 @@ public abstract class Player implements Serializable
 	public abstract void genericNotification ( String message ) ;
 	
 	// INNER CLASSES
-	
-	private class TimeoutExpirationTimerTask extends TimerTask 
-	{
-
-		@Override
-		public void run () 
-		{
-			try
-			{
-				methodCompleted.setValue ( false ) ;
-			}
-			catch ( WriteOncePropertyAlreadSetException e ) 
-			{
-				e.printStackTrace();
-			}
-			finally
-			{
-				cancel () ;
-			}
-		}		
-		
-	}
 	
 	// EXCEPTIONS
 	

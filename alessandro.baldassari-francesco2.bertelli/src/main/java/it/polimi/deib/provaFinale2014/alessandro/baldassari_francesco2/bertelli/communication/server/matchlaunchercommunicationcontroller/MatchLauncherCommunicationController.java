@@ -1,4 +1,4 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunchercommunicationcontroller;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -9,11 +9,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.GameController;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.Match.MatchState;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.GameController;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.MatchState;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.NetworkCommunicantPlayer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.NetworkCommunicationController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.MatchConnectionLoosingController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RequestAccepterServer;
 
@@ -23,11 +25,14 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * It is the one that sums all the inbound connections, bounds them to the GameController
  * instances and manages also the situation where just one Player wants to play ( and cannot ). 
  */
-class MasterServer implements NetworkCommunicationController , MatchAdderCommunicationController , MatchStartCommunicationController
+public final class MatchLauncherCommunicationController implements NetworkCommunicationController , MatchAdderCommunicationController , MatchStartCommunicationController
 {
 	
 	/***/
-	private static final long GAME_CONTROLLER_WAITING_DELAY = 1000L ;
+	public static final long GAME_CONTROLLER_WAITING_DELAY = 1000L ;
+	
+	/***/
+	private static MatchLauncherCommunicationController instance ;
 	
 	/**
 	 * The queue the technical networks input servers will use to add players requests. 
@@ -62,6 +67,9 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 	/***/
 	private Collection < String > currentClientNames ;
 	
+	/***/
+	private MatchConnectionLoosingController connectionLoosingController ;
+	
 	/**
 	 * A flag indicating if this MasterServer is on or not.
 	 */
@@ -70,7 +78,7 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 	/**
 	 * @throws IOException if something goes wrong with the creation of the member objects. 
 	 */
-	MasterServer () throws IOException  
+	MatchLauncherCommunicationController () throws IOException  
 	{
 		final String LOCALHOST_ADDRESS = InetAddress.getLocalHost ().getHostAddress () ;
 		socketServer = RequestAccepterServer.newSocketServer ( this ) ; 
@@ -80,11 +88,23 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 		threadExecutor = Executors.newCachedThreadPool () ;
 		currentClientHandlers = new LinkedList < ClientHandler > () ;
 		currentClientNames = new LinkedList < String > () ;
+		connectionLoosingController = null ;
 		inFunction = false ;
 	}
 	
 	/**
-	 * AS THE SUPER0'S ONE.
+	 * @return
+	 * @throws 
+	 */
+	public static synchronized MatchLauncherCommunicationController getInstance () throws IOException
+	{
+		if ( instance == null )
+			instance = new MatchLauncherCommunicationController () ;
+		return instance ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE.
 	 * The run method of this Runnable object.
 	 * Essentially it consists of an infinite loop which has to maintain this Runnable alive. 
 	 */
@@ -103,30 +123,34 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 			{
 				System.out.println ( "MASTER SERVER : ATTENDENDO CLIENT" ) ;
 				newClientHandler = queue.take () ;
-				System.out.println ( "MASTER SERVER : CLIENT ACCETTATO" ) ;
-				if ( currentGameController == null )
-					createAndLaunchNewGameController () ;
-				System.out.println ( "MASTER SERVER : CHIEDENDO NOME AL CLIENT" ) ;
-				name = newClientHandler.requestName () ;
-				System.out.println ( "MASTER SERVER : NOME RICEVUTO DAL CLIENT, nome = " + name ) ;
-				while ( currentClientNames.contains ( name ) )
+				synchronized ( currentClientHandlers )
 				{
-					System.out.println ( "MASTER SERVER : NOME " + name + " GIA' IN USO" ) ;
-					System.out.println ( "MASTER SERVER : NOTIFICA AL CLIENT DI NOME + " + name + " NOME GIA' IN USO" ) ;
-					newClientHandler.notifyNameChoose ( false , "Nome già in uso." ) ;					
+					System.out.println ( "MASTER SERVER : CLIENT ACCETTATO" ) ;
+					if ( currentGameController == null )
+						createAndLaunchNewGameController () ;
 					System.out.println ( "MASTER SERVER : CHIEDENDO NOME AL CLIENT" ) ;
 					name = newClientHandler.requestName () ;
 					System.out.println ( "MASTER SERVER : NOME RICEVUTO DAL CLIENT, nome = " + name ) ;
-				}
-				System.out.println ( "MASTER SERVER : NOME + " +name + " NON IN USO" ) ;
-				System.out.println ( "MASTER SERVER : AGGIUNGENDO PLAYER ALLA PARTITA DI NOME " + name ) ;
-				currentClientHandlers.add ( newClientHandler ) ;
-				currentClientNames.add ( name ) ;
-				System.out.println ( "CLIENT DI NOME " + name + " NOTIFICATO CHE IL SUO NOME E' CORRETTO" ) ;
-				newClientHandler.notifyNameChoose ( true , null ) ;
-				System.out.println ( "MASTER SERVER : PLAYER DI NOME " + name + "AGGIUNTO ALLA PARTITA" ) ;
-				currentGameController.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler ) ) ;
-			} 
+					while ( currentClientNames.contains ( name ) )
+					{
+						System.out.println ( "MASTER SERVER : NOME " + name + " GIA' IN USO" ) ;
+						System.out.println ( "MASTER SERVER : NOTIFICA AL CLIENT DI NOME + " + name + " NOME GIA' IN USO" ) ;
+						newClientHandler.notifyNameChoose ( false , "Nome già in uso." ) ;					
+						System.out.println ( "MASTER SERVER : CHIEDENDO NOME AL CLIENT" ) ;
+						name = newClientHandler.requestName () ;
+						System.out.println ( "MASTER SERVER : NOME RICEVUTO DAL CLIENT, nome = " + name ) ;
+					}
+					System.out.println ( "MASTER SERVER : NOME + " +name + " NON IN USO" ) ;
+					System.out.println ( "MASTER SERVER : AGGIUNGENDO PLAYER ALLA PARTITA DI NOME " + name ) ;
+					currentClientHandlers.add ( newClientHandler ) ;
+					currentClientNames.add ( name ) ;
+					System.out.println ( "CLIENT DI NOME " + name + " NOTIFICATO CHE IL SUO NOME E' CORRETTO" ) ;
+					newClientHandler.notifyNameChoose ( true , null ) ;
+					System.out.println ( "MASTER SERVER : PLAYER DI NOME " + name + "AGGIUNTO ALLA PARTITA" ) ;
+					currentGameController.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler , connectionLoosingController ) ) ;
+					currentClientHandlers.notifyAll () ;
+				} 
+			}
 			catch ( WrongMatchStateMethodCallException e )
 			{
 				if ( e.getActualState () == MatchState.CREATED ) // may be the Game Controller is late, give this Player another change to enter.
@@ -162,7 +186,10 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 	private void createAndLaunchNewGameController () 
 	{
 		currentGameController = new GameController ( this ) ;
+		connectionLoosingController = new MatchConnectionLoosingController () ;
+		connectionLoosingController.addObserver ( currentGameController ) ;
 		threadExecutor.submit ( currentGameController ) ;
+		threadExecutor.submit ( connectionLoosingController ) ;
 	}
 	
 	/**
@@ -216,6 +243,7 @@ class MasterServer implements NetworkCommunicationController , MatchAdderCommuni
 				e.printStackTrace();
 			}
 		currentGameController = null ;
+		connectionLoosingController = null ;
 		currentClientHandlers.clear () ;
 		currentClientNames.clear () ;
 	}

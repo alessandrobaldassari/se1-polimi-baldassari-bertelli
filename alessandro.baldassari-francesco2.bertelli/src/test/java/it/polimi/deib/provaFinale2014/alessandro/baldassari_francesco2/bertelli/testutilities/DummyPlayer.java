@@ -1,5 +1,8 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities;
 
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
@@ -17,39 +20,44 @@ public class DummyPlayer extends Player
 		// TODO Auto-generated constructor stub
 	}
 
+	public int diceRes =6 ;
+
 	@Override
-	protected void chooseCardsEligibleForSellingImpl () 
-	{
+	public void chooseCardsEligibleForSelling() throws TimeoutException {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected Sheperd chooseSheperdForATurnImpl() {
+	public Sheperd chooseSheperdForATurn() throws TimeoutException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	protected SellableCard chooseCardToBuyImpl(Iterable<SellableCard> src) {
+	public SellableCard chooseCardToBuy(Iterable<SellableCard> src)
+			throws TimeoutException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public GameMove doMove(MoveFactory moveFactory, GameMap gameMap) {
+	public GameMove doMove(MoveFactory moveFactory, GameMap gameMap)
+			throws TimeoutException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public NamedColor getColorForSheperd(Iterable<NamedColor> availableColors) {
+	public NamedColor getColorForSheperd(Iterable<NamedColor> availableColors)
+			throws TimeoutException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Road chooseInitialRegionForASheperd(Iterable<Road> availableRoads) {
+	public Road chooseInitialRegionForASheperd(Iterable<Road> availableRoads)
+			throws TimeoutException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -59,15 +67,9 @@ public class DummyPlayer extends Player
 		// TODO Auto-generated method stub
 		
 	}
+	
+	
 
-	public int diceRes =6 ;
-	
-	@Override
-	public int launchDice () 
-	{
-		return diceRes ;
-	}
-	
 }
 
 
