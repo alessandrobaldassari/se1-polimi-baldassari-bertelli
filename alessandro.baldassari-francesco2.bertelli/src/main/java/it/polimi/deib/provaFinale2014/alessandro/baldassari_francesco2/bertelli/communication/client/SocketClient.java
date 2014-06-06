@@ -138,6 +138,7 @@ public class SocketClient extends Client
 				case CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_REQUEST :
 					sheperds = ( Iterable < Sheperd > ) m.getParameters ().iterator().next () ;
 					choosenSheperd = getDataPicker ().onChooseSheperdForATurn ( sheperds ) ;
+					System.out.println("SOCKET CLIENT : CHOOSE SHEPERD FOR A TURN REQUESTING RESPONSE : DATA RECEIVED " + choosenSheperd);
 					params = new ArrayList < Serializable > ( 1 ) ;
 					params.add ( choosenSheperd ) ;
 					m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_RESPONSE , params ) ;

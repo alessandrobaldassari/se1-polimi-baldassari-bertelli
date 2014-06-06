@@ -8,8 +8,12 @@ import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Ovine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveNotAllowedException;
@@ -220,7 +224,7 @@ public class CLIController extends ViewPresenter
 		for ( SellableCard s : sellableCards )
 		{
 			writer.println ( "Tua carta : " + s.toString () ) ;
-			writer.println ( "Vuoi comprarla ? ( s / n )" ) ;
+			writer.println ( "Vuoi venderla ? ( s / n )" ) ;
 			try 
 			{
 				c = reader.readLine ().trim ().charAt ( 0 ) ;
@@ -315,13 +319,112 @@ public class CLIController extends ViewPresenter
 		}
 		switch ( i ) 
 		{
-			case 1 :				
+			case 1 :
+				Region r1, r2;
+				List <Ovine> killableAnimals = new LinkedList<Ovine>();
+				int j;
+				writer.println("Elenco degli ovini che può abbattere");
+				r1 = f.getAssociatedSheperd().getPosition().getFirstBorderRegion();
+				r2 = f.getAssociatedSheperd().getPosition().getSecondBorderRegion();
+				for(Animal animal : r1.getContainedAnimals())
+					if(animal instanceof Ovine)
+						killableAnimals.add((Ovine) animal);
+				for(Animal animal : r2.getContainedAnimals())
+					if(animal instanceof Ovine)
+						killableAnimals.add((Ovine) animal);
+				j=0;
+				for(Ovine ovine : killableAnimals){
+					writer.println(j + " " +ovine.toString());
+					j++;
+				}
+				writer.println("Chi vuoi abbattere?");
+			try {
+				j = Integer.parseInt(reader.readLine().trim());
+			} catch (NumberFormatException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			try {
+				f.newBreakDownMove(killableAnimals.get(j));
+			} catch (MoveNotAllowedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}				
 			break ;
 			case 2 :
+				int k = 0;
+				for(RegionType rt : RegionType.values()){
+					writer.println(k + " " + rt);
+					k++;	
+				}
+			try 
+			{
+				f.newBuyCard(RegionType.values()[k]);
+			} 
+			catch (MoveNotAllowedException e1) 
+			{
+				e1.printStackTrace();
+			}
 			break ;
 			case 3 :
+				int u ;
+				writer.println("Regioni dove puoi compire l'accoppiamento:") ;
+				writer.println("0 . " + f.getAssociatedSheperd().getPosition().getFirstBorderRegion());
+				writer.println("1 . " + f.getAssociatedSheperd().getPosition().getSecondBorderRegion());
+			u = 0 ;
+			try {
+				u = Integer.parseInt ( reader.readLine ().trim() );
+			} catch (NumberFormatException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			} catch (IOException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
+			try {
+				f.newMate ( u == 0 ? f.getAssociatedSheperd().getPosition().getFirstBorderRegion() : f.getAssociatedSheperd().getPosition().getSecondBorderRegion() ) ;
+			} catch (MoveNotAllowedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			break ;
 			case 4 :
+				Region r3, r4;
+				List <Ovine> movableAnimals = new LinkedList<Ovine>();
+				int h;
+				writer.println("Elenco degli ovini che può abbattere");
+				r3 = f.getAssociatedSheperd().getPosition().getFirstBorderRegion();
+				r4 = f.getAssociatedSheperd().getPosition().getSecondBorderRegion();
+				for(Animal animal : r3.getContainedAnimals())
+					if(animal instanceof Ovine)
+						movableAnimals.add((Ovine) animal);
+				for(Animal animal : r4.getContainedAnimals())
+					if(animal instanceof Ovine)
+						movableAnimals.add((Ovine) animal);
+				h=0;
+				for(Ovine ovine : movableAnimals){
+					writer.println(h + " " +ovine.toString());
+					h++;
+				}
+				writer.println("Chi vuoi muovere?");
+			try {
+				h = Integer.parseInt(reader.readLine().trim());
+			} catch (NumberFormatException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			try {
+				f.newMoveSheep(movableAnimals.get(h), CollectionsUtilities.contains(f.getAssociatedSheperd().getPosition().getFirstBorderRegion().getContainedAnimals(), movableAnimals.get(h)) ? f.getAssociatedSheperd().getPosition().getSecondBorderRegion() : f.getAssociatedSheperd().getPosition().getFirstBorderRegion());
+			} catch (MoveNotAllowedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			break ;
 			case 5 :
 				List < Road > l ;

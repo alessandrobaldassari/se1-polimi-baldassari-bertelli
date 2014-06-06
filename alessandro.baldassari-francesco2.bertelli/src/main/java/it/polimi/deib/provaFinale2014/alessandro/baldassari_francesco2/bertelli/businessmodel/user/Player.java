@@ -22,9 +22,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class models a Player in the Game.
@@ -75,7 +73,7 @@ public abstract class Player implements Serializable
 		
 	private WriteOnceProperty < Boolean > methodCompleted ;
 	
-	private ExecutorService executorService ;
+	private transient ExecutorService executorService ;
 	
 	// METHODS
 	

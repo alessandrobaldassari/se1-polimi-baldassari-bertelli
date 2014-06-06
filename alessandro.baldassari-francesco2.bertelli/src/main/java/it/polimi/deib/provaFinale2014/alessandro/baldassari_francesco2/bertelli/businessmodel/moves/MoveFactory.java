@@ -33,6 +33,10 @@ public class MoveFactory implements Serializable
 	/***/
 	private Sheperd sheperd ;
 	
+	public Sheperd getAssociatedSheperd(){
+		return sheperd;
+	}
+	
 	/***/
 	protected MoveFactory ( Sheperd sheperd , TurnNumberClock clockSource , LambEvolver lambEvolver ) 
 	{

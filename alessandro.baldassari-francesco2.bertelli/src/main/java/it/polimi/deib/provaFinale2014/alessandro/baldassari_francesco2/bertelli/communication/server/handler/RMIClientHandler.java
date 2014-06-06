@@ -236,6 +236,7 @@ public class RMIClientHandler implements ClientHandler
 			notifyMessageFinished () ;
 			waitForTheClient () ;
 			m = rmiClientBroker.getNextMessage () ;
+			System.out.println ( "RMI_CLIENT_HANDLER : CHOOSE SHEPERD FOR A TURN : MESSAGE RECEIVED : " + m.getOperation() ) ;
 			if ( m.getOperation() == ClientCommunicationProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_RESPONSE )
 			{
 				System.out.println ( "RMI_CLIENT_HANDLER" ) ;
@@ -248,6 +249,7 @@ public class RMIClientHandler implements ClientHandler
 		{
 			e.printStackTrace();
 		}
+		System.out.println ( "RMI_CLIENT_HANDLER : CHOOSE SHEPERD FOR A TURN : FINISH : " ) ;
 		return res ;
 	}
 

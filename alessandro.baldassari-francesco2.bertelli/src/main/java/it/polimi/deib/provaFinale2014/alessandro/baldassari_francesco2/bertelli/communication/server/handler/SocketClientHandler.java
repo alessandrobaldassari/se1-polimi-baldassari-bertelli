@@ -180,11 +180,13 @@ public class SocketClientHandler implements ClientHandler , Serializable
 		try 
 		{
 			m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_REQUEST , Collections.singleton ( ( Serializable ) sheperdsOfThePlayer ) ) ;
+			oos.writeObject(m);
 			oos.flush () ;
 			m = (Message) ois.readObject () ;
+			System.out.println("SOCKET CLIENT HANDLER : CHOOSE SHEPERD FOR A TURN : MESSAGE RECEIVED : " + m.getOperation());
 			if ( m.getOperation () == ClientCommunicationProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_RESPONSE )
 			{
-				res = ( Sheperd ) ois.readObject () ;
+				res = ( Sheperd ) m.getParameters().iterator().next();
 			}
 			else
 			{
@@ -202,14 +204,24 @@ public class SocketClientHandler implements ClientHandler , Serializable
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public Iterable < SellableCard > chooseCardsEligibleForSelling ( Iterable < SellableCard > sellablecards) throws IOException 
+	public Iterable < SellableCard > chooseCardsEligibleForSelling ( Iterable < SellableCard > sellableCards) throws IOException 
 	{
+		Message m ;
 		String resp ;
-		oos.writeUTF ( ClientCommunicationProtocolMessage.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST.toString () ) ;
+		m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST , Collections.singleton ( ( Serializable ) sellableCards ) ) ;
+		oos.writeObject ( m ) ;
 		oos.flush () ;
-		oos.writeObject ( sellablecards ) ;
-		oos.flush () ;
-		//il giocatore modifica sellableCards e il server deve conscere le modifiche
+		Iterable < SellableCard > res ;
+		try 
+		{
+			m = (Message) ois.readObject();
+			if ( m.getOperation () == ClientCommunicationProtocolMessage.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_RESPONSE ) 
+				res = (Iterable<SellableCard>) m.getParameters().iterator().next();
+		}
+		catch ( ClassNotFoundException e ) 
+		{
+
+		}
 		return null ;
 	}
 
@@ -219,28 +231,25 @@ public class SocketClientHandler implements ClientHandler , Serializable
 	@Override
 	public SellableCard chooseCardToBuy ( Iterable < SellableCard > src ) throws IOException 
 	{
-		String resp ;
 		SellableCard res = null ;
-		oos.writeUTF ( ClientCommunicationProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST.toString () ) ;
+		Message m ;
+		m = Message.newInstance( ClientCommunicationProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST , Collections.singleton ( ( Serializable ) src ) );
+		oos.writeObject ( m ) ;
 		oos.flush () ;
-		oos.writeObject ( src ) ;
-		oos.flush () ;
-		resp = ois.readUTF () ;
-		if ( ClientCommunicationProtocolMessage.valueOf ( resp ) == ClientCommunicationProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_RESPONSE )
+		try {
+			m = (Message) ois.readObject () ;
+			if ( m.getOperation() == ClientCommunicationProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_RESPONSE )
+				{
+					res = ( SellableCard ) m.getParameters ().iterator ().next () ;
+				}
+				else
+				{}
+		} 
+		catch ( ClassNotFoundException e1 ) 
 		{
-			try 
-			{
-				res = (SellableCard) ois.readObject() ;
-			}
-			catch (ClassNotFoundException e) {
-				// error management ;
-				e.printStackTrace();
-			}
+			e1.printStackTrace();
 		}
-		else
-		{
-			// error management
-		}
+		
 		return res ;
 	}
 

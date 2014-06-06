@@ -145,9 +145,10 @@ public class RMIClient extends Client
 					clientBroker.putNextMessage ( m ) ;
 				break ;
 				case CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_REQUEST :
-					sheperds = (Iterable<Sheperd>) params.get ( 0 ) ;
+					sheperds = ( Iterable < Sheperd > ) params.get ( 0 ) ;
 					sh = getDataPicker ().onChooseSheperdForATurn ( sheperds ) ;
-					params.clear () ;
+					System.out.println ( "RMIClient : CHOOSE SHEPERD FOR A TURN REQUESTING REQUEST : VALUE RECEIVED : " + sh ) ;
+					params = new ArrayList < Serializable > ( 1 ) ;
 					params.add ( ( Serializable ) sh ) ;
 					m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_RESPONSE , params ) ;
 					clientBroker.putNextMessage ( m ) ;
