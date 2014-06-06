@@ -53,7 +53,7 @@ public class LoginView extends JDialog
 	interface LoginViewObserver extends Observer
 	{
 		
-		public void onEnter ( String enteredName ) ;
+		public void onNameEntered ( String enteredName ) ;
 		
 		public void onExit () ;
 		
@@ -173,7 +173,7 @@ class LoginViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < Login
 		{
 			try 
 			{
-				LoginViewPanel.this.notifyObservers ( "onEnter" , nameField.getText () ) ;
+				LoginViewPanel.this.notifyObservers ( "onNameEntered" , nameField.getText () ) ;
 			} 
 			catch ( MethodInvocationException e1 ) 
 			{

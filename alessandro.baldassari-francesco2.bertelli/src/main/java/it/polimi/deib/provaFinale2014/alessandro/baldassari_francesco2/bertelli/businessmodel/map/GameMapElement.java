@@ -27,7 +27,7 @@ public abstract class GameMapElement implements Serializable
 	 * @param uid the uid of this GameMapElement
 	 * @throws IllegalArgumentException if the parameter is < 0  
 	 */
-	GameMapElement ( GameMapElementType gameMapElementType , int uid ) 
+	protected GameMapElement ( GameMapElementType gameMapElementType , int uid ) 
 	{
 		if ( gameMapElementType != null && uid >= 0 )
 		{

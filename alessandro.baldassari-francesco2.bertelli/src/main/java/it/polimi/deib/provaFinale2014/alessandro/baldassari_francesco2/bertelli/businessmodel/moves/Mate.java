@@ -16,7 +16,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb.LambEvolver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 
 /**
@@ -56,7 +55,7 @@ public class Mate extends GameMove
 	 * @throws IllegalArgumentException if the theOneWhoWantsTheMate or the whereMate parameters
 	 *         is null.
 	 */
-	Mate ( TurnNumberClock clockSource , LambEvolver lambEvolver , Sheperd theOneWhoWantsTheMate , Region whereMate ) throws MoveNotAllowedException 
+	protected Mate ( TurnNumberClock clockSource , LambEvolver lambEvolver , Sheperd theOneWhoWantsTheMate , Region whereMate ) throws MoveNotAllowedException 
 	{
 		if ( clockSource != null && lambEvolver != null && theOneWhoWantsTheMate != null && whereMate != null ) 
 		{
@@ -83,7 +82,14 @@ public class Mate extends GameMove
 	 * @param match the Match on which the action is performed.
 	 * @throws MoveNotAllowedException if something goes wrong.
 	 * 
-	 * 
+	 * @PRECONDITIONS
+	 *  1. match != null
+	 * @EXCEPTIONALS_POSTCONDITIONS 
+	 *  1. MoveNotAllowedException && there not exist a Ram in the whereMate Region.
+	 *  2. MoveNotAllowedException && there not exist a Sheep in the whereMate Region
+	 *  3. MoveNotAllowedException and the mate has failed.
+	 *  @POSTCONDITIONS
+	 *  1. the whereMate contains a new Lamb
 	 */
 	@Override
 	public void execute ( Match match ) throws MoveNotAllowedException 
@@ -94,36 +100,44 @@ public class Mate extends GameMove
 		List < AdultOvine > adultOvines ;
 		AdultOvine ram ;
 		AdultOvine sheep ;
-		adultOvines = extractAdultOvines ( whereMate.getContainedAnimals () ) ;
-		ram = lookForAnOvine ( adultOvines , AdultOvineType.RAM ) ;
-		if ( ram != null )
+		if ( match != null )
 		{
-			sheep = lookForAnOvine ( adultOvines , AdultOvineType.SHEEP ) ;
-			if ( sheep != null )
+			adultOvines = extractAdultOvines ( whereMate.getContainedAnimals () ) ;
+			// look for a male
+			ram = lookForAnOvine ( adultOvines , AdultOvineType.RAM ) ;
+			if ( ram != null )
 			{
-				try 
+				// look for a female
+				sheep = lookForAnOvine ( adultOvines , AdultOvineType.SHEEP ) ;
+				if ( sheep != null )
 				{
-					lamb = sheep.mate ( ram ) ;
-					whereMate.addAnimal ( lamb ) ;
-					lamb.moveTo ( whereMate );
-					runnableExec = Executors.newSingleThreadExecutor () ;	
-					lambGrowerLookerRunnable = new LambGrowerLookerRunnable ( clockSource , lamb , lambEvolver ) ;
-					runnableExec.execute ( lambGrowerLookerRunnable ) ;
-				} 
-				catch ( CanNotMateWithHimException e ) 
-				{
-					throw new RuntimeException ( e ) ;
-				} 
-				catch ( MateNotSuccesfullException e ) 
-				{
-					throw new MoveNotAllowedException ( "Mate not successfull." ) ;
+					try 
+					{
+						// do the mate
+						lamb = sheep.mate ( ram ) ;
+						whereMate.addAnimal ( lamb ) ;
+						lamb.moveTo ( whereMate );
+						// launch some stuff to mangage the evolution of the born Lamb.
+						runnableExec = Executors.newSingleThreadExecutor () ;	
+						lambGrowerLookerRunnable = new LambGrowerLookerRunnable ( clockSource , lamb , lambEvolver ) ;
+						runnableExec.execute ( lambGrowerLookerRunnable ) ;
+					} 
+					catch ( CanNotMateWithHimException e ) 
+					{
+						throw new RuntimeException ( e ) ;
+					} 
+					catch ( MateNotSuccesfullException e ) 
+					{
+						throw new MoveNotAllowedException ( "Mate not successfull." ) ;
+					}
 				}
+				else
+					throw new MoveNotAllowedException ( "" ) ;
 			}
 			else
-				throw new RuntimeException () ;
-			}
-		else
-			throw new MoveNotAllowedException ( "" ) ;
+				throw new MoveNotAllowedException ( "" ) ;
+		}
+		else throw new IllegalArgumentException () ;
 	}
 
 	/**
@@ -225,4 +239,5 @@ public class Mate extends GameMove
 			}
 		}
 	}
+	
 }

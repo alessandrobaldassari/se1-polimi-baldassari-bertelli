@@ -33,15 +33,22 @@ public class AdultOvineTest {
 	 */
 	static 
 	{
-		try
+		int i ;
+		i = 0 ;
+		do
 		{
-			animalFactory = AnimalFactory.newAnimalFactory ( new DummyMatchIdentifier ( 0 ) ) ;
+			try
+			{
+				animalFactory = AnimalFactory.newAnimalFactory ( new DummyMatchIdentifier ( 0 ) ) ;
+				ram = (AdultOvine) animalFactory.newAdultOvine("ram", AdultOvineType.RAM);
+				sheep = (AdultOvine) animalFactory.newAdultOvine("Sheep", AdultOvineType.SHEEP);
+			}
+			catch (SingletonElementAlreadyGeneratedException e) 
+			{
+				i ++ ;
+			}
 		}
-		catch (SingletonElementAlreadyGeneratedException e) {
-			e.printStackTrace();
-		}
-		ram = (AdultOvine) animalFactory.newAdultOvine("ram", AdultOvineType.RAM);
-		sheep = (AdultOvine) animalFactory.newAdultOvine("Sheep", AdultOvineType.SHEEP);
+		while ( animalFactory == null ) ;
 	}
 	
 	/*

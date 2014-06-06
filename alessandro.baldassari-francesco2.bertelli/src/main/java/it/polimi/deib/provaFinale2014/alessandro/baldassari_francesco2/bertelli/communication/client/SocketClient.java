@@ -1,6 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
@@ -18,7 +19,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -88,16 +88,17 @@ public class SocketClient extends Client
 		List < Serializable > params ;
 		ClientCommunicationProtocolMessage op ;
 		Message m ;
-		MoveFactory moveFactory ;
-		GameMap gameMap ;
 		Iterable < Sheperd > sheperds ;
 		Iterable <SellableCard> sellableCards;
 		Iterable < NamedColor > colors ;
-		String command ;
 		NamedColor n ;
 		Sheperd choosenSheperd ;
 		String s ;
+		SellableCard c ;
 		Boolean b ;
+		MoveFactory gf ;
+		GameMap map ;
+		GameMove move ;
 		try 
 		{
 			System.out.println ( "SOCKET CLIENT : ASPETTANDO UN MESSAGGIO" ) ;
@@ -124,8 +125,7 @@ public class SocketClient extends Client
 				case MATCH_WILL_NOT_START_NOTIFICATION:
 					getDataPicker ().onMatchWillNotStartNotification ( (String) m.getParameters().iterator().next() ) ;
 				break ;
-				case SHEPERD_COLOR_REQUESTING_REQUEST :
-					
+				case SHEPERD_COLOR_REQUESTING_REQUEST :	
 					colors = ( Iterable < NamedColor > ) m.getParameters().iterator().next() ;
 					n = getDataPicker ().onSheperdColorRequest ( colors ) ;
 					params = new ArrayList < Serializable > ( 1 ) ;
@@ -144,13 +144,32 @@ public class SocketClient extends Client
 					writeMessage ( m ) ;
 				break ;
 				case CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST:
-					
+					params = CollectionsUtilities.newListFromIterable ( m.getParameters() ) ;
+					sellableCards = (Iterable<SellableCard>) params.get ( 0 ) ;
+					sellableCards = getDataPicker ().onChooseCardsEligibleForSelling ( sellableCards );
+					params.clear () ;
+					params.add ( ( Serializable ) sellableCards ) ;
+					m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_RESPONSE , params ) ;
+					writeMessage ( m ) ;
 				break ;
 				case CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST :
+					params = CollectionsUtilities.newListFromIterable ( m.getParameters () ) ;
+					sellableCards = ( Iterable < SellableCard > ) params.get ( 0 ) ;
+					c = getDataPicker ().onChoseCardToBuy ( sellableCards ) ; 
+					params.clear () ;
+					params.add ( ( Serializable ) c ) ;
+					m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_RESPONSE , params ) ;
+					writeMessage ( m ) ;
 				break ;
 				case DO_MOVE_REQUESTING_REQUEST :
-					moveFactory = (MoveFactory) ois.readObject () ;
-					gameMap = (GameMap) ois.readObject () ;
+					params = CollectionsUtilities.newListFromIterable ( m.getParameters() ) ;
+					gf = ( MoveFactory ) params.get ( 0 ) ;
+					map = ( GameMap ) params.get ( 1 ) ;
+					move = getDataPicker ().onDoMove ( gf , map ) ;
+					params.clear () ;
+					params.add ( move ) ;
+					m = Message.newInstance ( ClientCommunicationProtocolMessage.DO_MOVE_REQUESTING_RESPONSE , params ) ;
+					writeMessage ( m ) ;
 				break ;
 				case GENERIC_NOTIFICATION_NOTIFICATION:
 				break;

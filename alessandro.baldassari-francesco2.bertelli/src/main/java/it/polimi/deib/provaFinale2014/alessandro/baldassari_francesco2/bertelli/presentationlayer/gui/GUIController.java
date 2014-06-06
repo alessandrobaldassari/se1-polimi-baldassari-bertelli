@@ -1,6 +1,5 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui;
 
-import java.awt.Color;
 import java.awt.Frame;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -14,12 +13,13 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.LoginView.LoginViewObserver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.SheperdColorRequestView.SheperdColorRequestViewObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
 /***/
-public class GUIController extends ViewPresenter implements LoginViewObserver
+public class GUIController extends ViewPresenter implements LoginViewObserver , SheperdColorRequestViewObserver
 {
 
 	/***/
@@ -47,10 +47,16 @@ public class GUIController extends ViewPresenter implements LoginViewObserver
 	private LoginView loginView ;
 	
 	/***/
+	private SheperdColorRequestView sheperdColorRequestView ;
+	
+	/***/
 	private GameView gameView ;
 	
 	/***/
 	private AtomicReference < String > name ;
+	
+	/***/
+	private AtomicReference < NamedColor > color ;
 	
 	/***/
 	public GUIController () 
@@ -59,6 +65,8 @@ public class GUIController extends ViewPresenter implements LoginViewObserver
 		Runnable guiElementsCreator ;
 		name = new AtomicReference < String > () ;
 		name.set ( null ) ;
+		color = new AtomicReference < NamedColor > () ;
+		color.set ( null ) ;
 		guiElementsCreator = new GUIElementsCreatorRunnable () ;
 		SwingUtilities.invokeLater ( guiElementsCreator ) ;
 	}
@@ -78,8 +86,7 @@ public class GUIController extends ViewPresenter implements LoginViewObserver
 							waitingView.setText ( SERVER_CONNECTION_MESSAGE ) ;
 							waitingView.setVisible ( true ) ;
 						} 
-					} 
-									);
+					} );
 	}
 	
 	/***/
@@ -178,9 +185,21 @@ public class GUIController extends ViewPresenter implements LoginViewObserver
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public NamedColor onSheperdColorRequest ( Iterable < NamedColor > availableColors ) 
+	public NamedColor onSheperdColorRequest ( final Iterable < NamedColor > availableColors ) 
 	{
-		return null;
+		SwingUtilities.invokeLater ( 
+				new Runnable () 
+				{ 
+					public void run () 
+					{
+						sheperdColorRequestView = new SheperdColorRequestView ( GUIController.this , availableColors ) ;
+						gameView.setVisible(false);
+						sheperdColorRequestView.setVisible ( true ) ;
+					} 
+				} 
+									);
+		while ( color.get () == null ) ;
+		return color.get() ;
 	}
 
 	@Override
@@ -227,6 +246,7 @@ public class GUIController extends ViewPresenter implements LoginViewObserver
 		{
 			waitingView = new WaitingView () ;
 			loginView = new LoginView ( GUIController.this ) ;
+			sheperdColorRequestView = null ;
 			gameView = new GameView () ;
 			waitingView.setSize ( GraphicsUtilities.getVGAResolution () ) ;
 			loginView.setSize ( GraphicsUtilities.getVGAResolution () ) ;
@@ -239,7 +259,7 @@ public class GUIController extends ViewPresenter implements LoginViewObserver
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void onEnter ( String enteredName ) 
+	public void onNameEntered ( String enteredName ) 
 	{
 		name.set ( enteredName ) ;
 	}
@@ -266,6 +286,21 @@ public class GUIController extends ViewPresenter implements LoginViewObserver
 							e.printStackTrace();
 							throw new RuntimeException ( e ) ;
 						}
+					} 
+				} 
+									);
+	}
+
+	@Override
+	public void onColorChoosed ( NamedColor selectedColor ) 
+	{
+		color.set ( selectedColor ) ;
+		SwingUtilities.invokeLater ( 
+				new Runnable () 
+				{ 
+					public void run () 
+					{
+						
 					} 
 				} 
 									);

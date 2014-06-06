@@ -54,6 +54,15 @@ public class MoveSheep extends GameMove
 	 * 
 	 * @param match the Match object on which this move is performed.
 	 * @throws MoveNotAllowedException if something goes wrong.
+	 * 
+	 * @PRECONDITIONS:
+	 *  1. match != null
+	 * @EXCEPTIONAL_POSTCONDITIONS
+	 *  1. MoveNotAllowedException RAISED && ovine.dest == where
+	 *  2. MoveNotAllowedException RAISED && ovineInitalRegion NOT NEAR the executor Sheperd.
+	 * @POSTCONDITIONS
+	 *  1. initWhere DOES NOT CONTAIN the moving ovine.
+	 *  2. moving ovine.pos == where.
 	 */
 	@Override
 	public void execute ( Match match ) throws MoveNotAllowedException 
@@ -61,22 +70,30 @@ public class MoveSheep extends GameMove
 		Region ovineInitialRegion ;
 		Region sheperdFirstBorderRegion ;
 		Region sheperdSecondBorderRegion ;
-		ovineInitialRegion = movingOvine.getPosition () ;
-		sheperdFirstBorderRegion = moverSheperd.getPosition ().getFirstBorderRegion () ;
-		sheperdSecondBorderRegion = moverSheperd.getPosition ().getSecondBorderRegion () ;
-		if ( movingOvine.getPosition ().equals ( ovineDestinationRegion ) == false )
+		if ( match != null )
 		{
-			if ( ( ovineInitialRegion.equals ( sheperdFirstBorderRegion ) || ovineInitialRegion.equals ( sheperdSecondBorderRegion ) ) && ( ovineDestinationRegion.equals ( sheperdFirstBorderRegion ) == true || ovineDestinationRegion.equals ( sheperdSecondBorderRegion ) == true ) )
+			ovineInitialRegion = movingOvine.getPosition () ;
+			sheperdFirstBorderRegion = moverSheperd.getPosition ().getFirstBorderRegion () ;
+			sheperdSecondBorderRegion = moverSheperd.getPosition ().getSecondBorderRegion () ;
+			// if the Sheep is not in the Region where the Sheperd wants to move her.
+			if ( movingOvine.getPosition ().equals ( ovineDestinationRegion ) == false )
 			{
-				ovineInitialRegion.removeAnimal ( movingOvine ) ;
-				movingOvine.moveTo ( ovineDestinationRegion ) ;
-				ovineDestinationRegion.addAnimal ( movingOvine ) ;
+				// if the ovine is near the Sheperd...
+				if ( ( ovineInitialRegion.equals ( sheperdFirstBorderRegion ) || ovineInitialRegion.equals ( sheperdSecondBorderRegion ) ) && ( ovineDestinationRegion.equals ( sheperdFirstBorderRegion ) == true || ovineDestinationRegion.equals ( sheperdSecondBorderRegion ) == true ) )
+				{
+					//effectively move the Ovine.
+					ovineInitialRegion.removeAnimal ( movingOvine ) ;
+					movingOvine.moveTo ( ovineDestinationRegion ) ;
+					ovineDestinationRegion.addAnimal ( movingOvine ) ;
+				}
+				else
+					throw new MoveNotAllowedException ( "Ovine not near the Sheperd ; he can not move her." ) ;
 			}
 			else
-				throw new MoveNotAllowedException ( "" ) ;
+				throw new MoveNotAllowedException ( "A Sheep can not move inside a Region where she already is." ) ;
 		}
 		else
-			throw new MoveNotAllowedException ( "" ) ;
+			throw new IllegalArgumentException ( "The match parameter can not be null." ) ;
 	}
 	
 }

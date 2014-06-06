@@ -14,7 +14,10 @@ public abstract class Ovine extends Animal
 	{
 		super ( positionableElementType , name ) ;
 	}
-
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public boolean equals ( Object obj ) 
 	{

@@ -34,7 +34,7 @@ public class MoveFactory implements Serializable
 	private Sheperd sheperd ;
 	
 	/***/
-	MoveFactory ( Sheperd sheperd , TurnNumberClock clockSource , LambEvolver lambEvolver ) 
+	protected MoveFactory ( Sheperd sheperd , TurnNumberClock clockSource , LambEvolver lambEvolver ) 
 	{
 		if ( sheperd != null && clockSource != null && lambEvolver != null )
 		{

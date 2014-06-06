@@ -34,14 +34,20 @@ public class MoveSheperd extends GameMove
 	/**
 	 * @param sheperdToMove the Sheperd who wants to make this move. 
 	 * @param roadWhereGo the Road where the Sheperd wants to go. 
+	 * @throws MoveNotAllowedException if the Sheperd wants to move where he already is.
 	 * @throws IllegalArgumentException if the sheperdToMove or the roadWhereGo parameter is null.
-	 */
-	protected MoveSheperd ( Sheperd sheperdToMove , Road roadWhereGo ) 
+	 */ 
+	protected MoveSheperd ( Sheperd sheperdToMove , Road roadWhereGo ) throws MoveNotAllowedException 
 	{
-		if ( sheperdToMove != null && roadWhereGo != null && roadWhereGo.getElementContained () == null )
+		if ( sheperdToMove != null && roadWhereGo != null )
 		{
-			this.sheperdToMove = sheperdToMove ;
-			this.roadWhereGo = roadWhereGo ;
+			if ( sheperdToMove.getPosition().equals ( roadWhereGo ) == false && roadWhereGo.getElementContained () == null )
+			{
+				this.sheperdToMove = sheperdToMove ;
+				this.roadWhereGo = roadWhereGo ;
+			}
+			else
+				throw new MoveNotAllowedException ( "" ) ;
 		}
 		else
 			throw new IllegalArgumentException () ;
@@ -55,55 +61,65 @@ public class MoveSheperd extends GameMove
 	 * @param match the Match object where to perform this action.
 	 * @throws MoveNotAllowedException if something goes wrong with the logic.
 	 * @throws RuntimeException if something goes wrong due to some architecture things.
+	 * 
+	 * @PRECONDITIONS :
+	 *  1. match != null
+	 * @EXCEPTIONAL_POSTCONDITIONS
+	 *  1. TooFewMoneyException && sheperd.money < 1 && sheperd.whereIs not adjacent whereToGo.
+	 * @POSTCONDITIONS
+	 *  1. sheperd.pos == whereToGo.
+	 *  2. sheperd.whereWasBefore.content instanceof Fence.
 	 */
 	@Override
 	public void execute ( Match match ) throws MoveNotAllowedException  
 	{
 		Road whereTheSheperdIsNow ;
-		System.out.println ( "MOVE SHEPERD : INIZIO " ) ;
-		System.out.println ( "MOVE SHEPERD : RECUPERO POSIZIONE PASTORE " ) ;		
-		whereTheSheperdIsNow = sheperdToMove.getPosition () ; 
-		System.out.println ( "MOVE SHEPERD : POSIZIONE PASTORE RECUPERATA : " + whereTheSheperdIsNow ) ;		
-		// se la regione dove il pastore vuole andare non è adiacente a dove sta ora, fallo pagare.
-		if ( CollectionsUtilities.contains ( whereTheSheperdIsNow.getAdjacentRoads () , roadWhereGo ) == false )
+		whereTheSheperdIsNow = null ;
+		if ( match != null )
 		{
-			System.out.println ( "MOVE SHEPERD : REGIONE DESTINAZIONE NON ADIACENTE " ) ;		
 			try 
 			{
-				System.out.println ( "MOVE SHEPERD : INIZIO PAGAMENTO." ) ;		
-				sheperdToMove.getOwner().pay ( MONEY_TO_PAY_IF_ROADS_NON_ADJACENT ) ;
-				match.getBank ().receiveMoney ( MONEY_TO_PAY_IF_ROADS_NON_ADJACENT ) ;
-				System.out.println ( "MOVE SHEPERD : FINE PAGAMENTO." ) ;		
+				System.out.println ( "MOVE SHEPERD : INIZIO " ) ;
+				System.out.println ( "MOVE SHEPERD : RECUPERO POSIZIONE PASTORE " ) ;		
+				whereTheSheperdIsNow = sheperdToMove.getPosition () ; 
+				System.out.println ( "MOVE SHEPERD : POSIZIONE PASTORE RECUPERATA : " + whereTheSheperdIsNow ) ;		
+				// se la regione dove il pastore vuole andare non è adiacente a dove sta ora, fallo pagare.				
+				if ( CollectionsUtilities.contains ( sheperdToMove.getPosition().getAdjacentRoads() , roadWhereGo ) == false )
+				{
+					System.out.println ( "MOVE SHEPERD : REGIONE DESTINAZIONE NON ADIACENTE " ) ;		
+					System.out.println ( "MOVE SHEPERD : INIZIO PAGAMENTO." ) ;		
+					sheperdToMove.getOwner().pay ( MONEY_TO_PAY_IF_ROADS_NON_ADJACENT ) ;
+					match.getBank ().receiveMoney ( MONEY_TO_PAY_IF_ROADS_NON_ADJACENT ) ;
+					System.out.println ( "MOVE SHEPERD : FINE PAGAMENTO." ) ;		
+				}
+				// effectively move the sheperd
+				System.out.println ( "MOVE SHEPERD : INIZIO MOVIMENTO PASTORE." ) ;		
+				sheperdToMove.moveTo ( roadWhereGo ) ;
+				roadWhereGo.setElementContained ( sheperdToMove ) ;
+				System.out.println ( "MOVE SHEPERD : FINE MOVIMENTO PASTORE" ) ;		
+				// place a fence where the Sheperd was before.
+				whereTheSheperdIsNow.setElementContained ( match.getBank ().getAFence ( FenceType.NON_FINAL ) ) ;
+				System.out.println ( "MOVE SHEPERD : RECINTO MESSO NELLA REGIONE DI PARTENZA." ) ;		
+				System.out.println ( "MOVE SHEPERD : FINE " ) ;
 			} 
 			catch ( TooFewMoneyException e ) 
 			{
-				e.printStackTrace ();
-				throw new MoveNotAllowedException ( "" ) ;
+				throw new MoveNotAllowedException ( "Too few money" ) ;
 			}
-		}
-		System.out.println ( "MOVE SHEPERD : INIZIO MOVIMENTO PASTORE." ) ;		
-		sheperdToMove.moveTo ( roadWhereGo ) ;
-		roadWhereGo.setElementContained ( sheperdToMove ) ;
-		System.out.println ( "MOVE SHEPERD : FINE MOVIMENTO PASTORE" ) ;		
-		try 
-		{
-			whereTheSheperdIsNow.setElementContained ( match.getBank ().getAFence ( FenceType.NON_FINAL ) ) ;
-			System.out.println ( "MOVE SHEPERD : RECINTO MESSO NELLA REGIONE DI PARTENZA." ) ;		
-		}
-		catch ( NoMoreFenceOfThisTypeException e ) 
-		{
-			e.printStackTrace();
-			try 
-			{
-				whereTheSheperdIsNow.setElementContained ( match.getBank ().getAFence ( FenceType.FINAL ) ) ;
-			} 
 			catch ( NoMoreFenceOfThisTypeException e1 ) 
 			{
-				e1.printStackTrace () ;
-				throw new RuntimeException ( e1 ) ;
-			}				
+				try
+				{
+					whereTheSheperdIsNow.setElementContained ( match.getBank ().getAFence ( FenceType.FINAL ) ) ;
+				} 
+				catch (NoMoreFenceOfThisTypeException e) 
+				{
+					throw new RuntimeException ( e ) ;
+				}
+			}		
 		}
-		System.out.println ( "MOVE SHEPERD : FINE " ) ;
+		else
+			throw new IllegalArgumentException ( "The parameter match has to be not null." ) ;
 	}
 
 }
