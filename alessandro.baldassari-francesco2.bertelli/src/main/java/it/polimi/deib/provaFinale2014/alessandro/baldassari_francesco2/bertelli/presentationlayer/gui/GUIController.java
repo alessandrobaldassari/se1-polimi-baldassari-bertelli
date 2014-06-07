@@ -1,12 +1,14 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui;
 
 import java.awt.Frame;
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
@@ -304,6 +306,13 @@ public class GUIController extends ViewPresenter implements LoginViewObserver , 
 					} 
 				} 
 									);
+	}
+
+	@Override
+	public Road chooseInitRoadForSheperd(Iterable<Road> availableRoads)
+			throws IOException {
+		// TODO Auto-generated method stub
+		return null;
 	}		
 
 }

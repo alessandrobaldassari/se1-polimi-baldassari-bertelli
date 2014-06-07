@@ -1,5 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandlerConnector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.RMIClientHandler;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunchercommunicationcontroller.MatchAdderCommunicationController;
 
@@ -14,7 +15,7 @@ import java.rmi.server.UnicastRemoteObject;
 /**
  * This interface defines the behavior of an RMI Server  
  */
-public interface RMIServer extends Remote 
+public interface RequestAcceptRMIServer extends Remote 
 {
 	
 	/**
@@ -41,7 +42,7 @@ public interface RMIServer extends Remote
 /**
  * Implementation of the RMI Server interface subclassing the RequestAccepterServer
  */
-class RMIServerImpl extends RequestAccepterServer implements RMIServer 
+class RMIServerImpl extends RequestAccepterServer implements RequestAcceptRMIServer 
 {
 
 	/**
@@ -87,23 +88,32 @@ class RMIServerImpl extends RequestAccepterServer implements RMIServer
 		RMIClientHandler clientHandler ;
 		RMIClientBroker stub ;
 		RMIClientBroker broker ;
-		System.out.println ( "RMI_SERVER : BEGIN_ACCEPT_REQUEST" ) ;
-		broker = new RMIClientBrokerImpl () ;
-		stub = (RMIClientBroker) UnicastRemoteObject.exportObject ( broker , 0 ) ;		
-		clientHandler = new RMIClientHandler ( broker ) ;
-		submitToMatchAdderCommunicationController ( clientHandler )  ;
-		lastRMIIdGenerated ++ ;
-		clientBrokerName = RMIClientHandler.LOGICAL_ABSTRACT_RMI_CLIENT_HANDLER + lastRMIIdGenerated ;
+	
 		try 
 		{
+			System.out.println ( "RMI_SERVER : BEGIN_ACCEPT_REQUEST" ) ;
+			broker = new RMIClientBrokerImpl () ;
+			System.out.println ( "RMI_SERVER - ADD PLAYER : EXPORTING THE CLIENT HANDLER." ) ;
+			stub = (RMIClientBroker) UnicastRemoteObject.exportObject ( broker , 0 ) ;		
+			System.out.println ( "RMI_SERVER - ADD PLAYER : CLIENT HANDLER EXPORTED." ) ;
+			System.out.println ( "RMI_SERVER - ADD PLAYER : CREATING THE CLIENT HANDLER EXPORTED." ) ;
+			clientHandler = new RMIClientHandler ( new ClientHandlerConnector < RMIClientBroker > ( broker ) ) ;
+			System.out.println ( "RMI_SERVER : COMMUNICATE THE NEW PLAYER TO THE CONTROLLER" ) ;
+			submitToMatchAdderCommunicationController ( clientHandler )  ;
+			lastRMIIdGenerated ++ ;
+			clientBrokerName = RMIClientHandler.LOGICAL_ABSTRACT_RMI_CLIENT_HANDLER + lastRMIIdGenerated ;
+			System.out.println ( "RMI_SERVER - ADD PLAYER : BINDING THE CLIENT HANDLER" ) ;
 			registry.bind ( clientBrokerName , stub ) ;
+			System.out.println ( "RMI_SERVER - ADD PLAYER : CLIENT HANDLER BOUNDED" ) ;
+			System.out.println ( "RMI_SERVER : END_ACCEPT_REQUEST" ) ;
 		}
 		catch ( AlreadyBoundException e ) 
 		{
-			e.printStackTrace();
-			throw new RemoteException () ;
+			throw new RuntimeException ( e ) ;
+		} 
+		catch (IOException e) {
+			throw new RuntimeException ( e ) ;
 		}
-		System.out.println ( "RMI_SERVER : END_ACCEPT_REQUEST" ) ;
 		return clientBrokerName ;
 	}
 
@@ -130,9 +140,9 @@ class RMIServerImpl extends RequestAccepterServer implements RMIServer
 	protected void technicalStart () throws IOException
 	{
 		Registry registry ;
-		RMIServer stub ;
+		RequestAcceptRMIServer stub ;
 		registry = LocateRegistry.createRegistry ( SERVER_PORT ) ;
-		stub = ( RMIServer ) UnicastRemoteObject.exportObject ( this , 0 ) ;
+		stub = ( RequestAcceptRMIServer ) UnicastRemoteObject.exportObject ( this , 0 ) ;
 		registry.rebind ( LOGICAL_SERVER_NAME , stub ) ;
 	}
 

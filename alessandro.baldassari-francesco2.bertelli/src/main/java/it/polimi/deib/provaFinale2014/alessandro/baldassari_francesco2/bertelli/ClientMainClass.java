@@ -1,17 +1,18 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client.Client;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client.CommunicationProtocolResponser;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client.RMIClient;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client.SocketClient;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.cli.CLIController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.GUIController;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -21,6 +22,20 @@ import java.util.concurrent.Executors;
 public final class ClientMainClass 
 {
 
+	final static String SOCKET_COMMUNICATION_PROTOCOL = "SOCKET" ;
+	final static String RMI_COMMUNICATION_PROTOCOL = "RMI" ;
+	final static String CLI_VIEW = "CLI" ;
+	final static String GUI_VIEW = "GUI" ;
+	final static byte SOCKET_INDEX = 1 ;
+	final static byte RMI_INDEX = 2 ;
+	final static byte EXIT_INDEX = 0 ;
+	final static byte ERROR_INDEX = -1 ;
+	final static byte CLI_INDEX = 1 ;
+	final static byte GUI_INDEX = 2 ;
+	final static String errorMsg = "Scelta non valida" ;
+	final static String byeMsg = "Grazie di avere utilizzato JSheepland\nArrivederci" ;	
+	static String netModeStr ;
+	static String presMoveStr ;
 	/***/
 	private ClientMainClass () {}
 	
@@ -35,95 +50,24 @@ public final class ClientMainClass
 	 */
 	public static void main ( String [] args ) throws IOException 
 	{
-		final String SOCKET_COMMUNICATION_PROTOCOL ;
-		final String RMI_COMMUNICATION_PROTOCOL ;
-		final String CLI_VIEW;
-		final String GUI_VIEW ;
-		final byte SOCKET_INDEX = 1 ;
-		final byte RMI_INDEX = 2 ;
-		final byte EXIT_INDEX = 0 ;
-		final byte ERROR_INDEX = -1 ;
-		final byte CLI_INDEX = 1 ;
-		final byte GUI_INDEX = 2 ;
-		final BufferedReader bufferedReader ;
-		final CommunicationProtocolResponser communicationProtocolResponser ;
+		final BufferedReader in ;
+		final PrintStream out ;
 		final Client client ;
 		final Executor executor ;
-		ViewPresenter viewPresenter ;
+		ViewPresenter viewPresenter ;	
 		int communicationProtocolChoosed ;
 		int viewChoosed ;
-		SOCKET_COMMUNICATION_PROTOCOL = "SOCKET" ;
-		RMI_COMMUNICATION_PROTOCOL = "RMI" ;
-		CLI_VIEW = "CLI" ;
-		GUI_VIEW = "GUI" ;
-		bufferedReader = new BufferedReader ( new InputStreamReader ( System.in ) ) ;
-		System.out.println ( "Benvenuto in JSheepland." ) ;
-		System.out.println ( "Prego, seleziona il metodo di comunicazione che vuoi utilizzare per giocare : " ) ;
-		System.out.println ( SOCKET_INDEX + ". " + SOCKET_COMMUNICATION_PROTOCOL ) ;
-		System.out.println ( RMI_INDEX + ". " + RMI_COMMUNICATION_PROTOCOL ) ;
-		System.out.println ( EXIT_INDEX + ". USCITA" ) ;
-		try
-		{
-			communicationProtocolChoosed = Byte.parseByte ( bufferedReader.readLine ().trim () ) ;
-		}
-		catch ( NumberFormatException n ) 
-		{
-			communicationProtocolChoosed = ERROR_INDEX ;
-		}
-		while ( communicationProtocolChoosed != SOCKET_INDEX && communicationProtocolChoosed != RMI_INDEX && communicationProtocolChoosed != EXIT_INDEX )
-		{
-			System.err.println ( "Scelta non valida" ) ;
-			System.out.println ( "Prego, seleziona il metodo di comunicazione che vuoi utilizzare per giocare : " ) ;
-			System.out.println ( SOCKET_INDEX + ". " + SOCKET_COMMUNICATION_PROTOCOL ) ;
-			System.out.println ( RMI_INDEX + ". " + RMI_COMMUNICATION_PROTOCOL ) ;
-			System.out.println ( EXIT_INDEX + ". USCITA" ) ;
-			try
-			{
-				communicationProtocolChoosed = Byte.parseByte ( bufferedReader.readLine ().trim () ) ;			
-			}
-			catch ( NumberFormatException n ) 
-			{
-				communicationProtocolChoosed = ERROR_INDEX ;
-			}
-		}
+		initializeStrings () ;
+		in = new BufferedReader ( new InputStreamReader ( System.in ) ) ;
+		out = System.out ;
+		communicationProtocolChoosed = GraphicsUtilities.checkedIntInput( SOCKET_INDEX, RMI_INDEX ,EXIT_INDEX , ERROR_INDEX , netModeStr , errorMsg , out , in ) ;
 		if ( communicationProtocolChoosed == EXIT_INDEX )
-		{
-			System.out.println ( "Grazie di avere utilizzato JSheepland" ) ;
-			System.out.println ( "Arrivederci" ) ;
-		}
+			out.println ( byeMsg ) ;
 		else
 		{
-			System.out.println ( "Prego, seleziona il tipo di interfaccia grafica che vuoi usare per giocare : " ) ;
-			System.out.println ( CLI_INDEX + ". " + CLI_VIEW ) ;
-			System.out.println ( GUI_INDEX + ". " + GUI_VIEW ) ;
-			try 
-			{
-				viewChoosed = Byte.parseByte ( bufferedReader.readLine ().trim () ) ;
-			}
-			catch ( NumberFormatException n ) 
-			{
-				viewChoosed = ERROR_INDEX ;
-			}
-			while ( viewChoosed != CLI_INDEX && viewChoosed != GUI_INDEX && viewChoosed != ERROR_INDEX )
-			{
-				System.err.println ( "Scelta non valida" ) ;
-				System.out.println ( "Prego, seleziona il tipo di interfaccia grafica che vuoi usare per giocare : " ) ;
-				System.out.println ( CLI_INDEX + ". " + CLI_VIEW ) ;
-				System.out.println ( GUI_INDEX + ". " + GUI_VIEW ) ;
-				try 
-				{
-					viewChoosed = Byte.parseByte ( bufferedReader.readLine ().trim () ) ;
-				}
-				catch ( NumberFormatException n ) 
-				{
-					viewChoosed = ERROR_INDEX ;
-				}
-			}
+			viewChoosed = GraphicsUtilities.checkedIntInput( CLI_INDEX, GUI_INDEX ,EXIT_INDEX , ERROR_INDEX , presMoveStr , errorMsg , out , in ) ;
 			if ( viewChoosed == ERROR_INDEX )
-			{
-				System.out.println ( "Grazie di avere utilizzato JSheepland" ) ;
-				System.out.println ( "Arrivederci" ) ;
-			}
+				out.println ( byeMsg ) ;
 			else
 			{
 				if ( viewChoosed == CLI_INDEX )
@@ -149,5 +93,19 @@ public final class ClientMainClass
 				viewPresenter.startApp () ;
 			}
 		}
+	}
+	
+	private static void initializeStrings () 
+	{
+		netModeStr = "Benvenuto in JSheepland.\n" ;
+		netModeStr = netModeStr + "Prego, seleziona il metodo di comunicazione che vuoi utilizzare per giocare :\n" ;
+		netModeStr = netModeStr + SOCKET_INDEX + ". " + SOCKET_COMMUNICATION_PROTOCOL + "\n" ;
+		netModeStr = netModeStr + RMI_INDEX + ". " + RMI_COMMUNICATION_PROTOCOL + "\n" ;
+		netModeStr = netModeStr + EXIT_INDEX + ". USCITA.\n" ; 
+		presMoveStr = "Prego, seleziona il tipo di interfaccia grafica che vuoi usare per giocare :\n" ;
+		presMoveStr = presMoveStr + CLI_INDEX + ". " + CLI_VIEW + "\n" ;
+		presMoveStr = presMoveStr + GUI_INDEX + ". " + GUI_VIEW + "\n" ;
+		presMoveStr = presMoveStr + EXIT_INDEX + ". USCITA.\n" ; 
+		
 	}
 }

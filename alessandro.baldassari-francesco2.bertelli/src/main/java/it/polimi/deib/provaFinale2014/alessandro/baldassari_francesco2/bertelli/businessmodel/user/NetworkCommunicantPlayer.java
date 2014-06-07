@@ -12,7 +12,6 @@ import java.util.concurrent.TimeoutException;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.GameController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
@@ -131,7 +130,6 @@ public class NetworkCommunicantPlayer extends Player
 		}
 		catch ( PropertyNotSetYetException e ) 
 		{
-			e.printStackTrace();
 			throw new RuntimeException ( e ) ;
 		}
 	}
@@ -385,7 +383,7 @@ public class NetworkCommunicantPlayer extends Player
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public Road chooseInitialRegionForASheperd ( final Iterable < Road > availableRoads ) throws TimeoutException
+	public Road chooseInitialRoadForASheperd ( final Iterable < Road > availableRoads ) throws TimeoutException
 	{
 		Road res  ;
 		Future < Road > f ;
@@ -397,7 +395,7 @@ public class NetworkCommunicantPlayer extends Player
 				public Road call () throws IOException 
 				{
 					Road res ;
-					res = null; // to impl
+					res = clientHandler.chooseInitialRoadForSheperd ( availableRoads ) ;
 					try 
 					{
 						methodCompleted.setValue ( true ) ;
@@ -418,7 +416,7 @@ public class NetworkCommunicantPlayer extends Player
 				if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
 					throw new TimeoutException () ;
 				else
-					res = chooseInitialRegionForASheperd(availableRoads);
+					res = chooseInitialRoadForASheperd(availableRoads);
 			}
 		}
 		catch ( PropertyNotSetYetException e ) 
@@ -434,7 +432,7 @@ public class NetworkCommunicantPlayer extends Player
 			if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
 				throw new TimeoutException () ;
 			else
-				res = chooseInitialRegionForASheperd(availableRoads);
+				res = chooseInitialRoadForASheperd(availableRoads);
 		}
 		return res ;
 	}

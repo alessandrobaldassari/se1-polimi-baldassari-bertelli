@@ -10,14 +10,9 @@ import java.net.Socket;
  * This class is a Socket implementation of the ClientHandler interface, so it manages the game
  * communication with a Client that uses the Socket technology as its data transfer method. 
  */
-public class SocketClientHandler extends ClientHandler implements Serializable
+public class SocketClientHandler extends ClientHandler < Socket > implements Serializable
 {
 
-	/**
-	 * A Socket object that points the Client. 
-	 */
-	private Socket clientChannel ;
-	
 	/**
 	 * An ObjectInputStream object used to extend the features of the socket's attribute InputStream. 
 	 */
@@ -32,16 +27,15 @@ public class SocketClientHandler extends ClientHandler implements Serializable
 	 * @param clientChannel a Socket object that points to the client.
 	 * @throws IllegalArgumentException if the clientChannel parameter is null 
 	 */
-	public SocketClientHandler ( Socket clientChannel ) throws IOException  
+	public SocketClientHandler ( ClientHandlerConnector < Socket > conn ) throws IOException  
 	{ 
-		if ( clientChannel != null  )
-		{
-			this.clientChannel = clientChannel ;
-			oos = new ObjectOutputStream ( clientChannel.getOutputStream () ) ;
-			ois = new ObjectInputStream ( clientChannel.getInputStream () ) ;
-		}
-		else
-			throw new IllegalArgumentException () ;
+		super ( conn ) ;
+	}
+	
+	protected void technicalRebinding () throws IOException 
+	{
+		oos = new ObjectOutputStream ( getConnector ().getOutputStream () ) ;
+		ois = new ObjectInputStream ( getConnector ().getInputStream () ) ;
 	}
 	
 	/**
@@ -52,7 +46,7 @@ public class SocketClientHandler extends ClientHandler implements Serializable
 	{
 		oos.close () ;
 		ois.close () ;
-		clientChannel.close () ;
+		getConnector().close () ;
 	}
 
 	/**

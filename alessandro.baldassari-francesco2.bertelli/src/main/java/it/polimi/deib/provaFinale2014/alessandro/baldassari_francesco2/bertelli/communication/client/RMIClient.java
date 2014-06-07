@@ -1,26 +1,15 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientCommunicationProtocolMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.Message;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.RMIResumerConnectionServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIClientBroker;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIServer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RequestAcceptRMIServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIClientBroker.AnotherCommandYetRunningException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * RMI-based implementation of the Client abstraction entity. 
@@ -36,8 +25,11 @@ public class RMIClient extends Client
 	/**
 	 * The port where contact the Server. 
 	 */
-	private final static int SERVER_PORT = 3334 ;
+	private final static int SERVER_DIRECT_PORT = 3334 ;
 
+	/***/
+	private static final int SERVER_CONNECTION_RESUME_PORT = 3332 ; 
+	
 	/**
 	 * A broker object to interact with the Server. 
 	 */
@@ -55,19 +47,19 @@ public class RMIClient extends Client
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void technicalConnect() throws IOException 
+	public void directTechnicalConnect() throws IOException 
 	{
-		RMIServer server ;
+		RequestAcceptRMIServer server ;
 		String key ;
 		Registry registry ;
 		try 
 		{
 			System.out.println ( "RMI - TECHNICAL CONNECT : BEGIN" ) ;
 			System.out.println ( "RMI - TECHNICAL CONNECT : LOCATING RMI REGISTRY." ) ;
-			registry = LocateRegistry.getRegistry ( SERVER_IP_ADDRESS , SERVER_PORT ) ;
+			registry = LocateRegistry.getRegistry ( SERVER_IP_ADDRESS , SERVER_DIRECT_PORT ) ;
 			System.out.println ( "RMI - TECHNICAL CONNECT : RMI REGISTRY LOCATED." ) ;
 			System.out.println ( "RMI - TECHNICAL CONNECT : RETRIEVING INITIAL CONNECTION SERVER." ) ;
-			server = ( RMIServer ) registry.lookup ( RMIServer.LOGICAL_SERVER_NAME ) ;
+			server = ( RequestAcceptRMIServer ) registry.lookup ( RequestAcceptRMIServer.LOGICAL_SERVER_NAME ) ;
 			System.out.println ( "RMI - TECHNICAL CONNECT : INITIAL CONNECTION SERVER RETRIEVED." ) ;
 			key = server.addPlayer () ; 
 			clientBroker = ( RMIClientBroker ) registry.lookup ( key ) ;
@@ -77,6 +69,26 @@ public class RMIClient extends Client
 			e.printStackTrace();
 		}
 	}	
+	
+	@Override
+	public void resumeConnectionConnect () throws IOException
+	{
+		RMIResumerConnectionServer s ;
+		Registry registry ;
+		registry = LocateRegistry.getRegistry( SERVER_IP_ADDRESS , SERVER_CONNECTION_RESUME_PORT ) ;
+		try 
+		{
+			System.out.println ( "RMI CLIENT - TRY RESUME CONNECTION : BEGIN" ) ;		
+			System.out.println ( "RMI CLIENT - TRY RESUME CONNECTION :" ) ;	
+			s = ( RMIResumerConnectionServer ) registry.lookup ( RMIResumerConnectionServer.LOGICAL_SERVER_NAME ) ;
+			s.resumeMe ( this ) ;
+		}
+		catch ( NotBoundException e ) 
+		{
+			System.out.println ( "RMI CLIENT - TRY RESUME CONNECTION : RESUMER SERVER NOT FOUND" ) ;		
+			throw new IOException ( e ) ;
+		}
+	}
 	
 	/**
 	 * AS THE SUPER'S ONE. 

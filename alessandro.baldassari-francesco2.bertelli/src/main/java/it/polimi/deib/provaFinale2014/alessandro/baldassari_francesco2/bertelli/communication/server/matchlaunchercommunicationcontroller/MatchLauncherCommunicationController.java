@@ -16,7 +16,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.NetworkCommunicationController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.MatchConnectionLoosingController;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIServer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RequestAcceptRMIServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RequestAccepterServer;
 
 /**
@@ -82,7 +82,7 @@ public final class MatchLauncherCommunicationController implements NetworkCommun
 	{
 		final String LOCALHOST_ADDRESS = InetAddress.getLocalHost ().getHostAddress () ;
 		socketServer = RequestAccepterServer.newSocketServer ( this ) ; 
-		rmiServer = RequestAccepterServer.newRMIServer ( this , LOCALHOST_ADDRESS , RMIServer.SERVER_PORT ) ; 
+		rmiServer = RequestAccepterServer.newRMIServer ( this , LOCALHOST_ADDRESS , RequestAcceptRMIServer.SERVER_PORT ) ; 
 		queue = new LinkedBlockingQueue < ClientHandler > () ; 
 		currentGameController = null ;
 		threadExecutor = Executors.newCachedThreadPool () ;

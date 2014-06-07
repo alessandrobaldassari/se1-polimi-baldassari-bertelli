@@ -1,7 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.Message;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.SocketServer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RequestAcceptSocketServer;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -47,11 +47,11 @@ public class SocketClient extends Client
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void technicalConnect () throws IOException
+	public void directTechnicalConnect () throws IOException
 	{
 		SocketAddress socketAddress ;
 		System.out.println ( "SOCKET_CLIENT - TECHNICAL CONNECT : BEGIN" ) ;
-		socketAddress = new InetSocketAddress ( SocketServer.SERVER_IP_ADDRESS , SocketServer.TCP_LISTENING_PORT ) ;
+		socketAddress = new InetSocketAddress ( RequestAcceptSocketServer.SERVER_IP_ADDRESS , RequestAcceptSocketServer.TCP_LISTENING_PORT ) ;
 		channel.connect ( socketAddress ) ;
 		System.out.println ( "SOCKET_CLIENT - TECHNICAL CONNECT : CONNECTION CREATED." ) ;		
 		ois = new ObjectInputStream ( channel.getInputStream () ) ;
@@ -102,7 +102,20 @@ public class SocketClient extends Client
 		System.out.println ( "SOCKET_CLIENT - WRITE : MESSAGE WRITTEN" ) ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
 	protected void operationFinished () throws IOException {}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	protected void resumeConnectionConnect () throws IOException 
+	{
+		
+	}
 
 	
 }

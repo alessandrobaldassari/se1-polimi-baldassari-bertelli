@@ -23,6 +23,12 @@ public class DummyPlayer extends Player
 	public int diceRes =6 ;
 
 	@Override
+	public int launchDice () 
+	{
+		return diceRes ;
+	}
+
+	@Override
 	public void chooseCardsEligibleForSelling() throws TimeoutException {
 		// TODO Auto-generated method stub
 		
@@ -56,7 +62,7 @@ public class DummyPlayer extends Player
 	}
 
 	@Override
-	public Road chooseInitialRegionForASheperd(Iterable<Road> availableRoads)
+	public Road chooseInitialRoadForASheperd(Iterable<Road> availableRoads)
 			throws TimeoutException {
 		// TODO Auto-generated method stub
 		return null;
@@ -67,6 +73,7 @@ public class DummyPlayer extends Player
 		// TODO Auto-generated method stub
 		
 	}
+	
 	
 	
 

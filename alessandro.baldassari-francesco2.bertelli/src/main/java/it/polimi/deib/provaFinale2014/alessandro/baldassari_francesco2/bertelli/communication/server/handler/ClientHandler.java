@@ -1,6 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
@@ -20,13 +21,45 @@ import java.util.Collections;
  * A ClientHandler is a server component whose target is to manage the connection between the server
  * itself and the client. 
  */
-public abstract class ClientHandler
+public abstract class ClientHandler < T >
 {
 
 	/**
 	 * Standard message to give to the User if the Match he was waiting for to start, will no begin. 
 	 */
 	public static final String MATCH_WILL_NOT_START_MESSAGE = "Sorry, but the game can not start now" ;
+
+	private ClientHandlerConnector < T > connector ;
+	
+	public ClientHandler ( ClientHandlerConnector < T > connector ) throws IOException
+	{
+		if ( connector != null )
+			rebind ( connector ) ;
+		else
+			throw new IllegalArgumentException () ;
+	}
+	
+	/***/
+	public ClientHandlerConnector < T > rebind ( ClientHandlerConnector < T > newConnector ) throws IOException
+	{
+		ClientHandlerConnector < T > old ;
+		if ( newConnector != null )
+		{
+			old = connector ;
+			connector = newConnector ;
+			technicalRebinding () ;
+		}
+		else
+			throw new IllegalArgumentException () ;
+		return old ;
+	}
+	
+	protected T getConnector () 
+	{
+		return connector.getConnector () ;
+	}
+	
+	protected abstract void technicalRebinding () throws IOException ;
 	
 	/**
 	 * This method should call the managed client for his name.
@@ -39,13 +72,13 @@ public abstract class ClientHandler
 		String res ;
 		Message m ;
 		System.out.println ( "CLIENT_HANDLER - REQUEST NAME : BEGIN." ) ;
-		m = Message.newInstance ( ClientCommunicationProtocolMessage.NAME_REQUESTING_REQUEST , Collections.EMPTY_LIST ) ;
+		m = Message.newInstance ( GameProtocolMessage.NAME_REQUESTING_REQUEST , Collections.EMPTY_LIST ) ;
 		write( m ) ;
 		System.out.println ( "CLIENT_HANDLER - REQUEST NAME : MESSAGE WRITTEN." ) ;
 		System.out.println ( "CLIENT_HANDLER - REQUEST NAME : WAITING FOR THE RESPONSE." ) ;
 		m = read () ;
 		System.out.println ( "CLIENT_HANDLER - REQUEST NAME : RESPONSE RECEIVED." ) ;
-		if ( m.getOperation () == ClientCommunicationProtocolMessage.NAME_REQUESTING_RESPONSE ) 
+		if ( m.getOperation () == GameProtocolMessage.NAME_REQUESTING_RESPONSE ) 
 		{
 			System.out.println ( "CLIENT_HANDLER - REQUEST NAME : IN HEADER OK." ) ;
 			res = ( String ) CollectionsUtilities.newListFromIterable ( m.getParameters () ).get ( 0 ) ;
@@ -75,7 +108,7 @@ public abstract class ClientHandler
 		params = new ArrayList < Serializable > ( 2 ) ;
 		params.add ( isNameOk ) ;
 		params.add ( note ) ;
-		m = Message.newInstance ( ClientCommunicationProtocolMessage.NAME_REQUESTING_RESPONSE_RESPONSE , params ) ;
+		m = Message.newInstance ( GameProtocolMessage.NAME_REQUESTING_RESPONSE_RESPONSE , params ) ;
 		write ( m ) ;
 		System.out.println ( "CLIENT_HANDLER - NOTIFY NAME CHOOSE : MESSAGE WRITTEN" ) ;
 		System.out.println ( "CLIENT_HANDLER - NOTIFY NAME CHOOSE : END" ) ;
@@ -87,7 +120,7 @@ public abstract class ClientHandler
 	public void notifyMatchStart () throws IOException 
 	{
 		Message m ;
-		m = Message.newInstance ( ClientCommunicationProtocolMessage.MATCH_STARTING_NOTIFICATION , Collections.EMPTY_LIST ) ;
+		m = Message.newInstance ( GameProtocolMessage.MATCH_STARTING_NOTIFICATION , Collections.EMPTY_LIST ) ;
 		write ( m ) ;
 		System.out.println ( "CLIENT_HANDLER - NOTIFY MATCH START : END" ) ;
 	}
@@ -102,7 +135,7 @@ public abstract class ClientHandler
 	public void notifyMatchWillNotStart ( String message ) throws IOException 
 	{
 		Message m ;
-		m = Message.newInstance ( ClientCommunicationProtocolMessage.MATCH_WILL_NOT_START_NOTIFICATION , Collections.<Serializable>singleton ( message ) ) ;
+		m = Message.newInstance ( GameProtocolMessage.MATCH_WILL_NOT_START_NOTIFICATION , Collections.<Serializable>singleton ( message ) ) ;
 		write ( m ) ;
 		System.out.println ( "CLIENT_HANDLER - NOTIFY MATCH WILL NOT START : END" ) ;
 	}
@@ -120,13 +153,13 @@ public abstract class ClientHandler
 		NamedColor res ;
 		Message m ;
 		System.out.println ( "CLIENT HANDLER - REQUEST SHEPERD COLOR : CREANDO IL MESSAGGIO" ) ;
-		m = Message.newInstance ( ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_REQUEST , Collections.<Serializable>singleton ( ( Serializable ) availableColors ) ) ;
+		m = Message.newInstance ( GameProtocolMessage.SHEPERD_COLOR_REQUESTING_REQUEST , Collections.<Serializable>singleton ( ( Serializable ) availableColors ) ) ;
 		System.out.println ( "CLIENT HANDLER - REQUEST SHEPERD COLOR : SCRIVENDO IL MESSAGGIO" ) ;
 		write ( m ) ;
 		System.out.println ( "CLIENT HANDLER - REQUEST SHEPERD COLOR : ATTENDENDO LA RISPOSTA" ) ;
 		m = read () ;
 		System.out.println ( "CLIENT HANDLER - REQUEST SHEPERD COLOR : RISPOSTA RICEVUTA" ) ;
-		if ( m.getOperation () == ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE )
+		if ( m.getOperation () == GameProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE )
 		{
 			System.out.println ( "CLIENT HANDLER - REQUEST SHEPERD COLOR : HEADER OK." ) ;
 			System.out.println ( m ) ;
@@ -135,6 +168,7 @@ public abstract class ClientHandler
 		}
 		else 
 			throw new IOException ( "BAD_RESPONSE" ) ; 
+		System.out.println ( "CLIENT HANDLER - REQUEST SHEPERD COLOR : FINISH " ) ;
 		return res ;
 	}
 		
@@ -149,19 +183,46 @@ public abstract class ClientHandler
 		Iterable < SellableCard > res ;
 		Message m ;
 		System.out.println ( "CLIENT HANDLER - CHOOSE CARDS ELIGIBLE FOR SELLING : CREANDO IL MESSAGGIO" ) ;
-		m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST , Collections.singleton ( ( Serializable ) sellableCards ) ) ;
-		System.out.println ( "CLIENT HANDLER - CHOOSE CARDS ELIGIBLE FOR SELLING : CARICANDO IL MESSAGGIO" ) ;
+		m = Message.newInstance ( GameProtocolMessage.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST , Collections.< Serializable >singleton ( ( Serializable ) sellableCards ) ) ;
+		System.out.println ( "CLIENT HANDLER - CHOOSE CARDS ELIGIBLE FOR SELLING : INVIANDO IL MESSAGGIO" ) ;
 		write ( m ) ;
 		System.out.println ( "CLIENT HANDLER - CHOOSE CARDS ELIGIBLE FOR SELLING : ATTENDENDO LA RISPOSTA" ) ;
 		m = read () ;
 		System.out.println ( "CLIENT HANDLER - CHOOSE CARDS ELIGIBLE FOR SELLING : RISPOSTA RICEVUTA" ) ;
-		if ( m.getOperation () == ClientCommunicationProtocolMessage.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_RESPONSE )
+		if ( m.getOperation () == GameProtocolMessage.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_RESPONSE )
 		{
-			System.out.println ( "CLIENT HANDLER - CHOOSE CARDS ELIGIBLE FOR SELLING - RISPOSTA RICEVUTA " ) ;
+			System.out.println ( "CLIENT HANDLER - CHOOSE CARDS ELIGIBLE FOR SELLING - HEADER OK." ) ;
 			res = ( Iterable < SellableCard > ) CollectionsUtilities.newListFromIterable( m.getParameters () ).get ( 0 ) ;
+			System.out.println ( "CLIENT HANDLER - CHOOSE CARDS ELIGIBLE FOR SELLING - PARAMETER OK : " + res ) ;
 		}
 		else 
 			throw new IOException ( "BAD_RESPONSE" ) ;
+		return res ;
+	}
+	
+	/***/
+	public Road chooseInitialRoadForSheperd ( Iterable < Road > availableRoads ) throws IOException 
+	{
+		Road res ;
+		Message m ;
+		System.out.println ( "CLIENT HANDLER - CHOOSE INITIAL ROAD FOR SHEPERD : CREANDO IL MESSAGGIO" ) ;		
+		m = Message.newInstance ( GameProtocolMessage.SHEPERD_INIT_ROAD_REQUESTING_REQUEST , Collections.<Serializable>singleton ( ( Serializable ) availableRoads ) ) ;
+		System.out.println ( "CLIENT HANDLER - CHOOSE INITIAL ROAD FOR SHEPERD : INVIANDO MESSAGGIO" ) ;		
+		write ( m ) ;
+		System.out.println ( "CLIENT HANDLER - CHOOSE INITIAL ROAD FOR SHEPERD : INVIANDO MESSAGGIO" ) ;		
+		m = read () ;
+		System.out.println ( "CLIENT HANDLER - CHOOSE INITIAL ROAD FOR SHEPERD : RISPOSTA RICEVUTA" ) ;		
+		if ( m.getOperation () == GameProtocolMessage.SHEPERD_INIT_ROAD_REQUESTING_RESPONSE ) 
+		{
+			System.out.println ( "CLIENT HANDLER - CHOOSE INITIAL ROAD FOR SHEPERD : HEADER OK." ) ;		
+			res = ( Road ) CollectionsUtilities.newListFromIterable ( m.getParameters () ).get ( 0 ) ;
+			System.out.println ( "CLIENT HANDLER - CHOOSE INITIAL ROAD FOR SHEPERD : PARAMETER OK : " + res ) ;					
+		}
+		else
+		{
+			System.out.println ( "CLIENT HANDLER - CHOOSE INITIAL ROAD FOR SHEPERD : BAD HEADER" ) ;		
+			throw new IOException ( "BAD RESPONSE" ) ;
+		}
 		return res ;
 	}
 	
@@ -178,13 +239,13 @@ public abstract class ClientHandler
 		Message m ;
 		Sheperd res ;
 		System.out.println ( "CLIENT_HANDLER - CHOOSE SHEPERD FOR A TURN : CREATING MESSAGE." ) ;		
-		m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_REQUEST , Collections.<Serializable>singleton ( ( Serializable ) sheperdsOfThePlayer ) ) ;	
+		m = Message.newInstance ( GameProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_REQUEST , Collections.<Serializable>singleton ( ( Serializable ) sheperdsOfThePlayer ) ) ;	
 		System.out.println ( "CLIENT_HANDLER - CHOOSE SHEPERD FOR A TURN : WRITING MESSAGE." ) ;
 		write ( m ) ;
 		System.out.println ( "CLIENT_HANDLER - CHOOSE SHEPERD FOR A TURN : MESSAGE WRITTEN." ) ;
 		m = read () ;
 		System.out.println ( "CLIENT_HANDLER - CHOOSE SHEPERD FOR A TURN : MESSAGE RECEIVED." ) ;
-		if ( m.getOperation() == ClientCommunicationProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_RESPONSE )
+		if ( m.getOperation() == GameProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_RESPONSE )
 		{
 			System.out.println ( "CLIENT_HANDLER - CHOOSE SHEPERD FOR A TURN : RESPONSE HEADER OK." ) ;
 			res = ( Sheperd ) ( CollectionsUtilities.newListFromIterable ( m.getParameters () ).get ( 0 ) ) ;
@@ -210,10 +271,10 @@ public abstract class ClientHandler
 	{
 		Message m ;
 		SellableCard res ;
-		m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST , Collections.<Serializable>singleton ( ( Serializable ) src ) ) ;
+		m = Message.newInstance ( GameProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST , Collections.<Serializable>singleton ( ( Serializable ) src ) ) ;
 		write ( m ) ;
 		m = read () ;
-		if ( m.getOperation() == ClientCommunicationProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_RESPONSE )
+		if ( m.getOperation() == GameProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_RESPONSE )
 		{
 			System.out.println ( "CLIENT HANDLER - CHOOSE CARD TO BUY : RESPONSE OK." ) ;
 			res = (SellableCard ) CollectionsUtilities.newListFromIterable ( m.getParameters() ).get (0);
@@ -240,10 +301,10 @@ public abstract class ClientHandler
 		params = new ArrayList < Serializable > ( 2 ) ;
 		params.add ( gameFactory ) ;
 		params.add ( gameMap ) ;
-		m = Message.newInstance ( ClientCommunicationProtocolMessage.DO_MOVE_REQUESTING_REQUEST , params ) ;
+		m = Message.newInstance ( GameProtocolMessage.DO_MOVE_REQUESTING_REQUEST , params ) ;
 		write ( m ) ;
 		m = read () ;
-		if ( m.getOperation () == ClientCommunicationProtocolMessage.DO_MOVE_REQUESTING_RESPONSE )
+		if ( m.getOperation () == GameProtocolMessage.DO_MOVE_REQUESTING_RESPONSE )
 		{
 			System.out.println ( "CLIENT_HANDLER - DO_MOVE : RESPONSE HEADER OK." ) ;
 			res = ( GameMove ) CollectionsUtilities.newListFromIterable( m.getParameters() ).get ( 0 ) ;
@@ -262,8 +323,21 @@ public abstract class ClientHandler
 	public void genericNotification(String message) throws IOException 
 	{
 		Message m ;
-		m = Message.newInstance ( ClientCommunicationProtocolMessage.GENERIC_NOTIFICATION_NOTIFICATION , Collections.<Serializable>singleton ( message ) ) ;
+		m = Message.newInstance ( GameProtocolMessage.GENERIC_NOTIFICATION_NOTIFICATION , Collections.<Serializable>singleton ( message ) ) ;
 		write ( m ) ;
+	}
+	
+	/***/
+	public void sendResumeSucceedNotification () throws IOException 
+	{
+		Message m ;
+		System.out.println ( "CLIENT HANDLER - SEND RESUME SUCCEED NOTIFICATION : PREPARING MESSAGE" ) ;
+		m = Message.newInstance ( GameProtocolMessage.RESUME_SUCCEEED , Collections.<Serializable> emptyList() ) ;
+		System.out.println ( "CLIENT HANDLER - SEND RESUME SUCCEED NOTIFICATION : MESSAGE PREPARED" ) ;
+		System.out.println ( "CLIENT HANDLER - SEND RESUME SUCCEED NOTIFICATION : WRITING MESSAGE" ) ;		
+		write ( m ) ;
+		System.out.println ( "CLIENT HANDLER - SEND RESUME SUCCEED NOTIFICATION : MESSAGE WRITTEN" ) ;		
+		System.out.println ( "CLIENT HANDLER - SEND RESUME SUCCEED NOTIFICATION : END" ) ;
 	}
 	
 	/**

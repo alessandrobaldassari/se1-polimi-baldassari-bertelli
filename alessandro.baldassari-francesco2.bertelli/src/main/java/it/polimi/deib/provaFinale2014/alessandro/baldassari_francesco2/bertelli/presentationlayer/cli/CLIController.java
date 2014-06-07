@@ -21,6 +21,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
@@ -109,104 +110,58 @@ public class CLIController extends ViewPresenter
 	
 	/**
 	 * AS THE SUPER'S ONE. 
+	 * @throws IOException 
 	 */
 	@Override
-	public NamedColor onSheperdColorRequest ( Iterable < NamedColor > availableColors ) 
+	public NamedColor onSheperdColorRequest ( Iterable < NamedColor > availableColors ) throws IOException 
 	{
 		List < NamedColor > colors = CollectionsUtilities.newListFromIterable ( availableColors ) ;
-		byte res ;
-		byte i ;
-		System.out.println ( "Prego, inserisci il numero del colore che vuoi scegliere per il tuo pastore" ) ;
+		String s ;
+		NamedColor res ;
+		int i ;
+		s = "Prego, inserisci il numero del colore che vuoi scegliere per il tuo pastore" ;
 		i = 1 ;
 		for ( Color c : colors )
 		{
-			System.out.println ( i + ". " + c.toString () ) ;
+			s = s + i + ". " + c.toString () ;
 			i ++ ;
 		}
-		try
+		s = s + "-1. Esci da JSheepland." ;
+		i = GraphicsUtilities.checkedIntInput ( 1 , colors.size() , -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
+		if ( i != - 1 )
 		{
-			res = Byte.parseByte ( reader.readLine () ) ;
+			res = colors.get ( i - 1 ) ;
+			System.out.println ( "Colore scelto : " + res.getName () ) ;			
 		}
-		catch ( NumberFormatException e ) 
+		else
 		{
-			res = -1 ;
-		} 
-		catch ( IOException e )
-		{
-			res = -1 ;
-		}
-		while ( res < 1 || res > colors.size () )
-		{
-			System.err.println ( "Scelta non valida." );
-			System.out.println ( "Prego, inserisci il numero del colore che vuoi scegliere per il tuo pastore" ) ;
-			i = 1 ;
-			for ( Color c : colors )
-			{
-				System.out.println ( i + ". " + c.toString () ) ;
-				i ++ ;
-			}
-			try
-			{
-				res = Byte.parseByte ( reader.readLine () ) ;
-			}
-			catch ( NumberFormatException e ) 
-			{
-				res = - 1 ;
-			}
-			catch ( IOException e ) 
-			{
-				res = -1 ;
-			}
-		}
-		System.out.println ( "Colore scelto : " + colors.get ( res - 1 ).getName () ) ;
-		return colors.get ( res - 1 ) ;
+			down () ;
+			throw new RuntimeException () ;
+		}	
+		return res ;
 	}
 
 	/**
 	 * AS THE SUPER'S ONE. 
+	 * @throws IOException 
 	 */
 	@Override
-	public Sheperd onChooseSheperdForATurn ( Iterable < Sheperd > playersSheperd ) 
+	public Sheperd onChooseSheperdForATurn ( Iterable < Sheperd > playersSheperd ) throws IOException 
 	{
 		List < Sheperd > sheperds ;
 		Sheperd res ;
-		byte i ;
+		String s ;
+		int i ;
 		sheperds = CollectionsUtilities.newListFromIterable ( playersSheperd ) ;
-		writer.println ( "Scegli uno dei tuoi pastori per questo turno:" ) ;
-		try 
+		s = "Scegli uno dei tuoi pastori per questo turno:" ;
+		s = s + "Scegli uno dei tuoi pastori per questo turno:\n1. Il primo\n2. Il secondo" ;
+		i = GraphicsUtilities.checkedIntInput ( 1 , 2 , -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
+		if ( i != -1 )
+			res = sheperds.get(i);
+		else
 		{
-			writer.println ( "Scegli uno dei tuoi pastori per questo turno:\n1. Il primo\n2. Il secondo" ) ;
-			i = Byte.parseByte ( reader.readLine () ) ;
-		} 
-		catch ( NumberFormatException e ) 
-		{
-			i = -1 ;
-			e.printStackTrace();
-		}
-		catch ( IOException e ) 
-		{
-			i = -1 ;
-			e.printStackTrace();
-		}
-		while ( i != 1 && i != 2 )
-		{
-			writer.println ( "Scelta non valida." ) ;
-			writer.println ( "Scegli uno dei tuoi pastori per questo turno:" ) ;
-			try 
-			{
-				writer.println ( "Scegli uno dei tuoi pastori per questo turno:\n1. Il primo\n2. Il secondo" ) ;
-				i = Byte.parseByte ( reader.readLine () ) ;
-			} 
-			catch ( NumberFormatException e ) 
-			{
-				i = -1 ;
-				e.printStackTrace();
-			}
-			catch ( IOException e ) 
-			{
-				i = -1 ;
-				e.printStackTrace();
-			}
+			down () ;
+			throw new RuntimeException () ;
 		}
 		return sheperds.get ( i - 1 ) ;
 	}
@@ -215,43 +170,24 @@ public class CLIController extends ViewPresenter
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public Iterable < SellableCard > onChooseCardsEligibleForSelling ( Iterable < SellableCard > sellableCards ) 
+	public Iterable < SellableCard > onChooseCardsEligibleForSelling ( Iterable < SellableCard > sellableCards ) throws IOException 
 	{
 		List < SellableCard > res ;
 		res = new LinkedList < SellableCard > () ;
+		String msg ;
 		char c ;
 		int i ;
+		int j ;
 		for ( SellableCard s : sellableCards )
 		{
-			writer.println ( "Tua carta : " + s.toString () ) ;
-			writer.println ( "Vuoi venderla ? ( s / n )" ) ;
-			try 
-			{
-				c = reader.readLine ().trim ().charAt ( 0 ) ;
-			}
-			catch (IOException e) {
-				c = 'n' ;
-				e.printStackTrace();
-			}
-			if ( c == 's' )
+			msg = "Tua carta : " + s + "\n" + "Vuoi venderla ? ( 1 : s / 2 : n )" ;
+			i = GraphicsUtilities.checkedIntInput ( 1 , 2 , -1 , -2 , msg , "Scelta non valida" , writer , reader ) ;
+			if ( i == 1 )
 			{
 				s.setSellable ( true ) ;
-				writer.println ( "Quanto vuoi chiedere per questa carta ? " ) ;
-				try 
-				{
-					i = Integer.parseInt ( reader.readLine () ) ;
-				}
-				catch (NumberFormatException e) 
-				{
-					i = 1 ;
-					e.printStackTrace();
-				}
-				catch (IOException e) 
-				{
-					i = 1 ;
-					e.printStackTrace();
-				}
-				s.setSellingPrice ( i ) ;
+				msg = "Quanto vuoi chiedere per questa carta ? " ;
+				j = GraphicsUtilities.checkedIntInput ( 1 , 5 , -1 , -2 , msg , "Scelta non valida" , writer , reader ) ;
+				s.setSellingPrice ( j ) ;
 				res.add(s);
 			}
 		}
@@ -470,5 +406,45 @@ public class CLIController extends ViewPresenter
 		writer.println ( msg ) ;
 	}
 
+	@Override
+	public Road chooseInitRoadForSheperd(Iterable<Road> availableRoads) throws IOException 
+	{
+		Road res ;
+		List < Road > l ;
+		String s ;
+		int i ;
+		l = CollectionsUtilities.newListFromIterable  ( availableRoads ) ;
+		i = 0 ;
+		s = "Scegli la regione di partenza per il tuo pastore tra quelle disponibili:" ;
+		for ( i = 0 ; i < l.size () ; i ++ )
+		{
+			s = s + i + ". " + l.get ( i ) ;
+			i ++ ;
+		}
+		s = s + "-1. Esci da JSheepland" ;
+		i = GraphicsUtilities.checkedIntInput ( 0 , l.size () - 1, -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
+		if ( i != -1 )
+			res = l.get ( i ) ;
+		else
+		{
+			down () ;
+			throw new RuntimeException () ;
+		}
+		return res ;
+	}
+	
+	/***/
+	private void down () throws IOException 
+	{
+		try 
+		{
+			terminateClient();
+			throw new IOException () ;
+		} 
+		catch ( WrongStateMethodCallException e ) 
+		{
+			throw new RuntimeException ( e ) ;
+		}
+	}
 	
 }

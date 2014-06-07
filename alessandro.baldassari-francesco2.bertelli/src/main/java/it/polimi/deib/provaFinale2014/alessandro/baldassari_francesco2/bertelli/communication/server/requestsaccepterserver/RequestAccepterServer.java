@@ -47,7 +47,7 @@ public abstract class RequestAccepterServer implements Runnable
 	 */
 	public static RequestAccepterServer newSocketServer ( MatchAdderCommunicationController matchAdderCommunicationController ) throws IOException 
 	{
-		return new SocketServer ( matchAdderCommunicationController ) ;
+		return new RequestAcceptSocketServer ( matchAdderCommunicationController ) ;
 	}
 	
 	/**

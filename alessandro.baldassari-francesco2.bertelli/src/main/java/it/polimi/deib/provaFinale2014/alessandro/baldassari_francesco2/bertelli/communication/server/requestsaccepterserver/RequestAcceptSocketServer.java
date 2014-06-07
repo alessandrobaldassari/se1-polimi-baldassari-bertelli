@@ -1,6 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandlerConnector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.SocketClientHandler;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunchercommunicationcontroller.MatchAdderCommunicationController;
 
@@ -14,7 +15,7 @@ import java.net.Socket;
  * It accepts requests, creates ClientHandlers for them and then send these Handlers to its
  * matchAdderCommunicationController .
  */
-public class SocketServer extends RequestAccepterServer
+public class RequestAcceptSocketServer extends RequestAccepterServer
 {
 
 	/**
@@ -35,7 +36,7 @@ public class SocketServer extends RequestAccepterServer
 	/**
 	 * @param matchAdderCommunicationController the matchAdderCommunicationController field value.
 	 */
-	SocketServer ( MatchAdderCommunicationController matchAdderCommunicationController ) throws IOException 
+	RequestAcceptSocketServer ( MatchAdderCommunicationController matchAdderCommunicationController ) throws IOException 
 	{
 		super ( matchAdderCommunicationController ) ;
 		serverSocket = new ServerSocket ( TCP_LISTENING_PORT  ) ;
@@ -54,7 +55,7 @@ public class SocketServer extends RequestAccepterServer
 			System.out.println ( "SOCKET_SERVER : ACCETTO RICHIESTA " ) ;
 			client = serverSocket.accept () ;
 			System.out.println ( "SOCKET_SERVER : RICHIESTA ACCETTATA" ) ;
-			clientHandler = new SocketClientHandler ( client ) ;
+			clientHandler = new SocketClientHandler ( new ClientHandlerConnector < Socket > ( client ) ) ;
 			System.out.println ( "SOCKET_SERVER : CREO CLIENT HANDLER PER RICHIESTA" ) ;			
 			submitToMatchAdderCommunicationController ( clientHandler ) ;
 			System.out.println ( "SOCKET_SERVER : SOTTOMETTO CLIENT HANDLER AL MATCH ADDER COMMUNICATION CONTROLLER" ) ;
@@ -62,7 +63,7 @@ public class SocketServer extends RequestAccepterServer
 		}
 		catch ( IOException e ) 
 		{
-			e.printStackTrace () ;
+			// manage errors
 		}	
 	}
 
@@ -84,5 +85,5 @@ public class SocketServer extends RequestAccepterServer
 	{
 		acceptRequest () ;
 	}
-	
+
 }

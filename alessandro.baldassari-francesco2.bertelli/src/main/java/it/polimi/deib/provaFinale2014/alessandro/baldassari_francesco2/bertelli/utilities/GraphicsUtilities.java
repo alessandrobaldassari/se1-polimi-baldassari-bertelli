@@ -2,15 +2,15 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Point;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Executor;
@@ -28,6 +28,36 @@ public final class GraphicsUtilities
 	
 	/***/
 	private static Dimension vgaResolution ; 
+	
+	// make it total.
+	/***/
+	public static int checkedIntInput ( int minVal , int maxVal, int exitVal , int wrongVal , String reqMsg , String errorMsg , PrintStream out , BufferedReader in ) throws IOException
+	{
+		int res ;		
+		out.println ( reqMsg ) ;
+		try 
+		{
+			res = Integer.parseInt ( in.readLine ().trim () ) ;
+		}
+		catch (NumberFormatException e)
+		{
+			res = wrongVal ;
+		}
+		while ( ( res < minVal || res > maxVal ) && res != exitVal  )
+		{
+			out.println ( errorMsg ) ;
+			out.println ( reqMsg ) ;
+			try 
+			{
+				res = Integer.parseInt ( in.readLine ().trim () ) ;
+			}
+			catch (NumberFormatException e)
+			{
+				res = wrongVal ;
+			}
+		}
+		return res ;
+	}
 	
 	/***/
 	public static Dimension getVGAResolution () 

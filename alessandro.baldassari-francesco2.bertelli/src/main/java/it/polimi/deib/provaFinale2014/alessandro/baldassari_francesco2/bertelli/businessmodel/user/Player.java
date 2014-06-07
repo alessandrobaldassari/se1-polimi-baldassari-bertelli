@@ -354,7 +354,7 @@ public abstract class Player implements Serializable , Suspendable
 	 * @return the choosen Road.
 	 * @throws TimeoutException 
 	 */
-	public abstract Road chooseInitialRegionForASheperd ( final Iterable < Road > availableRoads ) throws TimeoutException ;
+	public abstract Road chooseInitialRoadForASheperd ( final Iterable < Road > availableRoads ) throws TimeoutException ;
 
 	
 	/**

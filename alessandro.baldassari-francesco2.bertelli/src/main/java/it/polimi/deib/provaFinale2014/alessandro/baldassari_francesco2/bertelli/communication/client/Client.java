@@ -1,11 +1,12 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientCommunicationProtocolMessage;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.GameProtocolMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.Message;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
@@ -13,7 +14,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -60,7 +60,7 @@ public abstract class Client extends Thread implements Terminable
 	 */
 	public void openConnection () throws IOException  
 	{
-		technicalConnect () ;
+		directTechnicalConnect () ;
 		technicallyOn = true ;
 	}
 	
@@ -92,8 +92,11 @@ public abstract class Client extends Thread implements Terminable
 	 * 
 	 * @throws IOException if something goes wrong with the communication operations.
 	 */
-	protected abstract void technicalConnect () throws IOException ;
+	protected abstract void directTechnicalConnect () throws IOException ;
 		
+	/***/
+	protected abstract void resumeConnectionConnect () throws IOException ;
+	
 	/**
 	 * This method represents the one where a Client has to implement the mechanism which closes
 	 * all the connection to the server.
@@ -140,6 +143,11 @@ public abstract class Client extends Thread implements Terminable
 			super.start () ;
 	}
 	
+	private void connectionDownManagement () 
+	{
+		
+	}
+	
 	/**
 	 * AS THE SUPER'S ONE.
 	 * For every time the value of the technicallyOn attribute is true, it continues to call
@@ -153,6 +161,7 @@ public abstract class Client extends Thread implements Terminable
 		Iterable < NamedColor > colors ;
 		Iterable < SellableCard > cards ;
 		Iterable < Sheperd > sheperds ;
+		Iterable < Road > roads ;
 		GameMove move ;
 		MoveFactory gf ;
 		GameMap gm ;
@@ -161,6 +170,7 @@ public abstract class Client extends Thread implements Terminable
 		Message m ;
 		String s ;
 		Sheperd sh ;
+		Road r ;
 		boolean b ;
 		outParams = new LinkedList < Serializable > () ;
 		while ( technicallyOn )
@@ -178,7 +188,7 @@ public abstract class Client extends Thread implements Terminable
 					case NAME_REQUESTING_REQUEST :
 						s = dataPicker.onNameRequest () ;
 						outParams.add ( s ) ;
-						m = Message.newInstance ( ClientCommunicationProtocolMessage.NAME_REQUESTING_RESPONSE , outParams ) ;
+						m = Message.newInstance ( GameProtocolMessage.NAME_REQUESTING_RESPONSE , outParams ) ;
 						write ( m ) ;
 					break ;
 					case NAME_REQUESTING_RESPONSE_RESPONSE :
@@ -199,28 +209,21 @@ public abstract class Client extends Thread implements Terminable
 						outParams.clear();
 						outParams.add ( n ) ;
 						System.out.println ( outParams ) ;
-						m = Message.newInstance ( ClientCommunicationProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE , outParams ) ;
+						m = Message.newInstance ( GameProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE , outParams ) ;
 						write ( m ) ;
 					break;
-					case CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST:
-						cards = (Iterable<SellableCard>) inParams.get ( 0 ) ;
-						cards = dataPicker.onChooseCardsEligibleForSelling ( cards ) ;
-						outParams.add ( ( Serializable ) cards ) ;
-						m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_RESPONSE , outParams ) ;
+					case SHEPERD_INIT_ROAD_REQUESTING_REQUEST :
+						roads = ( Iterable<Road> ) inParams.get ( 0 ) ;
+						r = dataPicker.chooseInitRoadForSheperd ( roads ) ;
+						outParams.add ( r ) ;
+						m = Message.newInstance ( GameProtocolMessage.SHEPERD_INIT_ROAD_REQUESTING_RESPONSE , outParams ) ;
 						write ( m ) ;
 					break ;
 					case CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_REQUEST :
-						sheperds = (Iterable<Sheperd>) inParams.get ( 0 ) ;
+						sheperds = ( Iterable < Sheperd > ) inParams.get ( 0 ) ;
 						sh = getDataPicker ().onChooseSheperdForATurn ( sheperds ) ;
 						outParams.add ( sh ) ;
-						m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_RESPONSE , outParams ) ;
-						write ( m ) ;
-					break ;
-					case CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST :
-						cards = ( Iterable < SellableCard > ) inParams.get ( 0 ) ;
-						c = getDataPicker ().onChoseCardToBuy ( cards ) ; 
-						outParams.add ( c ) ;
-						m = Message.newInstance ( ClientCommunicationProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_RESPONSE , outParams ) ;
+						m = Message.newInstance ( GameProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_RESPONSE , outParams ) ;
 						write ( m ) ;
 					break ;
 					case DO_MOVE_REQUESTING_REQUEST :
@@ -228,7 +231,21 @@ public abstract class Client extends Thread implements Terminable
 						gm = ( GameMap ) inParams.get ( 1 ) ;
 						move = dataPicker.onDoMove ( gf , gm ) ;
 						outParams.add ( move ) ;
-						m = Message.newInstance ( ClientCommunicationProtocolMessage.DO_MOVE_REQUESTING_RESPONSE , outParams ) ;
+						m = Message.newInstance ( GameProtocolMessage.DO_MOVE_REQUESTING_RESPONSE , outParams ) ;
+						write ( m ) ;
+					break ;
+					case CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST:
+						cards = ( Iterable < SellableCard > ) inParams.get ( 0 ) ;
+						cards = dataPicker.onChooseCardsEligibleForSelling ( cards ) ;
+						outParams.add ( ( Serializable ) cards ) ;
+						m = Message.newInstance ( GameProtocolMessage.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_RESPONSE , outParams ) ;
+						write ( m ) ;
+					break ;
+					case CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST :
+						cards = ( Iterable < SellableCard > ) inParams.get ( 0 ) ;
+						c = getDataPicker ().onChoseCardToBuy ( cards ) ; 
+						outParams.add ( c ) ;
+						m = Message.newInstance ( GameProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_RESPONSE , outParams ) ;
 						write ( m ) ;
 					break ;
 					case GENERIC_NOTIFICATION_NOTIFICATION :
@@ -244,7 +261,17 @@ public abstract class Client extends Thread implements Terminable
 			}
 			catch ( IOException e ) 
 			{
-				throw new RuntimeException ( e ) ;
+				dataPicker.generationNotification ( "Server connection loosed.\nTry to resume it\nIt will take some time." );
+				try 
+				{
+					resumeConnectionConnect () ;
+					connectionDownManagement () ;
+				} 
+				catch ( IOException e1 ) 
+				{
+					dataPicker.generationNotification ( "Can not try to resume the connection.\nSorry but there is nothing to do !\nThe program will be closed" );
+					technicallyOn = false ;
+				}
 			}
 		}
 	}

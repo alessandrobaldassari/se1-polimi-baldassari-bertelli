@@ -9,7 +9,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 /**
  * RMI-based implementation of the ClientHandler interface. 
  */
-public class RMIClientHandler extends ClientHandler 
+public class RMIClientHandler extends ClientHandler < RMIClientBroker >
 {
 	
 	/**
@@ -18,21 +18,16 @@ public class RMIClientHandler extends ClientHandler
 	public static final String LOGICAL_ABSTRACT_RMI_CLIENT_HANDLER = "SHEEPLAND_RMI_CLIENT_HANDLER_#_" ;
 	
 	/**
-	 * A RMIClientBroker object this Handler will use to synchronize with the Client. 
-	 */
-	private RMIClientBroker rmiClientBroker;
-	
-	/**
 	 * @param rmiClientBroker the value for the rmiClientBroker field
+	 * @throws IOException 
 	 * @throws IllegalArgumentException if the parameter is null. 
 	 */
-	public RMIClientHandler ( RMIClientBroker rmiClientBroker ) 
+	public RMIClientHandler ( ClientHandlerConnector < RMIClientBroker > rmiClientBroker ) throws IOException 
 	{
-		if ( rmiClientBroker != null )
-			this.rmiClientBroker = rmiClientBroker ;
-		else
-			throw new IllegalArgumentException () ;
+		super ( rmiClientBroker ) ;
 	}
+	
+	protected void technicalRebinding () {}
 	
 	/**
 	 * AS THE SUPER'S ONE. 
@@ -47,8 +42,8 @@ public class RMIClientHandler extends ClientHandler
 	protected Message read () throws IOException 
 	{
 		Message m ;
-		while ( rmiClientBroker.isClientReady () == false ) ;
-		m = rmiClientBroker.getNextMessage () ;
+		while ( getConnector().isClientReady () == false ) ;
+		m = getConnector().getNextMessage () ;
 		return m ;
 	}
 	
@@ -57,9 +52,9 @@ public class RMIClientHandler extends ClientHandler
 	{
 		try
 		{
-			while ( rmiClientBroker.isClientReady () == false ) ;
-			rmiClientBroker.putNextMessage ( m ) ;
-			rmiClientBroker.setServerReady () ;
+			while ( getConnector().isClientReady () == false ) ;
+			getConnector().putNextMessage ( m ) ;
+			getConnector().setServerReady () ;
 		}
 		catch ( RemoteException e ) 
 		{
