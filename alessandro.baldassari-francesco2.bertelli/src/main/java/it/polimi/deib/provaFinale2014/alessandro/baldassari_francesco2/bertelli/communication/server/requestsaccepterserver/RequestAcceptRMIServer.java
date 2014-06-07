@@ -72,7 +72,7 @@ class RMIServerImpl extends RequestAccepterServer implements RequestAcceptRMISer
 		super ( matchAdderCommunicationController ) ;
 		if ( localhostAddress != null && registryPort >= 0 )
 		{
-			registry = LocateRegistry.getRegistry ( localhostAddress , registryPort ) ;
+			registry = LocateRegistry.createRegistry( registryPort ) ;
 		}
 		else
 			throw new IllegalArgumentException () ;
