@@ -17,7 +17,7 @@ public class Wolf extends Animal
 	/**
 	 * @param name the name of this Wolf. 
 	 */
-	Wolf ( String name ) 
+	protected Wolf ( String name ) 
 	{
 		super ( PositionableElementType.WOLF , name ) ;
 	}

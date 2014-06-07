@@ -47,7 +47,10 @@ public class CLIController extends ViewPresenter
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void startApp () {}
+	public void startApp () 
+	{
+		writer.println("Benvenuto in JSheepland.") ;
+	}
 	
 	/**
 	 * AS THE SUPER'S ONE. 
@@ -198,98 +201,76 @@ public class CLIController extends ViewPresenter
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public SellableCard onChoseCardToBuy ( Iterable < SellableCard > sellableCards ) 
+	public SellableCard onChoseCardToBuy ( Iterable < SellableCard > sellableCards ) throws IOException 
 	{
 		List < SellableCard > l ;
 		SellableCard res ;
+		String s ;
 		int i ;
 		l = CollectionsUtilities.newListFromIterable ( sellableCards ) ;
-		try 
-		{
-			writer.println ( "Scegli la carta che vuoi comprare:" ) ;
-			writer.println ( "0. Non voglio comprare alcuna carta." ) ;
+			s = "Scegli la carta che vuoi comprare:" ;
+			s = s + "-1. Non voglio comprare alcuna carta." ;
 	 		for ( i = 0 ; i < l.size() ; i ++ )
-				writer.println ( l.get ( i ) ) ;
+				s = s + i + ". " + l.get ( i ) ;
 			i = Integer.parseInt ( reader.readLine () ) ;
-		}
-		catch (NumberFormatException e) {
-			i = 0;
-			e.printStackTrace();
-		}
-		catch (IOException e) 
-		{
-			i = 0 ;
-			e.printStackTrace();
-		}
-		if ( i == 0 )
+		i = GraphicsUtilities.checkedIntInput ( 0 , l.size () - 1 , -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
+		if ( i == -1 )
 			res = null ;
 		else
-			res = l.get ( i - 1 ) ;
+			res = l.get ( i ) ;
 		return res ;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
-	public GameMove onDoMove ( MoveFactory f , GameMap m  ) 
+	public GameMove onDoMove ( MoveFactory f , GameMap m  ) throws IOException 
 	{
 		GameMove res = null ;
-		int i = 0 ;
-		writer.println ( "Situazione della mappa di gioco : " ) ;
-		writer.println ( m ) ;
-		writer.println ( "Quale mossa vuoi effetture?" ) ;
-		writer.println ( "1. Uccidere un ovino in una regione" ) ;
-		writer.println ( "2. Comperare una carta dalla banca" ) ;
-		writer.println ( "3. Fare una accoppiamento" ) ;
-		writer.println ( "4. Muovere una pecora." ) ;
-		writer.println ( "5. Muovere il pastore" ) ;
-		try 
+		String s ;
+		int i ;
+		s = "Situazione della mappa di gioco :\n" ;
+		s = s +m + "\n" ;
+		s = s + "Quale mossa vuoi effetture?\n" ;
+		s = s + "1. Uccidere un ovino in una regione\n" ;
+		s = s + "2. Comperare una carta dalla banca\n" ;
+		s = s + "3. Fare una accoppiamento\n" ;
+		s = s + "4. Muovere una pecora.\n" ;
+		s = s + "5. Muovere il pastore\n" ;
+		i = GraphicsUtilities.checkedIntInput ( 1 , 5 , -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
+		if ( i != -1 )
 		{
-			i = Integer.parseInt ( reader.readLine () ) ;
-		}
-		catch (NumberFormatException e) 
-		{
-			e.printStackTrace();
-		}
-		catch (IOException e) 
-		{
-			e.printStackTrace();
-		}
-		switch ( i ) 
-		{
-			case 1 :
-				Region r1, r2;
-				List <Ovine> killableAnimals = new LinkedList<Ovine>();
-				int j;
-				writer.println("Elenco degli ovini che può abbattere");
-				r1 = f.getAssociatedSheperd().getPosition().getFirstBorderRegion();
-				r2 = f.getAssociatedSheperd().getPosition().getSecondBorderRegion();
-				for(Animal animal : r1.getContainedAnimals())
-					if(animal instanceof Ovine)
-						killableAnimals.add((Ovine) animal);
-				for(Animal animal : r2.getContainedAnimals())
-					if(animal instanceof Ovine)
-						killableAnimals.add((Ovine) animal);
-				j=0;
-				for(Ovine ovine : killableAnimals){
-					writer.println(j + " " +ovine.toString());
-					j++;
-				}
-				writer.println("Chi vuoi abbattere?");
-			try {
-				j = Integer.parseInt(reader.readLine().trim());
-			} catch (NumberFormatException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			try {
-				f.newBreakDownMove(killableAnimals.get(j));
-			} catch (MoveNotAllowedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}				
-			break ;
+			switch ( i ) 
+			{
+				case 1 :
+					Region r1, r2;
+					List <Ovine> killableAnimals = new LinkedList<Ovine>();
+					int j;
+					s = "Elenco degli ovini che può abbattere";
+					r1 = f.getAssociatedSheperd().getPosition().getFirstBorderRegion();
+					r2 = f.getAssociatedSheperd().getPosition().getSecondBorderRegion();
+					for (Animal animal : r1.getContainedAnimals () )
+						if(animal instanceof Ovine)
+							killableAnimals.add((Ovine) animal ) ;
+					for(Animal animal : r2.getContainedAnimals())
+						if(animal instanceof Ovine)
+							killableAnimals.add ( ( Ovine ) animal ) ;
+					j=0;
+					for(Ovine ovine : killableAnimals)
+					{
+						s = s + j + ". " +ovine + "\n";
+						j++;
+					}
+					s = s + "Chi vuoi abbattere?";
+					j = GraphicsUtilities.checkedIntInput ( 0 , killableAnimals.size() - 1 , -1 , -2 , s , "Scelta errata." , writer , reader ) ;
+					try 
+					{
+						f.newBreakDownMove(killableAnimals.get(j));
+					} 
+					catch (MoveNotAllowedException e1) 
+					{}				
+				break ;
 			case 2 :
 				int k = 0;
 				for(RegionType rt : RegionType.values()){
@@ -393,6 +374,7 @@ public class CLIController extends ViewPresenter
 			default :
 				res = null ;
 			break ;
+		}
 		}
 		return res ;
 	}

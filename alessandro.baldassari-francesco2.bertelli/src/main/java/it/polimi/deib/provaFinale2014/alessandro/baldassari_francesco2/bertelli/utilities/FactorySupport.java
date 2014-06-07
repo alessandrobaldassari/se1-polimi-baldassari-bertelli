@@ -1,10 +1,11 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedList;
 
 /***/
-public class FactorySupport < T >
+public class FactorySupport < T > implements Serializable
 {
 
 	private Collection < Identifiable < T > > alreadyUsers ;

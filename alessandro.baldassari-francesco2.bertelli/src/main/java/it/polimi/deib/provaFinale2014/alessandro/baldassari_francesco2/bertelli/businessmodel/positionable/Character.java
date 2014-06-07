@@ -7,7 +7,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * stay in the GameMap ( as all the PositionableElements ) and can also move from one point of
  * the GameMap to one other.
  */
-public abstract class Character < T extends GameMapElement > extends PositionableElement < T >
+public abstract class Character < T extends GameMapElement > extends PositionableElement < T > 
 {
 
 	// ATTRIBUTES

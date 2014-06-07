@@ -1,10 +1,12 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities;
 
+import java.io.Serializable;
+
 /**
  * A generic and general purpose class that represents an object containing two other object.
  * Immutable implementations ( also the two object values contained may change themselves internally ).
  */
-public class Couple < T , S > 
+public class Couple < T , S > implements Serializable
 {
 
 	// ATTRIBUTES

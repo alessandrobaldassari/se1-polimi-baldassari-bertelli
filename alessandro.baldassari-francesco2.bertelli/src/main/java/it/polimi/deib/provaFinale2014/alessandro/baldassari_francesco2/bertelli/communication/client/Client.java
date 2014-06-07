@@ -261,6 +261,7 @@ public abstract class Client extends Thread implements Terminable
 			}
 			catch ( IOException e ) 
 			{
+				e.printStackTrace();
 				dataPicker.generationNotification ( "Server connection loosed.\nTry to resume it\nIt will take some time." );
 				try 
 				{

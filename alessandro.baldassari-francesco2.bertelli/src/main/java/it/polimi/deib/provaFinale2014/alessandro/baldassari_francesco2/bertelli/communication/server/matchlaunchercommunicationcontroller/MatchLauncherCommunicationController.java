@@ -10,14 +10,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.GameController;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.MatchState;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.NetworkCommunicantPlayer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.NetworkCommunicationController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.MatchConnectionLoosingController;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RequestAcceptRMIServer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIRequestAcceptServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RequestAccepterServer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
 /**
  * This class is the MasterServer, the core component of the Server part of the System
@@ -28,16 +29,20 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public final class MatchLauncherCommunicationController implements NetworkCommunicationController , MatchAdderCommunicationController , MatchStartCommunicationController
 {
 	
-	/***/
-	public static final long GAME_CONTROLLER_WAITING_DELAY = 1000L ;
+	/**
+	 * The time this Controller has to wait w.r.t the Game Controller during the Match starting. 
+	 */
+	public static final long WAITING_TIME = 15 * Utilities.MILLISECONDS_PER_SECOND ;
 	
-	/***/
+	/**
+	 * An instance of this class to implement the Singleton pattern. 
+	 */
 	private static MatchLauncherCommunicationController instance ;
 	
 	/**
 	 * The queue the technical networks input servers will use to add players requests. 
 	 */
-	private final BlockingQueue < ClientHandler > queue;
+	private final BlockingQueue < ClientHandler < ? > > queue;
 	
 	/**
 	 * A SocketServer object to intercept inbound socket connections.
@@ -52,7 +57,7 @@ public final class MatchLauncherCommunicationController implements NetworkCommun
 	/**
 	 * The GameController object associated to the Match that is currently starting. 
 	 */
-	private GameController currentGameController ;
+	private MatchController currentGameController ;
 	
 	/**
 	 * An ExecutorService object to manage all the threads this object creates. 
@@ -62,12 +67,16 @@ public final class MatchLauncherCommunicationController implements NetworkCommun
 	/**
 	 * A Collection containing the handlers of the Client which are currently connecting to this Server. 
 	 */
-	private Collection < ClientHandler > currentClientHandlers ;
+	private Collection < ClientHandler < ? > > currentClientHandlers ;
 	
-	/***/
+	/**
+	 * The name of the clients connected with the current Game Controller 
+	 */
 	private Collection < String > currentClientNames ;
 	
-	/***/
+	/**
+	 * A component associated with the current GameController to manage eventually connection loosing. 
+	 */
 	private MatchConnectionLoosingController connectionLoosingController ;
 	
 	/**
@@ -78,23 +87,25 @@ public final class MatchLauncherCommunicationController implements NetworkCommun
 	/**
 	 * @throws IOException if something goes wrong with the creation of the member objects. 
 	 */
-	MatchLauncherCommunicationController () throws IOException  
+	protected MatchLauncherCommunicationController () throws IOException  
 	{
 		final String LOCALHOST_ADDRESS = InetAddress.getLocalHost ().getHostAddress () ;
 		socketServer = RequestAccepterServer.newSocketServer ( this ) ; 
-		rmiServer = RequestAccepterServer.newRMIServer ( this , LOCALHOST_ADDRESS , RequestAcceptRMIServer.SERVER_PORT ) ; 
-		queue = new LinkedBlockingQueue < ClientHandler > () ; 
-		currentGameController = null ;
+		rmiServer = RequestAccepterServer.newRMIServer ( this , LOCALHOST_ADDRESS , RMIRequestAcceptServer.SERVER_PORT ) ; 
 		threadExecutor = Executors.newCachedThreadPool () ;
-		currentClientHandlers = new LinkedList < ClientHandler > () ;
+		queue = new LinkedBlockingQueue < ClientHandler < ? > > () ; 
+		currentGameController = null ;
+		currentClientHandlers = new LinkedList < ClientHandler < ? > > () ;
 		currentClientNames = new LinkedList < String > () ;
 		connectionLoosingController = null ;
 		inFunction = false ;
 	}
 	
 	/**
-	 * @return
-	 * @throws 
+	 * Singleton method for this class
+	 * 
+	 * @return the only existing of this class.
+	 * @throws IOException if an instance can not be created.
 	 */
 	public static synchronized MatchLauncherCommunicationController getInstance () throws IOException
 	{
@@ -105,17 +116,17 @@ public final class MatchLauncherCommunicationController implements NetworkCommun
 	
 	/**
 	 * AS THE SUPER'S ONE.
-	 * The run method of this Runnable object.
 	 * Essentially it consists of an infinite loop which has to maintain this Runnable alive. 
 	 */
 	@Override
 	public void run () 
 	{
-		ClientHandler newClientHandler = null ;
+		ClientHandler < ? > newClientHandler = null ;
 		String name ;
 		threadExecutor.submit ( socketServer ) ;
 		threadExecutor.submit ( rmiServer ) ;
 		inFunction = true ;
+		name = null ;
 		System.out.println ( "MASTER SERVER : INIZIO FUNZIONAMENTO" ) ;
 		while  ( inFunction )
 		{
@@ -123,7 +134,7 @@ public final class MatchLauncherCommunicationController implements NetworkCommun
 			{
 				System.out.println ( "MASTER SERVER : ATTENDENDO CLIENT" ) ;
 				newClientHandler = queue.take () ;
-				synchronized ( currentClientHandlers )
+				synchronized ( this )
 				{
 					System.out.println ( "MASTER SERVER : CLIENT ACCETTATO" ) ;
 					if ( currentGameController == null )
@@ -144,11 +155,11 @@ public final class MatchLauncherCommunicationController implements NetworkCommun
 					System.out.println ( "MASTER SERVER : AGGIUNGENDO PLAYER ALLA PARTITA DI NOME " + name ) ;
 					currentClientHandlers.add ( newClientHandler ) ;
 					currentClientNames.add ( name ) ;
+					newClientHandler.notifyNameChoose ( true , "Nome ammesso." ) ;
 					System.out.println ( "CLIENT DI NOME " + name + " NOTIFICATO CHE IL SUO NOME E' CORRETTO" ) ;
-					newClientHandler.notifyNameChoose ( true , null ) ;
 					System.out.println ( "MASTER SERVER : PLAYER DI NOME " + name + "AGGIUNTO ALLA PARTITA" ) ;
 					currentGameController.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler , connectionLoosingController ) ) ;
-					currentClientHandlers.notifyAll () ;
+					notifyAll () ;
 				} 
 			}
 			catch ( WrongMatchStateMethodCallException e )
@@ -157,26 +168,28 @@ public final class MatchLauncherCommunicationController implements NetworkCommun
 				{
 					try 
 					{
-						Thread.sleep ( GAME_CONTROLLER_WAITING_DELAY ) ;
+						Thread.sleep ( WAITING_TIME ) ;
+						currentGameController.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler , connectionLoosingController ) ) ;
 					} 
-					catch ( InterruptedException e1 ) 
+					catch ( InterruptedException e1 ) {}
+					catch ( WrongMatchStateMethodCallException e1 ) 
 					{
-						e1.printStackTrace();
+						System.out.println ( "THE GAME CONTROLLER HAS TOO LOW SPEED, SOMETHING MAY BE KO." ) ;
+						throw new RuntimeException ( e1 ) ;
 					}
-					addPlayer ( newClientHandler ) ;
+					finally 
+					{
+						notifyAll () ;
+					}
 				}
 				else
+				{
+					System.out.println ( "UNEXPECTED FLOW, THIS SITUATION SHOULD NEVER HAPPEN." ) ;
 					throw new RuntimeException ( e ) ;
+				}
 			} 
-			catch ( IOException e ) 
-			{
-				e.printStackTrace();
-			} 
-			catch ( InterruptedException e ) 
-			{
-				e.printStackTrace () ; 
-			}
-			
+			catch ( IOException e ) {} 
+			catch ( InterruptedException e ) {}
 		}
 	}
 	
@@ -185,8 +198,10 @@ public final class MatchLauncherCommunicationController implements NetworkCommun
 	 */
 	private void createAndLaunchNewGameController () 
 	{
-		currentGameController = new GameController ( this ) ;
+		currentGameController = new MatchController ( this ) ;
 		connectionLoosingController = new MatchConnectionLoosingController () ;
+		currentClientHandlers.clear () ;
+		currentClientNames.clear () ;
 		connectionLoosingController.addObserver ( currentGameController ) ;
 		threadExecutor.submit ( currentGameController ) ;
 		threadExecutor.submit ( connectionLoosingController ) ;
@@ -196,7 +211,7 @@ public final class MatchLauncherCommunicationController implements NetworkCommun
 	 * AS THE SUPER'S ONE.
 	 */
 	@Override
-	public void addPlayer ( ClientHandler newClientHandler ) 
+	public synchronized void addPlayer ( ClientHandler < ? > newClientHandler ) 
 	{
 		try 
 		{
@@ -204,7 +219,11 @@ public final class MatchLauncherCommunicationController implements NetworkCommun
 		}
 		catch ( InterruptedException e ) 
 		{
-			e.printStackTrace();
+			System.out.println ( "MATCH_LAUNCHER_COMMUNICATION_CONTROLLER - ADD_PLAYER : THREAD " + Thread.currentThread() + " INTERRUPTED HERE" ) ;
+		}
+		finally 
+		{
+			notifyAll () ;
 		}
 	}
 	
@@ -214,17 +233,18 @@ public final class MatchLauncherCommunicationController implements NetworkCommun
 	@Override
 	public synchronized void notifyFailStartMatch () 
 	{
-		System.out.println ( "MASTER SERVER : NOTIFICA CLIENTS CHE IL MATCH NON PARTIRA'" ) ;
-		for ( ClientHandler c : currentClientHandlers )
+		System.out.println ( "MATCH_LAUNCHER_COMMUNICATION_CONTROLLER - NOTIFY_FAIL_START_MATCH : NOTIFICA CLIENTS CHE IL MATCH NON PARTIRA'" ) ;
+		for ( ClientHandler < ? > c : currentClientHandlers )
 			try 
 			{
 				c.notifyMatchWillNotStart ( ClientHandler.MATCH_WILL_NOT_START_MESSAGE );
 			}
 			catch ( IOException e ) 
 			{
-				e.printStackTrace();
+				System.out.println ( "MATCH_LAUNCHER_COMMUNICATION_CONTROLLER - NOTIFY_FAIL_START_MATCH : IOEXCEPTION WITH THE CLIENT HANDLER " + c ) ;		
 			}
-		notifyFinishAddingPlayers () ;
+		clearMatchEnvironment () ;
+		notifyAll () ;
 	}
 	
 	/**
@@ -234,14 +254,34 @@ public final class MatchLauncherCommunicationController implements NetworkCommun
 	public synchronized void notifyFinishAddingPlayers () 
 	{
 		System.out.println ( "MASTER SERVER : NOTIFICA AI CLIENT CHE IL MATCH STA PARTENDO" ) ;
-		for ( ClientHandler c : currentClientHandlers )
+		for ( ClientHandler < ? > c : currentClientHandlers )
 			try 
 			{
 				c.notifyMatchStart () ;
 			}
-			catch (IOException e) {
-				e.printStackTrace();
+			catch ( IOException e ) 
+			{
+				System.out.println ( "MATCH_LAUNCHER_COMMUNICATION_CONTROLLER - NOTIFY FINISH ADDING PLAYERS : IOEXCEPTION WITH THE CLIENT HANDLER " + c ) ; 				
 			}
+		clearMatchEnvironment () ;
+		notifyAll () ;
+	}
+	
+	/**
+	 * Shut down this Controller. 
+	 */
+	public void shutDown () 
+	{
+		threadExecutor.shutdownNow () ;
+		inFunction = false ;
+	}
+	
+	/**
+	 * Helper method to remove all the resources associated with a Match that is no longer managed by
+	 * this Controller. 
+	 */
+	private void clearMatchEnvironment () 
+	{
 		currentGameController = null ;
 		connectionLoosingController = null ;
 		currentClientHandlers.clear () ;

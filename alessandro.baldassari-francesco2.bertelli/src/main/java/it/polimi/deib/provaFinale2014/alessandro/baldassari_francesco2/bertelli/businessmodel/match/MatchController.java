@@ -7,10 +7,10 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.BlackSheepAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.WolfAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.BlackSheep;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb.LambEvolver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Ovine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Wolf;
@@ -33,7 +33,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.NotSellableException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.SellingPriceNotSetException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ConnectionLoosingManager;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ConnectionLoosingManager.ConnectionLoosingManagerObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.Suspendable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunchercommunicationcontroller.MatchStartCommunicationController;
@@ -46,6 +45,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
 
 import java.awt.Color;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -69,35 +69,29 @@ import java.util.concurrent.TimeoutException;
  * The only true state variable of a GameController object is the GameMatch object;
  * so, every GameController, is potentially poolable.
  */
-public class GameController implements Runnable , TurnNumberClock , LambEvolver , ConnectionLoosingManagerObserver
+public class MatchController implements Runnable , TurnNumberClock , ConnectionLoosingManagerObserver , Serializable
 {
-	
-	/**
-	 * Static variable to generate id's for the Match objects here created. 
-	 */
-	private static int lastMatchIdentifierUID = -1 ;
 	
 	/**
 	 * The Timer value about the time to wait before begin a Match. 
 	 */
-	private static final long DELAY = 30 * Utilities.MILLISECONDS_PER_SECOND ;
+	public static final long DELAY = 30 * Utilities.MILLISECONDS_PER_SECOND ;
 	
 	/**
 	 * The maximum number of Player for a Match. 
 	 */
-	private static final int MAX_NUMBER_OF_PLAYERS = 4;
+	public static final int MAX_NUMBER_OF_PLAYERS = 4;
 
 	/**
 	 * The number of moves a Player can do each turn.
 	 * It's a business rule. 
 	 */
-	private static final int NUMBER_OF_MOVES_PER_USER_PER_TURN = 3 ;
+	public static final int NUMBER_OF_MOVES_PER_USER_PER_TURN = 3 ;
 	
 	/**
-	 * A standard Timer object to mange the timer at the beginning of a Match.
-	 * It's a business rule. 
+	 * Static variable to generate id's for the Match objects here created. 
 	 */
-	private final Timer timer;
+	private static int lastMatchIdentifierUID = -1 ;
 	
 	/**
 	 * The component this GameController will invoke to notify that the Initialization phase of this
@@ -117,9 +111,20 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver 
 	private Identifiable < Match > matchIdentifier ;
 	
 	/**
+	 * A standard Timer object to mange the timer at the beginning of a Match.
+	 * It's a business rule. 
+	 */
+	private final Timer timer;
+	
+	/**
 	 * An AnimalsFactory object to create all the Animal objects who play in the Game. 
 	 */
 	private AnimalFactory animalsFactory ;
+	
+	/**
+	 * A component to mange the evolution of Lambs. 
+	 */
+	private LambEvolver lambEvolver ;
 	
 	/**
 	 * A thread-safe queue object to offer the ADD PLAYER to decouple the adding Player operation
@@ -139,7 +144,7 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver 
 	 * @param matchStartCommunicationController the value for the matchStartCommunicationController field.
 	 * @throws IllegalArgumentException if the parameter passed is null.
 	 */
-	public GameController ( MatchStartCommunicationController matchStartCommunicationController ) 
+	public MatchController ( MatchStartCommunicationController matchStartCommunicationController ) 
 	{
 		if ( matchStartCommunicationController != null )
 		{
@@ -156,6 +161,40 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver 
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
+	public void onConnectionRetrieved ( Suspendable retrievedElem ) 
+	{
+		for ( Player p : match.getPlayers() )
+			if ( p.isSuspended () == false )
+				p.genericNotification ( retrievedElem + " is with us again!" );
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void onBeginSuspensionControl ( Suspendable pendant ) 
+	{
+		for ( Player p : match.getPlayers() )
+			if ( p.equals ( pendant ) == false )
+				p.genericNotification ( "We all wait a few time to retrieve a pendant player..." );
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void onEndSuspensionControl ( boolean suspendedRetrieved ) 
+	{
+		if ( suspendedRetrieved )
+			for ( Player p : match.getPlayers() )
+				p.genericNotification ( "We are all ok again.\nThe show can go on!" );
+	}
+
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
 	public int getTurnNumber () throws WrongMatchStateMethodCallException
 	{
 		int res ;
@@ -165,24 +204,6 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver 
 			throw new WrongMatchStateMethodCallException ( match.getMatchState () ) ;
 		return res ;
 	} 
-	
-	/***/
-	@Override
-	public void evolve ( Lamb lamb ) 
-	{
-		Region whereTheLambIsNow ;
-		Ovine newOvine ;
-		if ( lamb != null )
-		{
-			whereTheLambIsNow = lamb.getPosition () ;
-			whereTheLambIsNow.removeAnimal ( lamb ) ;
-			newOvine = animalsFactory.newAdultOvine ( MathUtilities.genProbabilityValue() > 0.5 ? AdultOvineType.RAM : AdultOvineType.SHEEP ) ;
-			newOvine.moveTo ( whereTheLambIsNow ) ;
-			whereTheLambIsNow.addAnimal ( newOvine ) ;
-		}
-		else
-			throw new IllegalArgumentException () ;
-	}
 	
 	/**
 	 * This is the logically second method of the Game Controller lifecycle.
@@ -238,6 +259,7 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver 
 			lastMatchIdentifierUID ++ ;
 			matchIdentifier = new MatchIdentifier ( lastMatchIdentifierUID ) ;
 			animalsFactory = AnimalFactory.newAnimalFactory ( matchIdentifier ) ;
+			lambEvolver = new LambEvolverImpl ( animalsFactory ) ;
 			gameMap = GameMapFactory.getInstance().newInstance ( matchIdentifier ) ;
 			bank = BankFactory.getInstance().newInstance ( matchIdentifier ) ;
 			match = new Match ( gameMap , bank ) ;		
@@ -246,7 +268,7 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver 
 		} 
 		catch ( SingletonElementAlreadyGeneratedException e ) 
 		{
-			e.printStackTrace();
+			// this should not happen.
 			throw new RuntimeException ( e ) ;
 		}
 	}
@@ -285,7 +307,8 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver 
 			}
 			catch ( WrongMatchStateMethodCallException e ) 
 			{
-				e.printStackTrace();
+				// something very wrong if here
+				throw new RuntimeException ( e ) ;
 			}			
 		}
 		System.out.println ( "GAME CONTROLLER : WAIT FOR PLAYER PHASE - FINE" ) ;
@@ -349,12 +372,10 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver 
 		} 
 		catch ( BlackSheepAlreadyGeneratedException e ) 
 		{
-			e.printStackTrace();
 			throw new RuntimeException ( e ) ;
 		} 
 		catch ( WolfAlreadyGeneratedException e ) 
 		{
-			e.printStackTrace();
 			throw new RuntimeException ( e ) ;
 		}
 	}
@@ -526,7 +547,6 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver 
 	private void turnationPhase () 
 	{
 		GameMove choosenMove ;
-		Sheperd choosenSheperd = null ;
 		MoveFactory moveFactory ;
 		BlackSheep blackSheep ;
 		Wolf wolf ;
@@ -623,10 +643,10 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver 
 			System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR - CHIDENDO AL PLAYER : " + currentPlayer.getName () + " DI SCEGLIERE UN PASTORE" ) ;					
 			choosenSheperd = currentPlayer.chooseSheperdForATurn () ;
 			System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR - IL PLAYER : " + currentPlayer.getName () + " HA SCELTO IL PASTORE " + choosenSheperd.getName () ) ;									
-			res = MoveFactory.newInstance ( choosenSheperd , this , this ) ;
+			res = MoveFactory.newInstance ( choosenSheperd , this , lambEvolver ) ;
 		}
 		else
-			res = MoveFactory.newInstance ( currentPlayer.getSheperds ().iterator ().next () , this , this ) ;
+			res = MoveFactory.newInstance ( currentPlayer.getSheperds ().iterator ().next () , this , lambEvolver ) ;
 		System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR : END" ) ;
 		return res ;
 	}
@@ -763,15 +783,200 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver 
 	 */
 	private void resultsCalculationPhase () 
 	{
-		Map <RegionType, Integer> regionValuesMap;
+		MatchResultsCalculator matchResultsCalculator ;
 		Map <Player, Integer> playerScoresMap;
-		playerScoresMap = new HashMap < Player , Integer> ( match.getNumberOfPlayers () ) ;
-		regionValuesMap = new HashMap < RegionType , Integer > ( RegionType.values ().length - 1 ) ;
+		try 
+		{
+			matchResultsCalculator = new MatchResultsCalculator ( match ) ;
+			playerScoresMap = new HashMap < Player , Integer> ( match.getNumberOfPlayers () ) ;
+			for ( Player p : match.getPlayers () )
+				playerScoresMap.put ( p , matchResultsCalculator.calculatePlayerScore ( p ) ) ;
+			for ( Player p : match.getPlayers () )
+				p.genericNotification ( "Your points : " + playerScoresMap.get ( p ) ) ;
+		}
+		catch ( WrongMatchStateMethodCallException e ) 
+		{
+			// something wrong here.
+			throw new RuntimeException ( e ) ;
+		}
+		
+	}
+	
+	private void notifyPlayerDisconnected ( Player disconnectedPlayer ) 
+	{
+		for ( Player p : match.getPlayers() )
+			if ( p.isSuspended() == false )
+				p.genericNotification ( "The game is going to continue without " + disconnectedPlayer.getName() + "\nMay be he will come back later..." );
+	}
+	
+	// INNER CLASSES
+	
+	/**
+	 * Utility class which implements the Task the GameController Timer has to do
+	 * when the Timer expires.
+	 * It set the MatchState to the INITIALIZATION value, and cancel the Timer. 
+	 */
+	private class WaitingPlayersTimerTask extends TimerTask
+	{
+
+		/**
+		 * AS THE SUPER'S ONE. 
+		 */
+		@Override
+		public void run ()
+		{
+			if ( match.getNumberOfPlayers() >= 2 ) 
+			{
+				System.out.println ( "GAME CONTROLLER - TIMER SCATTATO : NUMERO DI GIOCATORI : " + match.getNumberOfPlayers() ) ;
+				match.setMatchState ( MatchState.INITIALIZATION ) ;
+				matchStartCommunicationController.notifyFinishAddingPlayers () ;
+			}
+			else
+			{
+				System.out.println ( "GAME CONTROLLER - TIMER SCATTATO : NUMERO DI GIOCATORI : " + match.getNumberOfPlayers() + ", PARTITA RESPINTA." ) ;				
+				matchStartCommunicationController.notifyFailStartMatch () ;
+			}
+			cancel () ;
+		}
+		
+	}
+	
+}
+
+/**
+ * This class implements a MatchIdentifier for the Match managed by this GameController  
+ */
+class MatchIdentifier implements Identifiable < Match > 
+{
+
+	/**
+	 * The unique identifier for this MatchIdentifier.
+	 */
+	private int uid ;
+	
+	/**
+	 * @param uid the unique identifier for this MatchIdentifier. 
+	 */
+	protected MatchIdentifier ( int uid ) 
+	{
+		this.uid = uid ;
+	}
+	
+	/**
+	 * Getter method for the uid property.
+	 * 
+	 * @return the uid property. 
+	 */
+	public int getUID () 
+	{
+		return uid ;
+	}
+	
+	/**
+	 * Determine if this MatchIdentifier object is the same as the one
+	 * passed by parameter.
+	 * 
+	 * @param otherObject the otherObject to compare this one.
+	 * @return true if this object is equals to the one passed by parameter, false else. 
+	 */
+	public boolean isEqualsTo ( Identifiable<Match> otherObject ) 
+	{
+		if ( otherObject instanceof MatchIdentifier )
+			return uid == ( ( MatchIdentifier ) otherObject).getUID () ;
+		return false ;
+	}
+
+}
+
+/**
+ * Component that manages the evolution of the Lambs in the Game. 
+ */
+class LambEvolverImpl implements LambEvolver
+{
+
+	/**
+	 * An AnimalFactory object to replace the evolving Lamb. 
+	 */
+	private AnimalFactory animalFactory ;
+	
+	/**
+	 * @param animalFactory the value for the animalFactory instance.
+	 * @throws IllegalArgumentException if the animalFactory parameter is null. 
+	 */
+	protected LambEvolverImpl ( AnimalFactory animalFactory ) 
+	{
+		if ( animalFactory != null )
+			this.animalFactory = animalFactory ;
+		else
+			throw new IllegalArgumentException () ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void evolve ( Lamb lamb ) 
+	{
+		Region whereTheLambIsNow ;
+		Ovine newOvine ;
+		if ( lamb != null )
+		{
+			whereTheLambIsNow = lamb.getPosition () ;
+			whereTheLambIsNow.removeAnimal ( lamb ) ;
+			newOvine = animalFactory.newAdultOvine ( MathUtilities.genProbabilityValue() > 0.5 ? AdultOvineType.RAM : AdultOvineType.SHEEP ) ;
+			newOvine.moveTo ( whereTheLambIsNow ) ;
+			whereTheLambIsNow.addAnimal ( newOvine ) ;
+		}
+		else
+			throw new IllegalArgumentException () ;	
+	}
+
+}
+
+/**
+ * Component that calculate the results of a Match 
+ */
+class MatchResultsCalculator 
+{
+
+	/**
+	 * The match where operate. 
+	 */
+	private Match match ;
+	
+	/**
+	 * A Map containing the points that every regions has. 
+	 */
+	private Map <RegionType, Integer> regionValuesMap;
+	
+	/**
+	 * @param match the match where operate.
+	 * @throws IllegalArgumentException if the match parameter is null.
+	 * @throws WrongMatchStateMethodCallException if the match parameter's state is not CALCULATING_RESULTS. 
+	 */
+	protected MatchResultsCalculator ( Match match ) throws WrongMatchStateMethodCallException
+	{
+		if ( match != null )
+			if ( match.getMatchState() == MatchState.CALCULATING_RESULTS )
+			{
+				this.match = match ;
+				regionValuesMap = new HashMap < RegionType , Integer > ( RegionType.values ().length - 1 ) ;
+			}
+			else
+				throw new WrongMatchStateMethodCallException ( match.getMatchState () ) ;
+		else
+			throw new IllegalArgumentException () ;
+		
+	}
+
+	/**
+	 * Helper method to calculate the points for every region. 
+	 */
+	private void calculateRegionsResults () 
+	{
 		for ( RegionType r : RegionType.values () )
 			if ( r != RegionType.SHEEPSBURG )
 				regionValuesMap.put ( r , calculateRegionValue ( r ) ) ;
-		for ( Player p : match.getPlayers () )
-			playerScoresMap.put(p, calculatePlayerScore ( p , regionValuesMap ) ) ;	
 	}
 	
 	/**
@@ -811,10 +1016,12 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver 
 	 *        this Match.
 	 * @return the score of the Player passed by parameter.
 	 */
-	private int calculatePlayerScore ( Player player , Map < RegionType , Integer > regionValuesMap )
+	public int calculatePlayerScore ( Player player )
 	{
 		int res;
 		Collection <Card> playerCards;
+		if ( regionValuesMap.isEmpty () )
+			calculateRegionsResults () ;
 		playerCards = new ArrayList<Card>(player.getSellableCards().size() + 1);
 		playerCards.addAll(player.getSellableCards());
 		playerCards.add(player.getInitialCard());
@@ -822,113 +1029,6 @@ public class GameController implements Runnable , TurnNumberClock , LambEvolver 
 		for(Card card : playerCards)
 			res = res + regionValuesMap.get(card.getRegionType());
 		return 0;	
-	}
-	
-	private void notifyPlayerDisconnected ( Player disconnectedPlayer ) 
-	
-	{
-		for ( Player p : match.getPlayers() )
-			if ( p.isSuspended() == false )
-				p.genericNotification ( "The game is going to continue without " + disconnectedPlayer.getName() + "\nMay be he will come back later..." );
-	}
-	
-	// INNER CLASSES
-	
-	/**
-	 * Utility class which implements the Task the GameController Timer has to do
-	 * when the Timer expires.
-	 * It set the MatchState to the INITIALIZATION value, and cancel the Timer. 
-	 */
-	private class WaitingPlayersTimerTask extends TimerTask
-	{
-
-		@Override
-		public void run ()
-		{
-			if ( match.getNumberOfPlayers() >= 2 ) 
-			{
-				System.out.println ( "GAME CONTROLLER - TIMER SCATTATO : NUMERO DI GIOCATORI : " + match.getNumberOfPlayers() ) ;
-				match.setMatchState ( MatchState.INITIALIZATION ) ;
-				matchStartCommunicationController.notifyFinishAddingPlayers () ;
-			}
-			else
-			{
-				System.out.println ( "GAME CONTROLLER - TIMER SCATTATO : NUMERO DI GIOCATORI : " + match.getNumberOfPlayers() + ", PARTITA RESPINTA." ) ;				
-				matchStartCommunicationController.notifyFailStartMatch () ;
-			}
-			cancel () ;
-		}
-		
-	}
-	
-	/**
-	 * This class implements a MatchIdentifier for the Match managed by this GameController  
-	 */
-	private class MatchIdentifier implements Identifiable < Match > 
-	{
-
-		/**
-		 * The unique identifier for this MatchIdentifier.
-		 */
-		private int uid ;
-		
-		/**
-		 * @param uid the unique identifier for this MatchIdentifier. 
-		 */
-		public MatchIdentifier ( int uid ) 
-		{
-			this.uid = uid ;
-		}
-		
-		/**
-		 * Getter method for the uid property.
-		 * 
-		 * @return the uid property. 
-		 */
-		public int getUID () 
-		{
-			return uid ;
-		}
-		
-		/**
-		 * Determine if this MatchIdentifier object is the same as the one
-		 * passed by parameter.
-		 * 
-		 * @param otherObject the otherObject to compare this one.
-		 * @return true if this object is equals to the one passed by parameter, false else. 
-		 */
-		public boolean isEqualsTo ( Identifiable<Match> otherObject ) 
-		{
-			if ( otherObject instanceof MatchIdentifier )
-				return uid == ( ( MatchIdentifier ) otherObject).getUID () ;
-			return false ;
-		}
-	
-	}
-
-	/***/
-	@Override
-	public void onConnectionRetrieved ( Suspendable retrievedElem ) 
-	{
-		
-	}
-
-	/***/
-	@Override
-	public void onBeginSuspensionControl ( Suspendable pendant ) 
-	{
-		for ( Player p : match.getPlayers() )
-			if ( p.equals ( pendant ) == false )
-				p.genericNotification ( "We all wait a few time to retrieve a pendant player..." );
-	}
-
-	/***/
-	@Override
-	public void onEndSuspensionControl ( boolean suspendedRetrieved ) 
-	{
-		if ( suspendedRetrieved )
-			for ( Player p : match.getPlayers() )
-				p.genericNotification ( "We are all ok again.\nThe show can go on!" );
 	}
 	
 }

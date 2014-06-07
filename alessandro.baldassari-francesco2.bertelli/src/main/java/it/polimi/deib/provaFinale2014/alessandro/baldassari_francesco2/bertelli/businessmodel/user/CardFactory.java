@@ -1,5 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -14,7 +15,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * It allows to create just the needed cards for each Match that is created, and no more.
  * The only instance of the CardFactory class is exposed from here with a Singleton Method. 
  */
-public class CardFactory 
+public class CardFactory implements Serializable
 {
 
 	/**

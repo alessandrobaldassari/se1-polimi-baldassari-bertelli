@@ -4,7 +4,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This interface is the Protocol Component shared by an RMIClientHandler and an RMIClient.

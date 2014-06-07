@@ -33,7 +33,8 @@ public class MoveFactory implements Serializable
 	/***/
 	private Sheperd sheperd ;
 	
-	public Sheperd getAssociatedSheperd(){
+	public Sheperd getAssociatedSheperd ()
+	{
 		return sheperd;
 	}
 	

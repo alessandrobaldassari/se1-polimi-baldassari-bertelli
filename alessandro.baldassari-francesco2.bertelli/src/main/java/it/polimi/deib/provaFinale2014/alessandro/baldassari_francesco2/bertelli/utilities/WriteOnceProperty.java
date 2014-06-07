@@ -1,6 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities;
 
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class WriteOnceProperty < T > implements Serializable
 {
@@ -26,7 +27,7 @@ public class WriteOnceProperty < T > implements Serializable
 			throw new WriteOncePropertyAlreadSetException ( "VALUE" ) ;
 	}
 	
-	public T getValue () throws PropertyNotSetYetException 
+	public synchronized T getValue () throws PropertyNotSetYetException 
 	{
 		if ( set ) 
 			return value ;
@@ -34,7 +35,7 @@ public class WriteOnceProperty < T > implements Serializable
 			throw new PropertyNotSetYetException () ;
 	}
 	
-	public boolean isValueSet () 
+	public synchronized boolean isValueSet () 
 	{
 		return set ;
 	}

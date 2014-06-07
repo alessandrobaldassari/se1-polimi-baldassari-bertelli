@@ -2,6 +2,9 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 
+/**
+ * This interface describes a component that accept request to add Players in a Match. 
+ */
 public interface MatchAdderCommunicationController 
 {
 
@@ -13,6 +16,6 @@ public interface MatchAdderCommunicationController
 	 * 
 	 * @param newClientHandler the ClientHandler to add.
 	 */
-	public abstract void addPlayer ( ClientHandler newClientHandler ) ; 
+	public abstract void addPlayer ( ClientHandler < ? > newClientHandler ) ; 
 	
 }

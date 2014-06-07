@@ -2,6 +2,9 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
 
+/**
+ * This interface defines a component that manages the turn number succession in a Match. 
+ */
 public interface TurnNumberClock 
 {
 

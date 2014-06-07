@@ -28,6 +28,7 @@ public final class ServerMainClass
 	{
 		ExecutorService threadExecutor ;
 		NetworkCommunicationController networkCommunicationController ;
+		threadExecutor = null ;
 		try 
 		{
 			threadExecutor = Executors.newSingleThreadExecutor () ;
@@ -36,9 +37,11 @@ public final class ServerMainClass
 		}
 		catch ( IOException e ) 
 		{
-			e.printStackTrace () ;
+			System.out.println ( "CAN NOT CREATE A NETWORK_COMMUNICATION_CONTROLLER." ) ;
+			if ( threadExecutor != null )
+				threadExecutor.shutdownNow () ;
 			throw new RuntimeException ( e ) ;
-		}
+		}	
 	}
 	
 }

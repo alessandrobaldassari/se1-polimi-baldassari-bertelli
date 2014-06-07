@@ -47,7 +47,7 @@ public abstract class RequestAccepterServer implements Runnable
 	 */
 	public static RequestAccepterServer newSocketServer ( MatchAdderCommunicationController matchAdderCommunicationController ) throws IOException 
 	{
-		return new RequestAcceptSocketServer ( matchAdderCommunicationController ) ;
+		return new SocketRequestAcceptServer ( matchAdderCommunicationController ) ;
 	}
 	
 	/**
@@ -61,11 +61,11 @@ public abstract class RequestAccepterServer implements Runnable
 	 */
 	public static RequestAccepterServer newRMIServer ( MatchAdderCommunicationController matchAdderCommunicationController , String localhostAddress , int registryPort ) throws IOException
 	{
-		return new RMIServerImpl ( matchAdderCommunicationController , localhostAddress , registryPort ) ;
+		return new RMIRequestAcceptServerImpl ( matchAdderCommunicationController , localhostAddress , registryPort ) ;
 	}
 	
 	/**
-	 * The run method for this Server.
+	 * AS THE SUPER'S ONE.
 	 * It gives subclasses a change to initialize themselves, then, while the Server is up,
 	 * execute the lifeLoopImplementation method ( implemented in subclasses ). 
 	 */
@@ -78,10 +78,11 @@ public abstract class RequestAccepterServer implements Runnable
 			inFunction = true ;
 			while ( inFunction )
 				lifeLoopImplementation () ;
+			shutDown () ;
 		}
 		catch ( IOException e ) 
 		{
-			e.printStackTrace () ;
+			System.out.println ( "REQUEST_ACCEPT_SERVER : IOEXCEPTION DURING CREATION PHASE." ) ;
 		}
 	}
 	
@@ -111,5 +112,13 @@ public abstract class RequestAccepterServer implements Runnable
 	 * The method subclasses wants to execute during their lifecycle. 
 	 */
 	protected abstract void lifeLoopImplementation () ;
+	
+	/**
+	 * Shut down this Server. 
+	 */
+	public void shutDown () 
+	{
+		inFunction = false ;
+	}
 	
 }

@@ -32,23 +32,35 @@ public class NetworkCommunicationControllerSingleton
 		return instance ;	
 	}
 	
-	/***/
+	/**
+	 * A default implementation for the NetworkCommunicationController.
+	 * The only things it has to do is to launch a MatchLauncherCommunicationController object
+	 */
 	private static class NetworkCommunicationControllerImpl implements NetworkCommunicationController 
 	{
 
-		/***/
+		/**
+		 * An executor object to exec the MatchLauncherCommunicationController 
+		 */
 		private Executor threadExec ;
 		
-		/***/
+		/**
+		 * The MatchLauncherCommunicationController instance 
+		 */
 		private MatchLauncherCommunicationController adaptee ;
 		
-		/***/
+		/**
+		 * @throws IOException if it is not possible to retrieve a MatchLauncherCommunicationController instance. 
+		 */
 		public NetworkCommunicationControllerImpl () throws IOException 
 		{
 			threadExec = Executors.newSingleThreadExecutor () ;
 			adaptee = MatchLauncherCommunicationController.getInstance () ;
 		}
 		
+		/**
+		 * AS THE SUPER'S ONE. 
+		 */
 		@Override
 		public void run () 
 		{

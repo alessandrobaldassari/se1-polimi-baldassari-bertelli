@@ -1,7 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.Message;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RequestAcceptSocketServer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.SocketRequestAcceptServer;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -16,6 +16,10 @@ import java.net.SocketAddress;
  */
 public class SocketClient extends Client 
 {
+	
+	public static final String SERVER_IP_ADDR = "127.0.0.1" ;
+	
+	public static final int SERVER_PORT = 3333 ;
 	
 	/**
 	 * The socket object used to make the connection to the server. 
@@ -51,7 +55,7 @@ public class SocketClient extends Client
 	{
 		SocketAddress socketAddress ;
 		System.out.println ( "SOCKET_CLIENT - TECHNICAL CONNECT : BEGIN" ) ;
-		socketAddress = new InetSocketAddress ( RequestAcceptSocketServer.SERVER_IP_ADDRESS , RequestAcceptSocketServer.TCP_LISTENING_PORT ) ;
+		socketAddress = new InetSocketAddress ( SERVER_IP_ADDR , SERVER_PORT ) ;
 		channel.connect ( socketAddress ) ;
 		System.out.println ( "SOCKET_CLIENT - TECHNICAL CONNECT : CONNECTION CREATED." ) ;		
 		ois = new ObjectInputStream ( channel.getInputStream () ) ;

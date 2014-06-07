@@ -44,7 +44,7 @@ public class NetworkCommunicantPlayer extends Player
 	/**
 	 * 
 	 */
-	private ConnectionLoosingManager connectionLoosingManager ;
+	private transient ConnectionLoosingManager connectionLoosingManager ;
 	
 	/**
 	 * @param name the name of this Player
@@ -65,15 +65,90 @@ public class NetworkCommunicantPlayer extends Player
 	}
 
 	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public NamedColor getColorForSheperd ( final Iterable < NamedColor > availableColors ) throws TimeoutException
+	{
+		NamedColor res  ;
+		Timer t ;
+		Future < NamedColor > f ;
+		System.out.println ( "before creating barrier." ) ;
+		methodCompleted = new WriteOnceProperty < Boolean > () ;
+		System.out.println ( "prop created." ) ;
+		t = new Timer () ;
+		t.schedule ( new TimeoutExpirationTimerTask () , MatchConnectionLoosingController.WAITING_TIME ) ;
+		System.out.println ( "timer go." ) ;
+		f = executorService.submit ( new Callable < NamedColor > () 
+			{
+				@Override
+				public NamedColor call () throws IOException 
+				{
+					NamedColor res ;
+					res = clientHandler.requestSheperdColor(availableColors);
+					try 
+					{
+						System.out.println ( "call before set" ) ;
+						methodCompleted.setValue ( true ) ;
+						System.out.println ( "call after set" ) ;
+					} 
+					catch ( WriteOncePropertyAlreadSetException e ) 
+					{
+						
+					}
+					return res ;
+				}  
+			}
+		) ;
+		System.out.println ( "before barrier" ) ;
+		while ( methodCompleted.isValueSet () == false ) ;
+		System.out.println ( "afrer barrier" + methodCompleted.isValueSet() ) ;
+		try 
+		{
+			if ( methodCompleted.getValue() == true )
+			{
+				t.cancel () ;
+				res = f.get () ;
+			}
+			else
+			{
+				if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
+					throw new TimeoutException () ;
+				else
+					res = getColorForSheperd ( availableColors );
+			}
+		}
+		catch ( PropertyNotSetYetException e ) 
+		{
+			throw new RuntimeException ( e ) ;
+		} 
+		catch (InterruptedException e) 
+		{
+			throw new RuntimeException ( e ) ;
+		}
+		catch ( ExecutionException e ) 
+		{
+			if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
+				throw new TimeoutException () ;
+			else
+				res = getColorForSheperd ( availableColors );
+		}
+		return res ;
+		
+	}
+	
+	/**
 	 * AS THE SUPER'S ONE.  
 	 */
 	@Override
 	public void chooseCardsEligibleForSelling () throws TimeoutException
 	{
+		Timer t ;
 		Future < Boolean > f ;
 		Callable < Boolean > realMethodExecutor ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		new Timer ().schedule ( new TimeoutExpirationTimerTask () , MatchConnectionLoosingController.WAITING_TIME ) ;
+		t = new Timer ();
+		t .schedule ( new TimeoutExpirationTimerTask () , MatchConnectionLoosingController.WAITING_TIME ) ;
 		realMethodExecutor = new Callable < Boolean > () 
 		{
 			@Override
@@ -114,6 +189,7 @@ public class NetworkCommunicantPlayer extends Player
 			else
 				try 
 				{
+					t.cancel () ;
 					f.get () ;
 				}
 				catch ( InterruptedException e ) 
@@ -140,10 +216,12 @@ public class NetworkCommunicantPlayer extends Player
 	@Override
 	public GameMove doMove ( final MoveFactory moveFactory , final GameMap gameMap ) throws TimeoutException 
 	{
+		Timer t ;
 		GameMove res  ;
 		Future < GameMove > f ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		new Timer ().schedule ( new TimeoutExpirationTimerTask () , MatchConnectionLoosingController.WAITING_TIME ) ;
+		t = new Timer ();
+		t.schedule ( new TimeoutExpirationTimerTask () , MatchConnectionLoosingController.WAITING_TIME ) ;
 		f = executorService.submit ( new Callable < GameMove > () 
 			{
 				@Override
@@ -164,7 +242,10 @@ public class NetworkCommunicantPlayer extends Player
 		try 
 		{
 			if ( methodCompleted.getValue() == true )
+			{
 				res = f.get () ;
+				t.cancel () ;
+			}
 			else
 			{
 				if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
@@ -197,10 +278,12 @@ public class NetworkCommunicantPlayer extends Player
 	@Override
 	public Sheperd chooseSheperdForATurn () throws TimeoutException
 	{
+		Timer t ;
 		Sheperd res  ;
 		Future < Sheperd > f ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		new Timer ().schedule ( new TimeoutExpirationTimerTask () , MatchConnectionLoosingController.WAITING_TIME ) ;
+		t = new Timer ();
+		t.schedule ( new TimeoutExpirationTimerTask () , MatchConnectionLoosingController.WAITING_TIME ) ;
 		f = executorService.submit ( new Callable < Sheperd > () 
 			{
 				@Override
@@ -221,7 +304,10 @@ public class NetworkCommunicantPlayer extends Player
 		try 
 		{
 			if ( methodCompleted.getValue() == true )
+			{
+				t.cancel () ;
 				res = f.get () ;
+			}
 			else
 			{
 				if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
@@ -254,10 +340,12 @@ public class NetworkCommunicantPlayer extends Player
 	@Override
 	public SellableCard chooseCardToBuy ( final Iterable<SellableCard > src ) throws TimeoutException 
 	{
+		Timer t  ;
 		SellableCard res  ;
 		Future < SellableCard > f ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		new Timer ().schedule ( new TimeoutExpirationTimerTask () , MatchConnectionLoosingController.WAITING_TIME ) ;
+		t = new Timer ();
+		t.schedule ( new TimeoutExpirationTimerTask () , MatchConnectionLoosingController.WAITING_TIME ) ;
 		f = executorService.submit ( new Callable < SellableCard > () 
 			{
 				@Override
@@ -278,7 +366,10 @@ public class NetworkCommunicantPlayer extends Player
 		try 
 		{
 			if ( methodCompleted.getValue() == true )
+			{
+				t.cancel () ;
 				res = f.get () ;
+			}
 			else
 			{
 				if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
@@ -304,65 +395,7 @@ public class NetworkCommunicantPlayer extends Player
 		}
 		return res ;
 	}
-
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public NamedColor getColorForSheperd ( final Iterable < NamedColor > availableColors ) throws TimeoutException
-	{
-		NamedColor res  ;
-		Future < NamedColor > f ;
-		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		new Timer ().schedule ( new TimeoutExpirationTimerTask () , MatchConnectionLoosingController.WAITING_TIME ) ;
-		f = executorService.submit ( new Callable < NamedColor > () 
-			{
-				@Override
-				public NamedColor call () throws IOException 
-				{
-					NamedColor res ;
-					res = clientHandler.requestSheperdColor(availableColors);
-					try 
-					{
-						methodCompleted.setValue ( true ) ;
-					} 
-					catch ( WriteOncePropertyAlreadSetException e ) {}
-					return res ;
-				}  
-			}
-		) ;
-		while ( methodCompleted.isValueSet () == false ) ;
-		try 
-		{
-			if ( methodCompleted.getValue() == true )
-				res = f.get () ;
-			else
-			{
-				if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
-					throw new TimeoutException () ;
-				else
-					res = getColorForSheperd ( availableColors );
-			}
-		}
-		catch ( PropertyNotSetYetException e ) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (InterruptedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch ( ExecutionException e ) 
-		{
-			if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
-				throw new TimeoutException () ;
-			else
-				res = getColorForSheperd ( availableColors );
-		}
-		return res ;
-		
-	}
-
+	
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
@@ -385,10 +418,12 @@ public class NetworkCommunicantPlayer extends Player
 	@Override
 	public Road chooseInitialRoadForASheperd ( final Iterable < Road > availableRoads ) throws TimeoutException
 	{
+		Timer t ;
 		Road res  ;
 		Future < Road > f ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		new Timer ().schedule ( new TimeoutExpirationTimerTask () , MatchConnectionLoosingController.WAITING_TIME ) ;
+		t = new Timer ();
+		t.schedule ( new TimeoutExpirationTimerTask () , MatchConnectionLoosingController.WAITING_TIME ) ;
 		f = executorService.submit ( new Callable < Road > () 
 			{
 				@Override
@@ -410,7 +445,10 @@ public class NetworkCommunicantPlayer extends Player
 		try 
 		{
 			if ( methodCompleted.getValue() == true )
+			{	
+				t.cancel();
 				res = f.get () ;
+			}
 			else
 			{
 				if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )

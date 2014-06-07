@@ -3,7 +3,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.Message;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.RMIResumerConnectionServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIClientBroker;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RequestAcceptRMIServer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIRequestAcceptServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIClientBroker.AnotherCommandYetRunningException;
 
 import java.io.IOException;
@@ -49,7 +49,7 @@ public class RMIClient extends Client
 	@Override
 	public void directTechnicalConnect() throws IOException 
 	{
-		RequestAcceptRMIServer server ;
+		RMIRequestAcceptServer server ;
 		String key ;
 		Registry registry ;
 		try 
@@ -59,7 +59,7 @@ public class RMIClient extends Client
 			registry = LocateRegistry.getRegistry ( SERVER_IP_ADDRESS , SERVER_DIRECT_PORT ) ;
 			System.out.println ( "RMI - TECHNICAL CONNECT : RMI REGISTRY LOCATED." ) ;
 			System.out.println ( "RMI - TECHNICAL CONNECT : RETRIEVING INITIAL CONNECTION SERVER." ) ;
-			server = ( RequestAcceptRMIServer ) registry.lookup ( RequestAcceptRMIServer.LOGICAL_SERVER_NAME ) ;
+			server = ( RMIRequestAcceptServer ) registry.lookup ( RMIRequestAcceptServer.SERVER_NAME ) ;
 			System.out.println ( "RMI - TECHNICAL CONNECT : INITIAL CONNECTION SERVER RETRIEVED." ) ;
 			key = server.addPlayer () ; 
 			clientBroker = ( RMIClientBroker ) registry.lookup ( key ) ;

@@ -15,7 +15,7 @@ public class BlackSheep extends AdultOvine
 	/**
 	 * @param name the name of this BlackSheep 
 	 */
-	BlackSheep ( String name ) 
+	protected BlackSheep ( String name ) 
 	{
 		super ( PositionableElementType.BLACK_SHEEP , name , AdultOvineType.SHEEP ) ; 
 	}
