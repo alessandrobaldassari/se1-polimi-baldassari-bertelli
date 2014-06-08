@@ -73,7 +73,7 @@ public class Sheperd extends Character < Road >
 		String res ;
 		res = super.toString () ;
 		res = res + "Color : " + color + "\n" ;
-		res = res + "Owner : " + owner + "\n" ;
+		res = res + "Owner : " + owner.getName() + "\n" ;
 		return res ;
 	}
 	

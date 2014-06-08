@@ -262,9 +262,16 @@ public class Bank implements Serializable
 	public String toString () 
 	{
 		String res ;
-		res = "Bank\nInitial Cards owned : " + initialCards + "\n" ;
-		res = res + "Non Initial Cards owned : " + cards + "\n" ;
-		res = res + "Fences owned : " + fences + "\n" ;
+		res = "Bank\nInitial Cards owned :\n" ;
+		for ( Card c : initialCards.values() )
+			res = res + "*. " + c.getRegionType() + "\n" ;
+		res = res + "Non Initial Cards owned :\n" ;
+		for ( Stack < SellableCard > st : cards.values() )
+			for ( SellableCard s : st )
+				res = res + "*. " + s.getRegionType() + " [ " + s.getInitialPrice() + " ]\n" ;
+		res = res + "Fences owned :\n" ;
+		for ( Fence f : fences )
+			res = res + "*. Final : " + f.isFinal() + "\n" ;
 		res = res + "Money Reserve : " + moneyReserve ;
 		return res ;
 	}

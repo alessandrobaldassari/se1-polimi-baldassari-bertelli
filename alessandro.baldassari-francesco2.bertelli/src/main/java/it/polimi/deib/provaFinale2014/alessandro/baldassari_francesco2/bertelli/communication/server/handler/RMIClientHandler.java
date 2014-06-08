@@ -27,6 +27,10 @@ public class RMIClientHandler extends ClientHandler < RMIClientBroker >
 		super ( rmiClientBroker ) ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
 	protected void technicalRebinding () {}
 	
 	/**
@@ -47,6 +51,9 @@ public class RMIClientHandler extends ClientHandler < RMIClientBroker >
 		return m ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public void write ( Message m ) throws IOException
 	{

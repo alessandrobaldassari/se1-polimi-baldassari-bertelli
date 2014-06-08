@@ -180,12 +180,16 @@ public class Road extends GameMapElement
 		String res ;
 		res = super.toString () ;
 		res = res + "Number : " + number + "\n" ;
-		res = res + "Element Contained : " + elementContained + "\n" ;
-		res = res + "First Border Region : " + firstBorderRegion + "\n" ;
-		res = res + "Second Border Region : " + secondBorderRegion + "\n" ;
+		res = res + "Element Contained : " ;
+		if ( elementContained != null )
+			res = res + elementContained.getPositionableElementType().toString() + "\n" ;
+		else
+			res = res + "\n" ;
+		res = res + "First Border Region : " + firstBorderRegion.getGameMapElementType() + " [ " + firstBorderRegion.getType() + " ]\n" ;
+		res = res + "Second Border Region : " + secondBorderRegion.getGameMapElementType() + "[ " + secondBorderRegion.getType() + " ]\n" ;
 		res = res + "Adjacent roads : " ;
 		for ( Road r : adjacentRoads )
-			res = res + "* " + r ;
+			res = res + "* " + r.getGameMapElementType() + " [ " + r.getNumber() + " ]\n" ;
 		return res ;
 	}
 }

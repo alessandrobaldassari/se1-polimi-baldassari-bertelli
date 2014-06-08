@@ -37,7 +37,7 @@ public class NetworkCommunicantPlayer extends Player
 	private WriteOnceProperty < Boolean > methodCompleted ;
 	
 	/**
-	 * 
+	 * An ExecutorService object to execute threads.
 	 */
 	private transient ExecutorService executorService ;
 	

@@ -116,4 +116,18 @@ public class Card implements Serializable
 		return res ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public String toString ()
+	{
+		String res ;
+		res = "Card\n" ;
+		res = res + "Type : " + regionType + "\n" ;
+		res = res + "Id : " + id ; 
+		res = res + "Owner : " + owner !=null ? owner.getName() : null ;
+		return res ;
+	}
+	
 }

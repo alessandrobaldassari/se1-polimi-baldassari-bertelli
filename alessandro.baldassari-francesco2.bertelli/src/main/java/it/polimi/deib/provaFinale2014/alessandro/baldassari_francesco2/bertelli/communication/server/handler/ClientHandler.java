@@ -29,8 +29,10 @@ public abstract class ClientHandler < T >
 	 */
 	public static final String MATCH_WILL_NOT_START_MESSAGE = "Sorry, but the game can not start now" ;
 
+	/***/
 	private ClientHandlerConnector < T > connector ;
 	
+	/***/
 	public ClientHandler ( ClientHandlerConnector < T > connector ) throws IOException
 	{
 		if ( connector != null )
@@ -54,11 +56,13 @@ public abstract class ClientHandler < T >
 		return old ;
 	}
 	
+	/***/
 	protected T getConnector () 
 	{
 		return connector.getConnector () ;
 	}
 	
+	/***/
 	protected abstract void technicalRebinding () throws IOException ;
 	
 	/**
@@ -162,7 +166,7 @@ public abstract class ClientHandler < T >
 		if ( m.getOperation () == GameProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE )
 		{
 			System.out.println ( "CLIENT HANDLER - REQUEST SHEPERD COLOR : HEADER OK." ) ;
-			System.out.println ( m ) ;
+			System.out.println ( "Message : " + m ) ;
 			res = ( NamedColor ) CollectionsUtilities.newListFromIterable( m.getParameters () ).get ( 0 ) ;
 			System.out.println ( "CLIENT HANDLER - REQUEST SHEPERD COLOR : IN PARAMETER OK : " + res ) ;
 		}
@@ -200,7 +204,10 @@ public abstract class ClientHandler < T >
 		return res ;
 	}
 	
-	/***/
+	/**
+	 * @param availableRoads
+	 * @return 
+	 */
 	public Road chooseInitialRoadForSheperd ( Iterable < Road > availableRoads ) throws IOException 
 	{
 		Road res ;

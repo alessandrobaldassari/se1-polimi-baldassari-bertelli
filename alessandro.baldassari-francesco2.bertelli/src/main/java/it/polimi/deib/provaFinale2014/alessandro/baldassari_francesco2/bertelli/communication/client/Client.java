@@ -208,7 +208,7 @@ public abstract class Client extends Thread implements Terminable
 						n = dataPicker.onSheperdColorRequest ( colors ) ;
 						outParams.clear();
 						outParams.add ( n ) ;
-						System.out.println ( outParams ) ;
+						System.out.println ( n ) ;
 						m = Message.newInstance ( GameProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE , outParams ) ;
 						write ( m ) ;
 					break;

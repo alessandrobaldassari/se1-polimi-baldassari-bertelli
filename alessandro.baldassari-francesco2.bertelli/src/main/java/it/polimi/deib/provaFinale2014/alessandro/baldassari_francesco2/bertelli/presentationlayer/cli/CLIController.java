@@ -126,18 +126,18 @@ public class CLIController extends ViewPresenter
 		String s ;
 		NamedColor res ;
 		int i ;
-		s = "Prego, inserisci il numero del colore che vuoi scegliere per il tuo pastore" ;
-		i = 1 ;
+		s = "Prego, inserisci il numero del colore che vuoi scegliere per il tuo pastore\n" ;
+		i = 0 ;
 		for ( Color c : colors )
 		{
-			s = s + i + ". " + c.toString () ;
+			s = s + i + ". " + c + "\n" ;
 			i ++ ;
 		}
 		s = s + "-1. Esci da JSheepland." ;
-		i = GraphicsUtilities.checkedIntInput ( 1 , colors.size() , -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
+		i = GraphicsUtilities.checkedIntInput ( 0 , colors.size () - 1 , -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
 		if ( i != - 1 )
 		{
-			res = colors.get ( i - 1 ) ;
+			res = colors.get ( i ) ;
 			System.out.println ( "Colore scelto : " + res.getName () ) ;			
 		}
 		else
@@ -160,11 +160,16 @@ public class CLIController extends ViewPresenter
 		String s ;
 		int i ;
 		sheperds = CollectionsUtilities.newListFromIterable ( playersSheperd ) ;
-		s = "Scegli uno dei tuoi pastori per questo turno\n:" ;
-		s = s + "Scegli uno dei tuoi pastori per questo turno:\n1. Il primo\n2. Il secondo\n-1. " ;
-		i = GraphicsUtilities.checkedIntInput ( 1 , 2 , -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
+		s = "Scegli uno dei tuoi pastori per questo turno:\n " ;
+		i = 0 ;
+		for ( Sheperd sh : sheperds )
+		{
+			s = s + i + ". + " + sh + "\n" ;
+			i ++ ;
+		}
+		i = GraphicsUtilities.checkedIntInput ( 0 , 1 , -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
 		if ( i != -1 )
-			res = sheperds.get( i - 1 ) ;
+			res = sheperds.get( i ) ;
 		else
 		{
 			down () ;

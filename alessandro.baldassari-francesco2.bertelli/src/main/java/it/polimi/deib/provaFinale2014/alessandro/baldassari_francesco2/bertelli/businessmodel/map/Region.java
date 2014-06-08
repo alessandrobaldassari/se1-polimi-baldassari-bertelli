@@ -156,7 +156,7 @@ public class Region extends GameMapElement
 		res = res + "Region Type :" + type +  "\n" ;
 		res = res + "Border Roads : " ;
 		for ( Road r : borderRoads )
-			res = res + "* " + r + "\n" ;
+			res = res + "* " + r.getNumber() + "\n" ;
 		res = res + "Contained animals : " ;
 		for ( Animal a : containedAnimals )
 			res = res + "* " + a + "\n" ;

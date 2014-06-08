@@ -95,8 +95,8 @@ public class Lamb extends Ovine
 		String res ;
 		res = super.toString () ;
 		res = res + "Birth Turn : " + birthTurn + "\n" ;
-		res = res + "Mom : " + mother + "\n" ;
-		res = res + "Dad : " +father + "\n" ;
+		res = res + "Mom : " + mother.getName() + "\n" ;
+		res = res + "Dad : " +father.getName() + "\n" ;
 		return res ;
 	}
 	
