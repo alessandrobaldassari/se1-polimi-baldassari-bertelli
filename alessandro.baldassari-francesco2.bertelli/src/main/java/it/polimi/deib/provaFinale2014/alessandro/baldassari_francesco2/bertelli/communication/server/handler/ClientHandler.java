@@ -313,7 +313,7 @@ public abstract class ClientHandler < T >
 		m = read () ;
 		if ( m.getOperation () == GameProtocolMessage.DO_MOVE_REQUESTING_RESPONSE )
 		{
-			System.out.println ( "CLIENT_HANDLER - DO_MOVE : RESPONSE HEADER OK." ) ;
+			System.out.println ( "CLIENT_HANDLER - DO_MOVE : RESPONSE HEADER OK." + m.getParameters() ) ;
 			res = ( GameMove ) CollectionsUtilities.newListFromIterable( m.getParameters() ).get ( 0 ) ;
 		}
 		else

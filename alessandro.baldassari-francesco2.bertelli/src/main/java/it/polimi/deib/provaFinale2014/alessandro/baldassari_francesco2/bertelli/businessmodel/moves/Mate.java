@@ -128,7 +128,7 @@ public class Mate extends GameMove
 					} 
 					catch ( MateNotSuccesfullException e ) 
 					{
-						throw new MoveNotAllowedException ( "Mate not successfull." ) ;
+						// some type of notification ...
 					}
 				}
 				else

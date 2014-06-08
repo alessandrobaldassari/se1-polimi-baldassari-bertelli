@@ -29,6 +29,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class CLIController extends ViewPresenter
 {
 
+	public static final String CANNOT_DO_THIS_MOVE_EXCEPTION = "Spiacenti, ma non puoi fare questa mossa." ;
+	
 	/**
 	 * A BufferedReader object to retrieve the user's input 
 	 */
@@ -187,7 +189,6 @@ public class CLIController extends ViewPresenter
 		List < SellableCard > res ;
 		res = new LinkedList < SellableCard > () ;
 		String msg ;
-		char c ;
 		int i ;
 		int j ;
 		for ( SellableCard s : sellableCards )
@@ -253,108 +254,19 @@ public class CLIController extends ViewPresenter
 			switch ( i ) 
 			{
 				case 1 :
-					Region r1, r2;
-					List <Ovine> killableAnimals = new LinkedList<Ovine>();
-					int j;
-					s = "Elenco degli ovini che può abbattere";
-					r1 = f.getAssociatedSheperd().getPosition().getFirstBorderRegion();
-					r2 = f.getAssociatedSheperd().getPosition().getSecondBorderRegion();
-					for ( Animal animal : r1.getContainedAnimals () )
-						if( animal instanceof Ovine )
-							killableAnimals.add ( ( Ovine ) animal ) ;
-					for ( Animal animal : r2.getContainedAnimals () )
-						if ( animal instanceof Ovine )
-							killableAnimals.add ( ( Ovine ) animal ) ;
-					j=0;
-					for ( Ovine ovine : killableAnimals )
-					{
-						s = s + j + ". " +ovine + "\n";
-						j++;
-					}
-					s = s + "Chi vuoi abbattere?";
-					j = GraphicsUtilities.checkedIntInput ( 0 , killableAnimals.size() - 1 , -1 , -2 , s , "Scelta errata." , writer , reader ) ;
-					try 
-					{
-						f.newBreakDownMove(killableAnimals.get(j));
-					} 
-					catch (MoveNotAllowedException e1) 
-					{}				
+					res = killing(f, m);
 				break ;
 			case 2 :
-				s = "Quale carta vuoi comprare ( regione ) ?" ;
-				int k = 0;
-				for ( RegionType rt : RegionType.values () ) 
-				{	
-					if ( rt != RegionType.SHEEPSBURG )
-						s = s + k + ". " + rt ;
-					k++;	
-				}
-				i = GraphicsUtilities.checkedIntInput ( 0 , RegionType.values ().length - 1 , -1 , -2 , s , "Scelta non valida." , writer , reader) ;
-				if ( i != -1 )
-					try 
-					{
-						f.newBuyCard(RegionType.values()[k]);
-					} 
-					catch (MoveNotAllowedException e1) {}
+				res = buyCard ( f , m ) ;
 			break ;
 			case 3 :
-				s = "Regioni dove puoi compire l'accoppiamento:" ;
-				s = s + "0 . " + f.getAssociatedSheperd().getPosition().getFirstBorderRegion() + "\n";
-				s = s + "1 . " + f.getAssociatedSheperd().getPosition().getSecondBorderRegion() + "\n";
-				i = GraphicsUtilities.checkedIntInput ( 0 , 1 , -1 , -2 , s , "Scelta non valida" , writer , reader ) ; 
-				if ( i != -1 )
-				try 
-				{
-					f.newMate ( i == 0 ? f.getAssociatedSheperd().getPosition().getFirstBorderRegion() : f.getAssociatedSheperd().getPosition().getSecondBorderRegion() ) ;
-				}
-				catch (MoveNotAllowedException e1) {}
+				res = mate ( f , m ) ;
 			break ;
 			case 4 :
-				Region selReg ;
-				Sheperd sh ;
-				Region r3, r4;
-				List < Ovine > movableAnimals ;
-				movableAnimals = new LinkedList<Ovine>();
-				sh = f.getAssociatedSheperd () ;
-				s = s +"Elenco degli ovini che può abbattere" ;
-				r3 = sh.getPosition().getFirstBorderRegion () ;
-				r4 = sh.getPosition().getSecondBorderRegion () ;
-				for ( Animal animal : r3.getContainedAnimals () )
-					if ( animal instanceof Ovine )
-						movableAnimals.add ( ( Ovine ) animal ) ;
-				for ( Animal animal : r4.getContainedAnimals () )
-					if ( animal instanceof Ovine )
-						movableAnimals.add ( ( Ovine ) animal ) ;
-				i = 0 ;
-				for ( Ovine ovine : movableAnimals )
-				{
-					s = s + i + ". " +ovine + "\n";
-					i ++ ;
-				}
-				s = s + "Chi vuoi muovere?" ;
-				i = GraphicsUtilities.checkedIntInput ( 0 , movableAnimals.size () - 1 , -1 , -2 , s , "Scelta non valida." , writer , reader ) ;
-				if ( i != -1 )
-				try 
-				{
-					selReg =  CollectionsUtilities.contains ( sh.getPosition().getFirstBorderRegion ().getContainedAnimals (), movableAnimals.get ( i )) ? sh.getPosition().getSecondBorderRegion() : sh.getPosition().getFirstBorderRegion() ;
-					f.newMoveSheep(movableAnimals.get ( i ) , selReg );
-				} 
-				catch (MoveNotAllowedException e1) {}
+				res = moveOvine ( f , m ) ;
 			break ;
 			case 5 :
-				List < Road > l ;
-				l = CollectionsUtilities.newListFromIterable ( m.getFreeRoads () ) ;
-				s =  "Strade ok :" ;
-				for ( i = 0 ; i < l.size() ; i ++ )
-					s = s + i+1 + " : strada : " + l.get(i) ;
-				s = s + "In quale strada vuoi andare ?" ;
-				i = GraphicsUtilities.checkedIntInput ( 1 , l.size() , -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
-				if ( i != -1 )
-					try
-					{
-						res = f.newMoveSheperd ( l.get( i - 1 ) ) ;
-					}
-					catch (MoveNotAllowedException e) {}
+				res = moveSheperd ( f , m ) ;
 			break ;
 			default :
 				res = null ;
@@ -364,6 +276,174 @@ public class CLIController extends ViewPresenter
 		return res ;
 	}
 
+	private GameMove killing ( MoveFactory f , GameMap m ) throws IOException 
+	{
+		String s ;
+		GameMove res ;
+		Region r1, r2;
+		List <Ovine> killableAnimals = new LinkedList<Ovine>();
+		int j;
+		s = "Elenco degli ovini che può abbattere";
+		r1 = f.getAssociatedSheperd().getPosition().getFirstBorderRegion();
+		r2 = f.getAssociatedSheperd().getPosition().getSecondBorderRegion();
+		for ( Animal animal : r1.getContainedAnimals () )
+			if( animal instanceof Ovine )
+				killableAnimals.add ( ( Ovine ) animal ) ;
+		for ( Animal animal : r2.getContainedAnimals () )
+			if ( animal instanceof Ovine )
+				killableAnimals.add ( ( Ovine ) animal ) ;
+		j=0;
+		for ( Ovine ovine : killableAnimals )
+		{
+			s = s + j + ". " +ovine + "\n";
+			j++;
+		}
+		s = s + "Chi vuoi abbattere?";
+		j = GraphicsUtilities.checkedIntInput ( 0 , killableAnimals.size() - 1 , -1 , -2 , s , "Scelta errata." , writer , reader ) ;
+		try 
+		{
+			res = f.newBreakDownMove(killableAnimals.get(j));
+		} 
+		catch (MoveNotAllowedException e1) 
+		{
+			writer.println ( CANNOT_DO_THIS_MOVE_EXCEPTION ) ;
+			res = null ;
+		}		
+		return res ;
+	}
+	
+	/***/
+	private GameMove buyCard ( MoveFactory f , GameMap m ) throws IOException 
+	{
+		List < RegionType > regs ;
+		String s ;
+		GameMove res ;
+		int i ;
+		s = "Quale carta vuoi comprare ( regione ) ?\n" ;
+		regs = new LinkedList < RegionType > ()  ;
+		i = 0 ;
+		for ( RegionType rt : RegionType.values () ) 
+			if ( rt != RegionType.SHEEPSBURG )
+			{
+				s = s + i + ". " + rt ;
+				regs.add ( rt );
+				i ++ ;	
+			}
+		i = GraphicsUtilities.checkedIntInput ( 0 , regs.size() - 1 , -1 , -2 , s , "Scelta non valida." , writer , reader) ;
+		if ( i != -1 )
+			try 
+			{
+				res = f.newBuyCard ( regs.get ( i ) ) ;
+			} 
+			catch (MoveNotAllowedException e1) 
+			{
+				writer.println ( CANNOT_DO_THIS_MOVE_EXCEPTION ) ;
+				res = null ;
+			}
+		else
+			res = null ;
+		return res ;
+	}
+
+	/***/
+	private GameMove mate ( MoveFactory f , GameMap m ) throws IOException 
+	{
+		GameMove res ;
+		String s ;
+		int i ;
+		s = "Regioni dove puoi compire l'accoppiamento:" ;
+		s = s + "0 . " + f.getAssociatedSheperd().getPosition().getFirstBorderRegion() + "\n";
+		s = s + "1 . " + f.getAssociatedSheperd().getPosition().getSecondBorderRegion() + "\n";
+		i = GraphicsUtilities.checkedIntInput ( 0 , 1 , -1 , -2 , s , "Scelta non valida" , writer , reader ) ; 
+		if ( i != -1 )
+			try 
+			{
+				res = f.newMate ( i == 0 ? f.getAssociatedSheperd().getPosition().getFirstBorderRegion() : f.getAssociatedSheperd().getPosition().getSecondBorderRegion() ) ;
+			}
+			catch (MoveNotAllowedException e1) 
+			{
+				writer.println ( CANNOT_DO_THIS_MOVE_EXCEPTION ) ;
+				res = null ;
+			}
+		else
+			res = null ;
+		return res ;
+	}
+	
+	/***/
+	private GameMove moveOvine ( MoveFactory f , GameMap m ) throws IOException 
+	{
+		List < Ovine > movableAnimals ;
+		Region selReg ;
+		GameMove res ;
+		Sheperd sh ;
+		Region r3 ;
+		Region r4;
+		String s ;
+		int i ;
+		movableAnimals = new LinkedList<Ovine>();
+		sh = f.getAssociatedSheperd () ;
+		s = "Elenco degli ovini che puoi spostare\n" ;
+		r3 = sh.getPosition().getFirstBorderRegion () ;
+		r4 = sh.getPosition().getSecondBorderRegion () ;
+		for ( Animal animal : r3.getContainedAnimals () )
+			if ( animal instanceof Ovine )
+				movableAnimals.add ( ( Ovine ) animal ) ;
+		for ( Animal animal : r4.getContainedAnimals () )
+			if ( animal instanceof Ovine )
+				movableAnimals.add ( ( Ovine ) animal ) ;
+		i = 0 ;
+		for ( Ovine ovine : movableAnimals )
+		{
+			s = s + i + ". " +ovine + "\n";
+			i ++ ;
+		}
+		s = s + "Chi vuoi muovere?" ;
+		i = GraphicsUtilities.checkedIntInput ( 0 , movableAnimals.size () - 1 , -1 , -2 , s , "Scelta non valida." , writer , reader ) ;
+		if ( i != -1 )
+			try 
+			{
+				selReg =  CollectionsUtilities.contains ( sh.getPosition().getFirstBorderRegion ().getContainedAnimals (), movableAnimals.get ( i )) ? sh.getPosition().getSecondBorderRegion() : sh.getPosition().getFirstBorderRegion() ;
+				res = f.newMoveSheep(movableAnimals.get ( i ) , selReg );
+			} 
+			catch (MoveNotAllowedException e1) 
+			{
+				writer.println ( CANNOT_DO_THIS_MOVE_EXCEPTION ) ;
+				res = null ;
+			}
+		else
+			res = null ;
+		return res ;
+	}
+	
+	/***/
+	private GameMove moveSheperd ( MoveFactory f , GameMap m ) throws IOException 
+	{
+		List < Road > l ;
+		String s ;
+		GameMove res ;
+		int i ;
+		l = CollectionsUtilities.newListFromIterable ( m.getFreeRoads () ) ;
+		s =  "Strade ok :" ;
+		for ( i = 0 ; i < l.size() ; i ++ )
+			s = s + i+1 + " : strada : " + l.get(i) ;
+		s = s + "In quale strada vuoi andare ?" ;
+		i = GraphicsUtilities.checkedIntInput ( 1 , l.size() , -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
+		if ( i != -1 )
+			try
+			{
+				res = f.newMoveSheperd ( l.get( i - 1 ) ) ;
+			}
+			catch (MoveNotAllowedException e) 
+			{
+				writer.println ( CANNOT_DO_THIS_MOVE_EXCEPTION ) ;
+				res = null ;
+			}
+		else
+			res = null ;
+		return res ;
+	}
+	
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
@@ -373,6 +453,9 @@ public class CLIController extends ViewPresenter
 		writer.println ( msg ) ;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public Road chooseInitRoadForSheperd(Iterable<Road> availableRoads) throws IOException 
 	{

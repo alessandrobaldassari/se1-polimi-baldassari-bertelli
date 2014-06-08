@@ -586,14 +586,22 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 								{
 									System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - CHIEDENDO DI FARE UNA MOSSA " ) ;				
 									choosenMove = currentPlayer.doMove ( moveFactory , match.getGameMap () ) ;
-									System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - MOSSA SCELTA " + choosenMove.toString () ) ;									
-									choosenMove.execute ( match ) ;
-									System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " HA ESEGUITO LA MOSSA." ) ;									
+									if ( choosenMove != null )
+									{
+										System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - MOSSA SCELTA " + choosenMove.toString () ) ;									
+										choosenMove.execute ( match ) ;
+										System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " HA ESEGUITO LA MOSSA." ) ;									
+									}
+									else
+										throw new MoveNotAllowedException ( "" ) ;
 								} 
 								catch ( MoveNotAllowedException e ) 
 								{
 									System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - ERRORE DURANTE L'ESECUZIONE DELLA MOSSA." ) ;									
+									currentPlayer.genericNotification ( "Non puoi fare questa mossa, scegline un'altra!" ) ;
+									moveIndex -- ;
 									e.printStackTrace();
+								
 								} 
 							}
 					}

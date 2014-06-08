@@ -7,7 +7,7 @@ public class MoveNotAllowedException extends Exception
 {
 	
 	/***/
-	protected MoveNotAllowedException ( String message ) 
+	public MoveNotAllowedException ( String message ) 
 	{
 		super ( message ) ;
 	}
