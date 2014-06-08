@@ -52,8 +52,7 @@ public final class PresentationMessages
 	 * The message to display if he message will not start. 
 	 */
 	public static final String MATCH_WILL_NOT_START_MESSAGE = "Siamo veramente costernati ( o sarebbe meglio dire tosati... )\nPurtroppo nessun altro giocatore in rete ora ha voglia di fare il pastore, e quindi per il momento non puoi giocare...\nL'applicazione verrà ora chiusa.\nRiprova più tardi ( magari dopo avere inviato i tuoi amici ! )" ; ;
-	
-	
+
 	/**
 	 * The message to show when the App is closed. 
 	 */

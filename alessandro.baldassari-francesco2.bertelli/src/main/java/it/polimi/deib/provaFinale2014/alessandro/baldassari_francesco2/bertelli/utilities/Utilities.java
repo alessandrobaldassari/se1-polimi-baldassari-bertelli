@@ -6,6 +6,8 @@ public class Utilities
 	
 	public static final String EMPTY_STRING = "" ;
 	
+	public static final String CARRIAGE_RETURN = "\n" ;
+	
 	/**
 	 * The character used as a delimiter in the CSV format. 
 	 */
@@ -26,6 +28,21 @@ public class Utilities
 			res [ i ] = o.getClass () ;
 			i ++ ;
 		}
+		return res ;
+	}
+	
+	/***/
+	public static String fromBackslashnStringToBrHtmlString ( String backslashnString ) 
+	{
+		String [] lines ;
+		String res ;
+		int i ;
+		lines = backslashnString.split ( CARRIAGE_RETURN ) ; 
+		res = "<html>" ;
+		for ( i = 0 ; i < lines.length - 1 ; i ++ ) 
+			res = res + lines [ i ] + "<br>" ;
+		res = res + lines [ i ] ;
+		res = res + "</html>" ;
 		return res ;
 	}
 	

@@ -47,6 +47,7 @@ public abstract class ViewPresenter implements CommunicationProtocolResponser
 		{
 			onTermination () ;
 			terminateClient () ;
+			System.exit ( 0 ) ;
 		}
 		catch ( WrongStateMethodCallException e ) 
 		{

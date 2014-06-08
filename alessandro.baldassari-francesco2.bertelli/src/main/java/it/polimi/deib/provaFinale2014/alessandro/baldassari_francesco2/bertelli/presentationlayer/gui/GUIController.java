@@ -5,6 +5,8 @@ import java.awt.Window;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -53,6 +55,11 @@ public class GUIController extends ViewPresenter
 	private static final String GAME_VIEW_KEY = "GAME" ;
 	
 	/**
+	 * A component to manage thread issues. 
+	 */
+	private ExecutorService executorService ;
+	
+	/**
 	 * A Map containing the windows used in the App. 
 	 */
 	private final Map < String , Window > views ;
@@ -61,6 +68,12 @@ public class GUIController extends ViewPresenter
 	 * A reference for the current shown window. 
 	 */
 	private Window currentShownWindow ;
+	
+	/**
+	 * A flag that indicates that the User has read the last displayed message.
+	 * Useful for view synchronization. 
+	 */
+	private boolean messageRead ;
 	
 	/**
 	 * A flag that indicates if the User expressed the will to exit the program. 
@@ -81,11 +94,13 @@ public class GUIController extends ViewPresenter
 	public GUIController () 
 	{
 		super () ;
+		executorService = Executors.newCachedThreadPool() ;
 		views = new HashMap < String , Window > () ;
 		currentShownWindow = null ;
 		wantExit = new AtomicBoolean () ;
 		name = new AtomicReference < String > () ;
 		color = new AtomicReference < NamedColor > () ;
+		messageRead = true ;
 		wantExit.set ( false ) ;
 		SwingUtilities.invokeLater ( new GUIElementsCreatorRunnable () ) ;
 	}
@@ -101,11 +116,11 @@ public class GUIController extends ViewPresenter
 			public void run () 
 			{
 				WaitingView waitingView ;
-				while ( views.get ( WAITING_VIEW_KEY ) == null ) ;
-				waitingView = ( WaitingView ) views.get ( WAITING_VIEW_KEY ) ;
+				while ( getView ( WAITING_VIEW_KEY ) == null ) ;
+				waitingView = ( WaitingView ) getView ( WAITING_VIEW_KEY ) ;
 				currentShownWindow = waitingView ;
 				waitingView.setText ( PresentationMessages.WELCOME_MESSAGE + "\n" + PresentationMessages.SERVER_CONNECTION_MESSAGE ) ;
-				waitingView.setVisible ( true ) ;
+				showView ( waitingView , false ) ;
 			} 
 		} );
 	}
@@ -117,12 +132,12 @@ public class GUIController extends ViewPresenter
 	protected void onTermination () throws IOException 
 	{
 		MessageView messageView ;
-		while ( views.get ( MESSAGE_VIEW_KEY ) == null ) ;
-		messageView = ( MessageView ) views.get ( MESSAGE_VIEW_KEY ) ;
-		currentShownWindow.setVisible ( false ) ;
+		while ( getView ( MESSAGE_VIEW_KEY ) == null ) ;
+		messageView = ( MessageView ) getView ( MESSAGE_VIEW_KEY ) ;
+		unshowView ( currentShownWindow ) ;
 		currentShownWindow = messageView ;
 		messageView.setMessage ( PresentationMessages.BYE_MESSAGE ) ;
-		messageView.setVisible ( true ) ;
+		showView ( messageView , true ) ;
 		for ( Window w : views.values () )
 		{
 			w.setVisible ( false ) ;
@@ -142,13 +157,13 @@ public class GUIController extends ViewPresenter
 			public void run () 
 			{
 				LoginView loginView ;
-				while ( views.get ( LOGIN_VIEW_KEY ) == null ) ;
-				loginView = ( LoginView ) views.get ( LOGIN_VIEW_KEY ) ;
-				currentShownWindow.setVisible ( false ) ;
+				while ( getView ( LOGIN_VIEW_KEY ) == null ) ;
+				loginView = ( LoginView ) getView ( LOGIN_VIEW_KEY ) ;
+				unshowView ( currentShownWindow ) ;
 				currentShownWindow = loginView ;
 				loginView.prepareView () ;
 				name.set ( null ) ;
-				loginView.setVisible ( true ) ;
+				showView ( loginView , false ) ;
 			} 
 		} );
 		while ( name.get () == null ) ;
@@ -160,18 +175,17 @@ public class GUIController extends ViewPresenter
 				public void run () 
 				{
 					WaitingView waitingView ;
-					waitingView = ( WaitingView ) views.get ( WAITING_VIEW_KEY ) ;
-					currentShownWindow.setVisible ( false ) ;
+					waitingView = ( WaitingView ) getView ( WAITING_VIEW_KEY ) ;
+					unshowView ( currentShownWindow ) ;
 					currentShownWindow = waitingView ;
 					waitingView.setText ( PresentationMessages.NAME_VERIFICATION_MESSAGE ) ;
-					waitingView.setVisible ( true ) ;
+					showView ( waitingView , false ) ;
 					name.set(null);
 				} 
 			} );
 		}
 		else
 			res = null ;
-		
 		return res ;
 	}
 
@@ -205,15 +219,15 @@ public class GUIController extends ViewPresenter
 				{
 					MessageView messageView ;
 					WaitingView waitingView ;
-					messageView = ( MessageView ) views.get ( MESSAGE_VIEW_KEY ) ;
-					currentShownWindow.setVisible ( false ) ;
+					messageView = ( MessageView ) getView ( MESSAGE_VIEW_KEY ) ;
+					unshowView ( currentShownWindow ) ;
 					currentShownWindow = messageView ;
 					messageView.setMessage ( PresentationMessages.NAME_ACCEPTED_MESSAGE + "\n" + notes );
-					messageView.setVisible ( true ) ;
-					waitingView = ( WaitingView ) views.get ( WAITING_VIEW_KEY ) ;
+					showView ( messageView , true ) ;
+					waitingView = ( WaitingView ) getView ( WAITING_VIEW_KEY ) ;
 					waitingView.setText ( PresentationMessages.WAITING_FOR_OTHER_PLAYERS_MESSAGE ) ;
-					currentShownWindow = messageView ;
-					messageView.setVisible ( true ) ;
+					currentShownWindow = waitingView ;
+					showView ( waitingView , false ) ;
 				} 
 			} ;
 		else
@@ -223,10 +237,10 @@ public class GUIController extends ViewPresenter
 				{
 					MessageView messageView ;
 					messageView = ( MessageView ) views.get ( MESSAGE_VIEW_KEY ) ;
-					currentShownWindow.setVisible ( false ) ;
+					unshowView ( currentShownWindow ) ;
 					currentShownWindow = messageView ;
 					messageView.setMessage ( PresentationMessages.NAME_REJECTED_MESSAGE + "\n" + notes );
-					messageView.setVisible ( true );
+					showView ( messageView , true ) ;
 				} 
 			} ;
 		SwingUtilities.invokeLater ( r ) ;
@@ -244,19 +258,21 @@ public class GUIController extends ViewPresenter
 			{
 				MessageView messageView ;
 				GameView gameView ;
-				messageView = ( MessageView ) views.get ( MESSAGE_VIEW_KEY ) ;
-				currentShownWindow.setVisible ( false ) ;
+				messageView = ( MessageView ) getView ( MESSAGE_VIEW_KEY ) ;
+				unshowView ( currentShownWindow ) ;
 				currentShownWindow = messageView ;
 				messageView.setMessage ( PresentationMessages.MATCH_STARTING_MESSAGE ) ;
-				messageView.setVisible ( true ) ;
-				gameView = ( GameView ) views.get ( GAME_VIEW_KEY ) ;
-				currentShownWindow.setVisible ( false ) ;
+				showView ( messageView , true ) ;
+				gameView = ( GameView ) getView ( GAME_VIEW_KEY ) ;
 				currentShownWindow = gameView ;
-				gameView.setVisible ( true ) ;
+				showView ( gameView , false ) ;
 			} 
 		} ) ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public void onMatchWillNotStartNotification ( final String msg ) 
 	{
@@ -265,10 +281,10 @@ public class GUIController extends ViewPresenter
 			public void run () 
 			{
 				MessageView messageView ;
-				messageView = ( MessageView ) views.get ( MESSAGE_VIEW_KEY ) ;
-				currentShownWindow.setVisible ( false ) ;
+				messageView = ( MessageView ) getView ( MESSAGE_VIEW_KEY ) ;
+				unshowView ( currentShownWindow ) ;
 				messageView.setMessage ( PresentationMessages.MATCH_WILL_NOT_START_MESSAGE + "\n" + msg ) ;
-				messageView.setVisible ( true ) ;
+				showView ( messageView , true ) ;
 				stopApp () ;
 			} 
 		} ) ;
@@ -280,19 +296,21 @@ public class GUIController extends ViewPresenter
 	@Override
 	public void generationNotification ( final String msg ) 
 	{
-		SwingUtilities.invokeLater ( new Runnable () { 
+		System.out.println ( "GUI_CONTROLLER - GENERIC_NOTIFICATION : INIZIO" ) ;
+		SwingUtilities.invokeLater ( new Runnable () 
+		{ 
 			public void run () 
 			{
-				MessageView messageView ;
+				/*MessageView messageView ;
 				Window oldWindow ;
-				messageView = ( MessageView ) views.get ( MESSAGE_VIEW_KEY ) ;
+				messageView = ( MessageView ) getView ( MESSAGE_VIEW_KEY ) ;
 				oldWindow = currentShownWindow ;
-				currentShownWindow.setVisible ( false ) ;
+				unshowView ( currentShownWindow ) ;
 				currentShownWindow = messageView ;
 				messageView.setMessage ( msg ) ;
-				messageView.setVisible ( true ) ;
+				showView ( messageView , true ) ;
 				currentShownWindow = oldWindow ;
-				currentShownWindow.setVisible ( true ) ;
+				showView ( currentShownWindow , false ) ;*/
 			} 
 		} ) ;
 		
@@ -305,8 +323,10 @@ public class GUIController extends ViewPresenter
 	public void onMessageRead () 
 	{
 		MessageView messageView ;
-		messageView = ( MessageView ) views.get ( MESSAGE_VIEW_KEY ) ;
-		messageView.setVisible ( false ) ;
+		messageView = ( MessageView ) getView ( MESSAGE_VIEW_KEY ) ;
+		messageRead = true ;
+		unshowView ( messageView ) ;
+		System.out.println ( "GUI CONTROLLER - ON_MESSAGE_READ : FINISH" ) ;
 	}
 	
 	/**
@@ -340,8 +360,8 @@ public class GUIController extends ViewPresenter
 	}
 
 	@Override
-	public Road chooseInitRoadForSheperd(Iterable<Road> availableRoads)
-			throws IOException {
+	public Road chooseInitRoadForSheperd(Iterable<Road> availableRoads) throws IOException 
+	{
 		// TODO Auto-generated method stub
 		return null;
 	}		
@@ -387,6 +407,35 @@ public class GUIController extends ViewPresenter
 									);
 	}
 	
+	/***/
+	private Window getView ( String key ) 
+	{
+		return views.get ( key ) ;
+	}
+	
+	/***/
+	private void showView ( Window view , boolean isMessage ) 
+	{
+		System.out.println ( "megmweoògme" + messageRead ) ;
+		if ( messageRead == false )
+		{
+			System.out.println ( "GUI CONTROLLER - SHOW_VIEW : DELAYING THE SHOW." ) ;
+			executorService.submit ( new ViewShowSchedulingRunnable ( view , isMessage ) ) ;
+		}
+		else
+		{
+			if ( isMessage )
+				messageRead = false  ;
+			view.setVisible ( true ) ;
+		}
+	}
+	
+	/***/
+	private void unshowView ( Window view ) 
+	{
+		view.setVisible ( false ) ;
+	}
+	
 	// INNER CLASSES
 	
 	/**
@@ -413,6 +462,39 @@ public class GUIController extends ViewPresenter
 		}
 		
 	}
-
+	
+	private class ViewShowSchedulingRunnable implements Runnable 
+	{
+		
+		private Window target ;
+		
+		private boolean isMessage ;
+		
+		public ViewShowSchedulingRunnable ( Window target , boolean isMessage ) 
+		{
+			if ( target != null )
+			{
+				this.target = target ;
+				this.isMessage = isMessage ;
+			}
+			else
+				throw new IllegalArgumentException () ;
+		}
+		
+		@Override
+		public void run () 
+		{
+			while ( messageRead == false ) ;
+			System.out.println ( "triggo" ) ;
+			SwingUtilities.invokeLater( new Runnable () 
+			{ 
+				public void run () 
+				{
+					showView ( target , isMessage ) ;
+				} 
+			} ); 
+		}
+		
+	}
 	
 }

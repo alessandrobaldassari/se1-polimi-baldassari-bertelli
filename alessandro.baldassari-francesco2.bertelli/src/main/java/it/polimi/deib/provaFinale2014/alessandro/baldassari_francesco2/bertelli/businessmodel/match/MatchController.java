@@ -75,7 +75,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	/**
 	 * The Timer value about the time to wait before begin a Match. 
 	 */
-	public static final long DELAY = 30 * Utilities.MILLISECONDS_PER_SECOND ;
+	public static final long DELAY = 45 * Utilities.MILLISECONDS_PER_SECOND ;
 	
 	/**
 	 * The maximum number of Player for a Match. 

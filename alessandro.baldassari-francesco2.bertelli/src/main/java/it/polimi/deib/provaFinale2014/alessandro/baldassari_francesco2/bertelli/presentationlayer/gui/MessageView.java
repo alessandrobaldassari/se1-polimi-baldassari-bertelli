@@ -14,6 +14,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObservableFrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Observer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WithBackgroundImagePanel;
 
 import javax.swing.AbstractAction;
@@ -62,7 +63,7 @@ class MessageViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < Mes
 
 	public static final String BACKGROUND_IMAGE_PATH = "sheepland_init.jpg" ;
 	
-	public static final String ICON_IMAGE_PATH = "" ;
+	public static final String ICON_IMAGE_PATH = "sheepland_map.jpg" ;
 	
 	private BufferedImage backgroundImage ;
 	
@@ -80,19 +81,18 @@ class MessageViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < Mes
 		try 
 		{
 			backgroundImage = GraphicsUtilities.getImage ( BACKGROUND_IMAGE_PATH ) ;
-			//iconImage = GraphicsUtilities.getImage ( ICON_IMAGE_PATH ) ;
-			iconPanel.setBackgroundImage ( backgroundImage ) ;
+			iconImage = GraphicsUtilities.getImage ( ICON_IMAGE_PATH ) ;
+			iconPanel.setBackgroundImage ( iconImage ) ;
 		}
 		catch (IOException e) 
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
 	public void setMessage ( String msg ) 
 	{
-		messageLabel.setText ( msg ) ;
+		messageLabel.setText ( Utilities.fromBackslashnStringToBrHtmlString ( msg ) ) ;
 	}
 	
 	@Override
@@ -108,9 +108,9 @@ class MessageViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < Mes
 	{
 		Insets insets ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
-		layoutComponent ( iconPanel , 0 , 0 , 0.1 , 0.9 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets );
-		layoutComponent ( messageLabel , 1 , 0 , 0.9 , 0.9 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets );
-		layoutComponent ( okButton , 0 , 1 , 1 , 0.1 , 2 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets );
+		layoutComponent ( iconPanel , 0 , 0 , 0.3 , 0.9 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets );
+		layoutComponent ( messageLabel , 1 , 0 , 0.7 , 0.9 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets );
+		layoutComponent ( okButton , 0 , 1 , 1 , 0.1 , 1 , 2 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets );
 	}
 
 	@Override
