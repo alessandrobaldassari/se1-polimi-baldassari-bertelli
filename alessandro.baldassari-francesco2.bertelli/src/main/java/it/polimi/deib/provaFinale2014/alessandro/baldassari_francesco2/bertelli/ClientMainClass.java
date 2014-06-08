@@ -36,6 +36,7 @@ public final class ClientMainClass
 	final static String byeMsg = "Grazie di avere utilizzato JSheepland\nArrivederci" ;	
 	static String netModeStr ;
 	static String presMoveStr ;
+	
 	/***/
 	private ClientMainClass () {}
 	

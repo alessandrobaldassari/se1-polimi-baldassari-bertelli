@@ -368,6 +368,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 			sheepsburg.addAnimal ( wolf ) ;
 			blackSheep.moveTo ( sheepsburg ) ;
 			wolf.moveTo ( sheepsburg ) ;
+			playersGenericNotification ( "All animals are in the Map\nBeeeee!" ) ;
 			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - PLACE SHEEPS : FINE " ) ;
 		} 
 		catch ( BlackSheepAlreadyGeneratedException e ) 
@@ -387,17 +388,22 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	private void distributeInitialCards ()
 	{
 		Stack < RegionType > regions ;
+		Card initCard ;
 		try 
 		{
-			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE INITIAL CARDS : INIZIO " ) ;
+			System.out.println ( "MATCH CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE INITIAL CARDS : INIZIO " ) ;
 			regions = new Stack < RegionType > () ;
 			for ( RegionType type : RegionType.values () ) 
 				regions.push ( type ) ;
 			regions.remove ( RegionType.SHEEPSBURG ) ;
 			CollectionsUtilities.listMesh ( regions ) ;
 			for( Player player : match.getPlayers () )
-				player.setInitialCard ( match.getBank ().takeInitialCard ( regions.pop() ) ) ;
-			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE INITIAL CARDS : FINE " ) ;
+			{
+				initCard = match.getBank ().takeInitialCard ( regions.pop() ) ;
+				player.setInitialCard ( initCard ) ;
+				player.genericNotification ( "Initial Card choosen for you !\nYour secret card has the type : " + initCard.getRegionType () + "\nRemember it!" ) ;
+			}
+			System.out.println ( "MATCH CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE INITIAL CARDS : FINE " ) ;
 		}
 		catch ( NoMoreCardOfThisTypeException e ) 
 		{
@@ -808,6 +814,13 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 			throw new RuntimeException ( e ) ;
 		}
 		
+	}
+
+	private void playersGenericNotification ( String msg )
+	{
+		for ( Player p : match.getPlayers() )
+			if ( p.isSuspended() == false )
+				p.genericNotification ( msg ) ;
 	}
 	
 	private void notifyPlayerDisconnected ( Player disconnectedPlayer ) 

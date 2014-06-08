@@ -68,7 +68,7 @@ public class Road extends GameMapElement
 	 *         or secondBorderRegion parameter is null, or if the firstBorderRegion and
 	 *         the secondBorderRegion parameter are equals.
 	 */
-	Road ( int number , int uid , Region firstBorderRegion , Region secondBorderRegion ) 
+	protected Road ( int number , int uid , Region firstBorderRegion , Region secondBorderRegion ) 
 	{
 		super ( GameMapElementType.ROAD , uid ) ;
 		if ( number >= MIN_NUMBER && number <= MAX_NUMBER && firstBorderRegion != null && secondBorderRegion != null && firstBorderRegion.equals ( secondBorderRegion ) == false )

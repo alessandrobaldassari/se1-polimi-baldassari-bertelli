@@ -29,14 +29,15 @@ import javax.swing.JRadioButton;
 public class SheperdColorRequestView extends JDialog 
 {
 
+	/***/
 	private SheperdColorRequestViewPanel view ;
 	
-	public SheperdColorRequestView ( SheperdColorRequestViewObserver observer , Iterable < NamedColor > colors ) 
+	public SheperdColorRequestView ( SheperdColorRequestViewObserver observer ) 
 	{ 
 		super ( ( Frame ) null , "JSheepland - Scelta colore pastore" , true ) ;
 		GridBagLayout g ;
 		Insets insets ;
-		view = new SheperdColorRequestViewPanel ( colors ) ;
+		view = new SheperdColorRequestViewPanel () ;
 		g = new GridBagLayout () ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
 		GraphicsUtilities.setComponentLayoutProperties ( view , g , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
@@ -48,7 +49,12 @@ public class SheperdColorRequestView extends JDialog
 		setAlwaysOnTop ( true ) ;
 	}
 	
-	interface SheperdColorRequestViewObserver extends Observer
+	public void setColors ( Iterable < NamedColor > colors ) 
+	{
+		
+	}
+	
+	public interface SheperdColorRequestViewObserver extends Observer
 	{
 		
 		public void onColorChoosed ( NamedColor selectedColor ) ;
@@ -76,7 +82,7 @@ class SheperdColorRequestViewPanel extends ObservableFrameworkedWithGridBagLayou
 	
 	private Insets insets ;
 	
-	SheperdColorRequestViewPanel ( Iterable < NamedColor > in ) 
+	SheperdColorRequestViewPanel () 
 	{
 		createComponents () ;
 		manageLayout () ;
@@ -95,6 +101,9 @@ class SheperdColorRequestViewPanel extends ObservableFrameworkedWithGridBagLayou
 		}
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void createComponents () 
 	{

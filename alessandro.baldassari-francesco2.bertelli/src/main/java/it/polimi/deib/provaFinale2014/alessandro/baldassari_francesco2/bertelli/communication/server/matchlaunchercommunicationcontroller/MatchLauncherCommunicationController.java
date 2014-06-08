@@ -12,6 +12,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.MatchState;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.PlayerWantsToExitGameException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.NetworkCommunicantPlayer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.NetworkCommunicationController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
@@ -26,7 +27,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * It is the one that sums all the inbound connections, bounds them to the GameController
  * instances and manages also the situation where just one Player wants to play ( and cannot ). 
  */
-public final class MatchLauncherCommunicationController implements NetworkCommunicationController , MatchAdderCommunicationController , MatchStartCommunicationController
+public class MatchLauncherCommunicationController implements NetworkCommunicationController , MatchAdderCommunicationController , MatchStartCommunicationController
 {
 	
 	/**
@@ -164,14 +165,18 @@ public final class MatchLauncherCommunicationController implements NetworkCommun
 			}
 			catch ( WrongMatchStateMethodCallException e )
 			{
-				if ( e.getActualState () == MatchState.CREATED ) // may be the Game Controller is late, give this Player another change to enter.
+				// may be the Game Controller is late, give this Player another change to enter.
+				if ( e.getActualState () == MatchState.CREATED ) 
 				{
 					try 
 					{
 						Thread.sleep ( WAITING_TIME ) ;
 						currentGameController.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler , connectionLoosingController ) ) ;
 					} 
-					catch ( InterruptedException e1 ) {}
+					catch ( InterruptedException e1 ) 
+					{
+						System.out.println ( "MATCH_LAUNCHER_COMMUNICATION_CONTROLLER - RUN : INTERRUPTED BY " + Thread.currentThread() ) ;
+					}
 					catch ( WrongMatchStateMethodCallException e1 ) 
 					{
 						System.out.println ( "THE GAME CONTROLLER HAS TOO LOW SPEED, SOMETHING MAY BE KO." ) ;
@@ -188,8 +193,18 @@ public final class MatchLauncherCommunicationController implements NetworkCommun
 					throw new RuntimeException ( e ) ;
 				}
 			} 
-			catch ( IOException e ) {} 
-			catch ( InterruptedException e ) {}
+			catch ( IOException e ) 
+			{
+				System.out.println ( "MATCH_LAUNCHER_COMMUNICATION_CONTROLLER - RUN : IOEXCEPTION " + e.getMessage() ) ;	
+			} 
+			catch ( InterruptedException e ) 
+			{
+				System.out.println ( "MATCH_LAUNCHER_COMMUNICATION_CONTROLLER - RUN : INTERRUPTED BY " + Thread.currentThread() ) ;
+			} 
+			catch ( PlayerWantsToExitGameException e )
+			{
+				// notify others ?
+			}
 		}
 	}
 	

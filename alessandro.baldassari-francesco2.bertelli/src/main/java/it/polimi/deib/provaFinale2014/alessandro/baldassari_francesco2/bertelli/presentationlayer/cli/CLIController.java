@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Ovine;
@@ -19,17 +21,25 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveNotAllowedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
-/***/
+/**
+ * The CLI GUI implementation 
+ */
 public class CLIController extends ViewPresenter
 {
 
 	public static final String CANNOT_DO_THIS_MOVE_EXCEPTION = "Spiacenti, ma non puoi fare questa mossa." ;
+	
+	/**
+	 * The time to wait after that shutdown the program. 
+	 */
+	public static final long DOWN_DELAY = 5 * Utilities.MILLISECONDS_PER_SECOND ;
 	
 	/**
 	 * A BufferedReader object to retrieve the user's input 
@@ -41,12 +51,18 @@ public class CLIController extends ViewPresenter
 	 */
 	private PrintStream writer ;
 	
+	/**
+	 * A component to manage thread issues. 
+	 */
+	private Executor executorService ;
+	
 	/***/
 	public CLIController () 
 	{
 		super () ;
 		reader = new BufferedReader ( new InputStreamReader ( System.in ) ) ;
 		writer = System.out ;
+		executorService = Executors.newCachedThreadPool () ;
 	}
 	
 	/**
@@ -55,7 +71,26 @@ public class CLIController extends ViewPresenter
 	@Override
 	public void startApp () 
 	{
-		writer.println("Benvenuto in JSheepland.") ;
+		writer.println ( PresentationMessages.WELCOME_MESSAGE ) ;
+		writer.println ( PresentationMessages.SERVER_CONNECTION_MESSAGE ) ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	protected void onTermination () throws IOException 
+	{
+		writer.println ( PresentationMessages.BYE_MESSAGE ) ;
+		reader.close () ;
+		try 
+		{
+			Thread.sleep ( DOWN_DELAY ) ;
+		}
+		catch ( InterruptedException e ) 
+		{
+			throw new RuntimeException () ;
+		}
 	}
 	
 	/**
@@ -67,13 +102,21 @@ public class CLIController extends ViewPresenter
 		String res = null ;
 		try 
 		{
-			writer.println ( "Prego, inserisci il nome con cui vuoi giocare : " );
+			writer.println ( PresentationMessages.NAME_REQUEST_MESSAGE ) ;
+			writer.println ( "-1 per uscire." ) ;
 			res = reader.readLine ().trim () ;
-			writer.println ( "Attendi che il Server controlli se il tuo nome è ok." ) ;
+			if ( res.compareToIgnoreCase ( "-1" ) == 0 )
+			{
+				res = null ;
+				executorService.execute ( new DownAction () ) ;
+			}
+			else
+				writer.println ( PresentationMessages.NAME_VERIFICATION_MESSAGE ) ;
 		} 
 		catch (IOException e) 
 		{
-			e.printStackTrace();
+			res = null ;
+			executorService.execute ( new DownAction () ) ;
 		}
 		return res ;
 	}
@@ -82,21 +125,23 @@ public class CLIController extends ViewPresenter
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void onNotifyMatchStart () 
+	public void onNameRequestAck ( boolean isOk , String notes ) 
 	{
-		writer.println ( "Tutti i giocatori sono arrivati.\nIl gioco sta per cominciare." ) ;
+		String msg ;
+		if ( isOk ) 
+			msg =PresentationMessages.NAME_ACCEPTED_MESSAGE + "\n" + notes ;
+		else
+			msg = PresentationMessages.NAME_REJECTED_MESSAGE + "\n" + notes ;
+		writer.println ( msg );
 	}
 	
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void onNameRequestAck ( boolean isOk , String notes ) 
+	public void onNotifyMatchStart () 
 	{
-		if ( isOk ) 
-			writer.println ( "Nome valido.\nAttendi gli altri giocatori!" ) ;
-		else
-			writer.println( notes ) ;
+		writer.println ( PresentationMessages.MATCH_STARTING_MESSAGE ) ;
 	}
 	
 	/**
@@ -105,21 +150,21 @@ public class CLIController extends ViewPresenter
 	@Override
 	public void onMatchWillNotStartNotification ( String msg ) 
 	{
-		try 
-		{
-			System.exit ( 0 ) ; 
-			writer.println ( msg ) ;
-			terminateClient () ;
-		}
-		catch ( WrongStateMethodCallException e ) 
-		{
-			e.printStackTrace();
-		}
+		writer.println ( PresentationMessages.MATCH_WILL_NOT_START_MESSAGE + "\n" + msg ) ;
+		executorService.execute ( new DownAction () ) ;
 	}
 	
 	/**
 	 * AS THE SUPER'S ONE. 
-	 * @throws IOException 
+	 */
+	@Override
+	public void generationNotification ( String msg ) 
+	{
+		writer.println ( msg ) ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
 	public NamedColor onSheperdColorRequest ( Iterable < NamedColor > availableColors ) throws IOException 
@@ -144,8 +189,8 @@ public class CLIController extends ViewPresenter
 		}
 		else
 		{
-			down () ;
-			throw new RuntimeException () ;
+			res = null ;
+			stopApp () ;
 		}	
 		return res ;
 	}
@@ -174,8 +219,8 @@ public class CLIController extends ViewPresenter
 			res = sheperds.get( i ) ;
 		else
 		{
-			down () ;
-			throw new RuntimeException () ;
+			res = null ;
+			stopApp () ;
 		}
 		return res ;
 	}
@@ -443,15 +488,6 @@ public class CLIController extends ViewPresenter
 			res = null ;
 		return res ;
 	}
-	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public void generationNotification ( String msg ) 
-	{
-		writer.println ( msg ) ;
-	}
 
 	/**
 	 * AS THE SUPER'S ONE. 
@@ -477,28 +513,23 @@ public class CLIController extends ViewPresenter
 			res = l.get ( i ) ;
 		else
 		{
-			down () ;
-			throw new RuntimeException () ;
+			res = null ;
+			stopApp () ;
 		}
 		return res ;
 	}
 	
-	/**
-	 * Shut down this component.
-	 * 
-	 * @throws IOException always.
-	 */
-	private void down () throws IOException 
+	// INNNER CLASSES
+	
+	private class DownAction implements Runnable 
 	{
-		try 
+
+		@Override
+		public void run () 
 		{
-			terminateClient();
-			throw new IOException () ;
-		} 
-		catch ( WrongStateMethodCallException e ) 
-		{
-			throw new RuntimeException ( e ) ;
+			stopApp () ;
 		}
+		
 	}
 	
 }

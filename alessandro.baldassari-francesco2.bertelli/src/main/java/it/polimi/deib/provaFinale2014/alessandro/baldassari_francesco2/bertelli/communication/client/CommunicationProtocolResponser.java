@@ -17,16 +17,24 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public interface CommunicationProtocolResponser 
 {
 
-	/***/
+	/**
+	 * Implementers has to return from here with the name choosen for a Match. 
+	 */
 	public String onNameRequest () throws IOException ;
 	
-	/***/
+	/**
+	 * Notification by the server to communicate if the choosen name is ok or not. 
+	 */
 	public void onNameRequestAck ( boolean isOk , String notes ) ;
 	
-	/***/
+	/**
+	 * Notification by the server that the Match is about to start. 
+	 */
 	public void onNotifyMatchStart () ;
 	
-	/***/
+	/**
+	 * Notification by the server that the Match will not start. 
+	 */
 	public void onMatchWillNotStartNotification ( String msg ) ;
 	
 	/***/
@@ -47,7 +55,9 @@ public interface CommunicationProtocolResponser
 	/***/
 	public SellableCard onChoseCardToBuy ( Iterable < SellableCard > acquirables ) throws IOException ;
 	
-	/***/
+	/**
+	 * Generic notification by the Server. 
+	 */
 	public void generationNotification ( String msg ) ;
 	
 }

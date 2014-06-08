@@ -143,10 +143,7 @@ public abstract class Client extends Thread implements Terminable
 			super.start () ;
 	}
 	
-	private void connectionDownManagement () 
-	{
-		
-	}
+	private void connectionDownManagement () {}
 	
 	/**
 	 * AS THE SUPER'S ONE.
