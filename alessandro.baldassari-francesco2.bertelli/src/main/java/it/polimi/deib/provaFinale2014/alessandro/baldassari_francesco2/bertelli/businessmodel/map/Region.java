@@ -127,7 +127,11 @@ public class Region extends GameMapElement
 		return containedAnimals ;
 	}
 	
-	/***/
+	/**
+	 * Determines if this Region is closed, according to the definition of this term in the business rules.
+	 * 
+	 * @return true if this Region is closed, false else.
+	 */
 	public boolean isClosed () 
 	{
 		boolean result ;
@@ -141,11 +145,27 @@ public class Region extends GameMapElement
 		return result ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
-	public String toString(){
-		return type.toString();
-	}
+	public String toString ()
+	{
+		String res ;
+		res = super.toString () ;
+		res = res + "Region Type :" + type +  "\n" ;
+		res = res + "Border Roads : " ;
+		for ( Road r : borderRoads )
+			res = res + "* " + r + "\n" ;
+		res = res + "Contained animals : " ;
+		for ( Animal a : containedAnimals )
+			res = res + "* " + a + "\n" ;
+		return res ;
+	}		
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public boolean equals ( Object obj ) 
 	{

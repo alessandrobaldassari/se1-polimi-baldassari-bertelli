@@ -65,4 +65,16 @@ public class Sheperd extends Character < Road >
 		return color ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	public String toString ()
+	{
+		String res ;
+		res = super.toString () ;
+		res = res + "Color : " + color + "\n" ;
+		res = res + "Owner : " + owner + "\n" ;
+		return res ;
+	}
+	
 }

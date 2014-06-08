@@ -255,6 +255,20 @@ public class Bank implements Serializable
 		return res ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public String toString () 
+	{
+		String res ;
+		res = "Bank\nInitial Cards owned : " + initialCards + "\n" ;
+		res = res + "Non Initial Cards owned : " + cards + "\n" ;
+		res = res + "Fences owned : " + fences + "\n" ;
+		res = res + "Money Reserve : " + moneyReserve ;
+		return res ;
+	}
+	
 	// INNER CLASSES 
 	
 	// EXCEPTIONS

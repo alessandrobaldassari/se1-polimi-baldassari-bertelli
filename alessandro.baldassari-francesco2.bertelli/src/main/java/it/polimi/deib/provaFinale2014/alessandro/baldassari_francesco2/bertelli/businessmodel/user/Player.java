@@ -368,6 +368,17 @@ public abstract class Player implements Serializable , Suspendable
 	 */
 	public abstract void genericNotification ( String message ) ;
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public String toString () 
+	{
+		String res ;
+		res = "Player.\n" ;
+		return res ;
+	}
+	
 	// INNER CLASSES
 	
 	// EXCEPTIONS

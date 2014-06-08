@@ -157,6 +157,9 @@ public class Road extends GameMapElement
 		return elementContained ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public boolean equals ( Object obj ) 
 	{
@@ -168,8 +171,21 @@ public class Road extends GameMapElement
 		return res;
 	}
 	
+	/**
+	 * AS THE SUPER' ONE. 
+	 */
+	@Override
 	public String toString ()
 	{
-		return "Road: num " + number + " firstBorderRegion " + firstBorderRegion + " secondBorderRegion " + secondBorderRegion; 
+		String res ;
+		res = super.toString () ;
+		res = res + "Number : " + number + "\n" ;
+		res = res + "Element Contained : " + elementContained + "\n" ;
+		res = res + "First Border Region : " + firstBorderRegion + "\n" ;
+		res = res + "Second Border Region : " + secondBorderRegion + "\n" ;
+		res = res + "Adjacent roads : " ;
+		for ( Road r : adjacentRoads )
+			res = res + "* " + r ;
+		return res ;
 	}
 }

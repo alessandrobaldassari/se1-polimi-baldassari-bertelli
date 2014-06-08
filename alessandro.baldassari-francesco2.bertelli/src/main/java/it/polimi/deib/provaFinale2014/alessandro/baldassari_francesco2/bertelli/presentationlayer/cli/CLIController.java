@@ -29,10 +29,14 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class CLIController extends ViewPresenter
 {
 
-	/***/
+	/**
+	 * A BufferedReader object to retrieve the user's input 
+	 */
 	private BufferedReader reader ;
 	
-	/***/
+	/**
+	 * A PrintStream object to send output to users. 
+	 */
 	private PrintStream writer ;
 	
 	/***/
@@ -156,17 +160,17 @@ public class CLIController extends ViewPresenter
 		String s ;
 		int i ;
 		sheperds = CollectionsUtilities.newListFromIterable ( playersSheperd ) ;
-		s = "Scegli uno dei tuoi pastori per questo turno:" ;
-		s = s + "Scegli uno dei tuoi pastori per questo turno:\n1. Il primo\n2. Il secondo" ;
+		s = "Scegli uno dei tuoi pastori per questo turno\n:" ;
+		s = s + "Scegli uno dei tuoi pastori per questo turno:\n1. Il primo\n2. Il secondo\n-1. " ;
 		i = GraphicsUtilities.checkedIntInput ( 1 , 2 , -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
 		if ( i != -1 )
-			res = sheperds.get(i);
+			res = sheperds.get( i - 1 ) ;
 		else
 		{
 			down () ;
 			throw new RuntimeException () ;
 		}
-		return sheperds.get ( i - 1 ) ;
+		return res ;
 	}
 
 	/**
@@ -250,14 +254,14 @@ public class CLIController extends ViewPresenter
 					s = "Elenco degli ovini che può abbattere";
 					r1 = f.getAssociatedSheperd().getPosition().getFirstBorderRegion();
 					r2 = f.getAssociatedSheperd().getPosition().getSecondBorderRegion();
-					for (Animal animal : r1.getContainedAnimals () )
-						if(animal instanceof Ovine)
-							killableAnimals.add((Ovine) animal ) ;
-					for(Animal animal : r2.getContainedAnimals())
-						if(animal instanceof Ovine)
+					for ( Animal animal : r1.getContainedAnimals () )
+						if( animal instanceof Ovine )
+							killableAnimals.add ( ( Ovine ) animal ) ;
+					for ( Animal animal : r2.getContainedAnimals () )
+						if ( animal instanceof Ovine )
 							killableAnimals.add ( ( Ovine ) animal ) ;
 					j=0;
-					for(Ovine ovine : killableAnimals)
+					for ( Ovine ovine : killableAnimals )
 					{
 						s = s + j + ". " +ovine + "\n";
 						j++;
@@ -272,104 +276,80 @@ public class CLIController extends ViewPresenter
 					{}				
 				break ;
 			case 2 :
+				s = "Quale carta vuoi comprare ( regione ) ?" ;
 				int k = 0;
-				for(RegionType rt : RegionType.values()){
-					writer.println(k + " " + rt);
+				for ( RegionType rt : RegionType.values () ) 
+				{	
+					if ( rt != RegionType.SHEEPSBURG )
+						s = s + k + ". " + rt ;
 					k++;	
 				}
-			try 
-			{
-				f.newBuyCard(RegionType.values()[k]);
-			} 
-			catch (MoveNotAllowedException e1) 
-			{
-				e1.printStackTrace();
-			}
+				i = GraphicsUtilities.checkedIntInput ( 0 , RegionType.values ().length - 1 , -1 , -2 , s , "Scelta non valida." , writer , reader) ;
+				if ( i != -1 )
+					try 
+					{
+						f.newBuyCard(RegionType.values()[k]);
+					} 
+					catch (MoveNotAllowedException e1) {}
 			break ;
 			case 3 :
-				int u ;
-				writer.println("Regioni dove puoi compire l'accoppiamento:") ;
-				writer.println("0 . " + f.getAssociatedSheperd().getPosition().getFirstBorderRegion());
-				writer.println("1 . " + f.getAssociatedSheperd().getPosition().getSecondBorderRegion());
-			u = 0 ;
-			try {
-				u = Integer.parseInt ( reader.readLine ().trim() );
-			} catch (NumberFormatException e2) {
-				// TODO Auto-generated catch block
-				e2.printStackTrace();
-			} catch (IOException e2) {
-				// TODO Auto-generated catch block
-				e2.printStackTrace();
-			}
-			try {
-				f.newMate ( u == 0 ? f.getAssociatedSheperd().getPosition().getFirstBorderRegion() : f.getAssociatedSheperd().getPosition().getSecondBorderRegion() ) ;
-			} catch (MoveNotAllowedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+				s = "Regioni dove puoi compire l'accoppiamento:" ;
+				s = s + "0 . " + f.getAssociatedSheperd().getPosition().getFirstBorderRegion() + "\n";
+				s = s + "1 . " + f.getAssociatedSheperd().getPosition().getSecondBorderRegion() + "\n";
+				i = GraphicsUtilities.checkedIntInput ( 0 , 1 , -1 , -2 , s , "Scelta non valida" , writer , reader ) ; 
+				if ( i != -1 )
+				try 
+				{
+					f.newMate ( i == 0 ? f.getAssociatedSheperd().getPosition().getFirstBorderRegion() : f.getAssociatedSheperd().getPosition().getSecondBorderRegion() ) ;
+				}
+				catch (MoveNotAllowedException e1) {}
 			break ;
 			case 4 :
+				Region selReg ;
+				Sheperd sh ;
 				Region r3, r4;
-				List <Ovine> movableAnimals = new LinkedList<Ovine>();
-				int h;
-				writer.println("Elenco degli ovini che può abbattere");
-				r3 = f.getAssociatedSheperd().getPosition().getFirstBorderRegion();
-				r4 = f.getAssociatedSheperd().getPosition().getSecondBorderRegion();
-				for(Animal animal : r3.getContainedAnimals())
-					if(animal instanceof Ovine)
-						movableAnimals.add((Ovine) animal);
-				for(Animal animal : r4.getContainedAnimals())
-					if(animal instanceof Ovine)
-						movableAnimals.add((Ovine) animal);
-				h=0;
-				for(Ovine ovine : movableAnimals){
-					writer.println(h + " " +ovine.toString());
-					h++;
+				List < Ovine > movableAnimals ;
+				movableAnimals = new LinkedList<Ovine>();
+				sh = f.getAssociatedSheperd () ;
+				s = s +"Elenco degli ovini che può abbattere" ;
+				r3 = sh.getPosition().getFirstBorderRegion () ;
+				r4 = sh.getPosition().getSecondBorderRegion () ;
+				for ( Animal animal : r3.getContainedAnimals () )
+					if ( animal instanceof Ovine )
+						movableAnimals.add ( ( Ovine ) animal ) ;
+				for ( Animal animal : r4.getContainedAnimals () )
+					if ( animal instanceof Ovine )
+						movableAnimals.add ( ( Ovine ) animal ) ;
+				i = 0 ;
+				for ( Ovine ovine : movableAnimals )
+				{
+					s = s + i + ". " +ovine + "\n";
+					i ++ ;
 				}
-				writer.println("Chi vuoi muovere?");
-			try {
-				h = Integer.parseInt(reader.readLine().trim());
-			} catch (NumberFormatException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			try {
-				f.newMoveSheep(movableAnimals.get(h), CollectionsUtilities.contains(f.getAssociatedSheperd().getPosition().getFirstBorderRegion().getContainedAnimals(), movableAnimals.get(h)) ? f.getAssociatedSheperd().getPosition().getSecondBorderRegion() : f.getAssociatedSheperd().getPosition().getFirstBorderRegion());
-			} catch (MoveNotAllowedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+				s = s + "Chi vuoi muovere?" ;
+				i = GraphicsUtilities.checkedIntInput ( 0 , movableAnimals.size () - 1 , -1 , -2 , s , "Scelta non valida." , writer , reader ) ;
+				if ( i != -1 )
+				try 
+				{
+					selReg =  CollectionsUtilities.contains ( sh.getPosition().getFirstBorderRegion ().getContainedAnimals (), movableAnimals.get ( i )) ? sh.getPosition().getSecondBorderRegion() : sh.getPosition().getFirstBorderRegion() ;
+					f.newMoveSheep(movableAnimals.get ( i ) , selReg );
+				} 
+				catch (MoveNotAllowedException e1) {}
 			break ;
 			case 5 :
 				List < Road > l ;
 				l = CollectionsUtilities.newListFromIterable ( m.getFreeRoads () ) ;
-				writer.println ( "Strade ok :" ) ;
+				s =  "Strade ok :" ;
 				for ( i = 0 ; i < l.size() ; i ++ )
-					writer.println( i+1 + " : strada : " + l.get(i).toString()) ;
-				writer.println( "In quale strada vuoi andare ?" ) ;
-				try 
-				{
-					i = Integer.parseInt ( reader.readLine () ) ;
-					res = f.newMoveSheperd ( l.get(i) ) ;
-				} 
-				catch (MoveNotAllowedException e) 
-				{
-					res = null ;
-					e.printStackTrace();
-				} 	
-				catch ( NumberFormatException e ) 
-				{
-					res = null ;
-					e.printStackTrace();
-				} 
-				catch ( IOException e ) 
-				{
-					res = null ;
-					e.printStackTrace();
-				}
+					s = s + i+1 + " : strada : " + l.get(i) ;
+				s = s + "In quale strada vuoi andare ?" ;
+				i = GraphicsUtilities.checkedIntInput ( 1 , l.size() , -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
+				if ( i != -1 )
+					try
+					{
+						res = f.newMoveSheperd ( l.get( i - 1 ) ) ;
+					}
+					catch (MoveNotAllowedException e) {}
 			break ;
 			default :
 				res = null ;
@@ -415,7 +395,11 @@ public class CLIController extends ViewPresenter
 		return res ;
 	}
 	
-	/***/
+	/**
+	 * Shut down this component.
+	 * 
+	 * @throws IOException always.
+	 */
 	private void down () throws IOException 
 	{
 		try 

@@ -66,6 +66,19 @@ public abstract class PositionableElement < T extends GameMapElement > implement
 		return position ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public String toString () 
+	{
+		String res ;
+		res = "Character.\n" ;
+		res = res + "Type : " + positionableElementType + "\n" ;
+		res = res + "Position : " + position + "\n" ;
+		return res ;
+	}
+	
 	// ENUMERATIONS
 	
 	public enum PositionableElementType 

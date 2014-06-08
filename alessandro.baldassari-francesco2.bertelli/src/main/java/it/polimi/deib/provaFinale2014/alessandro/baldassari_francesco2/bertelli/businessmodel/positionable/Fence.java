@@ -119,6 +119,19 @@ public class Fence extends PositionableElement < Road >
 			throw new FenceAlreadyPlacedException ( this ) ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public String toString () 
+	{
+		String res ;
+		res = super.toString () ;
+		res = res + "Type : " + type + "\n" ;
+		res = res + "Place : " + placed + "\n" ;
+		return res ;
+	}
+	
 	// ENUMS
 	
 	/**

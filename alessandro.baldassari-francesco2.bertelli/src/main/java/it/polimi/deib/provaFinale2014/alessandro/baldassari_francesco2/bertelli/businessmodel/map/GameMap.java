@@ -151,12 +151,15 @@ public class GameMap implements Serializable
 	public String toString () 
 	{
 		String res ;
-		StringBuffer stringBuffer ;
-		stringBuffer = new StringBuffer () ;
-		stringBuffer.append ( "Class : " + getClass ().getName() );
-		res = stringBuffer.toString () ;
+		res = "GameMap." ;
+		res = res + "Regions : \n" ; 
+		for ( Region r : regions.values() )
+			res = res + "* " + r + "\n" ;
+		res = res + "Roads :\n" ;
+		for ( Road r : roads.values() )
+			res = res + "* " + r + "\n" ;
 		return res ;
-	}
+	}	
 	
 	/***/
 	interface GameMapObserver extends Observer 

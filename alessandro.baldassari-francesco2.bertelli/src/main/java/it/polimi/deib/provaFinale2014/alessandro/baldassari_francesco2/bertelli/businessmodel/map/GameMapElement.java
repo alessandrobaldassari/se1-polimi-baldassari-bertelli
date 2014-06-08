@@ -59,6 +59,18 @@ public abstract class GameMapElement implements Serializable
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
+	@Override
+	public String toString ()
+	{
+		String res ;
+		res = "UID : " + uid ;
+		res = res + "Type : " + gameMapElementType + "\n" ;
+		return res ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	public boolean equals ( Object obj ) 
 	{
 		GameMapElement other ;

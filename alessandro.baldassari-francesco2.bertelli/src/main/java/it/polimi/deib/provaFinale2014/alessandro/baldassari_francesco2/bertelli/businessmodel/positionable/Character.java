@@ -73,5 +73,16 @@ public abstract class Character < T extends GameMapElement > extends Positionabl
 		return res ;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	public String toString () 
+	{
+		String res ;
+		res = super.toString () ;
+		res = res + "Name : " + name + "\n" ;
+		return res ;
+	}
+	
 }
 

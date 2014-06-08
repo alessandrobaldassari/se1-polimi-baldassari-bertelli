@@ -76,12 +76,6 @@ public class Lamb extends Ovine
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public String toString ()
-	{
-		return "Lamb : " + birthTurn + " " + father + " " + mother;
-	} 
-	
-	@Override
 	public boolean equals ( Object obj ) 
 	{
 		boolean res ;
@@ -89,6 +83,20 @@ public class Lamb extends Ovine
 			res = super.equals ( obj ) ;
 		else
 			res = false ;
+		return res ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public String toString () 
+	{
+		String res ;
+		res = super.toString () ;
+		res = res + "Birth Turn : " + birthTurn + "\n" ;
+		res = res + "Mom : " + mother + "\n" ;
+		res = res + "Dad : " +father + "\n" ;
 		return res ;
 	}
 	

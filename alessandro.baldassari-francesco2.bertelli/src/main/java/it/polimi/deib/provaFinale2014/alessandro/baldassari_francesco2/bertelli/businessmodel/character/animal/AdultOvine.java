@@ -105,10 +105,16 @@ public class AdultOvine extends Ovine
 		return res ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public String toString ()
 	{
-		return "AdultOvine: " + type;
+		String res ;
+		res = super.toString () ;
+		res = res + "Ovine Type : " + type + "\n" ;
+		return res ;
 		
 	}
 
