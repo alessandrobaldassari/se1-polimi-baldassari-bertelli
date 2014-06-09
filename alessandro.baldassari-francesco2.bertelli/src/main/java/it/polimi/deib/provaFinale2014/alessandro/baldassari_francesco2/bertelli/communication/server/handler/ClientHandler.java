@@ -2,6 +2,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.PlayerWantsToExitGameException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
@@ -29,10 +30,16 @@ public abstract class ClientHandler < T >
 	 */
 	public static final String MATCH_WILL_NOT_START_MESSAGE = "Sorry, but the game can not start now" ;
 
-	/***/
+	/**
+	 * An object to technically do a net connection. 
+	 */
 	private ClientHandlerConnector < T > connector ;
 	
-	/***/
+	/**
+	 * @param connector
+	 * @throws IOException
+	 * @throws IllegalArgumentException 
+	 */
 	public ClientHandler ( ClientHandlerConnector < T > connector ) throws IOException
 	{
 		if ( connector != null )
@@ -71,7 +78,7 @@ public abstract class ClientHandler < T >
 	 * @return the name the client returns
 	 * @throws IOException if something goes wrong with the communication.
 	 */
-	public String requestName () throws IOException 
+	public String requestName () throws IOException , PlayerWantsToExitGameException 
 	{
 		String res ;
 		Message m ;
@@ -87,8 +94,11 @@ public abstract class ClientHandler < T >
 			System.out.println ( "CLIENT_HANDLER - REQUEST NAME : IN HEADER OK." ) ;
 			res = ( String ) CollectionsUtilities.newListFromIterable ( m.getParameters () ).get ( 0 ) ;
 			System.out.println ( "CLIENT_HANDLER - REQUEST NAME : IN PARAMETER OK." ) ;
-			if ( res == null || res.compareToIgnoreCase ( Utilities.EMPTY_STRING ) == 0 )
-				throw new IOException ( "BAD_RESPONSE" ) ;
+			if ( res == null )
+				throw new PlayerWantsToExitGameException () ;
+			else 
+				if ( res.compareToIgnoreCase ( Utilities.EMPTY_STRING ) == 0 )
+					throw new IOException ( "BAD_RESPONSE" ) ;
 		}
 		else
 		{

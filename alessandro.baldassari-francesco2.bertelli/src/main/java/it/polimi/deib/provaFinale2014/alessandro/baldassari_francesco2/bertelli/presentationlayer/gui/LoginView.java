@@ -1,5 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui;
 
+import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
@@ -9,11 +10,13 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.LoginView.LoginViewObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObservableFrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Observer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -23,14 +26,17 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+/***/
 public class LoginView extends JDialog 
 {
 
+	/***/
 	private LoginViewPanel loginViewPanel ;
 	
+	/***/
 	public LoginView ( LoginViewObserver observer ) 
 	{
-		super ( ( Frame ) null , "JSheepland - Login" , true ) ;
+		super ( ( Frame ) null , PresentationMessages.APP_NAME , true ) ;
 		GridBagLayout g ;
 		Insets insets ;
 		loginViewPanel = new LoginViewPanel () ;
@@ -41,21 +47,24 @@ public class LoginView extends JDialog
 		setLayout ( g ) ;
 		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
 		add ( loginViewPanel ) ;
-		setResizable ( false ) ;
 		setAlwaysOnTop ( true ) ;
 	}
 	
+	/***/
 	public void prepareView () 
 	{
 		loginViewPanel.prepareView () ;
 	}
 	
+	/***/
 	interface LoginViewObserver extends Observer
 	{
 		
+		/***/
 		public void onNameEntered ( String enteredName ) ;
 		
-		public void onExit () ;
+		/***/
+		public void onDoNotWantToEnterName () ;
 		
 	}
 	
@@ -65,6 +74,8 @@ public class LoginView extends JDialog
 class LoginViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < LoginViewObserver >
 {
 
+	private static final String EMPTY_NAME_ERROR_MESSAGE = "Un nome vuoto non va bene..." ;
+	
 	private static final String BACKGROUND_IMAGE_FILE_PATH = "sheepland_cover.jpg" ; ;
 	
 	/***/
@@ -72,6 +83,9 @@ class LoginViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < Login
 	
 	/***/
 	private JLabel textLabel ;
+	
+	/***/
+	private JLabel errorLabel ;
 	
 	/***/
 	private JTextField nameField ;
@@ -88,9 +102,11 @@ class LoginViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < Login
 		super () ;
 	}
 	
+	/***/
 	public void prepareView ()
 	{
-		nameField.setText ( "" ) ;
+		nameField.setText ( Utilities.EMPTY_STRING ) ;
+		errorLabel.setText ( Utilities.EMPTY_STRING ) ;
 	}
 	
 	/***/
@@ -110,9 +126,9 @@ class LoginViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < Login
 			backgroundImage = GraphicsUtilities.getImage ( BACKGROUND_IMAGE_FILE_PATH ) ;
 			textLabel = new JLabel () ;
 			nameField = new JTextField () ;
+			errorLabel = new JLabel () ;
 			enterButton = new JButton () ;
 			exitButton = new JButton () ;
-			
 		} 
 		catch ( IOException e ) 
 		{
@@ -129,10 +145,13 @@ class LoginViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < Login
 		insets = new Insets ( 5 , 5 , 5 , 5 ) ;
 		layoutComponent ( textLabel , 0 , 0 , 0 , 0 , 1 , 2 , 5 , 5 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
 		layoutComponent ( nameField , 0 , 1 , 0 , 0 , 1 , 2 , 5 , 5 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
-		layoutComponent ( enterButton , 0 , 2 , 0.5 , 0 , 1 , 1 , 5 , 5 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
-		layoutComponent ( exitButton , 1 , 2 , 0.5 , 0 , 1 , 1 , 5 , 5 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
-		textLabel.setText ( "Prego, inserisci il nome con cui vuoi giocare a JSheepland" ) ;
+		layoutComponent ( nameField , 0 , 2 , 0 , 0 , 1 , 2 , 5 , 5 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
+		layoutComponent ( enterButton , 0 , 3 , 0.5 , 0 , 1 , 1 , 5 , 5 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
+		layoutComponent ( exitButton , 1 , 3 , 0.5 , 0 , 1 , 1 , 5 , 5 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
+		textLabel.setText ( PresentationMessages.NAME_REQUEST_MESSAGE ) ;
 		textLabel.setHorizontalTextPosition ( SwingConstants.CENTER ) ;
+		errorLabel.setHorizontalTextPosition ( SwingConstants.CENTER ) ;
+		errorLabel.setForeground ( Color.RED ) ;
 	}
 	
 	/***/
@@ -153,6 +172,7 @@ class LoginViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < Login
 	{
 		add ( textLabel ) ;
 		add ( nameField ) ;
+		add ( errorLabel ) ;
 		add ( enterButton ) ;
 		add ( exitButton ) ;
 	}
@@ -163,17 +183,22 @@ class LoginViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < Login
 	private class OkAction extends AbstractAction 
 	{
 
+		/***/
 		public OkAction ( String frontEndText )  
 		{
 			super ( frontEndText ) ;
 		}
 		
+		/***/
 		@Override
 		public void actionPerformed ( ActionEvent e ) 
 		{
 			try 
 			{
-				LoginViewPanel.this.notifyObservers ( "onNameEntered" , nameField.getText () ) ;
+				if ( nameField.getText ().compareToIgnoreCase ( Utilities.EMPTY_STRING ) == 0 )
+					errorLabel.setText ( EMPTY_NAME_ERROR_MESSAGE ) ;
+				else
+					notifyObservers ( "onNameEntered" , nameField.getText () ) ;
 			} 
 			catch ( MethodInvocationException e1 ) 
 			{
@@ -201,7 +226,7 @@ class LoginViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < Login
 		{
 			try 
 			{
-				LoginViewPanel.this.notifyObservers ( "onExit" ) ;
+				notifyObservers ( "onDoNotWantToEnterName" ) ;
 			} 
 			catch ( MethodInvocationException e1 ) 
 			{
