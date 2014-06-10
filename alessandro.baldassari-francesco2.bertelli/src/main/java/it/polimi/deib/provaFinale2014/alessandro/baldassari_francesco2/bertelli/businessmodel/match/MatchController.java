@@ -434,6 +434,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - MONEY DISTRIBUTION : DISTRIBUISCO SOLDI AL PLAYER " + player.getName () ) ;
 			player.receiveMoney ( moneyToDistribute ) ;
 			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - MONEY DISTRIBUTION : IL PLAYER " + player.getName () + " HA RICEVUTO I SOLDI INIZIALI." ) ;
+			player.genericNotification ( "Hai ricevuto i tuoi soldi iniziali : ben " + moneyToDistribute + " denari !" ) ;
 		}
 		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - MONEY DISTRIBUTION : FINE " ) ;
 	}
@@ -460,6 +461,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 			for ( Player p : orderedPlayers )
 			{
 				playersMapOrder.put ( p , i ) ;
+				p.genericNotification ( "Il tuo turno nella partita è il numero " + ( i + 1 ) + " !" ) ;
 				i ++ ;
 			}
 			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - CHOOSE PLAYER ORDER PHASE : IMPOSTANDO L'ORDINE DEI GIOCATORI NEL MATCH." ) ;

@@ -34,7 +34,6 @@ public class WaitingView extends JDialog
 		super ( ( Frame ) null , PresentationMessages.APP_NAME , true ) ;
 		waitingPanel = new WaitingViewPanel () ;
 		add ( waitingPanel ) ;
-		setAlwaysOnTop ( true ) ;
 		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
 	}
 	
@@ -44,6 +43,11 @@ public class WaitingView extends JDialog
 	public void setText ( String text ) 
 	{
 		waitingPanel.setText ( text ) ;
+	}
+	
+	public void addNotification ( String msg ) 
+	{
+		waitingPanel.addNotification ( msg ) ;
 	}
 	
 	// INNER INTERFACES
@@ -68,6 +72,9 @@ class WaitingViewPanel extends FrameworkedWithGridBagLayoutPanel
 	private JLabel textLabel ;
 	
 	/***/
+	private NotificationPanel notificationArea ;
+	
+	/***/
 	private JProgressBar p ;
 	
 	/***/
@@ -82,10 +89,16 @@ class WaitingViewPanel extends FrameworkedWithGridBagLayoutPanel
 		if ( text != null )
 		{
 			textLabel.setText ( text ) ;
-			repaint () ;
+			textLabel.repaint () ;
 		}
 		else
 			throw new IllegalArgumentException () ;
+	}
+	
+	public void addNotification ( String n ) 
+	{
+		notificationArea.addNotification ( n ) ;
+		notificationArea.repaint () ;
 	}
 	
 	/***/
@@ -102,6 +115,7 @@ class WaitingViewPanel extends FrameworkedWithGridBagLayoutPanel
 		try 
 		{
 			textLabel = new JLabel () ;
+			notificationArea = new NotificationPanel();
 			p = new JProgressBar () ;
 			backgroundImage = GraphicsUtilities.getImage ( BACKGROUND_IMAGE_FILE_PATH ) ;
 		} 
@@ -118,10 +132,10 @@ class WaitingViewPanel extends FrameworkedWithGridBagLayoutPanel
 		Insets insets ;
 		insets = new Insets ( 5 , 5 , 5 , 5 ) ;
 		textLabel.setHorizontalTextPosition ( SwingConstants.CENTER ) ;
-		layoutComponent ( textLabel , 0 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
-		layoutComponent ( p , 0 , 1 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
-		p.setIndeterminate ( true ) ;
-					
+		layoutComponent ( textLabel , 0 , 0 , 1 , 0.125 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
+		layoutComponent ( notificationArea , 0 , 1 , 1 , 0.75 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+		layoutComponent ( p , 0 , 2 , 1 , 0.125 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
+		p.setIndeterminate ( true ) ;			
 	}
 
 	/**
@@ -134,6 +148,7 @@ class WaitingViewPanel extends FrameworkedWithGridBagLayoutPanel
 	protected void injectComponents () 
 	{
 		add ( textLabel ) ;
+		add ( notificationArea ) ;
 		add ( p ) ;
 	}
 	

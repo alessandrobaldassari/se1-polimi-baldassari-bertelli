@@ -21,4 +21,12 @@ public class NamedColor extends Color
 		return name ;
 	}
 	
+	@Override
+	public String toString () 
+	{
+		String res ;
+		res = getName ().toUpperCase() ;
+		return res ;
+	}
+	
 }

@@ -28,6 +28,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
@@ -66,13 +67,11 @@ public class GameView extends JFrame
 		add ( gameViewPanel ) ;
 	}
 	
-	public static void main ( String [] args ) 
+	public void addNotification ( String notif ) 
 	{
-		GameView g ;
-		g = new GameView () ;
-		g.setVisible(true) ;  
-	}
-	
+		gameViewPanel.addNotification(notif);
+	} 
+
 }
 
 /**
@@ -96,12 +95,19 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	 */
 	private PlayersMoveViewPanel playersMovePanel ;
 	
+	private NotificationPanel notificationArea ;
+	
 	/***/
 	GameViewPanel () 
 	{
 		super () ;
 	}
 
+	public void addNotification ( String msg ) 
+	{
+		notificationArea.addNotification(msg); 
+	}
+	
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
@@ -111,6 +117,7 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 		mapPanel = new MapViewPanel () ;
 		playersCardPanel = new PlayersCardViewPanel () ;
 		playersMovePanel = new PlayersMoveViewPanel () ;
+		notificationArea = new NotificationPanel();
 	}
 
 	/**
@@ -121,10 +128,10 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	{
 		Insets insets ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
-		layoutComponent ( playersCardPanel , 0 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.VERTICAL , GridBagConstraints.WEST , insets ) ;
-		layoutComponent ( mapPanel , 1 , 0 , 25 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
-		layoutComponent ( playersMovePanel , 2 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.VERTICAL , GridBagConstraints.EAST , insets ) ;
-
+		layoutComponent ( playersCardPanel , 0 , 0 , 1 , 1 , 2 , 1 , 0 , 0 , GridBagConstraints.VERTICAL , GridBagConstraints.WEST , insets ) ;
+		layoutComponent ( mapPanel , 1 , 0 , 25 , 1 , 2 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+		layoutComponent ( notificationArea , 2 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.EAST , insets ) ;
+		layoutComponent ( playersMovePanel , 2 , 1 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.VERTICAL , GridBagConstraints.EAST , insets ) ;
 	}
 
 	/**
@@ -142,6 +149,7 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 		add ( mapPanel ) ;
 		add ( playersCardPanel ) ;
 		add ( playersMovePanel ) ;
+		add ( notificationArea ) ;
 	}
 	
 }

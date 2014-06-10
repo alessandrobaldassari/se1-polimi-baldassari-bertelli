@@ -57,7 +57,7 @@ public class LoginView extends JDialog
 	}
 	
 	/***/
-	interface LoginViewObserver extends Observer
+	public interface LoginViewObserver extends Observer
 	{
 		
 		/***/

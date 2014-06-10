@@ -148,31 +148,13 @@ public class CLIController extends ViewPresenter
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void onMatchWillNotStartNotification ( String msg ) 
-	{
-		writer.println ( PresentationMessages.MATCH_WILL_NOT_START_MESSAGE + "\n" + msg ) ;
-		executorService.execute ( new DownAction () ) ;
-	}
-	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public void generationNotification ( String msg ) 
-	{
-		writer.println ( msg ) ;
-	}
-	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
 	public NamedColor onSheperdColorRequest ( Iterable < NamedColor > availableColors ) throws IOException 
 	{
-		List < NamedColor > colors = CollectionsUtilities.newListFromIterable ( availableColors ) ;
+		List < NamedColor > colors ;
 		String s ;
 		NamedColor res ;
 		int i ;
+		colors = CollectionsUtilities.newListFromIterable ( availableColors ) ;
 		s = "Prego, inserisci il numero del colore che vuoi scegliere per il tuo pastore\n" ;
 		i = 0 ;
 		for ( Color c : colors )
@@ -194,7 +176,26 @@ public class CLIController extends ViewPresenter
 		}	
 		return res ;
 	}
-
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void onMatchWillNotStartNotification ( String msg ) 
+	{
+		writer.println ( PresentationMessages.MATCH_WILL_NOT_START_MESSAGE + "\n" + msg ) ;
+		executorService.execute ( new DownAction () ) ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void generationNotification ( String msg ) 
+	{
+		writer.println ( msg ) ;
+	}
+	
 	/**
 	 * AS THE SUPER'S ONE. 
 	 * @throws IOException 

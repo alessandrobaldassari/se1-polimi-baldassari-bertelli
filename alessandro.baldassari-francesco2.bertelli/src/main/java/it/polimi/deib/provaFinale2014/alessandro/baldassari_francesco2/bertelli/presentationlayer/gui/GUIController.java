@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.SwingUtilities;
@@ -21,8 +20,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.LoginView.LoginViewObserver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.MessageView.MessageViewObserver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.SheperdColorRequestView.SheperdColorRequestViewObserver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.SheperdColorView.SheperdColorRequestViewObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 
@@ -31,7 +29,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * It is a Controller in the sense of the MVC pattern : it shows windows, handle gui events and so on. 
  */
 public class GUIController extends ViewPresenter 
-	implements MessageViewObserver , LoginViewObserver , SheperdColorRequestViewObserver
+	implements LoginViewObserver , SheperdColorRequestViewObserver
 {
 	
 	/**
@@ -40,14 +38,14 @@ public class GUIController extends ViewPresenter
 	private static final String WAITING_VIEW_KEY = "WAITING" ;
 	
 	/**
-	 * Identifier for the MessageView. 
-	 */
-	private static final String MESSAGE_VIEW_KEY = "MESSAGE" ;
-	
-	/**
 	 * Identifier for the LoginView. 
 	 */
 	private static final String LOGIN_VIEW_KEY = "LOGIN" ;
+	
+	/**
+	 * Identifier for the SheperdColorView
+	 */
+	private static final String SHEPERD_COLOR_VIEW = "SHEPERD_COLOR" ;
 	
 	/**
 	 * Identifier for the GameView. 
@@ -70,25 +68,16 @@ public class GUIController extends ViewPresenter
 	private Window currentShownWindow ;
 	
 	/**
-	 * A flag that indicates that the User has read the last displayed message.
-	 * Useful for view synchronization. 
-	 */
-	private boolean messageRead ;
-	
-	/**
-	 * A flag that indicates if the User expressed the will to exit the program. 
-	 */
-	private AtomicBoolean wantExit ;
-	
-	/**
 	 * Synch variable for the name input process. 
 	 */
 	private final AtomicReference < String > name ;
-	
+		
 	/**
 	 * Synch variable for the color input process. 
 	 */
 	private final AtomicReference < NamedColor > color ;
+	
+	private boolean wantExit ;
 	
 	/***/
 	public GUIController () 
@@ -97,14 +86,13 @@ public class GUIController extends ViewPresenter
 		executorService = Executors.newCachedThreadPool() ;
 		views = new HashMap < String , Window > () ;
 		currentShownWindow = null ;
-		wantExit = new AtomicBoolean () ;
 		name = new AtomicReference < String > () ;
 		color = new AtomicReference < NamedColor > () ;
-		messageRead = true ;
-		wantExit.set ( false ) ;
+		name.set ( null ) ;
+		color.set ( null ) ;
+		wantExit = false ;
 		SwingUtilities.invokeLater ( new GUIElementsCreatorRunnable () ) ;
 	}
-	
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
@@ -120,7 +108,7 @@ public class GUIController extends ViewPresenter
 				waitingView = ( WaitingView ) getView ( WAITING_VIEW_KEY ) ;
 				currentShownWindow = waitingView ;
 				waitingView.setText ( PresentationMessages.WELCOME_MESSAGE + "\n" + PresentationMessages.SERVER_CONNECTION_MESSAGE ) ;
-				showView ( waitingView , false ) ;
+				showView ( waitingView ) ;
 			} 
 		} );
 	}
@@ -131,18 +119,19 @@ public class GUIController extends ViewPresenter
 	@Override
 	protected void onTermination () throws IOException 
 	{
-		MessageView messageView ;
-		while ( getView ( MESSAGE_VIEW_KEY ) == null ) ;
-		messageView = ( MessageView ) getView ( MESSAGE_VIEW_KEY ) ;
-		unshowView ( currentShownWindow ) ;
-		currentShownWindow = messageView ;
-		messageView.setMessage ( PresentationMessages.BYE_MESSAGE ) ;
-		showView ( messageView , true ) ;
-		for ( Window w : views.values () )
-		{
-			w.setVisible ( false ) ;
-			w.dispose () ;
-		}
+		generationNotification ( PresentationMessages.BYE_MESSAGE ) ;
+		SwingUtilities.invokeLater ( new Runnable () 
+		{ 
+			public void run () 
+			{
+				unshowView ( currentShownWindow ) ;
+				for ( Window w : views.values () )
+				{
+					w.setVisible ( false ) ;
+					w.dispose () ;
+				}	
+			} 				
+		} );
 	}	
 	
 	/**
@@ -159,15 +148,24 @@ public class GUIController extends ViewPresenter
 				LoginView loginView ;
 				while ( getView ( LOGIN_VIEW_KEY ) == null ) ;
 				loginView = ( LoginView ) getView ( LOGIN_VIEW_KEY ) ;
-				unshowView ( currentShownWindow ) ;
-				currentShownWindow = loginView ;
 				loginView.prepareView () ;
 				name.set ( null ) ;
-				showView ( loginView , false ) ;
+				showView ( loginView ) ;
 			} 
 		} );
-		while ( name.get () == null ) ;
-		if ( wantExit.get () == false )
+		synchronized ( name )
+		{
+			while ( name.get () == null )
+				try 
+				{
+					name.wait () ;
+				} 
+				catch (InterruptedException e) 
+				{
+					e.printStackTrace();
+				}
+		}
+		if ( wantExit == false )
 		{
 			res = name.get () ;
 			SwingUtilities.invokeLater ( new Runnable () 
@@ -176,10 +174,7 @@ public class GUIController extends ViewPresenter
 				{
 					WaitingView waitingView ;
 					waitingView = ( WaitingView ) getView ( WAITING_VIEW_KEY ) ;
-					unshowView ( currentShownWindow ) ;
-					currentShownWindow = waitingView ;
 					waitingView.setText ( PresentationMessages.NAME_VERIFICATION_MESSAGE ) ;
-					showView ( waitingView , false ) ;
 					name.set(null);
 				} 
 			} );
@@ -187,22 +182,6 @@ public class GUIController extends ViewPresenter
 		else
 			res = null ;
 		return res ;
-	}
-
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public void onDoNotWantToEnterName () 
-	{
-		wantExit.set ( true ) ;
-		SwingUtilities.invokeLater ( new Runnable () 
-		{ 
-			public void run () 
-			{
-				stopApp () ;
-			} 
-		} );
 	}
 	
 	/**
@@ -213,37 +192,20 @@ public class GUIController extends ViewPresenter
 	{
 		Runnable r ;
 		if ( isOk )
-			r = new Runnable () 
+		{
+			generationNotification ( PresentationMessages.NAME_ACCEPTED_MESSAGE + "\n" + notes );
+			SwingUtilities.invokeLater ( new Runnable () 
 			{ 
 				public void run () 
 				{
-					MessageView messageView ;
 					WaitingView waitingView ;
-					messageView = ( MessageView ) getView ( MESSAGE_VIEW_KEY ) ;
-					unshowView ( currentShownWindow ) ;
-					currentShownWindow = messageView ;
-					messageView.setMessage ( PresentationMessages.NAME_ACCEPTED_MESSAGE + "\n" + notes );
-					showView ( messageView , true ) ;
 					waitingView = ( WaitingView ) getView ( WAITING_VIEW_KEY ) ;
 					waitingView.setText ( PresentationMessages.WAITING_FOR_OTHER_PLAYERS_MESSAGE ) ;
-					currentShownWindow = waitingView ;
-					showView ( waitingView , false ) ;
 				} 
-			} ;
+			} ) ;
+		}
 		else
-			r = new Runnable () 
-			{ 
-				public void run () 
-				{
-					MessageView messageView ;
-					messageView = ( MessageView ) views.get ( MESSAGE_VIEW_KEY ) ;
-					unshowView ( currentShownWindow ) ;
-					currentShownWindow = messageView ;
-					messageView.setMessage ( PresentationMessages.NAME_REJECTED_MESSAGE + "\n" + notes );
-					showView ( messageView , true ) ;
-				} 
-			} ;
-		SwingUtilities.invokeLater ( r ) ;
+			generationNotification ( PresentationMessages.NAME_REJECTED_MESSAGE + "\n" + notes );
 	}
 
 	/**
@@ -252,21 +214,17 @@ public class GUIController extends ViewPresenter
 	@Override
 	public void onNotifyMatchStart () 
 	{
+		generationNotification ( PresentationMessages.MATCH_STARTING_MESSAGE ) ;
 		SwingUtilities.invokeLater ( new Runnable () 
-		{ 
+		{
 			public void run () 
 			{
-				MessageView messageView ;
 				GameView gameView ;
-				messageView = ( MessageView ) getView ( MESSAGE_VIEW_KEY ) ;
-				unshowView ( currentShownWindow ) ;
-				currentShownWindow = messageView ;
-				messageView.setMessage ( PresentationMessages.MATCH_STARTING_MESSAGE ) ;
-				showView ( messageView , true ) ;
+				unshowView ( currentShownWindow );
 				gameView = ( GameView ) getView ( GAME_VIEW_KEY ) ;
 				currentShownWindow = gameView ;
-				showView ( gameView , false ) ;
-			} 
+				showView ( gameView ) ;
+			}
 		} ) ;
 	}
 	
@@ -276,57 +234,60 @@ public class GUIController extends ViewPresenter
 	@Override
 	public void onMatchWillNotStartNotification ( final String msg ) 
 	{
+		generationNotification ( msg ) ;
+		stopApp () ;
+	}
+	
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public NamedColor onSheperdColorRequest ( final Iterable < NamedColor > availableColors ) 
+	{
+		NamedColor res ;
 		SwingUtilities.invokeLater ( new Runnable () 
 		{ 
 			public void run () 
 			{
-				MessageView messageView ;
-				messageView = ( MessageView ) getView ( MESSAGE_VIEW_KEY ) ;
-				unshowView ( currentShownWindow ) ;
-				messageView.setMessage ( PresentationMessages.MATCH_WILL_NOT_START_MESSAGE + "\n" + msg ) ;
-				showView ( messageView , true ) ;
-				stopApp () ;
+				SheperdColorView sheperdColorView ;
+				sheperdColorView = ( SheperdColorView ) getView ( SHEPERD_COLOR_VIEW ) ;
+				sheperdColorView.setColors(availableColors ) ;
+				color.set ( null ) ;
+				wantExit = false ;
+				showView ( sheperdColorView ) ;
 			} 
-		} ) ;
+		} );
+		synchronized ( color )
+		{
+			while ( color.get () == null ) 
+				try 
+				{
+					color.wait();
+				}
+				catch (InterruptedException e) 
+				{					
+					e.printStackTrace();
+				}
+		}
+		if ( wantExit == false )
+		{
+			res = color.get () ;
+		}
+		else
+		{
+			res = null ;
+		}
+		return color.get() ;
 	}
 	
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void generationNotification ( final String msg ) 
+	public void generationNotification ( String msg ) 
 	{
-		System.out.println ( "GUI_CONTROLLER - GENERIC_NOTIFICATION : INIZIO" ) ;
-		SwingUtilities.invokeLater ( new Runnable () 
-		{ 
-			public void run () 
-			{
-				/*MessageView messageView ;
-				Window oldWindow ;
-				messageView = ( MessageView ) getView ( MESSAGE_VIEW_KEY ) ;
-				oldWindow = currentShownWindow ;
-				unshowView ( currentShownWindow ) ;
-				currentShownWindow = messageView ;
-				messageView.setMessage ( msg ) ;
-				showView ( messageView , true ) ;
-				currentShownWindow = oldWindow ;
-				showView ( currentShownWindow , false ) ;*/
-			} 
-		} ) ;
-		
-	}
-	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public void onMessageRead () 
-	{
-		MessageView messageView ;
-		messageView = ( MessageView ) getView ( MESSAGE_VIEW_KEY ) ;
-		messageRead = true ;
-		unshowView ( messageView ) ;
-		System.out.println ( "GUI CONTROLLER - ON_MESSAGE_READ : FINISH" ) ;
+		SwingUtilities.invokeLater ( new NotificationShowingRunnable ( msg ) ) ;
 	}
 	
 	/**
@@ -335,30 +296,72 @@ public class GUIController extends ViewPresenter
 	@Override
 	public void onNameEntered ( String enteredName ) 
 	{
-		name.set ( enteredName ) ;
+		SwingUtilities.invokeLater ( new Runnable () 
+		{ 
+			public void run () 
+			{
+				LoginView loginView ;
+				loginView = (LoginView) getView ( LOGIN_VIEW_KEY ) ;
+				unshowView ( loginView ) ;
+			} 
+		} );
+		synchronized ( name )
+		{	
+			name.set ( enteredName ) ;
+			name.notifyAll () ;
+			wantExit = false ;
+		}
 	}
 	
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public NamedColor onSheperdColorRequest ( final Iterable < NamedColor > availableColors ) 
+	public void onDoNotWantToEnterName () 
 	{
-		SwingUtilities.invokeLater ( 
-				new Runnable () 
-				{ 
-					public void run () 
-					{
-						//sheperdColorRequestView = new SheperdColorRequestView ( GUIController.this , availableColors ) ;
-						//gameView.setVisible(false);
-						//sheperdColorRequestView.setVisible ( true ) ;
-					} 
-				} 
-									);
-		while ( color.get () == null ) ;
-		return color.get() ;
+		synchronized ( name )
+		{
+			wantExit = true ;
+			name.notifyAll () ;
+		}
+		stopApp () ;
 	}
 
+	@Override
+	public void onColorChoosed ( NamedColor selectedColor ) 
+	{
+		SwingUtilities.invokeLater ( new Runnable () 
+		{ 
+			public void run () 
+			{
+				SheperdColorView s ;
+				s = (SheperdColorView) getView ( SHEPERD_COLOR_VIEW ) ;
+				unshowView ( s ) ;
+			} 
+		} );
+		synchronized ( color )
+		{
+			color.set ( selectedColor ) ;
+			color.notifyAll () ;
+			wantExit = false ;
+		}
+		
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void onDoNotWantChooseColor () 
+	{
+		synchronized  ( color ) 
+		{
+			wantExit = true ;
+			color.notifyAll () ;
+		}
+		stopApp () ;
+	}
+	
 	@Override
 	public Road chooseInitRoadForSheperd(Iterable<Road> availableRoads) throws IOException 
 	{
@@ -392,42 +395,25 @@ public class GUIController extends ViewPresenter
 		return null;
 	}
 
-	@Override
-	public void onColorChoosed ( NamedColor selectedColor ) 
-	{
-		color.set ( selectedColor ) ;
-		SwingUtilities.invokeLater ( 
-				new Runnable () 
-				{ 
-					public void run () 
-					{
-						
-					} 
-				} 
-									);
-	}
 	
-	/***/
+	
+	/**
+	 * Finds in the views map an object with the key equals to the parameter.
+	 * 
+	 * @param key the key.
+	 * @return the value associated with the key key, false if this key is not in the map.
+	 */
 	private Window getView ( String key ) 
 	{
 		return views.get ( key ) ;
 	}
 	
-	/***/
-	private void showView ( Window view , boolean isMessage ) 
+	/**
+	 *  
+	 */
+	private void showView ( Window view ) 
 	{
-		System.out.println ( "megmweoògme" + messageRead ) ;
-		if ( messageRead == false )
-		{
-			System.out.println ( "GUI CONTROLLER - SHOW_VIEW : DELAYING THE SHOW." ) ;
-			executorService.submit ( new ViewShowSchedulingRunnable ( view , isMessage ) ) ;
-		}
-		else
-		{
-			if ( isMessage )
-				messageRead = false  ;
-			view.setVisible ( true ) ;
-		}
+		view.setVisible ( true ) ;
 	}
 	
 	/***/
@@ -435,8 +421,6 @@ public class GUIController extends ViewPresenter
 	{
 		view.setVisible ( false ) ;
 	}
-	
-	// INNER CLASSES
 	
 	/**
 	 * Runnable object for the StartApp event. 
@@ -451,48 +435,54 @@ public class GUIController extends ViewPresenter
 		public void run () 
 		{
 			views.put ( WAITING_VIEW_KEY , new WaitingView () ) ;
-			views.put ( MESSAGE_VIEW_KEY , new MessageView ( GUIController.this ) ) ;
 			views.put ( LOGIN_VIEW_KEY , new LoginView ( GUIController.this ) ) ;
+			views.put ( SHEPERD_COLOR_VIEW , new SheperdColorView ( GUIController.this ) ) ;
 			views.put ( GAME_VIEW_KEY , new GameView () ) ;
 			views.get ( "WAITING" ).setSize ( GraphicsUtilities.getVGAResolution () ) ;
-			views.get ( "MESSAGE" ).setSize ( GraphicsUtilities.getVGAResolution () ) ;
-			views.get ( "LOGIN" ).setSize ( GraphicsUtilities.getVGAResolution () ) ;
+			views.get ( LOGIN_VIEW_KEY ).setSize ( GraphicsUtilities.getVGAResolution () ) ;
+			views.get ( SHEPERD_COLOR_VIEW ).setSize ( GraphicsUtilities.getVGAResolution () ) ;
 			( ( GameView ) views.get ( GAME_VIEW_KEY ) ).setExtendedState ( Frame.MAXIMIZED_BOTH ) ;
-			//views.put ( "SHEPERDS_COLOR_REQUEST" , new SheperdColorRequestView ( GUIController.this ) ) ;
 		}
 		
 	}
 	
-	private class ViewShowSchedulingRunnable implements Runnable 
+	private class NotificationShowingRunnable implements Runnable
 	{
+		private Notifier notifier ;
 		
-		private Window target ;
+		private String message ;
 		
-		private boolean isMessage ;
-		
-		public ViewShowSchedulingRunnable ( Window target , boolean isMessage ) 
+		public NotificationShowingRunnable ( String message ) 
 		{
-			if ( target != null )
-			{
-				this.target = target ;
-				this.isMessage = isMessage ;
-			}
-			else
-				throw new IllegalArgumentException () ;
+			notifier = new Notifier () ;
+			this.message = message ;
 		}
 		
 		@Override
 		public void run () 
 		{
-			while ( messageRead == false ) ;
-			System.out.println ( "triggo" ) ;
-			SwingUtilities.invokeLater( new Runnable () 
-			{ 
-				public void run () 
-				{
-					showView ( target , isMessage ) ;
-				} 
-			} ); 
+			notifier.notify ( message ) ;
+		}
+		
+	}
+	
+	private class Notifier 
+	{
+		
+		public void notify ( String messsage ) 
+		{
+			WaitingView waitingView ;
+			GameView gameView ;
+			if ( currentShownWindow instanceof WaitingView )
+			{
+				waitingView = ( WaitingView ) currentShownWindow ;
+				waitingView.addNotification(messsage);
+			}
+			else
+			{
+				gameView = ( GameView ) currentShownWindow ;
+				gameView.addNotification(messsage);
+			}
 		}
 		
 	}
