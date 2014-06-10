@@ -31,7 +31,7 @@ public class MatchTest
 		{
 			try 
 			{
-				id = new DummyMatchIdentifier ( i) ;
+				id = new DummyMatchIdentifier ( i ) ;
 				m = new Match ( GameMapFactory.getInstance().newInstance ( id ) , BankFactory.getInstance().newInstance ( id ) ) ;
 			} 
 			catch (SingletonElementAlreadyGeneratedException e) 

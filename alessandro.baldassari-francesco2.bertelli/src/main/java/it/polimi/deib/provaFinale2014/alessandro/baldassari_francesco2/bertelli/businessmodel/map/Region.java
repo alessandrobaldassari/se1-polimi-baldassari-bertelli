@@ -109,12 +109,14 @@ public class Region extends GameMapElement
 	public void addAnimal ( Animal newAnimal ) 
 	{
 		containedAnimals.add ( newAnimal ) ;
+		notifyAddElement ( getGameMapElementType () , getUID () , newAnimal.getPositionableElementType () , newAnimal.getUID () );
 	}
 	
 	/***/
 	public void removeAnimal ( Animal animal ) 
 	{
 		containedAnimals.remove ( animal ) ;
+		notifyRemoveElement ( getGameMapElementType () , getUID () , animal.getPositionableElementType () , animal.getUID ()  );
 	}
 	
 	/**
@@ -206,8 +208,9 @@ public class Region extends GameMapElement
 	
 	// EXCEPTIONS
 	
-	/***/
+	/**
+	 * This class models the situation where a User of this class try to look for a Road that does not exists. 
+	 */
 	public class NoRoadWithThisNumberException extends Exception {}
-	
 	
 }

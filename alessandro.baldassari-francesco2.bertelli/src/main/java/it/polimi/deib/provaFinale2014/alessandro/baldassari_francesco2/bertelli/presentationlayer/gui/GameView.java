@@ -1,14 +1,18 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Polygon;
-import java.awt.RenderingHints;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -28,12 +32,14 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap.GameMapObserver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElement.GameMapElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElement.PositionableElementType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementReference;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Counter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.GraphicsUtilities;
@@ -66,12 +72,21 @@ public class GameView extends JFrame
 		setResizable ( true ) ;
 		add ( gameViewPanel ) ;
 	}
-	
+
+	/***/
 	public void addNotification ( String notif ) 
 	{
 		gameViewPanel.addNotification(notif);
 	} 
 
+	public static void main ( String [] args ) 
+	{
+		GameView g ;
+		g = new GameView () ;
+		g.setExtendedState ( GameView.MAXIMIZED_BOTH );
+		g.setVisible ( true ) ;
+	}
+	
 }
 
 /**
@@ -81,31 +96,29 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 {
 
 	/**
+	 * A PlayersCardView to manage the Cards a User owns. 
+	 */
+	private PlayersCardViewPanel playersCardPanel ;
+	
+	/**
 	 * A MapView to render the Map and let the User interact with it. 
 	 */
 	private MapViewPanel mapPanel ;
 	
 	/**
-	 * A PlayersCardView to manage the Cards a User owns. 
+	 * A panel to show some notifications to the User. 
 	 */
-	private PlayersCardViewPanel playersCardPanel ;
+	private NotificationPanel notificationArea ;
 	
 	/**
 	 * A PlayersMoveView to manage the  move a User can do.
 	 */
 	private PlayersMoveViewPanel playersMovePanel ;
 	
-	private NotificationPanel notificationArea ;
-	
 	/***/
-	GameViewPanel () 
+	protected GameViewPanel () 
 	{
 		super () ;
-	}
-
-	public void addNotification ( String msg ) 
-	{
-		notificationArea.addNotification(msg); 
 	}
 	
 	/**
@@ -114,10 +127,10 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	@Override
 	protected void createComponents () 
 	{
-		mapPanel = new MapViewPanel () ;
 		playersCardPanel = new PlayersCardViewPanel () ;
-		playersMovePanel = new PlayersMoveViewPanel () ;
+		mapPanel = new MapViewPanel () ;
 		notificationArea = new NotificationPanel();
+		playersMovePanel = new PlayersMoveViewPanel () ;
 	}
 
 	/**
@@ -129,9 +142,9 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 		Insets insets ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
 		layoutComponent ( playersCardPanel , 0 , 0 , 1 , 1 , 2 , 1 , 0 , 0 , GridBagConstraints.VERTICAL , GridBagConstraints.WEST , insets ) ;
-		layoutComponent ( mapPanel , 1 , 0 , 25 , 1 , 2 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
-		layoutComponent ( notificationArea , 2 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.EAST , insets ) ;
-		layoutComponent ( playersMovePanel , 2 , 1 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.VERTICAL , GridBagConstraints.EAST , insets ) ;
+		layoutComponent ( mapPanel , 1 , 0 , 4 , 1 , 2 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+		layoutComponent ( notificationArea , 2 , 0 , 1 , 0.5 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.EAST , insets ) ;
+		layoutComponent ( playersMovePanel , 2 , 1 , 1 , 0.5 , 1 , 1 , 0 , 0 , GridBagConstraints.VERTICAL , GridBagConstraints.EAST , insets ) ;
 	}
 
 	/**
@@ -146,10 +159,18 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	@Override
 	protected void injectComponents () 
 	{
-		add ( mapPanel ) ;
 		add ( playersCardPanel ) ;
-		add ( playersMovePanel ) ;
+		add ( mapPanel ) ;
 		add ( notificationArea ) ;
+		add ( playersMovePanel ) ;
+	}
+	
+	/**
+	 * Show some notification to the User.
+	 */
+	public void addNotification ( String msg ) 
+	{
+		notificationArea.addNotification(msg); 
 	}
 	
 }
@@ -171,14 +192,14 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 	private JScrollPane scrollPane ;
 	
 	/**
-	 * A Command Panel to host some commands about the Map ( zoom and other stuff ).
-	 */
-	private CommandPanel commandPanel ;
-	
-	/**
 	 * A Drawing Panel to effectively draw the Map.
 	 */
 	private DrawingPanel drawingPanel ;
+	
+	/**
+	 * A Command Panel to host some commands about the Map ( zoom and other stuff ).
+	 */
+	private CommandPanel commandPanel ;
 	
 	/**
 	 * A component to manage the coordinates of the Map and the Objects on the Map. 
@@ -186,7 +207,10 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 	private MapMeasurementCoordinatesManager coordinatesManager ;
 	
 	/***/
-	MapViewPanel () 
+	private PositionableElementCoordinatesManager positionableElementsManager ;
+	
+	/***/
+	protected MapViewPanel () 
 	{
 		super () ;	
 	}
@@ -202,6 +226,7 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		drawingPanel = new DrawingPanel () ;
 		commandPanel = new CommandPanel () ;	
 		coordinatesManager = new MapMeasurementCoordinatesManager () ;
+		positionableElementsManager = new PositionableElementCoordinatesManager () ;
 	}
 
 	/**
@@ -219,15 +244,19 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		scrollPane.setViewportView ( drawingPanel ) ;
 		scrollPane.setVerticalScrollBarPolicy ( ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED ) ;
 		scrollPane.setHorizontalScrollBarPolicy ( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED ) ;
-		layoutComponent ( splitPane, 0 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
-		
+		layoutComponent ( splitPane, 0 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;	
 	}
 
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	protected void bindListeners () {}
+	protected void bindListeners () 
+	{
+		ComponentListener componentListener ;
+		componentListener = new ResizingManager () ;
+		addComponentListener ( componentListener );
+	}
 
 	/**
 	 * AS THE SUPER'S ONE. 
@@ -301,7 +330,14 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		@Override
 		public void paintComponent ( Graphics g ) 
 		{ 	
-			BufferedImage b ;
+			Map < Integer , Map < PositionableElementType , Counter > > dataMap ;
+			Map < PositionableElementType , Counter > specData ;
+			Rectangle boundingBox ;
+			Polygon p ;
+			Ellipse2D e ;
+			BufferedImage toDraw ;
+			int figH ;
+			int i ;
 			int x0 ;
 			int y0 ;
 			super.paintComponent ( g ) ;
@@ -313,36 +349,72 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 				y0 = ( getHeight () - backgroundImage.getHeight() ) / 2 ;
 			else
 				y0 = 0 ;
+			// draw the map
 			g.drawImage ( backgroundImage , x0 , y0 , backgroundImage.getWidth() , backgroundImage.getHeight() , this );
-			b = positionableElementsImages.get ( PositionableElementType.BLACK_SHEEP ) ;
-			g.drawImage ( b , ( int ) coordinatesManager.roadsCoordinates.get ( 2 ).getMinX() + ( getWidth() - backgroundImage.getWidth() ) /2 , ( int ) coordinatesManager.roadsCoordinates.get ( 2 ).getMinY() , coordinatesManager.ROADS_RADIUS * 2 , coordinatesManager.ROADS_RADIUS * 2 , this ) ;
+			// draw animals in the regions 
+			// retrieve data about regions
+			dataMap = positionableElementsManager.getData ( GameMapElementType.REGION ) ;
+			// for each region
+			g.setFont ( new Font ( "Arial" , Font.ITALIC , 10 ) ) ;
+			g.setColor ( Color.RED ) ;
+			for ( i = 1 ; i <= GameMap.NUMBER_OF_REGIONS ; i ++ )
+			{
+				p = coordinatesManager.getRegionBorder ( i ) ;
+				specData = dataMap.get ( i ) ;
+				// if there is someone in this region
+				if ( specData != null )
+				{
+					boundingBox = p.getBounds () ;
+					figH = boundingBox.height / specData.size () ;
+					int u ;
+					u = boundingBox.height ;
+					// effectively draw images.
+					for ( PositionableElementType t : specData.keySet() ) 
+					{
+						toDraw = positionableElementsImages.get ( t ) ;
+						g.drawImage ( toDraw , boundingBox.x , u , boundingBox.width , figH , this ) ;
+						g.drawString ( specData.get ( t ).getValue() + "" , boundingBox.x , u + figH - 20 ) ;
+						u = u + figH ;
+					}
+				}
+			}
+			// draw sheperds and fences in the roads
+			// retrieve data about roads
+			dataMap = positionableElementsManager.getData ( GameMapElementType.ROAD ) ;
+			for ( i = 1 ; i <= GameMap.NUMBER_OF_ROADS ; i ++ )
+			{
+				e = coordinatesManager.getRoadBorder ( i ) ;
+				specData = dataMap.get ( i ) ;
+				// it there is someone in
+				if ( specData != null )
+				{
+					toDraw = positionableElementsImages.get ( specData.keySet().iterator().next () ) ;
+					x0 = ( int ) ( e.getMinX() + ( getWidth() - backgroundImage.getWidth() ) /2 ) ;
+					y0 = ( int ) e.getMinY() ;
+					g.drawImage ( toDraw , x0, y0 , coordinatesManager.ROADS_RADIUS * 2 , coordinatesManager.ROADS_RADIUS * 2 , this ) ;
+				}
+			}
 		}
 		
 		/**
 		 * Zooms this GameView, the GameMap it represents and also every component drawed on it. 
 		 * 
-		 * @param factor the factor of the zoom.
+		 * @param xFactor the factor of the zoom in the x direction.
+		 * @param yFactor the factor of the zoom in the y direction.
 		 */
-		public void zoom ( float factor  ) 
+		public void zoom ( float xFactor , float yFactor ) 
 		{
 			BufferedImage original ;
-			BufferedImage resized ;
-			Graphics2D g ;
 			int newW ;
 			int newH ;
 			original = backgroundImage ;
-			newW = new Double ( original.getWidth() * factor ).intValue () ;
-			newH = new Double ( original.getHeight () * factor ).intValue () ;
+			newW = new Double ( original.getWidth() * xFactor ).intValue () ;
+			newH = new Double ( original.getHeight () * yFactor ).intValue () ;
 			preferredDimension.width = newW ;
 			preferredDimension.height = newH ;
-			resized = new BufferedImage(newW, newH, original.getType());
-		    g = resized.createGraphics();
-		    g.setRenderingHint ( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-		    g.drawImage ( original , 0, 0, newW , newH , 0, 0, original.getWidth(), original.getHeight() , this ) ;
-		    g.dispose();
-		    backgroundImage = resized ;
+			backgroundImage = GraphicsUtilities.scaleImage ( original , newH , newH ) ;
 		    SwingUtilities.updateComponentTreeUI ( MapViewPanel.this ) ;
-		    coordinatesManager.scale(factor); 
+		    coordinatesManager.scale ( xFactor , yFactor ) ; 
 		}
 		
 	}
@@ -436,7 +508,7 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 			@Override
 			public void actionPerformed ( ActionEvent e ) 
 			{
-				drawingPanel.zoom ( 0.5f ) ;
+				drawingPanel.zoom ( 0.5f , 0.5f ) ;
 			}
 			
 		}
@@ -461,7 +533,7 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 			@Override
 			public void actionPerformed ( ActionEvent e ) 
 			{
-				drawingPanel.zoom ( 2f ) ;	
+				drawingPanel.zoom ( 2f , 2f ) ;	
 			}
 					
 		}
@@ -469,7 +541,29 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 	}
 	
 	/**
-	 * Class 
+	 * This class implements a mechanism that has to fix the proportion of the split pane to 3 : 4 
+	 */
+	private class ResizingManager extends ComponentAdapter 
+	{
+		
+		public ResizingManager () 
+		{
+			super () ;
+		}
+		
+		/**
+		 * AS THE SUPER'S ONE. 
+		 */
+		@Override
+		public void componentResized ( ComponentEvent e ) 
+		{
+			splitPane.setDividerLocation ( 0.95 ) ;
+		}
+		
+	} 
+	
+	/**
+	 * Class that manages the measures of the GameMap.
 	 */
 	private class MapMeasurementCoordinatesManager
 	{
@@ -555,31 +649,105 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		} 
 		
 		/***/
-		public void scale ( float factor ) 
+		public void scale ( float xFactor , float yFactor ) 
 		{
 			int i ;
 			for ( Polygon p : regionsCoordinates.values() )
 				for ( i = 0 ; i < p.npoints ; i ++ )
 				{
-					p.xpoints [ i ] = Math.round ( p.xpoints [ i ] * factor ) ;
-					p.ypoints [ i ] = Math.round (p.ypoints [ i ] * factor) ;
+					p.xpoints [ i ] = Math.round ( p.xpoints [ i ] * xFactor ) ;
+					p.ypoints [ i ] = Math.round (p.ypoints [ i ] * yFactor) ;
 				}
 			for ( Ellipse2D p : roadsCoordinates.values () )
-				p.setFrame ( p.getX () * factor , p.getY () * factor , p.getWidth () * factor , p.getHeight () * factor ) ;
-			ROADS_RADIUS = (int) (ROADS_RADIUS * factor) ;
+				p.setFrame ( p.getX () * xFactor , p.getY () * yFactor , p.getWidth () * xFactor , p.getHeight () * yFactor ) ;
+			ROADS_RADIUS = (int) (ROADS_RADIUS * xFactor) ;
 		}
  		
+		/***/
+		public Polygon getRegionBorder ( int regionUID )
+		{
+			return regionsCoordinates.get ( regionUID ) ;
+		}
+		
+		/***/
+		public Ellipse2D getRoadBorder ( int roadUID ) 
+		{
+			return roadsCoordinates.get ( roadUID ) ;
+		}
+		
 	}
 	
-	/***/
-	private class PositionableElementCoordinatesManager 
+	/**
+	 * Class that manages the measures of the Elements which are on the GameMap. 
+	 */
+	private class PositionableElementCoordinatesManager implements GameMapObserver
 	{
 		
-		private Map < Couple < PositionableElementType , Integer > , PositionableElementReference > elems ; 
+		// ATTRIBUTES
 		
-		PositionableElementCoordinatesManager () 
+		/**
+		 * A Map object that contains the element to show on the Map; the semantics is :
+		 * key : first object an Element Type ( Sheep, Wolf, ... ), second object it's uid.
+		 * value: first object a GameElementType ( Region or Roads), second object it's uid.  
+		 */
+		private Map < Couple < PositionableElementType , Integer > , Couple < GameMapElementType , Integer > > elems ; 
+		
+		// METHODS
+		
+		/***/
+		public PositionableElementCoordinatesManager () 
 		{
-			elems = new LinkedHashMap < Couple < PositionableElementType , Integer > , PositionableElementReference > () ;
+			elems = new LinkedHashMap < Couple < PositionableElementType , Integer > , Couple < GameMapElementType , Integer > > () ;
+		}
+
+		/**
+		 * AS THE SUPER'S ONE. 
+		 */
+		@Override
+		public void onPositionableElementAdded ( GameMapElementType whereType , int whereId , PositionableElementType whoType , int whoId ) 
+		{
+			elems.put ( new Couple < PositionableElementType , Integer > ( whoType , whoId ) , new Couple < GameMapElementType , Integer > ( whereType , whereId ) ) ;
+		}
+
+		/**
+		 * AS THE SUPER'S ONE. 
+		 */
+		@Override
+		public void onPositionableElementRemoved ( GameMapElementType whereType , int whereId , PositionableElementType whoType , int whoId )
+		{
+			elems.remove ( new Couple < PositionableElementType , Integer > ( whoType , whoId ) ) ;
+		}
+		
+		/**
+		 * 
+		 * 
+		 * @param whereType the GameMapElementType to search data about.
+		 * @return a Map whose semantics is the sequent :
+		 * 	       key : the uid of a GameMapElementType 
+		 * 		   value : a Map containing, for each ElementType, the number of instances in the selected place.
+		 */
+		public Map < Integer , Map < PositionableElementType , Counter > > getData ( GameMapElementType whereType ) 
+		{
+			Map < Integer , Map < PositionableElementType , Counter > > res ;
+			Couple < GameMapElementType , Integer > out ;
+			res = new LinkedHashMap < Integer, Map < PositionableElementType , Counter > > () ;
+			for ( Couple < PositionableElementType , Integer > in : elems.keySet () )
+			{
+				out = elems.get ( in ) ;
+				// if the out object is involved into the request
+				if ( out.getFirstObject() == whereType )
+				{
+					// if there is no entry for this Position
+					if ( res.containsKey ( out.getSecondObject() ) == false )
+						res.put ( out.getSecondObject() , new LinkedHashMap < PositionableElementType , Counter > () ) ;
+					// if, in the selected position index, there is a type as the one specified by in yet, incrent
+					if ( res.get ( out.getSecondObject() ).containsKey ( in.getFirstObject() ) )
+						res.get ( out.getSecondObject() ).get ( in.getFirstObject () ).increment () ;
+					else
+						res.get ( out.getSecondObject () ).put ( in.getFirstObject () , new Counter ( 1 ) ) ;
+				}
+			}
+			return res ;
 		}
 		
 	}
@@ -589,34 +757,22 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 class PlayersCardViewPanel extends FrameworkedWithGridBagLayoutPanel 
 {
 	
-	PlayersCardViewPanel () 
+	protected PlayersCardViewPanel () 
 	{
 		super () ;
 	}
 
 	@Override
-	protected void createComponents() {
-		// TODO Auto-generated method stub
-		
-	}
+	protected void createComponents () {}
 
 	@Override
-	protected void manageLayout() {
-		// TODO Auto-generated method stub
-		
-	}
+	protected void manageLayout() {}
 
 	@Override
-	protected void bindListeners() {
-		// TODO Auto-generated method stub
-		
-	}
+	protected void bindListeners () {}
 
 	@Override
-	protected void injectComponents() {
-		// TODO Auto-generated method stub
-		
-	}
+	protected void injectComponents () {}
 
 }
 
@@ -629,29 +785,15 @@ class PlayersMoveViewPanel extends FrameworkedWithGridBagLayoutPanel
 	}
 	
 	@Override
-	protected void createComponents() {
-		// TODO Auto-generated method stub
-		
-	}
+	protected void createComponents () {}
 
 	@Override
-	protected void manageLayout() {
-		// TODO Auto-generated method stub
-		
-	}
+	protected void manageLayout () {}
 
 	@Override
-	protected void bindListeners() {
-		// TODO Auto-generated method stub
-		
-	}
+	protected void bindListeners () {}
 
 	@Override
-	protected void injectComponents() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	
+	protected void injectComponents () {}
 
 }

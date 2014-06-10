@@ -2,9 +2,11 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -24,6 +26,7 @@ public final class GraphicsUtilities
 	/***/
 	private static GraphicsUtilities instance ;
 	
+	/***/
 	private static Executor exec ;
 	
 	/***/
@@ -99,6 +102,20 @@ public final class GraphicsUtilities
 		return res ;
 	}
 	
+	/***/
+	public static BufferedImage scaleImage ( BufferedImage original , int newW , int newH ) 
+	{
+		BufferedImage resized ;
+		Graphics2D g ;
+		resized = new BufferedImage ( newW , newH , original.getType());
+	    g = resized.createGraphics();
+	    g.setRenderingHint ( RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+	    g.drawImage ( original , 0, 0, newW , newH , 0, 0, original.getWidth(), original.getHeight() , null ) ;
+	    g.dispose();
+	    return resized ;
+	}
+	
+	/***/
 	public static void showWindow ( Class windowClass , Object ... args ) 
 	{
 		Runnable runnable ;

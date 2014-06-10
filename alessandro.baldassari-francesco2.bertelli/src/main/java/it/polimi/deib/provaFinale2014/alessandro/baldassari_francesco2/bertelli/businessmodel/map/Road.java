@@ -144,6 +144,10 @@ public class Road extends GameMapElement
 	public void setElementContained ( PositionableElement < Road > elementContained ) 
 	{
 		this.elementContained = elementContained ;
+		if ( elementContained != null )
+			notifyAddElement ( getGameMapElementType () , getUID () , elementContained.getPositionableElementType () , elementContained.getUID () ) ;
+		else
+			notifyRemoveElement ( getGameMapElementType () , getUID () , elementContained.getPositionableElementType () , elementContained.getUID ()  ) ;
 	}
 	
 	/**

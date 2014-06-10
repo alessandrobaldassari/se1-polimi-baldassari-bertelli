@@ -12,6 +12,10 @@ public abstract class PositionableElement < T extends GameMapElement > implement
 
 	// ATTRIBUTES
 	
+	private static int UIDGenerator = -1 ;
+	
+	private final int uid ;
+	
 	/**
 	 * The type of this PositionableElement. 
 	 */
@@ -31,9 +35,18 @@ public abstract class PositionableElement < T extends GameMapElement > implement
 	protected PositionableElement ( PositionableElementType positionableElementType ) 
 	{
 		if ( positionableElementType != null )
+		{
+			UIDGenerator ++ ;
+			uid = UIDGenerator ;
 			this.positionableElementType = positionableElementType ;
+		}
 		else
 			throw new IllegalArgumentException () ;
+	}
+	
+	public int getUID () 
+	{
+		return uid ;
 	}
 	
 	/**
