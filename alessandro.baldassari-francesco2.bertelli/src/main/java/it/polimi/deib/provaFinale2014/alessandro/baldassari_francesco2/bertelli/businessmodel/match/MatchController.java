@@ -1,5 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.GameConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank.Bank;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank.BankFactory;
@@ -76,17 +77,6 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	 * The Timer value about the time to wait before begin a Match. 
 	 */
 	public static final long DELAY = 45 * Utilities.MILLISECONDS_PER_SECOND ;
-	
-	/**
-	 * The maximum number of Player for a Match. 
-	 */
-	public static final int MAX_NUMBER_OF_PLAYERS = 4;
-
-	/**
-	 * The number of moves a Player can do each turn.
-	 * It's a business rule. 
-	 */
-	public static final int NUMBER_OF_MOVES_PER_USER_PER_TURN = 3 ;
 	
 	/**
 	 * Static variable to generate id's for the Match objects here created. 
@@ -296,7 +286,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 					System.out.println ( "GAME CONTROLLER : WAIT FOR PLAYERS PHASE - PLAYER ACCETTATO" ) ;
 					match.addPlayer ( newPlayer ) ;
 					System.out.println ( "GAME CONTROLLER : WAIT FOR PLAYERS PHASE - PLAYER AGGIUNTO AL MATCH" ) ;
-					if ( match.getNumberOfPlayers () == MAX_NUMBER_OF_PLAYERS ) 
+					if ( match.getNumberOfPlayers () == GameConstants.MAX_NUMBER_OF_PLAYERS ) 
 					{
 						System.out.println ( "GAME CONTROLLER : WAIT FOR PLAYERS PHASE - MASSIMO NUMERO DI GIOCATORI RAGGIUNTO" ) ;
 						timer.cancel () ;
@@ -488,7 +478,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 		Sheperd [] sheperds ;
 		Road selectedRoad ;
 		int numberOfSheperdsPerPlayer ;
-		colors = generateInitialColors () ;
+		colors = CollectionsUtilities.newCollectionFromIterable( GameConstants.getSheperdColors () ) ;
 		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : INIZIO " ) ;
 		numberOfSheperdsPerPlayer = match.getNumberOfPlayers () == 2 ? 2 : 1 ;
 		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : INIZIO " ) ;
@@ -519,8 +509,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 					}
 					for ( Sheperd s : p.getSheperds () )
 					{
-						//selectedRoad = p.chooseInitialRegionForASheperd ( match.getGameMap ().getFreeRoads () ) ;
-						selectedRoad = match.getGameMap ().getFreeRoads ().iterator().next () ;
+						selectedRoad = p.chooseInitialRoadForASheperd ( match.getGameMap ().getFreeRoads () ) ;
 						s.moveTo ( selectedRoad ) ;
 						selectedRoad.setElementContained ( s ) ;
 					}
@@ -533,17 +522,6 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 			}
 		}
 		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : FINE " ) ;
-	}
-		
-	private Collection < NamedColor > generateInitialColors () 
-	{
-		Collection < NamedColor > colors ;
-		colors = new LinkedList < NamedColor > () ;
-		colors.add ( new NamedColor ( Color.RED.getRed() , Color.RED.getGreen() , Color.RED.getBlue() , "RED" ) ) ;
-		colors.add ( new NamedColor ( Color.BLUE.getRed() , Color.BLUE.getGreen() , Color.BLUE.getBlue() , "BLUE" ) ) ;
-		colors.add ( new NamedColor ( Color.GREEN.getRed() , Color.GREEN.getGreen() , Color.GREEN.getBlue() , "GREEN" ) ) ;
-		colors.add ( new NamedColor ( Color.YELLOW.getRed () , Color.YELLOW.getGreen () , Color.YELLOW.getBlue () , "YELLOW" ) ) ;
-		return colors ;
 	}
 	
 	/**
@@ -588,7 +566,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 						try
 						{
 							moveFactory = moveFactoryGenerator ( currentPlayer ) ;
-							for ( moveIndex = 0 ; moveIndex < NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ )
+							for ( moveIndex = 0 ; moveIndex < GameConstants.NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ )
 							{	
 								try 
 								{
@@ -607,9 +585,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 								{
 									System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - ERRORE DURANTE L'ESECUZIONE DELLA MOSSA." ) ;									
 									currentPlayer.genericNotification ( "Non puoi fare questa mossa, scegline un'altra!" ) ;
-									moveIndex -- ;
-									e.printStackTrace();
-								
+									moveIndex -- ;								
 								} 
 							}
 					}
@@ -645,9 +621,13 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	}
 	
 	/**
-	 * @param
-	 * @return
-	 * @throws 
+	 * Helper method that allows the System to choose a Sheperd for a Player's turn ( eventually aking him who ),
+	 * and then create a MoveFactory for this User to play.
+	 * 
+	 * @param currentPlayer the player for who a MoveFactory has to be built.
+	 * @return the created GameMoveFactory
+	 * @throws TimeoutException if the currentPlayer has to choose between some Sheperds and
+	 * 	       does not answer before a timeout.
 	 */
 	private MoveFactory moveFactoryGenerator ( Player currentPlayer ) throws TimeoutException 
 	{
@@ -657,7 +637,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 		if ( match.getNumberOfPlayers () == 2 )
 		{
 			System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR - CHIDENDO AL PLAYER : " + currentPlayer.getName () + " DI SCEGLIERE UN PASTORE" ) ;					
-			choosenSheperd = currentPlayer.chooseSheperdForATurn () ;
+			choosenSheperd = currentPlayer.chooseSheperdForATurn ( currentPlayer.getSheperds () ) ;
 			System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR - IL PLAYER : " + currentPlayer.getName () + " HA SCELTO IL PASTORE " + choosenSheperd.getName () ) ;									
 			res = MoveFactory.newInstance ( choosenSheperd , this , lambEvolver ) ;
 		}

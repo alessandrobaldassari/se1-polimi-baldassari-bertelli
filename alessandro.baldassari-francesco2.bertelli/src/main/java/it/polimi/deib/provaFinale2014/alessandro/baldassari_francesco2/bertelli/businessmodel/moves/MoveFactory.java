@@ -19,7 +19,7 @@ public class MoveFactory implements Serializable
 	private final transient TurnNumberClock clockSource ;
 	
 	/***/
-	private Move lastMove ;
+	private GameMoveType lastMove ;
 	
 	/***/
 	private byte numberOfMovesDone ;
@@ -71,10 +71,10 @@ public class MoveFactory implements Serializable
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new MoveNotAllowedException ( "" ) ;
 		else 
-			if ( lastMove == null || lastMove != Move.BREAK_DOWN )
+			if ( lastMove == null || lastMove != GameMoveType.BREAK_DOWN )
 			{
 				numberOfMovesDone ++ ;
-				lastMove = Move.BREAK_DOWN ;
+				lastMove = GameMoveType.BREAK_DOWN ;
 				return new BreakDown ( sheperd , animalToBreak ) ;
 			}
 			else
@@ -87,10 +87,10 @@ public class MoveFactory implements Serializable
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new MoveNotAllowedException ( "" ) ; 
 		else 
-			if ( lastMove == null || lastMove != Move.BUY_CARD )
+			if ( lastMove == null || lastMove != GameMoveType.BUY_CARD )
 			{
 				numberOfMovesDone ++ ;
-				lastMove = Move.BUY_CARD ;
+				lastMove = GameMoveType.BUY_CARD ;
 				return new BuyCard ( sheperd , buyingCardType ) ;
 			}
 			else
@@ -103,10 +103,10 @@ public class MoveFactory implements Serializable
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new MoveNotAllowedException ( "" ) ; 
 		else  
-			if ( lastMove == null || lastMove != Move.BUY_CARD )
+			if ( lastMove == null || lastMove != GameMoveType.BUY_CARD )
 			{
 				numberOfMovesDone ++ ;
-				lastMove = Move.MATE ;
+				lastMove = GameMoveType.MATE ;
 				return new Mate ( clockSource , lambEvolver , sheperd , whereMate ) ;
 			}
 			else
@@ -119,10 +119,10 @@ public class MoveFactory implements Serializable
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new MoveNotAllowedException ( "" ) ; 
 		else  
-			if ( lastMove == null || lastMove != Move.BUY_CARD )
+			if ( lastMove == null || lastMove != GameMoveType.BUY_CARD )
 			{
 				numberOfMovesDone ++ ;
-				lastMove = Move.MATE ;
+				lastMove = GameMoveType.MATE ;
 				return new MoveSheep ( sheperd , movingOvine , ovineDestinationRegion ) ;
 			}
 			else
@@ -135,23 +135,6 @@ public class MoveFactory implements Serializable
 		sheperdMoved = true ;
 		numberOfMovesDone ++ ;
 		return new MoveSheperd ( sheperd , roadWhereGo ) ;
-	}
-	
-	// ENUMERATIONS
-	
-	private enum Move 
-	{
-		
-		BREAK_DOWN ,
-		
-		BUY_CARD ,
-		
-		MATE ,
-		
-		MOVE_SHEEP ,
-		
-		MOVE_SHEPERD 
-		
 	}
 	
 }

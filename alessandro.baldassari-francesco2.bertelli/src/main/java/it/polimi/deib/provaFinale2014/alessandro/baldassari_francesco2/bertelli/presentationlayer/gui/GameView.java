@@ -43,8 +43,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.GameView.GameMapViewObserver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.GameView.GameViewInputMode;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Counter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
@@ -53,7 +51,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.ObservableFrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observable;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observer;
 
 /**
  * This class is a JFrame wrapper for the GameView. 
@@ -99,43 +96,11 @@ public class GameView extends JFrame
 	{
 		gameViewPanel.setInputMode ( mode ) ;
 	}
-	
-	// ENUMS
-	
-		/**
-		 * An enum that clarifies which subject may be found by mouse click. 
-		 */
-		public enum GameViewInputMode 
-		{
-			
-			REGIONS ,
-			
-			ROADS ,
-			
-			ANIMALS ,
-			
-			SHEPERDS
-			
-		}
-	
-	// INNER INTERFACES
-	
+
 	/***/
-	public interface GameMapViewObserver extends Observer 
+	public GameViewInputMode getInputMode () 
 	{
-		
-		/***/
-		public void onRegionSelected ( int regionUID ) ;
-		
-		/***/
-		public void onRoadSelected ( int roadUID ) ;
-		
-		/***/
-		public void onSheperdSelected ( int sheperdId ) ;
-		
-		/***/
-		public void onAnimalSelected ( int animalId ) ;
-		
+		return gameViewPanel.getInputMode () ;
 	}
 	
 	public static void main ( String [] args ) 
@@ -143,7 +108,7 @@ public class GameView extends JFrame
 		GameView g ;
 		g = new GameView () ;
 		g.setExtendedState ( GameView.MAXIMIZED_BOTH );
-		g.setInputMode(GameViewInputMode.REGIONS);
+		g.setInputMode ( GameViewInputMode.ROADS ) ;
 		g.setVisible ( true ) ;
 	}
 	
@@ -172,11 +137,6 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	 */
 	private NotificationPanel notificationArea ;
 	
-	/**
-	 * A PlayersMoveView to manage the  move a User can do.
-	 */
-	private PlayersMoveViewPanel playersMovePanel ;
-	
 	// METHODS
 	
 	/***/
@@ -194,7 +154,6 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 		playersCardPanel = new PlayersCardViewPanel () ;
 		mapPanel = new MapViewPanel () ;
 		notificationArea = new NotificationPanel();
-		playersMovePanel = new PlayersMoveViewPanel () ;
 	}
 
 	/**
@@ -205,10 +164,9 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	{
 		Insets insets ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
-		layoutComponent ( playersCardPanel , 0 , 0 , 1 , 1 , 2 , 1 , 0 , 0 , GridBagConstraints.VERTICAL , GridBagConstraints.WEST , insets ) ;
-		layoutComponent ( mapPanel , 1 , 0 , 4 , 1 , 2 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
-		layoutComponent ( notificationArea , 2 , 0 , 1 , 0.5 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.EAST , insets ) ;
-		layoutComponent ( playersMovePanel , 2 , 1 , 1 , 0.5 , 1 , 1 , 0 , 0 , GridBagConstraints.VERTICAL , GridBagConstraints.EAST , insets ) ;
+		layoutComponent ( playersCardPanel , 0 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.VERTICAL , GridBagConstraints.WEST , insets ) ;
+		layoutComponent ( mapPanel , 1 , 0 , 4 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+		layoutComponent ( notificationArea , 2 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.VERTICAL , GridBagConstraints.EAST , insets ) ;
 	}
 
 	/**
@@ -226,7 +184,6 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 		add ( playersCardPanel ) ;
 		add ( mapPanel ) ;
 		add ( notificationArea ) ;
-		add ( playersMovePanel ) ;
 	}
 	
 	/**
@@ -241,6 +198,12 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	protected void setInputMode ( GameViewInputMode mode ) 
 	{
 		mapPanel.setCurrentInputMode ( mode ) ;
+	}
+	
+	/***/
+	public GameViewInputMode getInputMode () 
+	{
+		return mapPanel.getCurrentInputMode () ;
 	}
 	
 	/**
@@ -389,8 +352,12 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 		this.currentInputMode = currentInputMode ;
 	}
 	
-	// ENUMS
-	
+	/***/
+	public GameViewInputMode getCurrentInputMode () 
+	{
+		return currentInputMode ;
+	}
+		
 	// INNER CLASSES
 	
 	/**
@@ -718,6 +685,7 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 			public void actionPerformed ( ActionEvent e ) 
 			{
 				drawingPanel.zoom ( 0.5f , 0.5f ) ;
+				
 			}
 			
 		}
@@ -874,7 +842,10 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 			return res ;
 		} 
 		
-		/***/
+		/**
+		 * @param
+		 * @param 
+		 */
 		public void scale ( float xFactor , float yFactor ) 
 		{
 			int i ;
@@ -980,10 +951,10 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 		/**
 		 * Find the key, if it exists for which the ( x , y ) point is in the value associated.
 		 * 
-		 * @param 
-		 * @param
-		 * @param
-		 * @return
+		 * @param dataStr
+		 * @param x the x value of the interested position.
+		 * @param y the y value of the interested position.
+		 * @return the id ot the searched object, it it exists, null else.
 		 */
 		private Integer lookForAPointObjectId ( Map < Integer , ? extends Shape > dataStr , int x , int y ) 
 		{
@@ -1072,7 +1043,13 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 			return res ;
 		}
 		
-		/***/
+		/**
+		 * @param
+		 * @param
+		 * @param
+		 * @param
+		 * @return 
+		 */
 		public Integer findPlaceOf ( GameMapElementType whereType , int whereId , PositionableElementType targetType ) 
 		{
 			Couple < GameMapElementType , Integer > out ;
@@ -1128,33 +1105,6 @@ class PlayersCardViewPanel extends FrameworkedWithGridBagLayoutPanel
 	/**
 	 * AS THE SUPERS' ONE. 
 	 */
-	@Override
-	protected void injectComponents () {}
-
-}
-
-/***/
-class PlayersMoveViewPanel extends FrameworkedWithGridBagLayoutPanel 
-{
-
-	PlayersMoveViewPanel () 
-	{
-		super () ;
-	}
-
-	/***/
-	@Override
-	protected void createComponents () {}
-
-	/***/
-	@Override
-	protected void manageLayout () {}
-
-	/***/
-	@Override
-	protected void bindListeners () {}
-
-	/***/
 	@Override
 	protected void injectComponents () {}
 

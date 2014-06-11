@@ -2,6 +2,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionAbstractObservable;
@@ -178,6 +179,18 @@ public class GameMap extends WithReflectionAbstractObservable < GameMapObserver 
 		return res ;
 	}
 
+	/***/
+	public static boolean areAdjacents ( Road road , Region target ) 
+	{
+		Region border1 ;
+		Region border2 ;
+		boolean res ;
+		border1 = road.getFirstBorderRegion () ;
+		border2 = road.getSecondBorderRegion () ;
+		res = border1.equals( target ) || border2.equals ( target ) ;
+		return res ;
+	}
+	
 	/**
 	 * AS THE SUPER ONE'S
 	 */

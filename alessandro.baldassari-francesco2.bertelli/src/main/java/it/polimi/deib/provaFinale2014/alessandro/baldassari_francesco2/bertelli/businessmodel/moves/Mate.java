@@ -13,6 +13,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb.LambEvolver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.TurnNumberClock;
@@ -40,10 +41,14 @@ public class Mate extends GameMove
 	 */
 	private Region whereMate ;
 	
-	/***/
+	/**
+	 * a TurnNumberClock object to manage the turn that passes. 
+	 */
 	private TurnNumberClock clockSource ;
 	
-	/***/
+	/**
+	 * A Lamb evolve to manage the life of the eventually born lambs. 
+	 */
 	private LambEvolver lambEvolver ;
 	
 	/**
@@ -57,17 +62,24 @@ public class Mate extends GameMove
 	 */
 	protected Mate ( TurnNumberClock clockSource , LambEvolver lambEvolver , Sheperd theOneWhoWantsTheMate , Region whereMate ) throws MoveNotAllowedException 
 	{
+		List < AdultOvine > adults ;
 		if ( clockSource != null && lambEvolver != null && theOneWhoWantsTheMate != null && whereMate != null ) 
 		{
-			if ( theOneWhoWantsTheMate.getPosition ().getFirstBorderRegion ().equals( whereMate ) || theOneWhoWantsTheMate.getPosition ().getSecondBorderRegion ().equals ( whereMate ) )
+			if ( GameMap.areAdjacents( theOneWhoWantsTheMate.getPosition () , whereMate ) )
 			{
-				this.clockSource = clockSource ;
-				this.lambEvolver = lambEvolver ; 
-				this.theOneWhoWantsTheMate = theOneWhoWantsTheMate ;
-				this.whereMate = whereMate ;
+				adults = extractAdultOvines ( whereMate.getContainedAnimals () ) ;
+				if ( lookForAnOvine ( adults , AdultOvineType.RAM ) != null && lookForAnOvine ( adults , AdultOvineType.SHEEP ) != null )
+				{
+					this.clockSource = clockSource ;
+					this.lambEvolver = lambEvolver ; 
+					this.theOneWhoWantsTheMate = theOneWhoWantsTheMate ;
+					this.whereMate = whereMate ;
+				}
+				else
+					throw new MoveNotAllowedException ( "There is not here a Ram and a Sheep that can mate..." ) ;
 			}
 			else
-				throw new MoveNotAllowedException ( "" ) ;
+				throw new MoveNotAllowedException ( "Selected Region not adjacent to the selected Sheperd." ) ;
 		} 
 		else
 			throw new IllegalArgumentException () ;
@@ -140,6 +152,8 @@ public class Mate extends GameMove
 		else throw new IllegalArgumentException () ;
 	}
 
+	
+	
 	/**
 	 * Extract from the src Collection the Animals which are AdultOvines
 	 * 
@@ -177,7 +191,9 @@ public class Mate extends GameMove
 		return res ;
 	}
 
-	/***/
+	/**
+	 * The object that will take care of the evolution of lambs, one per lamb. 
+	 */
 	private class LambGrowerLookerRunnable implements Runnable 
 	{
 		
@@ -215,6 +231,9 @@ public class Mate extends GameMove
 				throw new IllegalArgumentException () ;
 		}
 		
+		/**
+		 * As the super's one.
+		 */
 		@Override
 		public void run () 
 		{

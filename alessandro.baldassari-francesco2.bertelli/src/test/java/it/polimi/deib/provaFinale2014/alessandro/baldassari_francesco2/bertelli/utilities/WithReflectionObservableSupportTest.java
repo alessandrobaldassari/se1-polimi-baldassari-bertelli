@@ -69,26 +69,23 @@ public class WithReflectionObservableSupportTest
 		w.addObserver ( o ) ;
 		try {
 			w.notifyObservers ( "setDummyInt" , 4 ) ;
-		} catch (NoSuchMethodException e) {
+		} 
+		catch (SecurityException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (SecurityException e) {
+		} 
+		catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
+		} 
+		catch (MethodInvocationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		assertTrue ( o.getDummyInt() == 4 ) ;
 	}
 	
-	@Test ( expected = NoSuchMethodException.class )
+	@Test ( expected = MethodInvocationException.class )
 	public void notifyObservers2 () throws NoSuchMethodException 
 	{
 		DummyObserver o ; 
@@ -97,21 +94,17 @@ public class WithReflectionObservableSupportTest
 		try {
 			w.notifyObservers ( "nonExistingMethod" , new Object () ) ;
 		}
-		catch (NoSuchMethodException e) {
-			throw new NoSuchMethodException () ;
-		}
+		
 		catch (SecurityException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
+		
 		catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (InvocationTargetException e) {
+		} 
+		catch (MethodInvocationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

@@ -54,9 +54,39 @@ public final class PresentationMessages
 	public static final String MATCH_WILL_NOT_START_MESSAGE = "Siamo veramente costernati ( o sarebbe meglio dire tosati... )\nPurtroppo nessun altro giocatore in rete ora ha voglia di fare il pastore, e quindi per il momento non puoi giocare...\nL'applicazione verrà ora chiusa.\nRiprova più tardi ( magari dopo avere inviato i tuoi amici ! )" ; ;
 
 	/**
+	 * The message to display to ask the user a color. 
+	 */
+	public static final String CHOOSE_COLOR_FOR_SHEPERD_MESSAGE = "Scegli un colore per il tuo pastore tra quelli proposti!" ;
+	
+	/**
+	 * The message to display when the user has to choose an initial Road for one of his Sheperds. 
+	 */
+	public static final String CHOOSE_INITIAL_ROAD_FOR_A_SHEPERD_MESSAGE = "Scegli, cliccando sulla mappa, la strada dove vuoi posizionare il tuo pastore" ;
+
+	/**
+	 * The message to display when the user has to choose a Sheperd for a turn. 
+	 */
+	public static final String CHOOSE_SHEPERD_FOR_A_TURN_MESSAGE = "Scegli, cliccandolo sulla mappa, il pastore che vuoi usare questo turno." ;
+	
+	/**
+	 * The message to display when the user makes an incorrect choice. 
+	 */
+	public static final String INVALID_CHOOSE_MESSAGE = "Sorry, scelta non valida." ;
+	
+	/**
+	 * The message to display when the User has to choose a GameMove during the Match. 
+	 */
+	public static final String DO_MOVE_MESSAGE = "Scegli una mossa da effettuare!" ;
+	
+	/**
+	 * The message to display to allow the user to stop the Match and exit the App.
+	 */
+	public static final String STOP_GAME_AND_EXIT = "Termina la partita ed esci da JSheepland" ;
+	
+	/**
 	 * The message to show when the App is closed. 
 	 */
-	public static final String BYE_MESSAGE = "Grazie per avere utilizzato JSheepland.\nA presto !\nBeeeeee" ;
+	public static final String BYE_MESSAGE = "Grazie per avere utilizzato JSheepland.\nTorna presto a belare!\nBeeeeee" ;
 	
 	/***/
 	private PresentationMessages () {}

@@ -84,17 +84,6 @@ public abstract class Player implements Serializable , Suspendable
 	}
 	
 	/**
-	 * This methods is called by the system in the Market phase of the Game.
-	 * Here, the Player, has the opportunity to set the selling state and price of his SellableCards, if he wants
-	 * to sell some of his SellableCards to other Players.
-	 * It's important for subclasses to consider that this Class is stateful w.r.t. SellableCards; so if for example a Player
-	 * set a sellable for a given price at the turn t, and this Card is not sold at the same turn t, if the Player does not 
-	 * want to sell this Card anymore at the turn t+1, he has to explicitly make it not sellable ( or modify its price if he wants ), 
-	 * otherwise the system will consider the selling state the same as the turn t.
-	 */
-	public abstract void chooseCardsEligibleForSelling () throws TimeoutException ;
-		
-	/**
 	 * Getter methods for the sellableCards property.
 	 * 
 	 * @return the sellableCards property.
@@ -115,39 +104,6 @@ public abstract class Player implements Serializable , Suspendable
 	}
 	
 	/**
-	 * Partial Setter method for the sheperds property.
-	 * If the property has not been set yet, and the parameter is not null, it
-	 * sets the property to the parameter value, else throws some exceptions.
-	 * 
-	 * @param sheperds the value for the sheperds property.
-	 * @throws IllegalArgumentException if the parameter is null.
-	 * @throws SheperdsPropertyAlreadySetException if the property is already not null.
-	 */
-	public void initializeSheperds ( Sheperd [] sheperds ) throws WriteOncePropertyAlreadSetException
-	{
-		if ( this.sheperds == null )
-		{
-			if ( sheperds != null )
-				this.sheperds = sheperds ;
-			else
-				throw new IllegalArgumentException () ;
-		}
-		else
-			throw new WriteOncePropertyAlreadSetException ( "SHEPERDS" ) ;
-	} 
-	
-	/**
-	 * This method returns the Sheperd that a Player chooses, between his ones, to 
-	 * play in a given turn.
-	 * By business rule, this method will be asked only if the Match where this 
-	 * Player is is a two-players Match.
-	 * 
-	 * @return the Sheperd a this Player chooses to play in a given turn.
-	 * @throws TimeoutException 
-	 */
-	public abstract Sheperd chooseSheperdForATurn () throws TimeoutException ;
-		
-	/**
 	 * Accessor method useful for subclasses that want to know all the Sheperds.
 	 * 
 	 * @return an Iterable containing all the Sheperds that this Player has.
@@ -157,55 +113,6 @@ public abstract class Player implements Serializable , Suspendable
 		Iterable < Sheperd > res ;
 		res = CollectionsUtilities.newIterableFromArray ( sheperds ) ;
 		return res ;
-	}
-	
-	/**
-	 * Setter method for the initialCard property 
-	 * 
-	 * @param initialCard the value for the initialCard property.
-	 * @throws IllegalArgumentException if the parameter is null.
-	 * @throws WriteOncePropertyAlreadSetException if the property has been already set.
-	 */
-	public void setInitialCard ( Card initialCard ) throws WriteOncePropertyAlreadSetException 
-	{
-		if ( this.initialCard == null )
-		{
-			if ( initialCard != null )
-				this.initialCard = initialCard ;
-			else
-				throw new IllegalArgumentException () ;
-		}
-		else
-			throw new WriteOncePropertyAlreadSetException ( "INITIAL_CARD" ) ;
-	}
-	
-	/**
-	 * Getter method for the initialCard property.
-	 * 
-	 * @return the initialCard property.
-	 */
-	public Card getInitialCard () 
-	{
-		return initialCard ;
-	}
-	
-	/**
-	 * Add some money to this Player.
-	 * Because this method essentially models a payment to this Player, the parameter must be > 0.
-	 * Technically it increments the money property by the value indicated by the parameter.
-	 * 
-	 * @param amountToReceive the amount of money to add.
-	 * @throws IllegalArgumentException if the amountToAdd parameter is < 0
-	 */
-	public void receiveMoney ( int amountToReceive ) 
-	{
-		if ( amountToReceive >= 0 )
-			if ( money == null )
-				money = amountToReceive ;
-			else
-				money = money + amountToReceive ;
-		else 
-			throw new IllegalArgumentException () ;
 	}
 	
 	/**
@@ -284,6 +191,115 @@ public abstract class Player implements Serializable , Suspendable
 	}
 		
 	/**
+	 * Setter method for the initialCard property 
+	 * 
+	 * @param initialCard the value for the initialCard property.
+	 * @throws IllegalArgumentException if the parameter is null.
+	 * @throws WriteOncePropertyAlreadSetException if the property has been already set.
+	 */
+	public void setInitialCard ( Card initialCard ) throws WriteOncePropertyAlreadSetException 
+	{
+		if ( this.initialCard == null )
+		{
+			if ( initialCard != null )
+				this.initialCard = initialCard ;
+			else
+				throw new IllegalArgumentException () ;
+		}
+		else
+			throw new WriteOncePropertyAlreadSetException ( "INITIAL_CARD" ) ;
+	}
+	
+	/**
+	 * Partial Setter method for the sheperds property.
+	 * If the property has not been set yet, and the parameter is not null, it
+	 * sets the property to the parameter value, else throws some exceptions.
+	 * 
+	 * @param sheperds the value for the sheperds property.
+	 * @throws IllegalArgumentException if the parameter is null.
+	 * @throws SheperdsPropertyAlreadySetException if the property is already not null.
+	 */
+	public void initializeSheperds ( Sheperd [] sheperds ) throws WriteOncePropertyAlreadSetException
+	{
+		if ( this.sheperds == null )
+		{
+			if ( sheperds != null )
+				this.sheperds = sheperds ;
+			else
+				throw new IllegalArgumentException () ;
+		}
+		else
+			throw new WriteOncePropertyAlreadSetException ( "SHEPERDS" ) ;
+	} 
+	
+	/**
+	 * This method returns the Sheperd that a Player chooses, between his ones, to 
+	 * play in a given turn.
+	 * By business rule, this method will be asked only if the Match where this 
+	 * Player is is a two-players Match.
+	 * 
+	 * @param playerSheperds the Sheperds among which a Player may choose.
+	 * @return the Sheperd a this Player chooses to play in a given turn.
+	 * @throws TimeoutException 
+	 */
+	public abstract Sheperd chooseSheperdForATurn ( final Iterable < Sheperd > playersSheperds ) throws TimeoutException ;
+	
+	/**
+	 * This methods is called by the system in the Market phase of the Game.
+	 * Here, the Player, has the opportunity to set the selling state and price of his SellableCards, if he wants
+	 * to sell some of his SellableCards to other Players.
+	 * It's important for subclasses to consider that this Class is stateful w.r.t. SellableCards; so if for example a Player
+	 * set a sellable for a given price at the turn t, and this Card is not sold at the same turn t, if the Player does not 
+	 * want to sell this Card anymore at the turn t+1, he has to explicitly make it not sellable ( or modify its price if he wants ), 
+	 * otherwise the system will consider the selling state the same as the turn t.
+	 */
+	public abstract void chooseCardsEligibleForSelling () throws TimeoutException ;
+	
+	/**
+	 * Method called by the System during the Market phase of a Turn;
+	 * this Player has to decide which Card, included in the parameter Iterable, he 
+	 * wants to buy, and return it.
+	 * If the value returned is null, it is considered as a signal for the caller
+	 * that this Player does not want to buy any other card; else this method will 
+	 * be called again in order for this Player to buy more than one Card.
+	 * 
+	 * @param src the List of Cards this Player can potentially buy.
+	 * @return a SellableCard object contained in the parameter indicating a Card this Player
+	 *         wants to buy, or null if this Player does not want to buy any Card.
+	 * @throws TimeoutException 
+	 */
+	public abstract SellableCard chooseCardToBuy ( Iterable < SellableCard > src ) throws TimeoutException ;
+	
+	/**
+	 * Getter method for the initialCard property.
+	 * 
+	 * @return the initialCard property.
+	 */
+	public Card getInitialCard () 
+	{
+		return initialCard ;
+	}
+	
+	/**
+	 * Add some money to this Player.
+	 * Because this method essentially models a payment to this Player, the parameter must be > 0.
+	 * Technically it increments the money property by the value indicated by the parameter.
+	 * 
+	 * @param amountToReceive the amount of money to add.
+	 * @throws IllegalArgumentException if the amountToAdd parameter is < 0
+	 */
+	public void receiveMoney ( int amountToReceive ) 
+	{
+		if ( amountToReceive >= 0 )
+			if ( money == null )
+				money = amountToReceive ;
+			else
+				money = money + amountToReceive ;
+		else 
+			throw new IllegalArgumentException () ;
+	}
+	
+	/**
 	 * AS THE SUPER'S ONE.
 	 * Two Player objects are considered equals if, and only if, their two name properties are equal.
 	 * This definition is valid also for all subclasses of Player, so this method is marked as final. 
@@ -305,21 +321,6 @@ public abstract class Player implements Serializable , Suspendable
 			res = false ;
 		return res ;
 	}
-	
-	/**
-	 * Method called by the System during the Market phase of a Turn;
-	 * this Player has to decide which Card, included in the parameter Iterable, he 
-	 * wants to buy, and return it.
-	 * If the value returned is null, it is considered as a signal for the caller
-	 * that this Player does not want to buy any other card; else this method will 
-	 * be called again in order for this Player to buy more than one Card.
-	 * 
-	 * @param src the List of Cards this Player can potentially buy.
-	 * @return a SellableCard object contained in the parameter indicating a Card this Player
-	 *         wants to buy, or null if this Player does not want to buy any Card.
-	 * @throws TimeoutException 
-	 */
-	public abstract SellableCard chooseCardToBuy ( Iterable < SellableCard > src ) throws TimeoutException ;
 	
 	/**
 	 * This is the central method for the Player class ( and its subclasses too ) because it models the most important 

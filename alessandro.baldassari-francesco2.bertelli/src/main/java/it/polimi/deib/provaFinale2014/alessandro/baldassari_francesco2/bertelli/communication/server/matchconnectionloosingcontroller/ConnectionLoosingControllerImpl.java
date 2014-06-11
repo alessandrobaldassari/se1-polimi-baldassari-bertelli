@@ -1,11 +1,10 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.NetworkCommunicantPlayer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Suspendable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionObservableSupport;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,17 +62,7 @@ public class ConnectionLoosingControllerImpl implements ConnectionLoosingControl
 				suspendedhandlers.put ( connector.getUID() , connector ) ;
 				support.notifyObservers( "onEndSuspensionControl" , false ) ;
 			} 
-			catch (NoSuchMethodException e1) 
-			{
-				looser.suspend();
-				res = false ;
-			}
 			catch (SecurityException e1) 
-			{
-				looser.suspend();
-				res = false ;
-			}
-			catch (IllegalAccessException e1) 
 			{
 				looser.suspend();
 				res = false ;
@@ -83,31 +72,29 @@ public class ConnectionLoosingControllerImpl implements ConnectionLoosingControl
 				looser.suspend();
 				res = false ;
 			}
-			catch (InvocationTargetException e1) 
+			catch (InterruptedException e) 
+			{
+				res = true ;
+			} 
+			catch (MethodInvocationException e ) 
 			{
 				looser.suspend();
 				res = false ;
 			}
-			catch (InterruptedException e) 
+			try 
 			{
-				res = true ;
-			}
-			try {
 				support.notifyObservers( "onEndSuspensionControl" , res ) ;
-			} catch (NoSuchMethodException e) {
-				// TODO Auto-generated catch block
+			} 
+			catch ( SecurityException e ) 
+			{
 				e.printStackTrace();
-			} catch (SecurityException e) {
-				// TODO Auto-generated catch block
+			} 
+			catch ( IllegalArgumentException e )
+			{
 				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
+			} 
+			catch (MethodInvocationException e) 
+			{
 				e.printStackTrace();
 			}			
 		}

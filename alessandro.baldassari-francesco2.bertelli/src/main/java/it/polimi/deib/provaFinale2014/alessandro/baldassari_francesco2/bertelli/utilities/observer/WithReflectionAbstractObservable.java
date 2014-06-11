@@ -38,30 +38,7 @@ public class WithReflectionAbstractObservable < T extends Observer > extends Abs
 	/***/
 	protected void notifyObservers ( String methodName , Object ... args ) throws MethodInvocationException 
 	{
-		try 
-		{
-			observableSupport.notifyObservers ( methodName , args );
-		} 
-		catch (NoSuchMethodException e) 
-		{
-			throw new MethodInvocationException ( methodName , e) ;
-		}
-		catch ( SecurityException e ) 
-		{
-			throw new MethodInvocationException ( methodName , e) ;
-		}
-		catch ( IllegalAccessException e ) 
-		{
-			throw new MethodInvocationException ( methodName , e) ;
-		}
-		catch ( IllegalArgumentException e ) 
-		{
-			throw new MethodInvocationException ( methodName , e) ;
-		}
-		catch ( InvocationTargetException e ) 
-		{
-			throw new MethodInvocationException ( methodName , e) ;
-		}
+		observableSupport.notifyObservers ( methodName , args );
 	}
 	
 }

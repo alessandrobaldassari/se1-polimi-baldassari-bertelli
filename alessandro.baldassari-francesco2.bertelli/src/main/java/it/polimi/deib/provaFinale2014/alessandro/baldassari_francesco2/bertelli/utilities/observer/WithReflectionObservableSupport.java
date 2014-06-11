@@ -1,5 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
+
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -38,13 +40,36 @@ public class WithReflectionObservableSupport < T extends Observer > implements S
 	}
 	
 	/***/
-	public void notifyObservers ( String methodName , Object ... args ) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException 
+	public void notifyObservers ( String methodName , Object ... args ) throws MethodInvocationException
 	{
 		Method m ; 
 		if ( observers.isEmpty() == false )
 		{
-			m = obtainMethod ( methodName , args ) ;
-			effectiveNotification ( m , args ) ;
+			try 
+			{
+				m = obtainMethod ( methodName , args ) ;
+				effectiveNotification ( m , args ) ;
+			}
+			catch ( NoSuchMethodException e ) 
+			{
+				throw new MethodInvocationException ( methodName , e ) ;
+			}
+			catch ( SecurityException e ) 
+			{
+				throw new MethodInvocationException ( methodName , e ) ;
+			} 
+			catch ( IllegalAccessException e ) 
+			{
+				throw new MethodInvocationException ( methodName , e ) ;
+			}
+			catch ( IllegalArgumentException e ) 
+			{
+				throw new MethodInvocationException ( methodName , e ) ;
+			} 
+			catch ( InvocationTargetException e ) 
+			{
+				throw new MethodInvocationException ( methodName , e ) ;
+			}
 		}
 	}
 	

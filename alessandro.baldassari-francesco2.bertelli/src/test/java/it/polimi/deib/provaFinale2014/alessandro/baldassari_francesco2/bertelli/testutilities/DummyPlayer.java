@@ -35,7 +35,7 @@ public class DummyPlayer extends Player
 	}
 
 	@Override
-	public Sheperd chooseSheperdForATurn() throws TimeoutException {
+	public Sheperd chooseSheperdForATurn ( Iterable < Sheperd > sh ) throws TimeoutException {
 		// TODO Auto-generated method stub
 		return null;
 	}

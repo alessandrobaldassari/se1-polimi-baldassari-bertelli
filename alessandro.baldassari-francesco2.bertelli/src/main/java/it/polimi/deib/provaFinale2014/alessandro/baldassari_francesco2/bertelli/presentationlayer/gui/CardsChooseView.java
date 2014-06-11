@@ -1,5 +1,17 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.FrameworkedWithGridBagLayoutPanel;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.MultioptionChooseView;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionObservableSupport;
+
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -9,46 +21,35 @@ import java.awt.event.ItemListener;
 import java.util.LinkedList;
 import java.util.List;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.SheperdColorView.SheperdColorRequestViewObserver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.FrameworkedWithGridBagLayoutPanel;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.MultioptionChooseView;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observable;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observer;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionObservableSupport;
-
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JToggleButton;
 
-public class SheperdColorView extends JDialog implements Observable < SheperdColorRequestViewObserver >
+public class CardsChooseView extends JDialog implements Observable < CardsChooseView.CardsChooseViewObserver >
 {
 
 	/***/
-	private WithReflectionObservableSupport < SheperdColorRequestViewObserver > support ;
+	private WithReflectionObservableSupport < CardsChooseViewObserver > support ;
 	
 	/***/
 	private MultioptionChooseView view ;
 	
 	/***/
-	private ColorsListPanel colorsPanel ;
+	private CardChooseViewPanel colorsPanel ;
 	
 	/***/
-	public SheperdColorView ( SheperdColorRequestViewObserver observer ) 
+	public CardsChooseView ( CardsChooseViewObserver observer ) 
 	{ 
 		super ( ( Frame ) null , PresentationMessages.APP_NAME , true ) ;
 		GridBagLayout g ;
 		Insets insets ;
-		support = new WithReflectionObservableSupport < SheperdColorRequestViewObserver > () ;
+		support = new WithReflectionObservableSupport < CardsChooseViewObserver > () ;
 		view = new MultioptionChooseView () ;
-		colorsPanel = new ColorsListPanel () ;
+		colorsPanel = new CardChooseViewPanel () ;
 		g = new GridBagLayout () ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
 		
@@ -67,21 +68,37 @@ public class SheperdColorView extends JDialog implements Observable < SheperdCol
 		view.setContentsPanel ( colorsPanel ) ;
 	}
 	
-	/***/
-	public void setColors ( Iterable < NamedColor > colors ) 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void addObserver ( CardsChooseViewObserver newObserver) 
 	{
-		colorsPanel.setColors ( colors ) ;
+		support.addObserver ( newObserver ) ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+
+	@Override
+	public void removeObserver( CardsChooseViewObserver oldObserver) 
+	{
+		support.removeObserver ( oldObserver ) ;
 	}
 	
 	/***/
-	public interface SheperdColorRequestViewObserver extends Observer
+	public void setCards ( Iterable < Card > cards ) {}
+	
+	/***/
+	public interface CardsChooseViewObserver extends Observer
 	{
 		
 		/***/
-		public void onColorChoosed ( NamedColor selectedColor ) ;
+		public void onCardChoosed ( Card selectedCard ) ;
 		
 		/***/
-		public void onDoNotWantChooseColor () ;
+		public void onDoNotWantChooseAnyCard () ;
 		
 	}
 	
@@ -97,19 +114,19 @@ public class SheperdColorView extends JDialog implements Observable < SheperdCol
 		@Override
 		public void run () 
 		{
-			NamedColor res ;
-			res = colorsPanel.getSelectedColor();
+			Iterable < Card > res ;
+			res = colorsPanel.getSelectedCard();
 			if ( res != null )
 				try 
 				{
-					support.notifyObservers ( "onColorChoosed" , res );
+					support.notifyObservers ( "onCardChoosed" , res );
 				}
 				catch (MethodInvocationException e1) 
 				{
 					e1.printStackTrace();
 				}
 			else
-				JOptionPane.showMessageDialog ( null , "Devi prima selezionare un colore!" , PresentationMessages.APP_NAME , JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog ( null , "Devi prima selezionare una carta!" , PresentationMessages.APP_NAME , JOptionPane.ERROR_MESSAGE);
 		}
 				
 	}
@@ -126,7 +143,7 @@ public class SheperdColorView extends JDialog implements Observable < SheperdCol
 		{
 			try 
 			{
-				support.notifyObservers ( "onDoNotWantChooseColor" ) ;
+				support.notifyObservers ( "onDoNotWantChooseAnyCard" ) ;
 			} 
 			catch ( MethodInvocationException e1 ) 
 			{
@@ -135,44 +152,24 @@ public class SheperdColorView extends JDialog implements Observable < SheperdCol
 		}		
 		
 	}
-
-	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public void addObserver(SheperdColorRequestViewObserver newObserver) 
-	{
-		support.addObserver ( newObserver ) ;
-	}
-	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-
-	@Override
-	public void removeObserver(SheperdColorRequestViewObserver oldObserver) 
-	{
-		support.removeObserver ( oldObserver ) ;
-	}
 	
 }
 
 /***/
-class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel 
+class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel 
 {
 
-	private List < NamedColor > colors ;
+	private List < Card > availableCards ;
 	
-	private NamedColor selected ;
+	private List < Card > selectedCards ;
 	
-	private List < JPanel > colorPanels ;
+	private List < JPanel > imagePanels ;
 
-	private List < JRadioButton > selectors ;
+	private List < JToggleButton > selectors ;
 	
 	private ButtonGroup buttonGroup ;
 	
-	public ColorsListPanel () 
+	public CardChooseViewPanel () 
 	{
 		super () ;
 	}
@@ -180,9 +177,9 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 	@Override
 	protected void createComponents () 
 	{
-		selected = null ;
-		colorPanels = new LinkedList < JPanel > () ;
-		selectors = new LinkedList < JRadioButton > () ;
+		selectedCards = new LinkedList < Card > () ;
+		imagePanels = new LinkedList < JPanel > () ;
+		selectors = new LinkedList < JToggleButton > () ;
 		buttonGroup = new ButtonGroup () ;
 	}
 
@@ -195,39 +192,44 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 	@Override
 	protected void injectComponents () {}
 
-	public void setColors ( Iterable < NamedColor > in ) 
+	public void setCards ( Iterable < Card > in , boolean multipleSelectionsAllowed ) 
 	{
 		Insets insets ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
-		colors = CollectionsUtilities.newListFromIterable ( in ) ;
-		selected = null ;
-		for ( NamedColor n : colors )
+		availableCards = CollectionsUtilities.newListFromIterable ( in ) ;
+		for ( Card n : availableCards )
 		{
-			colorPanels.add ( new JPanel () ) ;
-			selectors.add ( new JRadioButton () ) ;
+			imagePanels.add ( new JPanel () ) ;
+			if ( multipleSelectionsAllowed )
+				selectors.add ( new JCheckBox () ) ;
+			else
+				selectors.add ( new JRadioButton () ) ;
 		}
 		int i ;
-		for ( i = 0 ; i < colors.size() ; i ++ )
+		for ( i = 0 ; i < availableCards.size() ; i ++ )
 		{
-			layoutComponent ( colorPanels.get ( i ) , i , 1 , 1 / colors.size() , 0.7 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
-			layoutComponent ( selectors.get ( i ) , i , 2 , 1 / colors.size() , 0.7 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+			layoutComponent ( imagePanels.get ( i ) , i , 1 , 1 / availableCards.size() , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+			layoutComponent ( selectors.get ( i ) , i , 2 , 1 / availableCards.size() , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 		}
-		for ( i = 0 ; i < colors.size() ; i ++ )
+		for ( i = 0 ; i < availableCards.size() ; i ++ )
 		{
-			colorPanels.get(i).setBackground ( colors.get ( i ) ) ;
 			selectors.get ( i ).addItemListener ( new SelectorListener ( i ) ) ;
-			buttonGroup.add ( selectors.get( i ) );
-			selectors.get(i).setText ( colors.get ( i ).getName () ) ;
+			selectors.get(i).setText ( availableCards.get(i).getRegionType().toString() ) ;
+			
 		}
-		for ( JPanel p : colorPanels )
+		for ( JPanel p : imagePanels )
 			add ( p ) ;
-		for ( JRadioButton r : selectors )
-			add ( r ) ;
+		for ( JToggleButton t : selectors )
+			add ( t ) ;
+		if ( ! multipleSelectionsAllowed )
+			for ( JToggleButton t : selectors )
+				buttonGroup.add ( t ) ;
+			
 	}
 	
-	public NamedColor getSelectedColor () 
+	public Iterable < Card > getSelectedCard () 
 	{
-		return selected ;
+		return selectedCards ;
 	}
 	
 	private class SelectorListener implements ItemListener 
@@ -243,7 +245,10 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 		@Override
 		public void itemStateChanged ( ItemEvent e ) 
 		{
-			selected = colors.get(associatedIndex);
+			if ( ( ( JToggleButton ) e.getSource() ).isSelected () )
+				selectedCards.add ( availableCards.get(associatedIndex) ) ;
+			else
+				selectedCards.remove ( availableCards.get ( associatedIndex ) ) ;
 		}	
 		
 	}

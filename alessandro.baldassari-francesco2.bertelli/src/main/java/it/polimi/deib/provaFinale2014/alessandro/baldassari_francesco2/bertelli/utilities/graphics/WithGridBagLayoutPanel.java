@@ -47,7 +47,9 @@ public abstract class WithGridBagLayoutPanel extends JPanel
 			}
 	}
 	
-	/***/
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public GridBagLayout getLayout () 
 	{

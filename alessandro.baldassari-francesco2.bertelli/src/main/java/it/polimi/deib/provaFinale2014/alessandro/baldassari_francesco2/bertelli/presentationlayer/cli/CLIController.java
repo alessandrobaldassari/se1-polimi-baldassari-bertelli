@@ -104,7 +104,7 @@ public class CLIController extends ViewPresenter
 		try 
 		{
 			writer.println ( PresentationMessages.NAME_REQUEST_MESSAGE ) ;
-			writer.println ( "-1 per uscire." ) ;
+			writer.println ( "-1. Esci"  ) ;
 			res = reader.readLine ().trim () ;
 			if ( res.compareToIgnoreCase ( "-1" ) == 0 )
 			{
@@ -192,14 +192,34 @@ public class CLIController extends ViewPresenter
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void generationNotification ( String msg ) 
+	public Road chooseInitRoadForSheperd(Iterable<Road> availableRoads) throws IOException 
 	{
-		writer.println ( msg ) ;
+		List < Road > availableRoadsList ;
+		Road res ;
+		String s ;
+		int i ;
+		availableRoadsList = CollectionsUtilities.newListFromIterable  ( availableRoads ) ;
+		i = 0 ;
+		s = PresentationMessages.CHOOSE_INITIAL_ROAD_FOR_A_SHEPERD_MESSAGE + Utilities.CARRIAGE_RETURN ;
+		for ( i = 0 ; i < availableRoadsList.size () ; i ++ )
+		{
+			s = s + i + ". " + availableRoadsList.get ( i ) + Utilities.CARRIAGE_RETURN ;
+			i ++ ;
+		}
+		s = s + "-1. Esci da JSheepland" + Utilities.CARRIAGE_RETURN ;
+		i = GraphicsUtilities.checkedIntInput ( 0 , availableRoadsList.size ()-1, -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
+		if ( i != -1 )
+			res = availableRoadsList.get ( i ) ;
+		else
+		{
+			res = null ;
+			stopApp () ;
+		}
+		return res ;
 	}
 	
 	/**
 	 * AS THE SUPER'S ONE. 
-	 * @throws IOException 
 	 */
 	@Override
 	public Sheperd onChooseSheperdForATurn ( Iterable < Sheperd > playersSheperd ) throws IOException 
@@ -209,14 +229,14 @@ public class CLIController extends ViewPresenter
 		String s ;
 		int i ;
 		sheperds = CollectionsUtilities.newListFromIterable ( playersSheperd ) ;
-		s = "Scegli uno dei tuoi pastori per questo turno:\n " ;
+		s = PresentationMessages.CHOOSE_SHEPERD_FOR_A_TURN_MESSAGE + Utilities.CARRIAGE_RETURN ;
 		i = 0 ;
 		for ( Sheperd sh : sheperds )
 		{
-			s = s + i + ". + " + sh + "\n" ;
+			s = s + i + ".  " + sh + Utilities.CARRIAGE_RETURN ;
 			i ++ ;
 		}
-		i = GraphicsUtilities.checkedIntInput ( 0 , 1 , -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
+		i = GraphicsUtilities.checkedIntInput ( 0 , sheperds.size () - 1 , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
 		if ( i != -1 )
 			res = sheperds.get( i ) ;
 		else
@@ -227,6 +247,61 @@ public class CLIController extends ViewPresenter
 		return res ;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public GameMove onDoMove ( MoveFactory f , GameMap m  ) throws IOException 
+	{
+		GameMove res = null ;
+		String s ;
+		int i ;
+		s = "Situazione della mappa di gioco" + Utilities.CARRIAGE_RETURN ;
+		s = s + m + Utilities.CARRIAGE_RETURN ;
+		writer.println ( s ) ;
+		s = PresentationMessages.DO_MOVE_MESSAGE + Utilities.CARRIAGE_RETURN ;
+		s = s + "1. Uccidere un ovino in una regione" + Utilities.CARRIAGE_RETURN ;
+		s = s + "2. Comperare una carta dalla banca" + Utilities.CARRIAGE_RETURN ;
+		s = s + "3. Fare una accoppiamento" + Utilities.CARRIAGE_RETURN ;
+		s = s + "4. Muovere una pecora." + Utilities.CARRIAGE_RETURN ;
+		s = s + "5. Muovere il pastore" + Utilities.CARRIAGE_RETURN ;
+		i = GraphicsUtilities.checkedIntInput ( 1 , 5 , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
+		if ( i != -1 )
+		{
+			switch ( i ) 
+			{
+				case 1 :
+					res = killing(f, m);
+				break ;
+				case 2 :
+					res = buyCard ( f , m ) ;
+				break ;
+				case 3 :
+					res = mate ( f , m ) ;
+				break ;
+				case 4 :
+					res = moveOvine ( f , m ) ;
+				break ;
+				case 5 :
+					res = moveSheperd ( f , m ) ;
+				break ;
+				default :
+					res = null ;
+				break ;
+			}
+		}
+		return res ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void generationNotification ( String msg ) 
+	{
+		writer.println ( msg ) ;
+	}
+	
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
@@ -275,51 +350,6 @@ public class CLIController extends ViewPresenter
 			res = null ;
 		else
 			res = l.get ( i ) ;
-		return res ;
-	}
-
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public GameMove onDoMove ( MoveFactory f , GameMap m  ) throws IOException 
-	{
-		GameMove res = null ;
-		String s ;
-		int i ;
-		s = "Situazione della mappa di gioco :\n" ;
-		s = s +m + "\n" ;
-		s = s + "Quale mossa vuoi effetture?\n" ;
-		s = s + "1. Uccidere un ovino in una regione\n" ;
-		s = s + "2. Comperare una carta dalla banca\n" ;
-		s = s + "3. Fare una accoppiamento\n" ;
-		s = s + "4. Muovere una pecora.\n" ;
-		s = s + "5. Muovere il pastore\n" ;
-		i = GraphicsUtilities.checkedIntInput ( 1 , 5 , -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
-		if ( i != -1 )
-		{
-			switch ( i ) 
-			{
-				case 1 :
-					res = killing(f, m);
-				break ;
-			case 2 :
-				res = buyCard ( f , m ) ;
-			break ;
-			case 3 :
-				res = mate ( f , m ) ;
-			break ;
-			case 4 :
-				res = moveOvine ( f , m ) ;
-			break ;
-			case 5 :
-				res = moveSheperd ( f , m ) ;
-			break ;
-			default :
-				res = null ;
-			break ;
-		}
-		}
 		return res ;
 	}
 
@@ -491,35 +521,6 @@ public class CLIController extends ViewPresenter
 		return res ;
 	}
 
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public Road chooseInitRoadForSheperd(Iterable<Road> availableRoads) throws IOException 
-	{
-		Road res ;
-		List < Road > l ;
-		String s ;
-		int i ;
-		l = CollectionsUtilities.newListFromIterable  ( availableRoads ) ;
-		i = 0 ;
-		s = "Scegli la regione di partenza per il tuo pastore tra quelle disponibili:" ;
-		for ( i = 0 ; i < l.size () ; i ++ )
-		{
-			s = s + i + ". " + l.get ( i ) ;
-			i ++ ;
-		}
-		s = s + "-1. Esci da JSheepland" ;
-		i = GraphicsUtilities.checkedIntInput ( 0 , l.size () - 1, -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
-		if ( i != -1 )
-			res = l.get ( i ) ;
-		else
-		{
-			res = null ;
-			stopApp () ;
-		}
-		return res ;
-	}
 	
 	/***/
 	@Override

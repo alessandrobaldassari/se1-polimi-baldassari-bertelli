@@ -2,16 +2,16 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.guimap.GUIMapNotificationMessage;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionAbstractObservable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionObservableSupport;
 
-public class SocketGUIMapClient implements Runnable , Observable < GameMapObserver >
+public class SocketGUIMapClient extends WithReflectionAbstractObservable < GameMapObserver > implements Runnable
 {
 
 	private final String SERVER_IP = "127.0.0.1" ;
@@ -46,7 +46,7 @@ public class SocketGUIMapClient implements Runnable , Observable < GameMapObserv
 					methodName = "onPositionableElementAdded" ;
 				else
 					methodName = "onPositionableElementRemoved" ;
-				support.notifyObservers ( methodName , m.getWhereType() , m.getWhereId () , m.getWhoType () , m.getWhoId () );
+				notifyObservers ( methodName , m.getWhereType() , m.getWhereId () , m.getWhoType () , m.getWhoId () );
 			}
 			catch (ClassNotFoundException e) 
 			{
@@ -56,20 +56,9 @@ public class SocketGUIMapClient implements Runnable , Observable < GameMapObserv
 			catch (IOException e) 
 			{
 				e.printStackTrace();
-			} catch (NoSuchMethodException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
+			} 
+			catch  (MethodInvocationException e ) 
+			{
 				e.printStackTrace();
 			}
 		}
