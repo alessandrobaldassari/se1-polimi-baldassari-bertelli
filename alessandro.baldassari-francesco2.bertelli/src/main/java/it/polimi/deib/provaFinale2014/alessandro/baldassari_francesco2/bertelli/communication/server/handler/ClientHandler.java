@@ -25,11 +25,16 @@ import java.util.Collections;
 public abstract class ClientHandler < T >
 {
 
+	private static int uidGenerator = 0 ;
+	
 	/**
 	 * Standard message to give to the User if the Match he was waiting for to start, will no begin. 
 	 */
 	public static final String MATCH_WILL_NOT_START_MESSAGE = "Sorry, but the game can not start now" ;
 
+	/***/
+	private final int UID ;
+	
 	/**
 	 * An object to technically do a net connection. 
 	 */
@@ -43,7 +48,11 @@ public abstract class ClientHandler < T >
 	public ClientHandler ( ClientHandlerConnector < T > connector ) throws IOException
 	{
 		if ( connector != null )
+		{
+			uidGenerator ++ ;
+			UID = uidGenerator ;
 			rebind ( connector ) ;
+		}
 		else
 			throw new IllegalArgumentException () ;
 	}
@@ -63,14 +72,33 @@ public abstract class ClientHandler < T >
 		return old ;
 	}
 	
+	public int getUID ()
+	{
+		return UID ;
+	}
+	
 	/***/
 	protected T getConnector () 
 	{
 		return connector.getConnector () ;
 	}
 	
-	/***/
+	/**
+	 * 
+	 */
 	protected abstract void technicalRebinding () throws IOException ;
+	
+	/**
+	 * Notify the User the Id has been choosen for him  
+	 * 
+	 * @throws IOException if something goes wrong with the communication.
+	 */
+	public void uidNotification () throws IOException 
+	{
+		Message m ;
+		m = Message.newInstance ( GameProtocolMessage.UID_NOTIFICATION , Collections.<Serializable>singleton ( UID ) ) ;
+		write ( m ) ;
+	}
 	
 	/**
 	 * This method should call the managed client for his name.
@@ -341,6 +369,13 @@ public abstract class ClientHandler < T >
 	{
 		Message m ;
 		m = Message.newInstance ( GameProtocolMessage.GENERIC_NOTIFICATION_NOTIFICATION , Collections.<Serializable>singleton ( message ) ) ;
+		write ( m ) ;
+	}
+	
+	public void sendGuiConnectorNotification ( Serializable guiConnector ) throws IOException
+	{
+		Message m ;
+		m = Message.newInstance ( GameProtocolMessage.GUI_CONNECTOR_NOTIFICATION , Collections.<Serializable>singleton ( guiConnector ) ) ;
 		write ( m ) ;
 	}
 	

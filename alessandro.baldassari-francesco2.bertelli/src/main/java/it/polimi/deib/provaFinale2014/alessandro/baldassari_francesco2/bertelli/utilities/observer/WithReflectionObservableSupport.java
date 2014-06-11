@@ -1,12 +1,13 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 
 /***/
-public class WithReflectionObservableSupport < T extends Observer > 
+public class WithReflectionObservableSupport < T extends Observer > implements Serializable
 {
 
 	/***/
@@ -47,6 +48,7 @@ public class WithReflectionObservableSupport < T extends Observer >
 		}
 	}
 	
+	/***/
 	private Method obtainMethod ( String methodName , Object ... parameters ) throws NoSuchMethodException, SecurityException 
 	{
 		Class < ? > [] parametersTypes ;
@@ -59,6 +61,7 @@ public class WithReflectionObservableSupport < T extends Observer >
 		return res ;
 	} 
 	
+	/***/
 	private void effectiveNotification ( Method m , Object ... args ) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException 
 	{
 		for ( T t : observers )

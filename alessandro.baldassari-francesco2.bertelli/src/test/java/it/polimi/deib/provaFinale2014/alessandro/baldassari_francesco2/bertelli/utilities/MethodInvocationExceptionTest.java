@@ -16,13 +16,13 @@ public class MethodInvocationExceptionTest
 	@Before 
 	public void setUp () 
 	{
-		m = new MethodInvocationException ( methodName ) ;
+		m = new MethodInvocationException ( methodName , null ) ;
 	}
 	
 	@Test ( expected = IllegalArgumentException.class )
 	public void constructor () 
 	{
-		m = new MethodInvocationException ( null ) ;
+		m = new MethodInvocationException ( null , null ) ;
 	}
 	
 	@Test

@@ -1,5 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.GameConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank.Bank;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank.BankFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank.Bank.CardPriceNotRightException;
@@ -73,7 +74,7 @@ public class BankTest
 	@Test 
 	public void getMoneyReserve ()
 	{	
-		assertTrue ( bank.getMoneyReserve() == Bank.INITIAL_MONEY_RESERVE ) ;
+		assertTrue ( bank.getMoneyReserve() == GameConstants.INITIAL_MONEY_RESERVE ) ;
 	}
 	
 	/*
@@ -85,7 +86,7 @@ public class BankTest
 		int increment ;
 		increment = 50 ;
 		bank.receiveMoney ( increment ) ;
-		assertTrue ( bank.getMoneyReserve() == Bank.INITIAL_MONEY_RESERVE + increment );
+		assertTrue ( bank.getMoneyReserve() == GameConstants.INITIAL_MONEY_RESERVE + increment );
 	}
 	
 	@Test
@@ -99,7 +100,7 @@ public class BankTest
 	@Test
 	public void hasAFenceOfThisType2 () 
 	{
-		for ( int i = 0 ; i < Bank.FINAL_FENCE_NUMBER ; i ++ )
+		for ( int i = 0 ; i < GameConstants.FINAL_FENCE_NUMBER ; i ++ )
 			try {
 				bank.getAFence ( FenceType.FINAL ) ;
 			} catch (NoMoreFenceOfThisTypeException e) {
@@ -113,7 +114,7 @@ public class BankTest
 	@Test
 	public void hasAFenceOfThisType3 () 
 	{
-		for ( int i = 0 ; i < Bank.NON_FINAL_FENCE_NUMBER ; i ++ )
+		for ( int i = 0 ; i < GameConstants.NON_FINAL_FENCE_NUMBER ; i ++ )
 			try {
 				bank.getAFence ( FenceType.NON_FINAL ) ;
 			} catch (NoMoreFenceOfThisTypeException e) {
@@ -133,7 +134,7 @@ public class BankTest
 		int i ;
 		assertFalse ( bank.getAFence(FenceType.NON_FINAL).isFinal () ) ;
 		assertTrue ( bank.getAFence(FenceType.FINAL).isFinal () ) ;
-		for ( i = 0 ; i < Bank.FINAL_FENCE_NUMBER - 1 ; i ++ )
+		for ( i = 0 ; i < GameConstants.FINAL_FENCE_NUMBER - 1 ; i ++ )
 			bank.getAFence ( FenceType.FINAL ) ;
 		bank.getAFence ( FenceType.FINAL ) ;
 	}

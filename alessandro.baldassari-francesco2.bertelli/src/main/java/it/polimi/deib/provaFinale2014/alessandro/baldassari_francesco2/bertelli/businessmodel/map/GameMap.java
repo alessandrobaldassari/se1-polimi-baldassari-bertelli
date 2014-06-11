@@ -1,16 +1,12 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElement.GameMapElementObserver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElement.GameMapElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElement.PositionableElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Observable;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Observer;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WithReflectionObservableSupport;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionAbstractObservable;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,20 +19,10 @@ import java.util.Map;
  * they need to interact with it.
  * The object is immutable, also if the regions and roads contained here are not.
  */
-public class GameMap implements Serializable , Observable  < GameMap.GameMapObserver > , GameMapElementObserver
+public class GameMap extends WithReflectionAbstractObservable < GameMapObserver > implements Serializable , GameMapElementObserver
 {
 
 	// ATTRIBUTES
-	
-	/**
-	 * The number of Region in a Map. 
-	 */
-	public static final int NUMBER_OF_REGIONS = 19 ;
-	
-	/**
-	 * The number of Road in a Map 
-	 */
-	public static final int NUMBER_OF_ROADS = 42 ;
 	
 	/**
 	 * The map of all the regions that compose this map with the UID as the key and the Region object as the value.
@@ -47,11 +33,6 @@ public class GameMap implements Serializable , Observable  < GameMap.GameMapObse
 	 * The map of all the roads that compose this map with the UID as the key and the Road object as the value.
 	 */
 	private final Map < Integer , Road > roads ;
-	
-	/**
-	 * An object to easily implement the Observer pattern. 
-	 */
-	private WithReflectionObservableSupport < GameMapObserver > support ;
 	
 	// METHODS
 	
@@ -71,7 +52,6 @@ public class GameMap implements Serializable , Observable  < GameMap.GameMapObse
 		Road road ;
 		regions = new HashMap < Integer , Region > () ;
 		roads = new HashMap < Integer , Road > () ;
-		support = new WithReflectionObservableSupport < GameMapObserver > () ;
 		for ( Couple < Region , int [] > couple : regionsMap.values() )
 		{
 			region = couple.getFirstObject () ;
@@ -98,43 +78,15 @@ public class GameMap implements Serializable , Observable  < GameMap.GameMapObse
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void addObserver( GameMapObserver newObserver ) 
+	public void onElementAdded ( GameMapElementType whereType , Integer whereId , PositionableElementType whoType , Integer whoId ) 
 	{
-		support.addObserver ( newObserver ) ;
-	}
-
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public void removeObserver ( GameMapObserver oldObserver ) 
-	{
-		support.removeObserver ( oldObserver ) ;
-	}
-	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public void onElementAdded ( GameMapElementType whereType , int whereId , PositionableElementType whoType , int whoId ) 
-	{
-		try {
-			support.notifyObservers ( "onPositionableElementAdded" , whereType , whereId , whoType , whoId );
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		try 
+		{
+			notifyObservers ( "onPositionableElementAdded" , whereType , whereId , whoType , whoId );
+		} 
+		catch ( MethodInvocationException m ) 
+		{
+			m.printStackTrace () ;
 		}
 	}
 
@@ -142,25 +94,15 @@ public class GameMap implements Serializable , Observable  < GameMap.GameMapObse
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void onElementRemoved ( GameMapElementType whereType , int whereId , PositionableElementType whoType , int whoId ) 
+	public void onElementRemoved ( GameMapElementType whereType , Integer whereId , PositionableElementType whoType , Integer whoId ) 
 	{
-		try {
-			support.notifyObservers ( "onPositionableElementRemoved" , whereType , whereId , whoType , whoId );
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		try
+		{
+			notifyObservers ( "onPositionableElementRemoved" , whereType , whereId , whoType , whoId );
+		}
+		catch ( MethodInvocationException m ) 
+		{
+			m.printStackTrace () ;
 		}
 	}
 	
@@ -252,17 +194,5 @@ public class GameMap implements Serializable , Observable  < GameMap.GameMapObse
 			res = res + "* " + r + "\n" ;
 		return res ;
 	}	
-	
-	/***/
-	public interface GameMapObserver extends Observer 
-	{
-		
-		/***/
-		public void onPositionableElementAdded ( GameMapElementType whereType , int whereId , PositionableElementType whoType , int whoId ) ;
-	
-		/***/
-		public void onPositionableElementRemoved ( GameMapElementType whereType , int whereId , PositionableElementType whoType , int whoId ) ;
-		
-	}
 	
 }

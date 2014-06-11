@@ -9,11 +9,15 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Polygon;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.RectangularShape;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,16 +39,21 @@ import javax.swing.JSplitPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap.GameMapObserver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElement.GameMapElementType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElement.PositionableElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.GameConstants;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.GameView.GameMapViewObserver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.GameView.GameViewInputMode;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Counter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.FrameworkedWithGridBagLayoutPanel;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.GraphicsUtilities;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObservableFrameworkedWithGridBagLayoutPanel;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.FrameworkedWithGridBagLayoutPanel;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.ObservableFrameworkedWithGridBagLayoutPanel;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observer;
 
 /**
  * This class is a JFrame wrapper for the GameView. 
@@ -79,11 +88,62 @@ public class GameView extends JFrame
 		gameViewPanel.addNotification(notif);
 	} 
 
+	/***/
+	public void setGameMapObservable ( Observable < GameMapObserver > src ) 
+	{
+		src.addObserver ( gameViewPanel.getGameMapObserver () ) ;
+	}
+	
+	/***/
+	public void setInputMode ( GameViewInputMode mode ) 
+	{
+		gameViewPanel.setInputMode ( mode ) ;
+	}
+	
+	// ENUMS
+	
+		/**
+		 * An enum that clarifies which subject may be found by mouse click. 
+		 */
+		public enum GameViewInputMode 
+		{
+			
+			REGIONS ,
+			
+			ROADS ,
+			
+			ANIMALS ,
+			
+			SHEPERDS
+			
+		}
+	
+	// INNER INTERFACES
+	
+	/***/
+	public interface GameMapViewObserver extends Observer 
+	{
+		
+		/***/
+		public void onRegionSelected ( int regionUID ) ;
+		
+		/***/
+		public void onRoadSelected ( int roadUID ) ;
+		
+		/***/
+		public void onSheperdSelected ( int sheperdId ) ;
+		
+		/***/
+		public void onAnimalSelected ( int animalId ) ;
+		
+	}
+	
 	public static void main ( String [] args ) 
 	{
 		GameView g ;
 		g = new GameView () ;
 		g.setExtendedState ( GameView.MAXIMIZED_BOTH );
+		g.setInputMode(GameViewInputMode.REGIONS);
 		g.setVisible ( true ) ;
 	}
 	
@@ -95,6 +155,8 @@ public class GameView extends JFrame
 class GameViewPanel extends FrameworkedWithGridBagLayoutPanel 
 {
 
+	// ATTRIBUTES
+	
 	/**
 	 * A PlayersCardView to manage the Cards a User owns. 
 	 */
@@ -114,6 +176,8 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	 * A PlayersMoveView to manage the  move a User can do.
 	 */
 	private PlayersMoveViewPanel playersMovePanel ;
+	
+	// METHODS
 	
 	/***/
 	protected GameViewPanel () 
@@ -172,15 +236,33 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	{
 		notificationArea.addNotification(msg); 
 	}
+
+	/***/
+	protected void setInputMode ( GameViewInputMode mode ) 
+	{
+		mapPanel.setCurrentInputMode ( mode ) ;
+	}
+	
+	/**
+	 * Access the GameMapObserver associated to this GameMapView.
+	 * 
+	 * @return a GameMapObserver associated to this GameMapView.
+	 */
+	protected GameMapObserver getGameMapObserver () 
+	{
+		return mapPanel ;
+	}
 	
 }
 
 /**
  * A comoponent that manage the rendering of the Map and the interaction of the User with it. 
  */
-class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel  
+class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMapViewObserver > implements GameMapObserver 
 {
 
+	// ATTRIBUTES
+	
 	/**
 	 * A split pane to show both the map and some commands button about zoom and other things. 
 	 */
@@ -206,8 +288,17 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 	 */
 	private MapMeasurementCoordinatesManager coordinatesManager ;
 	
-	/***/
+	/**
+	 * The object that manages the position of elements on the GameMap. 
+	 */
 	private PositionableElementCoordinatesManager positionableElementsManager ;
+		
+	/**
+	 * The input mode this GameView is, null if none. 
+	 */
+	private GameViewInputMode currentInputMode ;
+	
+	// METHODS
 	
 	/***/
 	protected MapViewPanel () 
@@ -227,6 +318,7 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		commandPanel = new CommandPanel () ;	
 		coordinatesManager = new MapMeasurementCoordinatesManager () ;
 		positionableElementsManager = new PositionableElementCoordinatesManager () ;
+		currentInputMode = null ;
 	}
 
 	/**
@@ -268,10 +360,46 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 	}
 	
 	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void onPositionableElementAdded ( GameMapElementType whereType , Integer whereId , 
+			PositionableElementType whoType , Integer whoId ) 
+	{
+		positionableElementsManager.addElement(whereType, whereId, whoType, whoId);
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void onPositionableElementRemoved(GameMapElementType whereType , Integer whereId , 
+			PositionableElementType whoType , Integer whoId) 
+	{
+		positionableElementsManager.removeElement ( whereType , whereId , whoType , whoId ) ;
+	}
+
+	/**
+	 * Set the current input mode for this MapViewPanel 
+	 * 
+	 * @param currentInputMode the value for the currentInputModeProperty.
+	 */
+	public void setCurrentInputMode ( GameViewInputMode currentInputMode ) 
+	{
+		this.currentInputMode = currentInputMode ;
+	}
+	
+	// ENUMS
+	
+	// INNER CLASSES
+	
+	/**
 	 * The class that effectively draw the GameMap on the screen. 
 	 */
 	private class DrawingPanel extends JPanel 
 	{
+		
+		// ATTRIBUTES
 		
 		/**
 		 * A Map containing the images of the elements to draw on the GameMap.
@@ -287,6 +415,8 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		 * The preferred Dimension of this component. 
 		 */
 		private Dimension preferredDimension ;
+		
+		// METHODS
 		
 		/***/
 		public DrawingPanel () 
@@ -307,6 +437,7 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 				setDoubleBuffered ( true ) ;
 				setLayout ( null ) ;
 				setOpaque ( false );
+				addMouseListener ( new ClickManager () );
 			} 
 			catch ( IOException e ) 
 			{
@@ -333,14 +464,19 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 			Map < Integer , Map < PositionableElementType , Counter > > dataMap ;
 			Map < PositionableElementType , Counter > specData ;
 			Rectangle boundingBox ;
-			Polygon p ;
-			Ellipse2D e ;
+			Shape shape ;
 			BufferedImage toDraw ;
-			int figH ;
+			PositionableElementType type ;
+			int imageWidth ;
+			int imageHeight ;
 			int i ;
+			int currentHeight ;
 			int x0 ;
 			int y0 ;
 			super.paintComponent ( g ) ;
+			g.setFont ( new Font ( "Arial" , Font.ITALIC , 10 ) ) ;
+			g.setColor ( Color.RED ) ;
+			// consider the Map may not fill the entire space offered by this panel.
 			if ( backgroundImage.getWidth () < getWidth () ) 
 				x0 = ( getWidth () - backgroundImage.getWidth() ) / 2 ;
 			else 
@@ -351,47 +487,58 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 				y0 = 0 ;
 			// draw the map
 			g.drawImage ( backgroundImage , x0 , y0 , backgroundImage.getWidth() , backgroundImage.getHeight() , this );
-			// draw animals in the regions 
 			// retrieve data about regions
 			dataMap = positionableElementsManager.getData ( GameMapElementType.REGION ) ;
 			// for each region
-			g.setFont ( new Font ( "Arial" , Font.ITALIC , 10 ) ) ;
-			g.setColor ( Color.RED ) ;
-			for ( i = 1 ; i <= GameMap.NUMBER_OF_REGIONS ; i ++ )
+			for ( i = 1 ; i <= GameConstants.NUMBER_OF_REGIONS ; i ++ )
 			{
-				p = coordinatesManager.getRegionBorder ( i ) ;
+				// retrieve the coordinates of this region
+				shape = coordinatesManager.getRegionBorder ( i ) ;
+				// retrieve data about animals in the region.
 				specData = dataMap.get ( i ) ;
 				// if there is someone in this region
 				if ( specData != null )
 				{
-					boundingBox = p.getBounds () ;
-					figH = boundingBox.height / specData.size () ;
-					int u ;
-					u = boundingBox.height ;
-					// effectively draw images.
+					// approximate the region with a Rectangle.
+					boundingBox = shape.getBounds () ;
+					// determine an acceptable value for the height of the images.
+					imageHeight = boundingBox.height / specData.size () ;
+					// determine an acceptable value for the width of the images.
+					imageWidth = boundingBox.width / 2 ;
+					// begin draw in the top left corner.
+					currentHeight = boundingBox.height ;
+					// for each Type of Animal in the region
 					for ( PositionableElementType t : specData.keySet() ) 
 					{
 						toDraw = positionableElementsImages.get ( t ) ;
-						g.drawImage ( toDraw , boundingBox.x , u , boundingBox.width , figH , this ) ;
-						g.drawString ( specData.get ( t ).getValue() + "" , boundingBox.x , u + figH - 20 ) ;
-						u = u + figH ;
+						g.drawImage ( toDraw , boundingBox.x , currentHeight , imageWidth , imageHeight , this ) ;
+						g.drawString ( specData.get ( t ).getValue() + "" , boundingBox.x , currentHeight + imageHeight - 20 ) ;
+						currentHeight = currentHeight + imageHeight ;
+						// update the coordinates manager to manage the click events.
+						coordinatesManager.updateAnimalsInRegionsMap ( i , t , new Rectangle ( boundingBox.x , currentHeight , imageWidth , imageHeight ) );
 					}
 				}
 			}
-			// draw sheperds and fences in the roads
 			// retrieve data about roads
 			dataMap = positionableElementsManager.getData ( GameMapElementType.ROAD ) ;
-			for ( i = 1 ; i <= GameMap.NUMBER_OF_ROADS ; i ++ )
+			for ( i = 1 ; i <= GameConstants.NUMBER_OF_ROADS ; i ++ )
 			{
-				e = coordinatesManager.getRoadBorder ( i ) ;
+				shape = coordinatesManager.getRoadBorder ( i ) ;
 				specData = dataMap.get ( i ) ;
 				// it there is someone in
-				if ( specData != null )
+				if ( specData != null ) 
 				{
-					toDraw = positionableElementsImages.get ( specData.keySet().iterator().next () ) ;
-					x0 = ( int ) ( e.getMinX() + ( getWidth() - backgroundImage.getWidth() ) /2 ) ;
-					y0 = ( int ) e.getMinY() ;
+					// retrieve the type of object with which we are dealing with.
+					type = specData.keySet().iterator().next () ;
+					// select the appropriate image.
+					toDraw = positionableElementsImages.get ( type ) ;
+					// determine the right coordinates.
+					x0 = ( int ) ( ( ( RectangularShape ) shape).getMinX() + ( getWidth() - backgroundImage.getWidth() ) /2 ) ;
+					y0 = ( int ) ( ( RectangularShape ) shape).getMinY() ;
+					// draw the image effectively
 					g.drawImage ( toDraw , x0, y0 , coordinatesManager.ROADS_RADIUS * 2 , coordinatesManager.ROADS_RADIUS * 2 , this ) ;
+					// update the coordinates manager to mange the click events.
+					coordinatesManager.updateObjectInRoadsMap ( i , type );
 				}
 			}
 		}
@@ -415,6 +562,68 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 			backgroundImage = GraphicsUtilities.scaleImage ( original , newH , newH ) ;
 		    SwingUtilities.updateComponentTreeUI ( MapViewPanel.this ) ;
 		    coordinatesManager.scale ( xFactor , yFactor ) ; 
+		}
+		
+		/**
+		 * This class managed the click actions a User do on the Map.
+		 * The mouseClocked event is the base point from where launch other events relative
+		 * to User choiches. 
+		 */
+		private class ClickManager extends MouseAdapter 
+		{
+			
+			/**
+			 * AS THE SUPER'S ONE. 
+			 */
+			@Override
+		    public void mouseClicked(MouseEvent e) 
+		    {
+				String methodName ;
+				Integer uid ;
+				int x ;
+				int y ;
+				methodName = null ;
+				if ( currentInputMode != null )
+				{
+					x = e.getX () ;
+					y = e.getY () ;
+					switch ( currentInputMode )
+					{
+						case REGIONS :
+							uid = coordinatesManager.getRegionId ( x , y ) ;
+							if ( uid != null )
+								methodName = "onRegionSelected" ;
+						break ;
+						case ROADS :
+							uid = coordinatesManager.getRoadId ( x , y ) ;
+							if ( uid != null )
+								methodName = "onRoadSelected" ;
+						break ;
+						case ANIMALS :
+							uid = coordinatesManager.getAnimalId ( x , y ) ;
+							if ( uid != null )
+								methodName = "onSheperdSelected" ;
+						break ;
+						case SHEPERDS :
+							uid = coordinatesManager.getSheperdId ( x , y ) ;
+							if ( uid != null )
+								methodName = "onAnimalSelected" ;
+						break ;
+						default :
+							throw new RuntimeException () ;
+					}
+					try 
+					{
+						System.out.println ( uid ) ;
+						notifyObservers ( methodName , uid ) ;
+					}
+					catch (MethodInvocationException e1) 
+					{
+						e1.printStackTrace();
+					}
+				}
+		    }
+			
 		}
 		
 	}
@@ -568,6 +777,8 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 	private class MapMeasurementCoordinatesManager
 	{
 	
+		// ATTRIBUTES
+		
 		/***/
 		private final String REGIONS_CSV_FILE_PATH = "regionsPerimiterPoints.csv" ;
 		
@@ -576,18 +787,27 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		
 		/***/
 		int ROADS_RADIUS = 25 ;
-	
+			
 		/***/
 		private Map < Integer , Polygon > regionsCoordinates ;
 		
 		/***/
 		private Map < Integer , Ellipse2D > roadsCoordinates ;
+
+		/***/
+		private Map < Integer , Map < PositionableElementType , Shape > > animalsInRegions ;
+	
+		/***/
+		private Map < Integer , PositionableElementType > objectsInRoads ;
+		
+		// METHODS
 		
 		/***/
 		public MapMeasurementCoordinatesManager () 
 		{
 			InputStream regionsI ;
 			InputStream roadsI ;
+			int i ;
 			try 
 			{
 				regionsI = Files.newInputStream ( Paths.get ( REGIONS_CSV_FILE_PATH ) , StandardOpenOption.READ ) ;
@@ -596,6 +816,12 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 				regionsI.close () ;
 				roadsCoordinates = readRoadsCoordinates ( roadsI ) ;
 				roadsI.close () ;
+				animalsInRegions = new HashMap < Integer , Map < PositionableElementType , Shape > > ( GameConstants.NUMBER_OF_REGIONS ) ;
+				for ( i = 1 ; i <= GameConstants.NUMBER_OF_REGIONS ; i ++ )
+					animalsInRegions.put ( i , new LinkedHashMap < PositionableElementType , Shape > () ) ;
+				objectsInRoads = new HashMap < Integer , PositionableElementType > ( GameConstants.NUMBER_OF_ROADS ) ;
+				for ( i = 1 ; i <= GameConstants.NUMBER_OF_ROADS ; i ++ )
+					objectsInRoads.put ( i , null ) ;
 			}
 			catch ( IOException e ) 
 			{
@@ -664,15 +890,115 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 		}
  		
 		/***/
-		public Polygon getRegionBorder ( int regionUID )
+		public Shape getRegionBorder ( int regionUID )
 		{
 			return regionsCoordinates.get ( regionUID ) ;
 		}
 		
 		/***/
-		public Ellipse2D getRoadBorder ( int roadUID ) 
+		public Shape getRoadBorder ( int roadUID ) 
 		{
 			return roadsCoordinates.get ( roadUID ) ;
+		}
+		
+		/***/
+		public Integer getRegionId ( int x , int y ) 
+		{
+			Integer res ;
+			res = lookForAPointObjectId ( regionsCoordinates , x, y ) ;
+			return res ;
+		}
+		
+		/***/
+		public Integer getRoadId ( int x , int y ) 
+		{
+			Integer res ;
+			res = lookForAPointObjectId ( roadsCoordinates , x , y ) ;
+			return res ;
+		}
+	
+		/***/
+		public Integer getSheperdId ( int x , int y ) 
+		{
+			PositionableElementType type ;
+			Integer res ;
+			Integer roadId ;
+			// first, find the road where it happened, if it exists.
+			roadId = getRegionId ( x , y ) ;
+			if ( roadId != null )
+			{
+				type = objectsInRoads.get ( roadId ) ;
+				if ( type != null && type == PositionableElementType.SHEPERD )
+					res = positionableElementsManager.findPlaceOf ( GameMapElementType.ROAD , roadId , type ) ;
+				else
+					res = null ;
+			}
+			else
+				res = null ;
+			return res ;
+		}
+		
+		/***/
+		public Integer getAnimalId ( int x , int y ) 
+		{
+			Integer res ;
+			Integer regionId ;
+			PositionableElementType type ;
+			// first, find the region where it happened, if it exists.
+			regionId = getRegionId ( x , y ) ;
+			if ( regionId != null )
+			{
+				type = null ;
+				for ( PositionableElementType t : animalsInRegions.get ( regionId ).keySet() )
+					if ( animalsInRegions.get ( regionId ).get ( t ).contains ( x , y ) )
+					{
+						type = t ;
+						break ;
+					}
+				if ( type != null )
+					res = positionableElementsManager.findPlaceOf ( GameMapElementType.REGION , regionId , type ) ;
+				else
+					res = null ;
+			}
+			else
+				res = null ;
+			return res ;
+		}
+		
+		/***/
+		public void updateAnimalsInRegionsMap ( int regionId , PositionableElementType t , Shape loc ) 
+		{
+			animalsInRegions.get ( regionId ).put ( t , loc ) ;
+		}
+		
+		/***/
+		public void updateObjectInRoadsMap ( int roadId , PositionableElementType t ) 
+		{
+			objectsInRoads.put ( roadId , t ) ;
+		}
+		
+		/**
+		 * Find the key, if it exists for which the ( x , y ) point is in the value associated.
+		 * 
+		 * @param 
+		 * @param
+		 * @param
+		 * @return
+		 */
+		private Integer lookForAPointObjectId ( Map < Integer , ? extends Shape > dataStr , int x , int y ) 
+		{
+			Integer res ;
+			res = null ;
+			System.out.println ( "X = " + x + "\nY = " + y );
+			for ( Integer i : dataStr.keySet () )
+			{
+				System.out.println ( dataStr.get(i).getBounds() ) ;
+				if ( dataStr.get ( i ).contains ( x , y ) )
+				{
+					res = i ;
+					break ;
+				}
+			}return res ;
 		}
 		
 	}
@@ -680,7 +1006,7 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 	/**
 	 * Class that manages the measures of the Elements which are on the GameMap. 
 	 */
-	private class PositionableElementCoordinatesManager implements GameMapObserver
+	private class PositionableElementCoordinatesManager
 	{
 		
 		// ATTRIBUTES
@@ -700,27 +1026,23 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 			elems = new LinkedHashMap < Couple < PositionableElementType , Integer > , Couple < GameMapElementType , Integer > > () ;
 		}
 
-		/**
-		 * AS THE SUPER'S ONE. 
-		 */
-		@Override
-		public void onPositionableElementAdded ( GameMapElementType whereType , int whereId , PositionableElementType whoType , int whoId ) 
+		/***/
+		public void addElement ( GameMapElementType whereType , int whereId , PositionableElementType whoType , int whoId  ) 
 		{
 			elems.put ( new Couple < PositionableElementType , Integer > ( whoType , whoId ) , new Couple < GameMapElementType , Integer > ( whereType , whereId ) ) ;
 		}
-
-		/**
-		 * AS THE SUPER'S ONE. 
-		 */
-		@Override
-		public void onPositionableElementRemoved ( GameMapElementType whereType , int whereId , PositionableElementType whoType , int whoId )
+		
+		/***/
+		public void removeElement ( GameMapElementType whereType , int whereId , PositionableElementType whoType , int whoId  ) 
 		{
 			elems.remove ( new Couple < PositionableElementType , Integer > ( whoType , whoId ) ) ;
+
 		}
 		
 		/**
-		 * 
-		 * 
+		 * This method finds in this Object data all the entries that matches the whereType parameter and returns
+		 * the information about this data.
+		 *
 		 * @param whereType the GameMapElementType to search data about.
 		 * @return a Map whose semantics is the sequent :
 		 * 	       key : the uid of a GameMapElementType 
@@ -750,32 +1072,68 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel
 			return res ;
 		}
 		
+		/***/
+		public Integer findPlaceOf ( GameMapElementType whereType , int whereId , PositionableElementType targetType ) 
+		{
+			Couple < GameMapElementType , Integer > out ;
+			Integer res ;
+			res = null ;
+			for ( Couple < PositionableElementType , Integer > in : elems.keySet () )
+			{
+				out = elems.get ( in ) ;
+				if ( out.getFirstObject() == whereType && out.getSecondObject () == whereId )
+					if ( in.getFirstObject () == targetType )
+					{
+						res = in.getSecondObject () ;
+						break ;
+					}
+			}
+			return res ;
+		}
+		
 	}
 	
 }
 
+/**
+ * A View that shows to the User his Cards. 
+ */ 
 class PlayersCardViewPanel extends FrameworkedWithGridBagLayoutPanel 
 {
 	
+	/***/
 	protected PlayersCardViewPanel () 
 	{
 		super () ;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void createComponents () {}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void manageLayout() {}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void bindListeners () {}
 
+	/**
+	 * AS THE SUPERS' ONE. 
+	 */
 	@Override
 	protected void injectComponents () {}
 
 }
 
+/***/
 class PlayersMoveViewPanel extends FrameworkedWithGridBagLayoutPanel 
 {
 
@@ -783,17 +1141,22 @@ class PlayersMoveViewPanel extends FrameworkedWithGridBagLayoutPanel
 	{
 		super () ;
 	}
-	
+
+	/***/
 	@Override
 	protected void createComponents () {}
 
+	/***/
 	@Override
 	protected void manageLayout () {}
 
+	/***/
 	@Override
 	protected void bindListeners () {}
 
+	/***/
 	@Override
 	protected void injectComponents () {}
 
 }
+

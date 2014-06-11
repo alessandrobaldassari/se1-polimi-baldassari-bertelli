@@ -16,8 +16,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ConnectionLoosingManager;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.MatchConnectionLoosingController;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ConnectionLoosingController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.PropertyNotSetYetException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOnceProperty;
@@ -44,14 +43,14 @@ public class NetworkCommunicantPlayer extends Player
 	/**
 	 * 
 	 */
-	private transient ConnectionLoosingManager connectionLoosingManager ;
+	private transient ConnectionLoosingController connectionLoosingManager ;
 	
 	/**
 	 * @param name the name of this Player
 	 * @param clientHandler the value for the ClientHandler property.
 	 * @throws IllegalArgumentException if the clientHandler parameter is null.
 	 */
-	public NetworkCommunicantPlayer ( String name , ClientHandler clientHandler , ConnectionLoosingManager connectionLoosingManager ) 
+	public NetworkCommunicantPlayer ( String name , ClientHandler clientHandler , ConnectionLoosingController connectionLoosingManager ) 
 	{
 		super ( name ) ;
 		if ( clientHandler != null && connectionLoosingManager != null )
@@ -63,7 +62,7 @@ public class NetworkCommunicantPlayer extends Player
 		else 
 			throw new IllegalArgumentException();
 	}
-
+	
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
@@ -77,7 +76,7 @@ public class NetworkCommunicantPlayer extends Player
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
 		System.out.println ( "prop created." ) ;
 		t = new Timer () ;
-		t.schedule ( new TimeoutExpirationTimerTask () , MatchConnectionLoosingController.WAITING_TIME ) ;
+		t.schedule ( new TimeoutExpirationTimerTask () , ConnectionLoosingController.WAITING_TIME ) ;
 		System.out.println ( "timer go." ) ;
 		f = executorService.submit ( new Callable < NamedColor > () 
 			{
@@ -112,7 +111,7 @@ public class NetworkCommunicantPlayer extends Player
 			}
 			else
 			{
-				if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
+				if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
 					throw new TimeoutException () ;
 				else
 					res = getColorForSheperd ( availableColors );
@@ -128,7 +127,7 @@ public class NetworkCommunicantPlayer extends Player
 		}
 		catch ( ExecutionException e ) 
 		{
-			if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
+			if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
 				throw new TimeoutException () ;
 			else
 				res = getColorForSheperd ( availableColors );
@@ -148,7 +147,7 @@ public class NetworkCommunicantPlayer extends Player
 		Callable < Boolean > realMethodExecutor ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
 		t = new Timer ();
-		t .schedule ( new TimeoutExpirationTimerTask () , MatchConnectionLoosingController.WAITING_TIME ) ;
+		t .schedule ( new TimeoutExpirationTimerTask () , ConnectionLoosingController.WAITING_TIME ) ;
 		realMethodExecutor = new Callable < Boolean > () 
 		{
 			@Override
@@ -181,7 +180,7 @@ public class NetworkCommunicantPlayer extends Player
 		{
 			if ( methodCompleted.getValue () == false )
 			{
-				if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
+				if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
 					throw new TimeoutException () ;
 				else
 					chooseCardsEligibleForSelling();
@@ -198,7 +197,7 @@ public class NetworkCommunicantPlayer extends Player
 				}
 				catch ( ExecutionException e ) 
 				{
-					if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
+					if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
 						throw new TimeoutException () ;
 					else
 						chooseCardsEligibleForSelling();
@@ -221,7 +220,7 @@ public class NetworkCommunicantPlayer extends Player
 		Future < GameMove > f ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
 		t = new Timer ();
-		t.schedule ( new TimeoutExpirationTimerTask () , MatchConnectionLoosingController.WAITING_TIME ) ;
+		t.schedule ( new TimeoutExpirationTimerTask () , ConnectionLoosingController.WAITING_TIME ) ;
 		f = executorService.submit ( new Callable < GameMove > () 
 			{
 				@Override
@@ -248,7 +247,7 @@ public class NetworkCommunicantPlayer extends Player
 			}
 			else
 			{
-				if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
+				if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
 					throw new TimeoutException () ;
 				else
 					res = doMove ( moveFactory , gameMap ) ;
@@ -264,7 +263,7 @@ public class NetworkCommunicantPlayer extends Player
 		}
 		catch ( ExecutionException e ) 
 		{
-			if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
+			if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
 				throw new TimeoutException () ;
 			else
 				res = doMove ( moveFactory , gameMap ) ;
@@ -283,7 +282,7 @@ public class NetworkCommunicantPlayer extends Player
 		Future < Sheperd > f ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
 		t = new Timer ();
-		t.schedule ( new TimeoutExpirationTimerTask () , MatchConnectionLoosingController.WAITING_TIME ) ;
+		t.schedule ( new TimeoutExpirationTimerTask () , ConnectionLoosingController.WAITING_TIME ) ;
 		f = executorService.submit ( new Callable < Sheperd > () 
 			{
 				@Override
@@ -310,7 +309,7 @@ public class NetworkCommunicantPlayer extends Player
 			}
 			else
 			{
-				if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
+				if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
 					throw new TimeoutException () ;
 				else
 					res = chooseSheperdForATurn();
@@ -326,7 +325,7 @@ public class NetworkCommunicantPlayer extends Player
 		}
 		catch ( ExecutionException e ) 
 		{
-			if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
+			if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
 				throw new TimeoutException () ;
 			else
 				res = chooseSheperdForATurn();
@@ -345,7 +344,7 @@ public class NetworkCommunicantPlayer extends Player
 		Future < SellableCard > f ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
 		t = new Timer ();
-		t.schedule ( new TimeoutExpirationTimerTask () , MatchConnectionLoosingController.WAITING_TIME ) ;
+		t.schedule ( new TimeoutExpirationTimerTask () , ConnectionLoosingController.WAITING_TIME ) ;
 		f = executorService.submit ( new Callable < SellableCard > () 
 			{
 				@Override
@@ -372,7 +371,7 @@ public class NetworkCommunicantPlayer extends Player
 			}
 			else
 			{
-				if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
+				if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
 					throw new TimeoutException () ;
 				else
 					res = chooseCardToBuy ( src );
@@ -388,7 +387,7 @@ public class NetworkCommunicantPlayer extends Player
 		}
 		catch ( ExecutionException e ) 
 		{
-			if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
+			if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
 				throw new TimeoutException () ;
 			else
 				res = chooseCardToBuy ( src );
@@ -423,7 +422,7 @@ public class NetworkCommunicantPlayer extends Player
 		Future < Road > f ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
 		t = new Timer ();
-		t.schedule ( new TimeoutExpirationTimerTask () , MatchConnectionLoosingController.WAITING_TIME ) ;
+		t.schedule ( new TimeoutExpirationTimerTask () , ConnectionLoosingController.WAITING_TIME ) ;
 		f = executorService.submit ( new Callable < Road > () 
 			{
 				@Override
@@ -451,7 +450,7 @@ public class NetworkCommunicantPlayer extends Player
 			}
 			else
 			{
-				if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
+				if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
 					throw new TimeoutException () ;
 				else
 					res = chooseInitialRoadForASheperd(availableRoads);
@@ -467,7 +466,7 @@ public class NetworkCommunicantPlayer extends Player
 		}
 		catch ( ExecutionException e ) 
 		{
-			if ( connectionLoosingManager.manageConnectionLoosing ( this , true ) == false )
+			if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
 				throw new TimeoutException () ;
 			else
 				res = chooseInitialRoadForASheperd(availableRoads);

@@ -1,6 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
@@ -59,5 +60,8 @@ public interface CommunicationProtocolResponser
 	 * Generic notification by the Server. 
 	 */
 	public void generationNotification ( String msg ) ;
+	
+	/***/
+	public void onGUIConnectorOnNotification ( Serializable guiConnector ) ;
 	
 }

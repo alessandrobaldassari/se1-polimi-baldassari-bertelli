@@ -1,59 +1,62 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.io.IOException ;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client.Client;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 
-public abstract class ResumeConnectionServer < T , Q extends Client > implements Runnable
+/***/
+public abstract class ResumeConnectionServer < T > implements Runnable
 {
-
-	private Map < Q , ClientHandler < T > > associations ;
 	
+	
+	/***/
 	private boolean on ;
 	
-	private BlockingQueue < Couple < Q , T > > requests ;
+	/***/
+	private BlockingQueue < Couple < Integer , T > > requests ;
+
+	/***/
+	private ConnectionLoosingController connectionLoosingController ;
 	
-	public ResumeConnectionServer () 
+	/***/
+	public ResumeConnectionServer ( ConnectionLoosingController connectionLoosingController ) 
 	{
 		on = false ;
-		associations = new LinkedHashMap < Q , ClientHandler < T > > () ;
-		requests = new LinkedBlockingQueue < Couple < Q , T > > () ;
+		requests = new LinkedBlockingQueue < Couple < Integer , T > > () ;
+		this.connectionLoosingController = connectionLoosingController ;
 	} 
 	
-	public void addAssociation ( Q client , ClientHandler < T > handler ) 
+	/***/
+	protected ClientHandler < T > getHandler ( Integer key ) 
 	{
-		associations.put ( client , handler ) ;
+		ClientHandler res ;
+		res = connectionLoosingController.getClientHandler ( key ) ;
+		return res ;
 	}
 	
-	protected ClientHandler < T > getAssociations ( Q clientKey ) 
-	{
-		return associations.get ( clientKey ) ;
-	}
-	
+	/***/
 	protected boolean isUp () 
 	{
 		return on ;
 	}
 	
 	/***/
-	protected void tryResumeMe ( Couple < Q , T > req ) 
+	protected void tryResumeMe ( Couple < Integer , T > req ) 
 	{
 		requests.offer ( req ) ;
 	}
 	
 	/***/
-	protected abstract void resumeAlgo ( Couple < Q , T > req ) ;
+	protected abstract void resumeAlgo ( Couple < Integer , T > req ) throws IOException ;
 	
 	/***/
 	@Override
 	public void run ()
 	{
-		Couple < Q , T > x ;
+		Couple < Integer , T > x ;
 		on = true ;
 		while ( on ) 
 		{
@@ -64,7 +67,12 @@ public abstract class ResumeConnectionServer < T , Q extends Client > implements
 			}
 			catch (InterruptedException e) 
 			{
+				e.printStackTrace();
 				on = false ;
+			} 
+			catch (IOException e) 
+			{
+				e.printStackTrace();
 			}
 		}
 	}

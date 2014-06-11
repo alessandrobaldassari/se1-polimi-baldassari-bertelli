@@ -70,18 +70,32 @@ public class RMIClient extends Client
 		}
 	}	
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public void resumeConnectionConnect () throws IOException
 	{
 		RMIResumerConnectionServer s ;
+		RMIClientBroker br ;
 		Registry registry ;
+		String res ;
 		registry = LocateRegistry.getRegistry( SERVER_IP_ADDRESS , SERVER_CONNECTION_RESUME_PORT ) ;
 		try 
 		{
 			System.out.println ( "RMI CLIENT - TRY RESUME CONNECTION : BEGIN" ) ;		
 			System.out.println ( "RMI CLIENT - TRY RESUME CONNECTION :" ) ;	
 			s = ( RMIResumerConnectionServer ) registry.lookup ( RMIResumerConnectionServer.LOGICAL_SERVER_NAME ) ;
-			s.resumeMe ( this ) ;
+			s.resumeMe ( getUID () ) ;
+			while ( s.areYouReadyForMe ( getUID () ) == null ) ;
+			res = s.areYouReadyForMe ( getUID () ) ;
+			if ( res.compareTo ( "KO" ) == 0 )
+				throw new IOException () ;
+			else
+			{
+				br = (RMIClientBroker) registry.lookup ( res ) ;
+				this.clientBroker = br ;
+			}
 		}
 		catch ( NotBoundException e ) 
 		{

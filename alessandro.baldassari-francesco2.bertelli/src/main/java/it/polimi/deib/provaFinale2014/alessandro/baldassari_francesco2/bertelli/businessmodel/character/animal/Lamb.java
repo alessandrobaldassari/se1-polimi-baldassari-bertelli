@@ -1,5 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
+
 /**
  * This class models a Lamb, the Ovine generated when a Ram and a Sheep mate.
  * A Lamb remains a Lamb only a given number of turns in the Game ( this parameter

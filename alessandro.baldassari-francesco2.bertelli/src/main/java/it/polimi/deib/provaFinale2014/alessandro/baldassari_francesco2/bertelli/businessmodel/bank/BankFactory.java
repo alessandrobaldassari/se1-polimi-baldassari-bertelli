@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.GameConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
@@ -61,14 +62,14 @@ public class BankFactory implements Serializable
 		if ( factorySupport.isAlreadyUser ( caller ) == false )
 		{
 			factorySupport.addUser ( caller ) ;
-			initFences = new ArrayList < Fence > ( Bank.NON_FINAL_FENCE_NUMBER + Bank.FINAL_FENCE_NUMBER ) ;
-			for ( i = 0 ; i < Bank.NON_FINAL_FENCE_NUMBER ; i ++ )
+			initFences = new ArrayList < Fence > ( GameConstants.NON_FINAL_FENCE_NUMBER + GameConstants.FINAL_FENCE_NUMBER ) ;
+			for ( i = 0 ; i < GameConstants.NON_FINAL_FENCE_NUMBER ; i ++ )
 				initFences.add ( new Fence ( FenceType.NON_FINAL ) ) ;
-			for ( i = 0 ; i < Bank.FINAL_FENCE_NUMBER ; i ++ )
+			for ( i = 0 ; i < GameConstants.FINAL_FENCE_NUMBER ; i ++ )
 				initFences.add ( new Fence ( FenceType.FINAL ) ) ;
 			initialCards = CardFactory.getInstance().generatedInitialCards ( caller ) ;
 			otherCards = CardFactory.getInstance().generatedSellableCards ( caller ) ;
-			res = new Bank ( Bank.INITIAL_MONEY_RESERVE , initFences , initialCards , otherCards ) ;
+			res = new Bank ( GameConstants.INITIAL_MONEY_RESERVE , initFences , initialCards , otherCards ) ;
 		}
 		else 
 			throw new SingletonElementAlreadyGeneratedException () ;

@@ -58,7 +58,7 @@ public final class PresentationMessages
 	 */
 	public static final String BYE_MESSAGE = "Grazie per avere utilizzato JSheepland.\nA presto !\nBeeeeee" ;
 	
-	
-	
+	/***/
+	private PresentationMessages () {}
 	
 }

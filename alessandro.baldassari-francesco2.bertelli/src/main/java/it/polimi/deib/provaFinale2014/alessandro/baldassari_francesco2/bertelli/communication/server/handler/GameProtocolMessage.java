@@ -6,6 +6,8 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 public enum GameProtocolMessage 
 {
 
+	UID_NOTIFICATION ,
+	
 	NAME_REQUESTING_REQUEST ,
 	
 	NAME_REQUESTING_RESPONSE,
@@ -46,6 +48,8 @@ public enum GameProtocolMessage
 	
 	RESUME_SUCCEEED ,
 	
-	RESUME_FAILED 
+	RESUME_FAILED ,
+	
+	GUI_CONNECTOR_NOTIFICATION
 	
 }

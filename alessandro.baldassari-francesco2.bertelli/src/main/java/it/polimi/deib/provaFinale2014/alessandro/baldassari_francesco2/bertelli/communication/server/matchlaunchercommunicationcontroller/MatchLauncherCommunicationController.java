@@ -15,8 +15,13 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.PlayerWantsToExitGameException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.NetworkCommunicantPlayer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.NetworkCommunicationController;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.guimap.SocketGUIMapServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.MatchConnectionLoosingController;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ConnectionLoosingController;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ConnectionLoosingControllerImpl;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.RMIResumerConnectionServerImpl;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ResumeConnectionServer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.SocketResumeConnectionServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIRequestAcceptServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RequestAccepterServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
@@ -78,12 +83,21 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 	/**
 	 * A component associated with the current GameController to manage eventually connection loosing. 
 	 */
-	private MatchConnectionLoosingController connectionLoosingController ;
+	private ConnectionLoosingController connectionLoosingController ;
 	
 	/**
 	 * A flag indicating if this MasterServer is on or not.
 	 */
 	private boolean inFunction ;
+
+	/***/
+	private ResumeConnectionServer < ? > socketResumeConnectionServer ;
+	
+	/***/
+	private ResumeConnectionServer < ? > rmiResumeConnectionServer ;
+	
+	/***/
+	private SocketGUIMapServer guiServer ;
 	
 	/**
 	 * @throws IOException if something goes wrong with the creation of the member objects. 
@@ -98,8 +112,12 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 		currentGameController = null ;
 		currentClientHandlers = new LinkedList < ClientHandler < ? > > () ;
 		currentClientNames = new LinkedList < String > () ;
-		connectionLoosingController = null ;
+		connectionLoosingController = new ConnectionLoosingControllerImpl () ;
+		socketResumeConnectionServer = new SocketResumeConnectionServer ( connectionLoosingController ) ; 
+		rmiResumeConnectionServer = new RMIResumerConnectionServerImpl ( connectionLoosingController ) ;
 		inFunction = false ;
+		threadExecutor.execute ( socketResumeConnectionServer ) ;
+		threadExecutor.execute ( rmiResumeConnectionServer ) ;
 	}
 	
 	/**
@@ -214,12 +232,16 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 	private void createAndLaunchNewGameController () 
 	{
 		currentGameController = new MatchController ( this ) ;
-		connectionLoosingController = new MatchConnectionLoosingController () ;
+		try {
+			guiServer = new SocketGUIMapServer () ;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		currentClientHandlers.clear () ;
 		currentClientNames.clear () ;
 		connectionLoosingController.addObserver ( currentGameController ) ;
 		threadExecutor.submit ( currentGameController ) ;
-		threadExecutor.submit ( connectionLoosingController ) ;
+		threadExecutor.submit ( guiServer ) ;
 	}
 	
 	/**
@@ -252,7 +274,7 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 		for ( ClientHandler < ? > c : currentClientHandlers )
 			try 
 			{
-				c.notifyMatchWillNotStart ( ClientHandler.MATCH_WILL_NOT_START_MESSAGE );
+				c.notifyMatchWillNotStart ( ClientHandler.MATCH_WILL_NOT_START_MESSAGE ) ;
 			}
 			catch ( IOException e ) 
 			{
@@ -272,6 +294,8 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 		for ( ClientHandler < ? > c : currentClientHandlers )
 			try 
 			{
+				c.uidNotification () ;
+				c.sendGuiConnectorNotification ( guiServer.getPort () ) ;
 				c.notifyMatchStart () ;
 			}
 			catch ( IOException e ) 
@@ -299,6 +323,7 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 	{
 		currentGameController = null ;
 		connectionLoosingController = null ;
+		guiServer = null ;
 		currentClientHandlers.clear () ;
 		currentClientNames.clear () ;
 	}

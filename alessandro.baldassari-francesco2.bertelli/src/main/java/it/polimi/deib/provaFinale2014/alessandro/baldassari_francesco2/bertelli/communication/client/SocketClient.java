@@ -16,9 +16,14 @@ import java.net.SocketAddress;
 public class SocketClient extends Client 
 {
 	
+	/***/
 	public static final String SERVER_IP_ADDR = "127.0.0.1" ;
 	
+	/***/
 	public static final int SERVER_PORT = 3333 ;
+	
+	/***/
+	public static final int EMERGENCY_SERVER_PORT = 3331 ;
 	
 	/**
 	 * The socket object used to make the connection to the server. 
@@ -117,7 +122,23 @@ public class SocketClient extends Client
 	@Override
 	protected void resumeConnectionConnect () throws IOException 
 	{
-		
+		Socket emergencySocket ;
+		String res ;
+		ObjectInputStream emOIS ;
+		ObjectOutputStream emOOS ;
+		emergencySocket = new Socket ( SERVER_IP_ADDR , EMERGENCY_SERVER_PORT ) ;
+		emOIS = new ObjectInputStream ( emergencySocket.getInputStream() ) ;
+		emOOS = new ObjectOutputStream ( emergencySocket.getOutputStream () ) ;
+		emOOS.writeInt ( getUID () );
+		res = emOIS.readUTF () ;
+		if ( res.compareTo ( "OK" ) != 0 )
+			throw new IOException ( "out." ) ;
+		else
+		{
+			channel = emergencySocket ;
+			ois = new ObjectInputStream ( channel.getInputStream() ) ;
+			oos = new ObjectOutputStream ( channel.getOutputStream () ) ;
+		}
 	}
 
 	

@@ -6,8 +6,8 @@ import java.awt.Insets;
 import javax.swing.JTextArea;
 import javax.swing.border.TitledBorder;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.FrameworkedWithGridBagLayoutPanel;
 
 public class NotificationPanel extends FrameworkedWithGridBagLayoutPanel
 {

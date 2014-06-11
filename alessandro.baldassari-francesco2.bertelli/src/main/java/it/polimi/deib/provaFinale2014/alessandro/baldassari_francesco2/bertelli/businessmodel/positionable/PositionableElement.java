@@ -14,6 +14,7 @@ public abstract class PositionableElement < T extends GameMapElement > implement
 	
 	private static int UIDGenerator = -1 ;
 	
+	/***/
 	private final int uid ;
 	
 	/**
@@ -93,24 +94,5 @@ public abstract class PositionableElement < T extends GameMapElement > implement
 	}
 	
 	// ENUMERATIONS
-	
-	public enum PositionableElementType 
-	{
-		
-		FENCE ,
-		
-		SHEPERD ,
-	
-		WOLF ,
-
-		LAMB ,
-
-		RAM ,
-		
-		SHEEP ,
-		
-		BLACK_SHEEP ,
-			
-	}
 	
 }

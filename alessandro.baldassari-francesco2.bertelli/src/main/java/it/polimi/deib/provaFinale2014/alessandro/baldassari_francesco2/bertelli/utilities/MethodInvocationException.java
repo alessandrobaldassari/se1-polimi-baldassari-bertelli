@@ -4,12 +4,17 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 public class MethodInvocationException extends Exception 
 {
 
+	/***/
 	private String methodName ;
 	
-	/***/
-	public MethodInvocationException ( String methodName ) 
+	/**
+	 * @param methodName 
+	 * @param cause 
+	 * @throws IllegalArgumentException
+	 */
+	public MethodInvocationException ( String methodName , Throwable cause ) 
 	{
-		super () ;
+		super ( cause )  ;
 		if ( methodName != null && methodName.compareToIgnoreCase ( "" ) != 0 )
 			this.methodName = methodName ;
 		else

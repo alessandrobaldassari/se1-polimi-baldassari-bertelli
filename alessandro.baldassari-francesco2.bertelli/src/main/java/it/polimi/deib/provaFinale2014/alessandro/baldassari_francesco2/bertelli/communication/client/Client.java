@@ -26,6 +26,8 @@ import java.util.List;
 public abstract class Client extends Thread implements Terminable
 {
 	
+	private int uid ;
+	
 	/**
 	 * Boolean flag indicating if the connections pointing to the server are opened. 
 	 */
@@ -49,6 +51,11 @@ public abstract class Client extends Thread implements Terminable
 		}
 		else
 			throw new IllegalArgumentException () ;
+	}
+	
+	protected int getUID ()
+	{
+		return uid ;
 	}
 	
 	/**
@@ -122,16 +129,6 @@ public abstract class Client extends Thread implements Terminable
 	protected abstract void operationFinished () throws IOException ;
 	
 	/**
-	 * Getter method for the dataPicker property.
-	 * 
-	 * @return the dataPicker property.
-	 */
-	protected CommunicationProtocolResponser getDataPicker () 
-	{
-		return dataPicker ;
-	}
-	
-	/**
 	 * AS THE SUPER'S ONE.
 	 * This methods do things in order for this Thread to start only if the technicallyOn parameter
 	 * is true, so only if the openConnection method has been called before. 
@@ -159,6 +156,7 @@ public abstract class Client extends Thread implements Terminable
 		Iterable < SellableCard > cards ;
 		Iterable < Sheperd > sheperds ;
 		Iterable < Road > roads ;
+		Serializable se ;
 		GameMove move ;
 		MoveFactory gf ;
 		GameMap gm ;
@@ -182,6 +180,9 @@ public abstract class Client extends Thread implements Terminable
 				outParams.clear () ;
 				switch ( m.getOperation() ) 
 				{
+					case UID_NOTIFICATION :
+						uid = ( Integer ) inParams.get ( 0 ) ;
+					break ;
 					case NAME_REQUESTING_REQUEST :
 						s = dataPicker.onNameRequest () ;
 						outParams.add ( s ) ;
@@ -218,7 +219,7 @@ public abstract class Client extends Thread implements Terminable
 					break ;
 					case CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_REQUEST :
 						sheperds = ( Iterable < Sheperd > ) inParams.get ( 0 ) ;
-						sh = getDataPicker ().onChooseSheperdForATurn ( sheperds ) ;
+						sh = dataPicker.onChooseSheperdForATurn ( sheperds ) ;
 						outParams.add ( sh ) ;
 						m = Message.newInstance ( GameProtocolMessage.CHOOSE_SHEPERD_FOR_A_TURN_REQUESTING_RESPONSE , outParams ) ;
 						write ( m ) ;
@@ -240,13 +241,17 @@ public abstract class Client extends Thread implements Terminable
 					break ;
 					case CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST :
 						cards = ( Iterable < SellableCard > ) inParams.get ( 0 ) ;
-						c = getDataPicker ().onChoseCardToBuy ( cards ) ; 
+						c = dataPicker.onChoseCardToBuy ( cards ) ; 
 						outParams.add ( c ) ;
 						m = Message.newInstance ( GameProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_RESPONSE , outParams ) ;
 						write ( m ) ;
 					break ;
+					case GUI_CONNECTOR_NOTIFICATION :
+						se = inParams.get ( 0 ) ;
+						dataPicker.onGUIConnectorOnNotification ( se ) ;
+					break ;
 					case GENERIC_NOTIFICATION_NOTIFICATION :
-						s = ( String ) inParams.get ( 0 ) ;
+						s = ( String ) inParams.get ( 0 ) ;							
 						dataPicker.generationNotification ( s ) ;
 					break;
 					default :

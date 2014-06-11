@@ -23,24 +23,6 @@ public class Bank implements Serializable
 	// ATTRIBUTES
 	
 	/**
-	 * The initial money amount, total. 
-	 * It's a business rule. 
-	 */
-	public static final int INITIAL_MONEY_RESERVE = 80 ;
-	
-	/**
-	 * The total number of non final fences.
-	 * It's a business rule. 
-	 */
-	public static final int NON_FINAL_FENCE_NUMBER = 20 ;
-	
-	/**
-	 * The number of final fences initially in the Bank.
-	 * It's a business rule. 
-	 */
-	public static final int FINAL_FENCE_NUMBER = 12 ;
-	
-	/**
 	 * The container for the initial Card objects. 
 	 */
 	private final Map < RegionType , Card > initialCards ;

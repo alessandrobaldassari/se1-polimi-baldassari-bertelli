@@ -3,6 +3,8 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import java.awt.Frame;
 import java.awt.Window;
 import java.io.IOException;
+import java.io.Serializable;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -17,19 +19,21 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.guimap.SocketGUIMapClient;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.GameView.GameMapViewObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.LoginView.LoginViewObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.SheperdColorView.SheperdColorRequestViewObserver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
 
 /**
  * This is the Component that manage all the GUI infrastructure.
  * It is a Controller in the sense of the MVC pattern : it shows windows, handle gui events and so on. 
  */
 public class GUIController extends ViewPresenter 
-	implements LoginViewObserver , SheperdColorRequestViewObserver
+	implements LoginViewObserver , SheperdColorRequestViewObserver , GameMapViewObserver
 {
 	
 	/**
@@ -294,6 +298,33 @@ public class GUIController extends ViewPresenter
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
+	public void onGUIConnectorOnNotification ( Serializable guiConnector ) 
+	{
+		GameView gameView ;
+		while ( getView ( GAME_VIEW_KEY ) == null ) ;
+		SocketGUIMapClient c ;
+		try {
+			gameView = (GameView) getView ( GAME_VIEW_KEY ) ;
+			c = new SocketGUIMapClient ( ( Integer ) guiConnector ) ;
+			executorService.submit(c);
+			gameView.setGameMapObservable ( c ) ;
+			gameView.setInputMode ( null ) ;
+		}
+		catch (UnknownHostException e) 
+		{
+			e.printStackTrace();
+		}
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		}
+		
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
 	public void onNameEntered ( String enteredName ) 
 	{
 		SwingUtilities.invokeLater ( new Runnable () 
@@ -327,6 +358,9 @@ public class GUIController extends ViewPresenter
 		stopApp () ;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public void onColorChoosed ( NamedColor selectedColor ) 
 	{
@@ -360,6 +394,34 @@ public class GUIController extends ViewPresenter
 			color.notifyAll () ;
 		}
 		stopApp () ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE 
+	 */
+	@Override
+	public void onRegionSelected ( int regionUID ) 
+	{
+		System.out.println ( regionUID ) ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void onRoadSelected ( int roadUID ) 
+	{
+		System.out.println ( roadUID ) ;
+	}
+	@Override
+	public void onSheperdSelected(int sheperdId) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void onAnimalSelected(int animalId) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	@Override

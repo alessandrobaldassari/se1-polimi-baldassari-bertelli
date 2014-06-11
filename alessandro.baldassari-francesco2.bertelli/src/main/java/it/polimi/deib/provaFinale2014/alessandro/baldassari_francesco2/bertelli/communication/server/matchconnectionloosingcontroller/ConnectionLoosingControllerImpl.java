@@ -1,41 +1,54 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WithReflectionObservableSupport;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.NetworkCommunicantPlayer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Suspendable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionObservableSupport;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-public class MatchConnectionLoosingController implements ConnectionLoosingManager , Runnable
+/***/
+public class ConnectionLoosingControllerImpl implements ConnectionLoosingController
 {
-	
-	/***/
-	public static final long WAITING_TIME = 60 * Utilities.MILLISECONDS_PER_SECOND ;
 
-	public static final long SUSPENSION_TIME = 60 * Utilities.MILLISECONDS_PER_SECOND ;
+	/***/
+	private Map < Integer , ClientHandler > suspendedhandlers ;
 	
 	/***/
 	private WithReflectionObservableSupport < ConnectionLoosingManagerObserver > support ;
 	
 	/***/
-	private Collection < Suspendable > managedHandlers ;
-	
-	public MatchConnectionLoosingController () 
+	public ConnectionLoosingControllerImpl () 
 	{
+		super () ;
 		support = new WithReflectionObservableSupport < ConnectionLoosingManagerObserver > () ;
-		managedHandlers = new ArrayList < Suspendable > () ; 
+		suspendedhandlers = new HashMap < Integer , ClientHandler > () ; 
 	}
-		
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
-	public void run() 
+	public void addObserver ( ConnectionLoosingManagerObserver newObserver ) 
 	{
-		while ( true ) ;
+		support.addObserver ( newObserver ) ;
 	}
 
-	/***/
+	/**
+	 * AS THE SUPER'S ONE.
+	 */
 	@Override
-	public boolean manageConnectionLoosing ( Suspendable looser , boolean pingAlreadyTested ) 
+	public void removeObserver ( ConnectionLoosingManagerObserver oldObserver ) 
+	{
+		support.removeObserver ( oldObserver ) ;
+	}
+	/**
+	 * AS THE SUPER'S ONE.
+	 */
+	@Override
+	public boolean manageConnectionLoosing ( Suspendable looser , ClientHandler < ? > connector , boolean pingAlreadyTested ) 
 	{
 		boolean res ;
 		if ( looser.isSuspended () == false )
@@ -47,6 +60,7 @@ public class MatchConnectionLoosingController implements ConnectionLoosingManage
 					Thread.sleep ( SUSPENSION_TIME ) ;
 				looser.suspend();
 				res = false ;
+				suspendedhandlers.put ( connector.getUID() , connector ) ;
 				support.notifyObservers( "onEndSuspensionControl" , false ) ;
 			} 
 			catch (NoSuchMethodException e1) 
@@ -102,19 +116,10 @@ public class MatchConnectionLoosingController implements ConnectionLoosingManage
 		return res ;
 	}
 
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public void addObserver ( ConnectionLoosingManagerObserver newObserver) 
+	public ClientHandler getClientHandler ( int clientHandlerUID ) 
 	{
-		support.addObserver ( newObserver ) ;
+		return suspendedhandlers.get ( clientHandlerUID ) ;
 	}
-
-	@Override
-	public void removeObserver ( ConnectionLoosingManagerObserver oldObserver ) 
-	{
-		support.removeObserver ( oldObserver ) ;
-	}	
-		
+	
 }
+
