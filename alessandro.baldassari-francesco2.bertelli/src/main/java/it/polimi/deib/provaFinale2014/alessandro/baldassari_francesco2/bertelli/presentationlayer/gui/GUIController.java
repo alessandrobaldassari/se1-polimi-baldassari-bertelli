@@ -5,8 +5,8 @@ import java.awt.Window;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
@@ -30,9 +30,14 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.guimap.SocketGUIMapClient;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.CardsChooseView.CardsChooseViewObserver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.MoveChooseView.MoveChooseViewObserver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.SheperdColorView.SheperdColorRequestViewObserver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.choosecardsview.CardsChooseView;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.GameMapViewObserver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.GameView;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.GameViewInputMode;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.loginview.LoginView;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.movechooseview.MoveChooseView;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.sheperdcolorchooseview.SheperdColorChooseView;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.sheperdcolorchooseview.SheperdColorChooseViewObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
@@ -44,10 +49,14 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class GUIController extends ViewPresenter implements GameMapViewObserver
 {
 	
-	/***/
+	/**
+	 * A WaitingView instance to relax the User. 
+	 */
 	private WaitingView waitingView ;
 	
-	/***/
+	/**
+	 * The effective GameView of the Game. 
+	 */
 	private GameView gameView ;
 	
 	/**
@@ -74,6 +83,8 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	public GUIController () 
 	{
 		super () ;
+		waitingView = new WaitingView () ;
+		gameView = new GameView () ;
 		index = new AtomicReference < Integer > () ;		
 		index.set ( null ) ;
 		currentShownWindow = null ;
@@ -86,10 +97,6 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	@Override
 	public void startApp () 
 	{
-		//views.put ( SHEPERD_COLOR_KEY , new SheperdColorView ( GUIController.this ) ) ;
-		//views.put ( MOVE_CHOOSE_KEY , new MoveChooseView ( GUIController.this ) ) ;
-		//views.put ( CHOOSE_CARDS_KEY , new CardsChooseView ( GUIController.this ) ) ;
-		//views.put ( GAME_VIEW_KEY , new GameView () ) ;
 		currentShownWindow = waitingView ;
 		waitingView.setText ( PresentationMessages.WELCOME_MESSAGE + Utilities.CARRIAGE_RETURN + PresentationMessages.SERVER_CONNECTION_MESSAGE ) ;
 		GraphicsUtilities.showUnshowWindow ( waitingView , false , true ) ;
@@ -116,12 +123,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	public String onNameRequest () 
 	{
 		String res ;
-		res = ( String ) JOptionPane.showInputDialog ( currentShownWindow , PresentationMessages.NAME_REQUEST_MESSAGE , PresentationMessages.APP_NAME , JOptionPane.QUESTION_MESSAGE ) ;
-		while ( res == null || res.compareTo ( Utilities.EMPTY_STRING ) == 0 )
-		{
-			JOptionPane.showMessageDialog ( currentShownWindow , PresentationMessages.INVALID_CHOOSE_MESSAGE , PresentationMessages.APP_NAME , JOptionPane.ERROR_MESSAGE ) ;
-			res = ( String ) JOptionPane.showInputDialog ( currentShownWindow , PresentationMessages.NAME_REQUEST_MESSAGE , PresentationMessages.APP_NAME , JOptionPane.QUESTION_MESSAGE ) ;	
-		}
+		res = LoginView.showDialog () ;
 		waitingView.setText ( PresentationMessages.NAME_VERIFICATION_MESSAGE ) ;
 		return res ;
 	}
@@ -173,10 +175,8 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	public NamedColor onSheperdColorRequest ( Iterable < NamedColor > availableColors ) 
 	{
 		System.out.println ( "GUI_CONTROLLER - ON_SHEPERD_COLOR_REQUEST : INIZIO" ) ;
-		NamedColor res = null ;
-		//sheperdColorView.setColors ( availableColors ) ;
-		//GraphicsUtilities.showUnshowWindow ( sheperdColorView , true , true ) ;
-		//res = color.get () ;
+		NamedColor res ;
+		res = SheperdColorChooseView.showDialog ( availableColors ) ;
 		System.out.println ( "GUI_CONTROLLER - ON_SHEPERD_COLOR_REQUEST : FINE" ) ;
 		return res ;
 	}
@@ -192,6 +192,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		generationNotification ( PresentationMessages.CHOOSE_INITIAL_ROAD_FOR_A_SHEPERD_MESSAGE ) ;
 		index.set(null); 
 		gameView.setInputMode ( GameViewInputMode.ROADS ) ;
+		// highlight effects
 		waitForAtomicVariable(index);
 		res = null ;
 		for ( Road road : availableRoads )
@@ -246,13 +247,8 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		res = null ;
 		do
 		{
-			//move.set ( null ) ;
-			//GraphicsUtilities.showUnshowWindow ( moveChooseView , true , true ) ;
-			//waitForAtomicVariable ( move ) ;
-			//GraphicsUtilities.showUnshowWindow ( moveChooseView , false , false ) ; 
 			userWantsToChangeMove = false ;
-			// allow the user the do his move
-			move = null ; //destroy !
+			move = MoveChooseView.showDialog () ;
 			switch ( move )
 			{
 				case BREAK_DOWN :
@@ -383,14 +379,25 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		return res ;	
 	}
 	
+	// non gli passare le carte, passagli una rappresentazione ! -> card view !
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
 	public Iterable < SellableCard > onChooseCardsEligibleForSelling ( Iterable < SellableCard > playerCards ) 
 	{
-		
-		return null ;
+		Collection < SellableCard > res ;
+		Collection < Card > in ;
+		Iterable < Card > out ;
+		res = new LinkedList < SellableCard > () ;
+		in = new LinkedList < Card > () ;
+		for ( SellableCard s : playerCards )
+			in.add ( s ) ;
+		generationNotification ( "Scegli le carte che vuoi vendere" );
+		out = CardsChooseView.showDialog ( in , true ) ;
+		for ( Card c : out )
+			res.add ( ( SellableCard ) c ) ;
+		return res ;
 	}
 	
 	/**

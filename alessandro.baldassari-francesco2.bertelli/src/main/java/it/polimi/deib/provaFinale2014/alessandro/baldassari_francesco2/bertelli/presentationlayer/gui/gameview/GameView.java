@@ -1,4 +1,4 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -41,6 +41,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.NotificationPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Counter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
@@ -254,6 +255,11 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 	 */
 	private GameViewInputMode currentInputMode ;
 	
+	/***/
+	private boolean highlightMode ;
+	
+	private Iterable < Integer > toHighlight ;
+	
 	// METHODS
 	
 	/***/
@@ -274,6 +280,7 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 		coordinatesManager = new MapMeasurementCoordinatesManager () ;
 		positionableElementsManager = new PositionableElementCoordinatesManager () ;
 		currentInputMode = null ;
+		highlightMode = false ;
 	}
 
 	/**
@@ -342,7 +349,15 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 	{
 		return currentInputMode ;
 	}
+	
+	/***/
+	public void beginHighlightVisualization ( Iterable < Integer > toShowElems ) 
+	{
+		highlightMode = true ;
+		toHighlight = toShowElems ;
 		
+	}
+	
 	// INNER CLASSES
 	
 	/**
@@ -493,6 +508,8 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 					coordinatesManager.updateObjectInRoadsMap ( i , type );
 				}
 			}
+			// highlight effects
+			
 		}
 		
 		/**

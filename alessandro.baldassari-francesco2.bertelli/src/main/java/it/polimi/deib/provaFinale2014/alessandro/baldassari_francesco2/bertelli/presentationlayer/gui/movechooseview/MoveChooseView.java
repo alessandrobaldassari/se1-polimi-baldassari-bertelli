@@ -1,28 +1,26 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.movechooseview;
 
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.ButtonGroup;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMoveType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.SheperdColorView.SheperdColorRequestViewObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.InputView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.ObservableFrameworkedWithGridBagLayoutDialog;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observer;
 
-public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog < SheperdColorRequestViewObserver >
+public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog < MoveChooseViewObserver >
 {
 
 	/***/
@@ -34,7 +32,7 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 	/**
 	 * @param observer 
 	 */
-	public MoveChooseView ( SheperdColorRequestViewObserver observer ) 
+	public MoveChooseView ( DefaultMoveChooseViewObserver observer ) 
 	{ 
 		super ( ( Frame ) null , PresentationMessages.APP_NAME , true ) ;
 		addObserver ( observer ) ;
@@ -60,8 +58,9 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
 		GraphicsUtilities.setComponentLayoutProperties ( view , getLayout () , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
-		setResizable ( false ) ;
-		setAlwaysOnTop ( true ) ;		
+		setAlwaysOnTop ( true ) ;	
+		view.setShowKo(false); 
+		pack () ;
 	}
 
 	/**
@@ -70,8 +69,8 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 	@Override
 	protected void bindListeners () 
 	{
-		view.setOkAction ( new Couple < Boolean , Runnable > ( true , new OkAction () ) ) ; 
-		view.setKoAction ( new Couple < Boolean , Runnable > ( true , new KoAction () ) ) ;		
+		view.setOkAction ( new Couple < Boolean , Runnable > ( false , new OkAction () ) ) ; 
+		view.setKoAction ( new Couple < Boolean , Runnable > ( false , new KoAction () ) ) ;		
 	}
 
 	/**
@@ -99,16 +98,16 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 			GameMoveType res ;
 			res = moveListPanel.getSelectedMove () ;
 			if ( res != null )
-			try 
-			{
-				notifyObservers ( "onMoveChoosed" , moveListPanel.getSelectedMove () );
-			}
-			catch (MethodInvocationException e) 
-			{
-				e.printStackTrace();
-			}
+				try 
+				{
+					notifyObservers ( "onMoveChoosed" , moveListPanel.getSelectedMove () );
+				}
+				catch (MethodInvocationException e) 
+				{
+					e.printStackTrace();
+				}
 			else
-				JOptionPane.showMessageDialog ( null , PresentationMessages.INVALID_CHOOSE_MESSAGE , PresentationMessages.APP_NAME , JOptionPane.ERROR_MESSAGE );
+				view.setErrors ( PresentationMessages.INVALID_CHOOSE_MESSAGE ) ;
 		}
 		
 	}
@@ -137,24 +136,36 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 		
 	}
 	
-	/**
-	 * This class defines the events a MoveChooseViewObserver can listen to.
-	 */
-	public interface MoveChooseViewObserver extends Observer
+	/***/
+	public static GameMoveType showDialog () 
 	{
-		
-		/**
-		 * Called when the User choosed a move and wants to confirm it. 
-		 */
-		public void onMoveChoosed ( GameMoveType move ) ;
-		
-		/**
-		 * Undo action. 
-		 */
-		public void onDoNotWantChooseMove () ;
-		
+		MoveChooseView moveChooseView ;
+		AtomicReference < GameMoveType > move ;
+		move = new AtomicReference < GameMoveType > ( null ) ;
+		moveChooseView = new MoveChooseView ( new DefaultMoveChooseViewObserver(move) ) ;
+		GraphicsUtilities.showUnshowWindow ( moveChooseView , false , true ) ;
+		synchronized ( move ) 
+		{
+			while ( move.get() == null )
+				try 
+				{
+					move.wait () ;
+				}
+				catch (InterruptedException e ) 
+				{
+					e.printStackTrace();
+				}
+		}
+		GraphicsUtilities.showUnshowWindow ( moveChooseView , false , false ) ;
+		return move.get() ;
 	}
-
+	
+	public static void main ( String [] args ) 
+	{
+		GameMoveType x ;
+		x = MoveChooseView.showDialog () ;
+		System.out.println ( x ) ;
+	}
 	
 }
 
@@ -195,29 +206,32 @@ class MoveListPanel extends FrameworkedWithGridBagLayoutPanel
 		for ( i = 0 ; i < imagePanels.length ; i ++ )
 			selectors [ i ] = new JRadioButton () ;
 		buttonGroup = new ButtonGroup () ;
-		
 	}
 
 	@Override
 	protected void manageLayout () 
 	{
+		GameMoveType [] moveTypes ;
 		Insets insets ;
+		moveTypes = GameMoveType.values();
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
 		int i ;
 		for ( i = 0 ; i < imagePanels.length ; i ++ )
 		{
-			layoutComponent ( imagePanels [ i ] , i , 1 , 1 / imagePanels.length , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
-			layoutComponent ( selectors [ i ] , i , 2 , 1 / imagePanels.length , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
-			selectors [ i ].setText ( GameMoveType.values () [ i ].name () ) ;
+			layoutComponent ( imagePanels [ i ] , i , 1 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+			layoutComponent ( selectors [ i ] , i , 2 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+			selectors [ i ].setText ( moveTypes [ i ].name () ) ;
 		}
 	}
 
 	@Override
 	protected void bindListeners () 
 	{
+		GameMoveType [] moveTypes ;
 		int i ;
+		moveTypes = GameMoveType.values () ;
 		for ( i = 0 ; i < selectors.length ; i ++ )
-			selectors [ i ].addItemListener ( new SelectorListener ( GameMoveType.values () [ i ] ) ) ;
+			selectors [ i ].addItemListener ( new SelectorListener ( moveTypes [ i ] ) ) ;
 	}
 
 	@Override
@@ -231,7 +245,9 @@ class MoveListPanel extends FrameworkedWithGridBagLayoutPanel
 			buttonGroup.add ( r ) ;
 	}
 
-	/***/
+	/**
+	 * Returns the move selected in this View. 
+	 */
 	public GameMoveType getSelectedMove () 
 	{
 		return selected ;

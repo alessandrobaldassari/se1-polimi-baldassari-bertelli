@@ -1,4 +1,4 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observer;
 
@@ -8,7 +8,11 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public interface GameMapViewObserver extends Observer 
 {
 	
-	/***/
+	/**
+	 * Called when a Region on the Map is selected.
+	 * 
+	 * @param regionUID the UID of the selected region.
+	 */
 	public void onRegionSelected ( Integer regionUID ) ;
 	
 	/***/

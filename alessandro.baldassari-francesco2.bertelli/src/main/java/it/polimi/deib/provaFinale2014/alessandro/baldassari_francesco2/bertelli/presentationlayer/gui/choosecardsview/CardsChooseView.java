@@ -1,23 +1,27 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.choosecardsview;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.sheperdcolorchooseview.DefaultSheperdColorChooseViewObserver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.sheperdcolorchooseview.SheperdColorChooseView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.InputView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.ObservableFrameworkedWithGridBagLayoutDialog;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observer;
 
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
@@ -29,7 +33,7 @@ import javax.swing.JToggleButton;
 /**
  * This component allows a User to select some Cards between a List. 
  */
-public class CardsChooseView extends ObservableFrameworkedWithGridBagLayoutDialog < CardsChooseView.CardsChooseViewObserver >
+public class CardsChooseView extends ObservableFrameworkedWithGridBagLayoutDialog < CardsChooseViewObserver >
 {
 	
 	/**
@@ -70,10 +74,12 @@ public class CardsChooseView extends ObservableFrameworkedWithGridBagLayoutDialo
 		Insets insets ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
 		GraphicsUtilities.setComponentLayoutProperties ( view , getLayout () , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
-		view.setTitle ( PresentationMessages.CHOOSE_COLOR_FOR_SHEPERD_MESSAGE ) ;
+		view.setTitle ( "Scegli le carte !" ) ;
+		view.setShowKo(false); 
 		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
 		setResizable ( false ) ;
-		setAlwaysOnTop ( true ) ;		
+		setAlwaysOnTop ( true ) ;	
+		pack () ;
 	}
 
 	/**
@@ -82,8 +88,8 @@ public class CardsChooseView extends ObservableFrameworkedWithGridBagLayoutDialo
 	@Override
 	protected void bindListeners () 
 	{
-		view.setOkAction ( new Couple < Boolean , Runnable > ( true , new OkAction () ) ) ;
-		view.setKoAction ( new Couple < Boolean , Runnable > ( true , new KoAction () ) );		
+		view.setOkAction ( new Couple < Boolean , Runnable > ( false , new OkAction () ) ) ;
+		view.setKoAction ( new Couple < Boolean , Runnable > ( false , new KoAction () ) );		
 	}
 
 	/**
@@ -96,32 +102,10 @@ public class CardsChooseView extends ObservableFrameworkedWithGridBagLayoutDialo
 		view.setContentsPanel ( cardsPanel ) ;		
 	}
 	
-	/**
-	 * 
-	 */
-	public void setCards ( Iterable < Card > cards , boolean moreThanOneCard ) 
+	/***/
+	public void setCards ( Iterable < Card > availableCards , boolean multipleSelectionAllowed ) 
 	{
-		cardsPanel.setCards ( cards , moreThanOneCard ) ;
-	}
-	
-	/**
-	 * This interface defines the methods that a CardsChooseViewObserver can listen to. 
-	 */
-	public interface CardsChooseViewObserver extends Observer
-	{
-		
-		/**
-		 * Called when the User has finished the choosing process and confirm his selection.
-		 * 
-		 * @param selectedCards the Cards the User has choosen.
-		 */
-		public void onCardChoosed ( Iterable < Card > selectedCards ) ;
-		
-		/**
-		 * Called when the User does not want to make any selection. 
-		 */
-		public void onDoNotWantChooseAnyCard () ;
-		
+		cardsPanel.setCards ( availableCards , multipleSelectionAllowed ) ;
 	}
 	
 	/**
@@ -174,6 +158,43 @@ public class CardsChooseView extends ObservableFrameworkedWithGridBagLayoutDialo
 		}		
 		
 	}
+
+	/***/
+	public static Iterable < Card > showDialog ( Iterable < Card > availableCards , boolean multipleSelectionAllowed ) 
+	{
+		CardsChooseView cardsChooseView ;
+		AtomicReference < Iterable < Card > > cards ;
+		cards = new AtomicReference < Iterable < Card > > ( null ) ;
+		cardsChooseView = new CardsChooseView ( new DefaultCardsChooseViewObserver ( cards ) ) ;
+		cardsChooseView.setCards ( availableCards , multipleSelectionAllowed ) ;
+		GraphicsUtilities.showUnshowWindow ( cardsChooseView , false , true ) ;
+		synchronized ( cards ) 
+		{
+			while ( cards.get() == null )
+				try 
+				{
+					cards.wait () ;
+				}
+				catch (InterruptedException e ) 
+				{
+					e.printStackTrace();
+				}
+		}
+		GraphicsUtilities.showUnshowWindow ( cardsChooseView , false , false ) ;
+		return cards.get() ;
+	}
+	
+	public static void main ( String [] args ) 
+	{
+		ArrayList < NamedColor > a = new ArrayList < NamedColor > () ;
+		a.add(new NamedColor ( 0 , 0 , 0 , "BLACK" ) ) ;
+		a.add ( new NamedColor ( 255 , 0 , 0 , "RED" ) ) ;
+		a.add ( new NamedColor ( 0 , 255 , 0 , "GREEN") ) ;
+		NamedColor n ;
+		n = SheperdColorChooseView.showDialog( a );
+		System.out.println ( n ) ;
+	}
+	
 	
 }
 

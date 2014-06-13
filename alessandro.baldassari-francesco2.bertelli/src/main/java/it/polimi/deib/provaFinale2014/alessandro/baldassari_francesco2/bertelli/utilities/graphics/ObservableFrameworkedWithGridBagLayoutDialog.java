@@ -27,6 +27,10 @@ public abstract class ObservableFrameworkedWithGridBagLayoutDialog < T extends O
 		contentPane = new DefaultObservableFrameworkedWithGridBagLayoutPanel < T > () ;
 		setContentPane ( contentPane ) ;
 		System.out.println ( "ObservableFrameworkedWithGridBagLayoutDialog : CONSTRUCTOR_EXECUTED" ) ;
+		createComponents();
+		manageLayout();
+		bindListeners();
+		injectComponents();
 	}
 	
 	/**
@@ -103,37 +107,25 @@ public abstract class ObservableFrameworkedWithGridBagLayoutDialog < T extends O
 		 * AS THE SUPER'S ONE. 
 		 */
 		@Override
-		protected void createComponents () 
-		{
-			ObservableFrameworkedWithGridBagLayoutDialog.this.createComponents () ;
-		}
+		protected void createComponents () {}
 
 		/**
 		 * AS THE SUPER'S ONE. 
 		 */
 		@Override
-		protected void manageLayout () 
-		{
-			ObservableFrameworkedWithGridBagLayoutDialog.this.manageLayout () ;
-		}
+		protected void manageLayout () {}
 
 		/**
 		 * AS THE SUPERS' ONE. 
 		 */
 		@Override
-		protected void bindListeners () 
-		{
-			ObservableFrameworkedWithGridBagLayoutDialog.this.bindListeners () ;			
-		}
+		protected void bindListeners () {}
 
 		/**
 		 * AS THE SUPER'S ONE.
 		 */
 		@Override
-		protected void injectComponents () 
-		{
-			ObservableFrameworkedWithGridBagLayoutDialog.this.injectComponents() ;			
-		}
+		protected void injectComponents () {}
 		
 	}
 	

@@ -1,6 +1,8 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics;
 
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.lang.reflect.InvocationTargetException;
@@ -22,6 +24,11 @@ public class InputView extends FrameworkedWithGridBagLayoutPanel
 {
 
 	/**
+	 * An image to show as background 
+	 */
+	private Image backgroundImage ;
+	
+	/**
 	 * The label that displays the intent of this View. 
 	 */
 	private JLabel titleLabel ;
@@ -30,6 +37,11 @@ public class InputView extends FrameworkedWithGridBagLayoutPanel
 	 * The panel containing the options a User can choose between. 
 	 */
 	private SimpleWithGridBagLayoutPanel contentsPanel ;
+	
+	/**
+	 * The label that shows eventually present input errors. 
+	 */
+	private JLabel errorLabel ;
 	
 	/**
 	 * The button to confirm the choose. 
@@ -68,10 +80,32 @@ public class InputView extends FrameworkedWithGridBagLayoutPanel
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
+	public void paintComponent ( Graphics g )
+	{
+		super.paintComponent(g); 
+		if ( backgroundImage != null )
+			g.drawImage ( backgroundImage , 0 , 0 , getWidth() , getHeight() , this ) ;
+	}
+	
+	/**
+	 * Setter method for the backgroundImage property.
+	 * 
+	 * @param backgroundImage the value for the backgroundImage property.
+	 */
+	public void setBackgroundImage ( Image backgroundImage )
+	{
+		this.backgroundImage = backgroundImage ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
 	protected void createComponents () 
 	{
 		titleLabel = new JLabel () ;
 		contentsPanel = new SimpleWithGridBagLayoutPanel() ;
+		errorLabel = new JLabel () ;
 		okButton = new JButton () ;
 		koButton = new JButton () ;
 		showKo = true ;
@@ -85,10 +119,12 @@ public class InputView extends FrameworkedWithGridBagLayoutPanel
 	{
 		Insets insets ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
-		layoutComponent ( titleLabel , 0 , 0 , 1 , 0.125 , 1 , 2 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets );
-		layoutComponent ( contentsPanel , 0 , 1 , 1 , 0.75 , 1 , 2 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets );		
-		layoutComponent ( okButton , 0 , 2 , 0.5 , 0.125 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets );
-		layoutComponent ( koButton , 1 , 2 , 0.5 , 0.125 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets );		
+		layoutComponent ( titleLabel ,    0 , 0 , 1   , 0.1 , 1 , 2 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets );
+		layoutComponent ( contentsPanel , 0 , 1 , 1   , 0.6 , 1 , 2 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets );		
+		layoutComponent ( errorLabel ,    0 , 2 , 1   , 0.1 , 1 , 2 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets );				
+		layoutComponent ( okButton ,      0 , 3 , 0.5 , 0.1 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets );
+		layoutComponent ( koButton ,      1 , 3 , 0.5 , 0.1 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets );		
+		//errorLabel.setVisible(false); 
 	}
 
 	/**
@@ -113,6 +149,7 @@ public class InputView extends FrameworkedWithGridBagLayoutPanel
 	{
 		add ( titleLabel ) ;
 		add ( contentsPanel ) ;
+		add ( errorLabel ) ;
 		add ( okButton ) ;
 		add ( koButton ) ;
 	}
@@ -125,6 +162,15 @@ public class InputView extends FrameworkedWithGridBagLayoutPanel
 	public void setTitle ( String title ) 
 	{
 		titleLabel.setText ( title ) ;
+		repaint () ;
+	}
+	
+	/***/
+	public void setErrors ( String errors ) 
+	{
+		errorLabel.setVisible(true); 
+		errorLabel.setText ( errors ) ;
+		repaint () ;
 	}
 	
 	/**
@@ -288,6 +334,7 @@ public class InputView extends FrameworkedWithGridBagLayoutPanel
 		public SimpleWithGridBagLayoutPanel () 
 		{
 			super () ;
+			setOpaque ( false ) ;
 		}
 		
 		/**

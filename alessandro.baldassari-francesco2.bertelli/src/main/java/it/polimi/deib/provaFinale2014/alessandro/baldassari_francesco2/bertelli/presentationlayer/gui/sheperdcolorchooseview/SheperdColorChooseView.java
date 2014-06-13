@@ -1,15 +1,16 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.sheperdcolorchooseview;
 
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.SheperdColorView.SheperdColorRequestViewObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
@@ -18,17 +19,15 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.InputView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.ObservableFrameworkedWithGridBagLayoutDialog;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observer;
 
 import javax.swing.ButtonGroup;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 /**
  * This class allows the User to select one color for one of his Sheperds. 
  */
-public class SheperdColorView extends ObservableFrameworkedWithGridBagLayoutDialog < SheperdColorRequestViewObserver >
+public class SheperdColorChooseView extends ObservableFrameworkedWithGridBagLayoutDialog < SheperdColorChooseViewObserver >
 {
 	
 	/**
@@ -44,7 +43,7 @@ public class SheperdColorView extends ObservableFrameworkedWithGridBagLayoutDial
 	/**
 	 * @param observer an Observer for this View. 
 	 */
-	public SheperdColorView ( SheperdColorRequestViewObserver observer ) 
+	public SheperdColorChooseView ( SheperdColorChooseViewObserver observer ) 
 	{ 
 		super ( ( Frame ) null , PresentationMessages.APP_NAME , true ) ;
 		addObserver ( observer ) ;
@@ -72,9 +71,8 @@ public class SheperdColorView extends ObservableFrameworkedWithGridBagLayoutDial
 		view.setTitle ( PresentationMessages.CHOOSE_COLOR_FOR_SHEPERD_MESSAGE ) ;
 		view.setShowKo(false); 
 		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
-		setResizable ( false ) ;
 		setAlwaysOnTop ( true ) ;
-				
+		pack () ;
 	}
 
 	/**
@@ -83,7 +81,7 @@ public class SheperdColorView extends ObservableFrameworkedWithGridBagLayoutDial
 	@Override
 	protected void bindListeners () 
 	{
-		view.setOkAction ( new Couple < Boolean , Runnable > ( true , new OkAction () ) ) ;		
+		view.setOkAction ( new Couple < Boolean , Runnable > ( false , new OkAction () ) ) ;		
 	}
 
 	/**
@@ -104,26 +102,6 @@ public class SheperdColorView extends ObservableFrameworkedWithGridBagLayoutDial
 	public void setColors ( Iterable < NamedColor > colors ) 
 	{
 		colorsPanel.setColors ( colors ) ;
-	}
-	
-	/**
-	 * This interface defines the events a SheperdColorRequestViewObserver can be notified about.
-	 */
-	public interface SheperdColorRequestViewObserver extends Observer
-	{
-		
-		/**
-		 * Called when a color is choosed and the User confirm that he has decided the value. 
-		 * 
-		 * @param selectedColor the color the User choosed.
-		 */
-		public void onColorChoosed ( NamedColor selectedColor ) ;
-		
-		/**
-		 * Undo events 
-		 */
-		public void onDoNotWantChooseColor () ;
-		
 	}
 	
 	/**
@@ -153,7 +131,7 @@ public class SheperdColorView extends ObservableFrameworkedWithGridBagLayoutDial
 					e1.printStackTrace();
 				}
 			else
-				JOptionPane.showMessageDialog ( null , "Devi prima selezionare un colore!" , PresentationMessages.APP_NAME , JOptionPane.ERROR_MESSAGE);
+				view.setErrors ( "Devi prima selezionare un colore!" );
 		}
 				
 	}
@@ -182,6 +160,42 @@ public class SheperdColorView extends ObservableFrameworkedWithGridBagLayoutDial
 		
 	}
 
+	/***/
+	public static NamedColor showDialog ( Iterable < NamedColor > inColors ) 
+	{
+		SheperdColorChooseView sheperdColorChooseView ;
+		AtomicReference < NamedColor > color ;
+		color = new AtomicReference < NamedColor > ( null ) ;
+		sheperdColorChooseView = new SheperdColorChooseView ( new DefaultSheperdColorChooseViewObserver ( color ) ) ;
+		sheperdColorChooseView.setColors ( inColors ) ;
+		GraphicsUtilities.showUnshowWindow ( sheperdColorChooseView , false , true ) ;
+		synchronized ( color ) 
+		{
+			while ( color.get() == null )
+				try 
+				{
+					color.wait () ;
+				}
+				catch (InterruptedException e ) 
+				{
+					e.printStackTrace();
+				}
+		}
+		GraphicsUtilities.showUnshowWindow ( sheperdColorChooseView , false , false ) ;
+		return color.get() ;
+	}
+	
+	public static void main ( String [] args ) 
+	{
+		ArrayList < NamedColor > a = new ArrayList < NamedColor > () ;
+		a.add(new NamedColor ( 0 , 0 , 0 , "BLACK" ) ) ;
+		a.add ( new NamedColor ( 255 , 0 , 0 , "RED" ) ) ;
+		a.add ( new NamedColor ( 0 , 255 , 0 , "GREEN") ) ;
+		NamedColor n ;
+		n = SheperdColorChooseView.showDialog( a );
+		System.out.println ( n ) ;
+	}
+	
 }
 
 /**
@@ -258,15 +272,14 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 		int i ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
 		colors = CollectionsUtilities.newListFromIterable ( in ) ;
-		for ( NamedColor n : colors )
-		{
+		for ( NamedColor n : in )
 			colorPanels.add ( new JPanel () ) ;
+		for ( NamedColor n : in )
 			selectors.add ( new JRadioButton () ) ;
-		}
 		for ( i = 0 ; i < colors.size() ; i ++ )
 		{
-			layoutComponent ( colorPanels.get ( i ) , i , 1 , 1 / colors.size() , 0.7 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
-			layoutComponent ( selectors.get ( i ) , i , 2 , 1 / colors.size() , 0.7 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+			layoutComponent ( colorPanels.get ( i ) , i , 1 , 1 , 0.7 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+			layoutComponent ( selectors.get ( i ) , i , 2 , 1 , 0.3 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
 			colorPanels.get(i).setBackground ( colors.get ( i ) ) ;
 			selectors.get ( i ).addItemListener ( new SelectorListener ( colors.get ( i ) ) ) ;
 			selectors.get(i).setText ( colors.get ( i ).getName () ) ; 
@@ -279,7 +292,9 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 			buttonGroup.add ( r ) ;
 	}
 	
-	/***/
+	/**
+	 * Return the selected color in of this View. 
+	 */
 	public NamedColor getSelectedColor () 
 	{
 		return selected ;
