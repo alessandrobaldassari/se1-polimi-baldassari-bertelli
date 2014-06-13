@@ -8,14 +8,24 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import java.util.HashMap;
 import java.util.Map;
 
-/***/
+/**
+ * This class implements the ConnectionLoosingController interface.
+ * It is a point of reference for the ClientHandlers that may loose the connection with their clients; in
+ * this sense, ClientHandlers ( and in particular Players, where ClientHandlers are contained ) submit 
+ * themselves to this component that will be used by the Servers that will try to re-establish connection. 
+ */
 public class ConnectionLoosingControllerImpl implements ConnectionLoosingController
 {
 
-	/***/
-	private Map < Integer , ClientHandler > suspendedhandlers ;
+	/**
+	 * The ClientHandlers that registered to this Controller to eventually partecipate to connection 
+	 * resuming operations. 
+	 */
+	private Map < Integer , ClientHandler < ? > > suspendedhandlers ;
 	
-	/***/
+	/**
+	 * An object to implement the Observer pattern. 
+	 */
 	private WithReflectionObservableSupport < ConnectionLoosingManagerObserver > support ;
 	
 	/***/
@@ -23,7 +33,19 @@ public class ConnectionLoosingControllerImpl implements ConnectionLoosingControl
 	{
 		super () ;
 		support = new WithReflectionObservableSupport < ConnectionLoosingManagerObserver > () ;
-		suspendedhandlers = new HashMap < Integer , ClientHandler > () ; 
+		suspendedhandlers = new HashMap < Integer , ClientHandler < ? > > () ; 
+	}
+	
+	/**
+	 * Return the ClientHandler associated with the clientHandlerUID parameter if contained in this component.
+	 * 
+	 * @param clientHandlerUID the UID of the ClientHandler the caller is looking for.
+	 * @return the value associated with the clientHandlerUID if it exists, null if the parameter is
+	 *         unknown w.r.t this Controller.
+	 */
+	public ClientHandler < ? > getClientHandler ( int clientHandlerUID ) 
+	{
+		return suspendedhandlers.get ( clientHandlerUID ) ;
 	}
 	
 	/**
@@ -43,6 +65,7 @@ public class ConnectionLoosingControllerImpl implements ConnectionLoosingControl
 	{
 		support.removeObserver ( oldObserver ) ;
 	}
+	
 	/**
 	 * AS THE SUPER'S ONE.
 	 */
@@ -103,10 +126,5 @@ public class ConnectionLoosingControllerImpl implements ConnectionLoosingControl
 		return res ;
 	}
 
-	public ClientHandler getClientHandler ( int clientHandlerUID ) 
-	{
-		return suspendedhandlers.get ( clientHandlerUID ) ;
-	}
-	
 }
 

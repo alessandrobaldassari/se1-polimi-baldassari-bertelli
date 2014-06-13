@@ -2,13 +2,11 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import javax.swing.ButtonGroup;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -20,66 +18,81 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.MultioptionChooseView;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.InputView;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.ObservableFrameworkedWithGridBagLayoutDialog;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observer;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionObservableSupport;
 
-public class MoveChooseView extends JDialog implements Observable < SheperdColorRequestViewObserver >
+public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog < SheperdColorRequestViewObserver >
 {
 
 	/***/
-	private WithReflectionObservableSupport < SheperdColorRequestViewObserver > support ;
-	
-	/***/
-	private MultioptionChooseView view ;
+	private InputView view ;
 	
 	/***/
 	private MoveListPanel moveListPanel ;
 	
-	/***/
+	/**
+	 * @param observer 
+	 */
 	public MoveChooseView ( SheperdColorRequestViewObserver observer ) 
 	{ 
 		super ( ( Frame ) null , PresentationMessages.APP_NAME , true ) ;
-		GridBagLayout g ;
-		Insets insets ;
-		
-		view = new MultioptionChooseView () ;
-		moveListPanel = new MoveListPanel () ;
-		g = new GridBagLayout () ;
-		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
-		
-		GraphicsUtilities.setComponentLayoutProperties ( view , g , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
-		
-		view.setOkAction ( new Couple < Boolean , Runnable > ( true , new OkAction () ) ) ; 
-		view.setKoAction ( new Couple < Boolean , Runnable > ( true , new KoAction () ) ) ;
 		addObserver ( observer ) ;
+	}
 	
-		setLayout ( g ) ;
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	protected void createComponents () 
+	{
+		view = new InputView () ;
+		moveListPanel = new MoveListPanel () ;
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	protected void manageLayout () 
+	{
+		Insets insets ;
+		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
+		GraphicsUtilities.setComponentLayoutProperties ( view , getLayout () , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
 		setResizable ( false ) ;
-		setAlwaysOnTop ( true ) ;
+		setAlwaysOnTop ( true ) ;		
+	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	protected void bindListeners () 
+	{
+		view.setOkAction ( new Couple < Boolean , Runnable > ( true , new OkAction () ) ) ; 
+		view.setKoAction ( new Couple < Boolean , Runnable > ( true , new KoAction () ) ) ;		
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	protected void injectComponents () 
+	{
 		view.setContentsPanel ( moveListPanel ) ;
 		add ( view ) ;
 	}
 	
-	@Override
-	public void addObserver ( SheperdColorRequestViewObserver newObserver ) 
-	{
-		support.addObserver ( newObserver ) ;
-	}
-
-	@Override
-	public void removeObserver(SheperdColorRequestViewObserver oldObserver) 
-	{
-		support.removeObserver ( oldObserver ) ;
-	}
-	
-	/***/
+	/**
+	 * This class manages the ok action. 
+	 */
 	private class OkAction implements Runnable 
 	{
 		
+		/**
+		 * AS THE SUPER'S ONE. 
+		 */
 		@Override
 		public void run () 
 		{
@@ -88,7 +101,7 @@ public class MoveChooseView extends JDialog implements Observable < SheperdColor
 			if ( res != null )
 			try 
 			{
-				support.notifyObservers ( "onMoveChoosed" , moveListPanel.getSelectedMove () );
+				notifyObservers ( "onMoveChoosed" , moveListPanel.getSelectedMove () );
 			}
 			catch (MethodInvocationException e) 
 			{
@@ -100,16 +113,21 @@ public class MoveChooseView extends JDialog implements Observable < SheperdColor
 		
 	}
 	
-	/***/
+	/**
+	 * This class manages the ko action. 
+	 */
 	private class KoAction implements Runnable 
 	{
 		
+		/**
+		 * AS THE SUPER'S ONE. 
+		 */
 		@Override
 		public void run () 
 		{
 			try 
 			{
-				support.notifyObservers ( "onDoNotWantChooseMove" );
+				notifyObservers ( "onDoNotWantChooseMove" );
 			}
 			catch (MethodInvocationException e) 
 			{
@@ -119,17 +137,24 @@ public class MoveChooseView extends JDialog implements Observable < SheperdColor
 		
 	}
 	
-	/***/
+	/**
+	 * This class defines the events a MoveChooseViewObserver can listen to.
+	 */
 	public interface MoveChooseViewObserver extends Observer
 	{
 		
-		/***/
+		/**
+		 * Called when the User choosed a move and wants to confirm it. 
+		 */
 		public void onMoveChoosed ( GameMoveType move ) ;
 		
-		/***/
+		/**
+		 * Undo action. 
+		 */
 		public void onDoNotWantChooseMove () ;
 		
 	}
+
 	
 }
 
@@ -137,19 +162,27 @@ public class MoveChooseView extends JDialog implements Observable < SheperdColor
 class MoveListPanel extends FrameworkedWithGridBagLayoutPanel 
 {
 	
+	/***/
 	private GameMoveType selected ;
 	
+	/***/
 	private JPanel [] imagePanels ;
 
+	/***/
 	private JRadioButton [] selectors ;
+		
+	/***/
+	private ButtonGroup buttonGroup ;	
 	
-	private ButtonGroup buttonGroup ;
-	
+	/***/
 	public MoveListPanel () 
 	{
 		super () ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void createComponents () 
 	{

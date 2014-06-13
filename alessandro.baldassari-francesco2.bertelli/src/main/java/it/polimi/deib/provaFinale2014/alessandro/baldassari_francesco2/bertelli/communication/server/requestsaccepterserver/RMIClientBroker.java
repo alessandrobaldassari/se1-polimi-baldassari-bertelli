@@ -12,7 +12,14 @@ import java.rmi.RemoteException;
  */
 public interface RMIClientBroker extends Remote
 {
-
+	
+	/**
+	 * Returns the registry RMI name of this RMIClientBroker.
+	 * 
+	 * @return the registry RMI name of this RMIClientBroker.
+	 */
+	public abstract String getRMIName () throws RemoteException ;
+	
 	/**
 	 * Allow to retrieve the Message stored in this broker. 
 	 * 

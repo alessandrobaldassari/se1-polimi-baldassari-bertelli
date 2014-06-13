@@ -118,6 +118,16 @@ public class Match implements Serializable
 	}
 	
 	/**
+	 * Remove a Player from this Match.
+	 * 
+	 * @param playerToRemove the player to remove from this Match.
+	 */
+	void removePlayer ( Player playerToRemove ) 
+	{
+		players.remove ( playerToRemove ) ;
+	}
+	
+	/**
 	 * Getter for the players property.
 	 * 
 	 * @return the players property.

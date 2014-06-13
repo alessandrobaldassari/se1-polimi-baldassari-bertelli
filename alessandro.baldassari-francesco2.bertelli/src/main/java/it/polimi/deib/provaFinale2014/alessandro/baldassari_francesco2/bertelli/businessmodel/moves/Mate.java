@@ -13,7 +13,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb.LambEvolver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.MapUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.TurnNumberClock;
@@ -63,9 +63,13 @@ public class Mate extends GameMove
 	protected Mate ( TurnNumberClock clockSource , LambEvolver lambEvolver , Sheperd theOneWhoWantsTheMate , Region whereMate ) throws MoveNotAllowedException 
 	{
 		List < AdultOvine > adults ;
+		System.out.println ( "clock : " + clockSource ) ;
+		System.out.println ( "lamb : " + lambEvolver ) ;
+		System.out.println ( "sh : " + theOneWhoWantsTheMate ) ;
+		System.out.println ( "where : " + whereMate  ) ;
 		if ( clockSource != null && lambEvolver != null && theOneWhoWantsTheMate != null && whereMate != null ) 
 		{
-			if ( GameMap.areAdjacents( theOneWhoWantsTheMate.getPosition () , whereMate ) )
+			if ( MapUtilities.areAdjacents( theOneWhoWantsTheMate.getPosition () , whereMate ) )
 			{
 				adults = extractAdultOvines ( whereMate.getContainedAnimals () ) ;
 				if ( lookForAnOvine ( adults , AdultOvineType.RAM ) != null && lookForAnOvine ( adults , AdultOvineType.SHEEP ) != null )

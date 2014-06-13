@@ -312,17 +312,17 @@ public abstract class ClientHandler < T >
 	 * @return the card the client wants to buy, null if he doesn't want to buy cards anymore.
 	 * @throws IOException if something goes wrong with the communication.
 	 */
-	public SellableCard chooseCardToBuy ( Iterable < SellableCard > src ) throws IOException 
+	public Iterable < SellableCard > chooseCardToBuy ( Iterable < SellableCard > src ) throws IOException 
 	{
 		Message m ;
-		SellableCard res ;
+		Iterable < SellableCard > res ;
 		m = Message.newInstance ( GameProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST , Collections.<Serializable>singleton ( ( Serializable ) src ) ) ;
 		write ( m ) ;
 		m = read () ;
 		if ( m.getOperation() == GameProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_RESPONSE )
 		{
 			System.out.println ( "CLIENT HANDLER - CHOOSE CARD TO BUY : RESPONSE OK." ) ;
-			res = (SellableCard ) CollectionsUtilities.newListFromIterable ( m.getParameters() ).get (0);
+			res = ( Iterable < SellableCard > ) CollectionsUtilities.newListFromIterable ( m.getParameters() ).get (0);
 		}
 		else
 			throw new IOException ( "BAD_RESPONSE" ) ;
@@ -359,6 +359,13 @@ public abstract class ClientHandler < T >
 		return res ;
 	}
 	
+	public void gameConclusionNotification ( String cause ) throws IOException  
+	{
+		Message m ;
+		m = Message.newInstance ( GameProtocolMessage.GAME_CONCLUSION_NOTIFICATION , Collections.<Serializable>singleton ( cause ) ) ;
+		write ( m ) ;
+	}
+	
 	/**
 	 * This methods sends to the client a generic message.
 	 * 
@@ -372,6 +379,7 @@ public abstract class ClientHandler < T >
 		write ( m ) ;
 	}
 	
+	/***/
 	public void sendGuiConnectorNotification ( Serializable guiConnector ) throws IOException
 	{
 		Message m ;

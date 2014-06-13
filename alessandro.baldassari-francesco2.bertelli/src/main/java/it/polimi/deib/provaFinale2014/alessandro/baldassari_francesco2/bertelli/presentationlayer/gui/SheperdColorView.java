@@ -2,7 +2,6 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -17,70 +16,112 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.MultioptionChooseView;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.InputView;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.ObservableFrameworkedWithGridBagLayoutDialog;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observer;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionObservableSupport;
 
 import javax.swing.ButtonGroup;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
-public class SheperdColorView extends JDialog implements Observable < SheperdColorRequestViewObserver >
+/**
+ * This class allows the User to select one color for one of his Sheperds. 
+ */
+public class SheperdColorView extends ObservableFrameworkedWithGridBagLayoutDialog < SheperdColorRequestViewObserver >
 {
-
-	/***/
-	private WithReflectionObservableSupport < SheperdColorRequestViewObserver > support ;
 	
-	/***/
-	private MultioptionChooseView view ;
+	/**
+	 * An input view to contains the data. 
+	 */
+	private InputView view ;
 	
-	/***/
+	/**
+	 * The effective data-content panel. 
+	 */
 	private ColorsListPanel colorsPanel ;
 	
-	/***/
+	/**
+	 * @param observer an Observer for this View. 
+	 */
 	public SheperdColorView ( SheperdColorRequestViewObserver observer ) 
 	{ 
 		super ( ( Frame ) null , PresentationMessages.APP_NAME , true ) ;
-		GridBagLayout g ;
+		addObserver ( observer ) ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	protected void createComponents () 
+	{
+		view = new InputView () ;
+		colorsPanel = new ColorsListPanel () ;		
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	protected void manageLayout () 
+	{
 		Insets insets ;
-		support = new WithReflectionObservableSupport < SheperdColorRequestViewObserver > () ;
-		view = new MultioptionChooseView () ;
-		colorsPanel = new ColorsListPanel () ;
-		g = new GridBagLayout () ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
-		
-		GraphicsUtilities.setComponentLayoutProperties ( view , g , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+		GraphicsUtilities.setComponentLayoutProperties ( view , getLayout () , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 		view.setTitle ( PresentationMessages.CHOOSE_COLOR_FOR_SHEPERD_MESSAGE ) ;
-		setLayout ( g ) ;
+		view.setShowKo(false); 
 		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
 		setResizable ( false ) ;
 		setAlwaysOnTop ( true ) ;
-		
-		view.setOkAction ( new Couple < Boolean , Runnable > ( true , new OkAction () ) ) ;
-		view.setKoAction ( new Couple < Boolean , Runnable > ( true , new KoAction () ) );
-		addObserver ( observer ) ;
-		
+				
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	protected void bindListeners () 
+	{
+		view.setOkAction ( new Couple < Boolean , Runnable > ( true , new OkAction () ) ) ;		
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	protected void injectComponents () 
+	{
 		add ( view ) ;
 		view.setContentsPanel ( colorsPanel ) ;
 	}
-	
-	/***/
+
+	/**
+	 * Set the colors among which the User can choose.
+	 * 
+	 * @param colors the list of colors the User can choose in.
+	 */
 	public void setColors ( Iterable < NamedColor > colors ) 
 	{
 		colorsPanel.setColors ( colors ) ;
 	}
 	
-	/***/
+	/**
+	 * This interface defines the events a SheperdColorRequestViewObserver can be notified about.
+	 */
 	public interface SheperdColorRequestViewObserver extends Observer
 	{
 		
-		/***/
+		/**
+		 * Called when a color is choosed and the User confirm that he has decided the value. 
+		 * 
+		 * @param selectedColor the color the User choosed.
+		 */
 		public void onColorChoosed ( NamedColor selectedColor ) ;
 		
-		/***/
+		/**
+		 * Undo events 
+		 */
 		public void onDoNotWantChooseColor () ;
 		
 	}
@@ -90,6 +131,9 @@ public class SheperdColorView extends JDialog implements Observable < SheperdCol
 	 */
 	private class OkAction implements Runnable 
 	{
+		
+		/***/
+		private static final String NAME_OF_THE_METHOD_TO_CALL = "onColorChoosed" ;
 
 		/**
 		 * AS THE SUPER'S ONE. 
@@ -102,7 +146,7 @@ public class SheperdColorView extends JDialog implements Observable < SheperdCol
 			if ( res != null )
 				try 
 				{
-					support.notifyObservers ( "onColorChoosed" , res );
+					notifyObservers ( NAME_OF_THE_METHOD_TO_CALL , res );
 				}
 				catch (MethodInvocationException e1) 
 				{
@@ -114,7 +158,9 @@ public class SheperdColorView extends JDialog implements Observable < SheperdCol
 				
 	}
 	
-	/***/
+	/**
+	 * Class that manages the ko action  
+	 */
 	private class KoAction implements Runnable 
 	{
 
@@ -126,7 +172,7 @@ public class SheperdColorView extends JDialog implements Observable < SheperdCol
 		{
 			try 
 			{
-				support.notifyObservers ( "onDoNotWantChooseColor" ) ;
+				notifyObservers ( "onDoNotWantChooseColor" ) ;
 			} 
 			catch ( MethodInvocationException e1 ) 
 			{
@@ -136,47 +182,43 @@ public class SheperdColorView extends JDialog implements Observable < SheperdCol
 		
 	}
 
-	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public void addObserver(SheperdColorRequestViewObserver newObserver) 
-	{
-		support.addObserver ( newObserver ) ;
-	}
-	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-
-	@Override
-	public void removeObserver(SheperdColorRequestViewObserver oldObserver) 
-	{
-		support.removeObserver ( oldObserver ) ;
-	}
-	
 }
 
-/***/
+/**
+ * The Panel that effectively contains colors. 
+ */
 class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel 
 {
 
-	private List < NamedColor > colors ;
-	
+	/**
+	 * The color the user has selected. 
+	 */
 	private NamedColor selected ;
 	
+	/**
+	 * Panels to represent the Colors to the User. 
+	 */
 	private List < JPanel > colorPanels ;
 
+	/**
+	 * Buttons to allow the User to select a Color. 
+	 */
 	private List < JRadioButton > selectors ;
 	
+	/**
+	 * Needed to ensure just one color is selected. 
+	 */
 	private ButtonGroup buttonGroup ;
 	
+	/***/
 	public ColorsListPanel () 
 	{
 		super () ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void createComponents () 
 	{
@@ -186,64 +228,83 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 		buttonGroup = new ButtonGroup () ;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void manageLayout () {}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void bindListeners () {}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void injectComponents () {}
 
+	/**
+	 * Fill this component with data, allowing it to effectively show something useful to the User.
+	 * 
+	 * @param in the colors the User can choose betweeen.
+	 */
 	public void setColors ( Iterable < NamedColor > in ) 
 	{
+		List < NamedColor > colors ;
 		Insets insets ;
+		int i ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
 		colors = CollectionsUtilities.newListFromIterable ( in ) ;
-		selected = null ;
 		for ( NamedColor n : colors )
 		{
 			colorPanels.add ( new JPanel () ) ;
 			selectors.add ( new JRadioButton () ) ;
 		}
-		int i ;
 		for ( i = 0 ; i < colors.size() ; i ++ )
 		{
 			layoutComponent ( colorPanels.get ( i ) , i , 1 , 1 / colors.size() , 0.7 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 			layoutComponent ( selectors.get ( i ) , i , 2 , 1 / colors.size() , 0.7 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
-		}
-		for ( i = 0 ; i < colors.size() ; i ++ )
-		{
 			colorPanels.get(i).setBackground ( colors.get ( i ) ) ;
-			selectors.get ( i ).addItemListener ( new SelectorListener ( i ) ) ;
-			buttonGroup.add ( selectors.get( i ) );
-			selectors.get(i).setText ( colors.get ( i ).getName () ) ;
+			selectors.get ( i ).addItemListener ( new SelectorListener ( colors.get ( i ) ) ) ;
+			selectors.get(i).setText ( colors.get ( i ).getName () ) ; 
 		}
 		for ( JPanel p : colorPanels )
 			add ( p ) ;
 		for ( JRadioButton r : selectors )
 			add ( r ) ;
+		for ( JRadioButton r : selectors )
+			buttonGroup.add ( r ) ;
 	}
 	
+	/***/
 	public NamedColor getSelectedColor () 
 	{
 		return selected ;
 	}
 	
+	/***/
 	private class SelectorListener implements ItemListener 
 	{
 
-		private int associatedIndex ;
+		/***/
+		private NamedColor associatedColor ;
 		
-		public SelectorListener ( int associatedIndex )
+		/***/
+		public SelectorListener ( NamedColor associatedColor )
 		{
-			this.associatedIndex = associatedIndex ;
+			this.associatedColor = associatedColor ;
 		}
 		
+		/**
+		 * AS THE SUPER'S ONE. 
+		 */
 		@Override
 		public void itemStateChanged ( ItemEvent e ) 
 		{
-			selected = colors.get(associatedIndex);
+			selected = associatedColor ;
 		}	
 		
 	}

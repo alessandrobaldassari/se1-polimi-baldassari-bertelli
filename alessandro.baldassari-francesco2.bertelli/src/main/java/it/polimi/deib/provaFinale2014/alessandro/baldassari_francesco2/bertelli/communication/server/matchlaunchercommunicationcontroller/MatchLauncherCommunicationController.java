@@ -1,6 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunchercommunicationcontroller;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -32,7 +33,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * It is the one that sums all the inbound connections, bounds them to the GameController
  * instances and manages also the situation where just one Player wants to play ( and cannot ). 
  */
-public class MatchLauncherCommunicationController implements NetworkCommunicationController , MatchAdderCommunicationController , MatchStartCommunicationController
+public class MatchLauncherCommunicationController implements NetworkCommunicationController , MatchAdderCommunicationController , MatchStartCommunicationController , Serializable
 {
 	
 	/**
@@ -53,12 +54,12 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 	/**
 	 * A SocketServer object to intercept inbound socket connections.
 	 */
-	private RequestAccepterServer socketServer ;
+	private transient RequestAccepterServer socketServer ;
 	
 	/**
 	 * A RMIServer object to intercept inbound RMI connections. 
 	 */
-	private RequestAccepterServer rmiServer ;
+	private transient RequestAccepterServer rmiServer ;
 	
 	/**
 	 * The GameController object associated to the Match that is currently starting. 
@@ -68,7 +69,7 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 	/**
 	 * An ExecutorService object to manage all the threads this object creates. 
 	 */
-	private ExecutorService threadExecutor ;
+	private transient ExecutorService threadExecutor ;
 	
 	/**
 	 * A Collection containing the handlers of the Client which are currently connecting to this Server. 
@@ -83,7 +84,7 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 	/**
 	 * A component associated with the current GameController to manage eventually connection loosing. 
 	 */
-	private ConnectionLoosingController connectionLoosingController ;
+	private transient ConnectionLoosingController connectionLoosingController ;
 	
 	/**
 	 * A flag indicating if this MasterServer is on or not.
@@ -91,13 +92,13 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 	private boolean inFunction ;
 
 	/***/
-	private ResumeConnectionServer < ? > socketResumeConnectionServer ;
+	private transient ResumeConnectionServer < ? > socketResumeConnectionServer ;
 	
 	/***/
-	private ResumeConnectionServer < ? > rmiResumeConnectionServer ;
+	private transient ResumeConnectionServer < ? > rmiResumeConnectionServer ;
 	
 	/***/
-	private SocketGUIMapServer guiServer ;
+	private transient SocketGUIMapServer guiServer ;
 	
 	/**
 	 * @throws IOException if something goes wrong with the creation of the member objects. 
@@ -221,7 +222,7 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 			} 
 			catch ( PlayerWantsToExitGameException e )
 			{
-				// notify others ?
+				System.out.println ( "MATCH_LAUNCHER_COMUNICATION_CONTROLLER - RUN : PLAYER_WANTS_TO_EXIT_GAME_EXCEPTION" ) ;
 			}
 		}
 	}

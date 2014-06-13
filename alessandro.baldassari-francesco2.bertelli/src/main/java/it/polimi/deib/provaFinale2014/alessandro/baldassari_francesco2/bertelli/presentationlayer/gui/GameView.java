@@ -11,9 +11,6 @@ import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
@@ -33,9 +30,9 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
@@ -43,6 +40,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Counter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
@@ -164,9 +162,9 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	{
 		Insets insets ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
-		layoutComponent ( playersCardPanel , 0 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.VERTICAL , GridBagConstraints.WEST , insets ) ;
+		layoutComponent ( playersCardPanel , 0 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.WEST , insets ) ;
 		layoutComponent ( mapPanel , 1 , 0 , 4 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
-		layoutComponent ( notificationArea , 2 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.VERTICAL , GridBagConstraints.EAST , insets ) ;
+		layoutComponent ( notificationArea , 2 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.EAST , insets ) ;
 	}
 
 	/**
@@ -227,11 +225,6 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 	// ATTRIBUTES
 	
 	/**
-	 * A split pane to show both the map and some commands button about zoom and other things. 
-	 */
-	private JSplitPane splitPane ;
-	
-	/**
 	 * A Scroll Pane to scroll the Map. 
 	 */
 	private JScrollPane scrollPane ;
@@ -275,7 +268,6 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 	@Override
 	protected void createComponents () 
 	{
-		splitPane = new JSplitPane () ;
 		scrollPane = new JScrollPane () ;
 		drawingPanel = new DrawingPanel () ;
 		commandPanel = new CommandPanel () ;	
@@ -292,26 +284,18 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 	{
 		Insets insets ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
-		splitPane.setTopComponent ( scrollPane ) ;
-		splitPane.setBottomComponent ( commandPanel );
-		splitPane.setOrientation ( JSplitPane.VERTICAL_SPLIT );
-		splitPane.setOneTouchExpandable ( true ) ;
 		scrollPane.setViewportView ( drawingPanel ) ;
 		scrollPane.setVerticalScrollBarPolicy ( ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED ) ;
 		scrollPane.setHorizontalScrollBarPolicy ( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED ) ;
-		layoutComponent ( splitPane, 0 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;	
+		layoutComponent ( scrollPane, 0 , 0 , 1 , 10 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;	
+		layoutComponent ( commandPanel, 0 , 1 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.SOUTH , insets ) ;	
 	}
 
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	protected void bindListeners () 
-	{
-		ComponentListener componentListener ;
-		componentListener = new ResizingManager () ;
-		addComponentListener ( componentListener );
-	}
+	protected void bindListeners () {}
 
 	/**
 	 * AS THE SUPER'S ONE. 
@@ -319,7 +303,8 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 	@Override
 	protected void injectComponents() 
 	{
-		add ( splitPane ) ;
+		add ( scrollPane ) ;
+		add ( commandPanel ) ;
 	}
 	
 	/**
@@ -581,8 +566,15 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 					}
 					try 
 					{
-						System.out.println ( uid ) ;
-						notifyObservers ( methodName , uid ) ;
+						if ( uid != null )
+						{
+							System.out.println ( uid ) ;
+							notifyObservers ( methodName , uid ) ;
+						}
+						else
+						{
+							JOptionPane.showMessageDialog ( DrawingPanel.this , PresentationMessages.INVALID_CHOOSE_MESSAGE , PresentationMessages.APP_NAME , JOptionPane.ERROR_MESSAGE );
+						}
 					}
 					catch (MethodInvocationException e1) 
 					{
@@ -600,6 +592,12 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 	 */
 	private class CommandPanel extends FrameworkedWithGridBagLayoutPanel 
 	{
+		
+		/**
+		 * Button whose triggers indicate that the user, being an a MoveChoose context, wants to change
+		 * a Move. 
+		 */
+		private JButton changeMoveButton ;
 		
 		/**
 		 * Button for the zoom less action. 
@@ -623,6 +621,7 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 		@Override
 		protected void createComponents () 
 		{
+			changeMoveButton = new JButton () ;
 			zoomLessButton = new JButton () ;
 			zoomPlusButton = new JButton () ;
 			
@@ -636,8 +635,9 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 		{
 			Insets insets ;
 			insets = new Insets ( 0 , 0 , 0 , 0 ) ;
-			layoutComponent ( zoomLessButton , 0 , 0 , 0.5 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
-			layoutComponent ( zoomPlusButton , 1 , 0 , 0.5 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;			
+			layoutComponent ( changeMoveButton , 0 , 0 , 1 , 1, 1 , 2, 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets);
+			layoutComponent ( zoomLessButton , 0 , 1 , 0.5 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
+			layoutComponent ( zoomPlusButton , 1 , 1 , 0.5 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;			
 		}
 
 		/**
@@ -646,10 +646,13 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 		@Override
 		protected void bindListeners() 
 		{
+			Action changeMoveButtonAction ;
 			Action zoomLessAction ;
 			Action zoomPlusAction ;
+			changeMoveButtonAction = new ChangeMoveButtonAction ( "CAMBIA MOSSA" ) ;
 			zoomLessAction = new ZoomLessAction () ;
 			zoomPlusAction = new ZoomPlusAction () ;
+			changeMoveButton.setAction ( changeMoveButtonAction );
 			zoomLessButton.setAction ( zoomLessAction ) ;
 			zoomPlusButton.setAction ( zoomPlusAction ) ;	
 		}
@@ -660,8 +663,41 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 		@Override
 		protected void injectComponents () 
 		{
+			add ( changeMoveButton ) ;
 			add ( zoomLessButton ) ;
 			add ( zoomPlusButton ) ;	
+		}
+		
+		/**
+		 * Action that manages the ChangeMove action. 
+		 */
+		private class ChangeMoveButtonAction extends AbstractAction 
+		{
+			
+			/**
+			 * @param txt the text to display. 
+			 */
+			public ChangeMoveButtonAction ( String txt ) 
+			{
+				super ( txt ) ;
+			}
+			
+			/**
+			 * AS THE SUPER'S ONE. 
+			 */
+			@Override
+			public void actionPerformed ( ActionEvent e ) 
+			{
+				try 
+				{
+					notifyObservers ( "onWantToChangeMove" ) ;
+				}
+				catch (MethodInvocationException e1) 
+				{
+					e1.printStackTrace();
+				}
+			} 
+			
 		}
 		
 		/**
@@ -716,28 +752,6 @@ class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMap
 		}
 		
 	}
-	
-	/**
-	 * This class implements a mechanism that has to fix the proportion of the split pane to 3 : 4 
-	 */
-	private class ResizingManager extends ComponentAdapter 
-	{
-		
-		public ResizingManager () 
-		{
-			super () ;
-		}
-		
-		/**
-		 * AS THE SUPER'S ONE. 
-		 */
-		@Override
-		public void componentResized ( ComponentEvent e ) 
-		{
-			splitPane.setDividerLocation ( 0.95 ) ;
-		}
-		
-	} 
 	
 	/**
 	 * Class that manages the measures of the GameMap.

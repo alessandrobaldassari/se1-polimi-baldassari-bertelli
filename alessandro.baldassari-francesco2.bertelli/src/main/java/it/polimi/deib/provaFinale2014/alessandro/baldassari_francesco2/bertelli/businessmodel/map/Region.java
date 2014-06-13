@@ -4,6 +4,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -187,7 +188,7 @@ public class Region extends GameMapElement
 	 */
 	public enum RegionType 
 	{
-		
+				
 		HILL ,
 		
 		FOREST ,
@@ -200,7 +201,25 @@ public class Region extends GameMapElement
 		
 		DESERT ,
 		
-		SHEEPSBURG
+		SHEEPSBURG ;
+			
+		/**
+		 * Returns an Iterable containing all the RegionType values except Sheepsburg.
+		 * 
+		 * @return an Iterable containing all the RegionType values except Sheepsburg.
+		 */
+		public static Collection < RegionType > allTheTypesExceptSheepsburg () 
+		{
+			Collection < RegionType > res ;
+			res = new ArrayList < RegionType > ( 6 ) ;
+			res.add ( HILL ) ;
+			res.add ( FOREST ) ;
+			res.add ( LACUSTRINE ) ;
+			res.add ( CULTIVABLE ) ;
+			res.add ( MOUNTAIN ) ;
+			res.add ( DESERT ) ;
+			return res ;
+		}
 		
 	}
 	

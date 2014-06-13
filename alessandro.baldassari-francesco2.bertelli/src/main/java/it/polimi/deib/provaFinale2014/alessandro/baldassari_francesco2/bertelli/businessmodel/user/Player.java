@@ -8,6 +8,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MathUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Suspendable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
 
 import java.io.Serializable;
@@ -265,10 +266,10 @@ public abstract class Player implements Serializable , Suspendable
 	 * 
 	 * @param src the List of Cards this Player can potentially buy.
 	 * @return a SellableCard object contained in the parameter indicating a Card this Player
-	 *         wants to buy, or null if this Player does not want to buy any Card.
+	 *         wants to buy, or an empty iterable to indicate that this User does not want to buy any card
 	 * @throws TimeoutException 
 	 */
-	public abstract SellableCard chooseCardToBuy ( Iterable < SellableCard > src ) throws TimeoutException ;
+	public abstract Iterable < SellableCard > chooseCardToBuy ( Iterable < SellableCard > src ) throws TimeoutException ;
 	
 	/**
 	 * Getter method for the initialCard property.
@@ -370,13 +371,23 @@ public abstract class Player implements Serializable , Suspendable
 	public abstract void genericNotification ( String message ) ;
 	
 	/**
+	 * Method called by the System to notify the User that the Match is finishing.
+	 * If subclasses uses Closeable resources ( connections, threads and so on ) this is the place
+	 * when do it.
+	 * No other method will be called by the System on this Player object after this.
+	 * 
+	 * @param cause the cause of the match finish in the form of a User friendly message.
+	 */
+	public abstract void matchEndNotification ( String cause ) ;
+	
+	/**
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
 	public String toString () 
 	{
 		String res ;
-		res = "Player.\n" ;
+		res = "Player." + Utilities.CARRIAGE_RETURN ;
 		return res ;
 	}
 	
@@ -391,7 +402,7 @@ public abstract class Player implements Serializable , Suspendable
 	{
 		
 		/***/
-		private TooFewMoneyException () {}
+		public TooFewMoneyException () {}
 		
 	}
 	

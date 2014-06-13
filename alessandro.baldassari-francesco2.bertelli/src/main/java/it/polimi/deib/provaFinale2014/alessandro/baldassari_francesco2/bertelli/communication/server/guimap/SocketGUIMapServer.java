@@ -11,7 +11,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class SocketGUIMapServer implements Runnable , GameMapObserver
+public class SocketGUIMapServer implements Runnable , GameMapObserver 
 {
 
 	private static int lastPortEmitted = 4000 ;

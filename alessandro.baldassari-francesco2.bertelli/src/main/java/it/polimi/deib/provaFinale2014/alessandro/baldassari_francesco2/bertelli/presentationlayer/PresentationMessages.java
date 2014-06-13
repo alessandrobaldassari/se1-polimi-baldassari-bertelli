@@ -1,5 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
+
 public final class PresentationMessages 
 {
 
@@ -77,6 +79,21 @@ public final class PresentationMessages
 	 * The message to display when the User has to choose a GameMove during the Match. 
 	 */
 	public static final String DO_MOVE_MESSAGE = "Scegli una mossa da effettuare!" ;
+	
+	/**
+	 * The message to display when the User try to do a not allowed move. 
+	 */
+	public static final String MOVE_NOT_ALLOWED_MESSAGE = "Sorry, ma non puoi fare questa mossa!" ;
+	
+	/**
+	 * The message to display when a Player tries to execute an action but does not have enough money to do it. 
+	 */
+	public static final String NOT_ENOUGH_MONEY_MESSAGE = "Sorry, ma non hai abbastanza soldi per fare questo..." ;
+
+	/**
+	 * The message to show when an unexpected error appears. 
+	 */
+	public static final String UNEXPECTED_ERROR_MESSAGE = "Sorry, ma c'è stato un errore imprevisto" + Utilities.CARRIAGE_RETURN + "Purtroppo il gioco verrà chiuso ma..." + Utilities.CARRIAGE_RETURN + "Torna presta a belare con noi!" ;
 	
 	/**
 	 * The message to display to allow the user to stop the Match and exit the App.

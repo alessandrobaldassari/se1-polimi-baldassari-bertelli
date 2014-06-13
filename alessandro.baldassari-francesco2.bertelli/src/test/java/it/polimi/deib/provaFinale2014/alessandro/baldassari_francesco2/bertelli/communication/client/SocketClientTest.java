@@ -118,7 +118,7 @@ class ProtocolResponser implements CommunicationProtocolResponser{
 	}
 
 	@Override
-	public SellableCard onChoseCardToBuy(Iterable<SellableCard> acquirables)
+	public Iterable < SellableCard > onChoseCardToBuy(Iterable<SellableCard> acquirables)
 			throws IOException {
 		// TODO Auto-generated method stub
 		return null;
@@ -132,6 +132,12 @@ class ProtocolResponser implements CommunicationProtocolResponser{
 
 	@Override
 	public void onGUIConnectorOnNotification(Serializable guiConnector) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onGameConclusionNotification(String cause) throws IOException {
 		// TODO Auto-generated method stub
 		
 	}

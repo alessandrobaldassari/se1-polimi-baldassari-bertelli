@@ -8,18 +8,22 @@ import java.util.LinkedList;
 public class FactorySupport < T > implements Serializable
 {
 
+	/***/
 	private Collection < Identifiable < T > > alreadyUsers ;
 	
+	/***/
 	public FactorySupport () 
 	{
 		alreadyUsers = new LinkedList < Identifiable < T > > () ;
 	}
 	
+	/***/
 	public void addUser ( Identifiable < T > newUser ) 
 	{
 		alreadyUsers.add ( newUser ) ;
 	} 
 	
+	/***/
 	public boolean isAlreadyUser ( Identifiable < T > key ) 
 	{
 		boolean res ;

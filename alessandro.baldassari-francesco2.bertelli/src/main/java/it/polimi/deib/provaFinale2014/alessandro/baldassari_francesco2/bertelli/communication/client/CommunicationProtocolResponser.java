@@ -38,7 +38,9 @@ public interface CommunicationProtocolResponser
 	 */
 	public void onMatchWillNotStartNotification ( String msg ) ;
 	
-	/***/
+	/**
+	 * Request by the Server that the Player has to choose a Color for his Sheperd. 
+	 */
 	public NamedColor onSheperdColorRequest ( Iterable < NamedColor > availableColors ) throws IOException ;
 	
 	/***/
@@ -54,7 +56,10 @@ public interface CommunicationProtocolResponser
 	public Iterable < SellableCard > onChooseCardsEligibleForSelling ( Iterable < SellableCard > sellableCards ) throws IOException ;
 	
 	/***/
-	public SellableCard onChoseCardToBuy ( Iterable < SellableCard > acquirables ) throws IOException ;
+	public Iterable < SellableCard > onChoseCardToBuy ( Iterable < SellableCard > acquirables ) throws IOException ;
+	
+	/***/
+	public void onGameConclusionNotification ( String cause ) throws IOException ;
 	
 	/**
 	 * Generic notification by the Server. 

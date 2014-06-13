@@ -16,7 +16,7 @@ public class MoveFactory implements Serializable
 {
 
 	/***/
-	private final transient TurnNumberClock clockSource ;
+	private final TurnNumberClock clockSource ;
 	
 	/***/
 	private GameMoveType lastMove ;
@@ -28,11 +28,12 @@ public class MoveFactory implements Serializable
 	private boolean sheperdMoved ;
 	
 	/***/
-	private transient LambEvolver lambEvolver ;
+	private LambEvolver lambEvolver ;
 	
 	/***/
 	private Sheperd sheperd ;
 	
+	/***/
 	public Sheperd getAssociatedSheperd ()
 	{
 		return sheperd;
@@ -101,7 +102,7 @@ public class MoveFactory implements Serializable
 	public GameMove newMate ( Region whereMate ) throws MoveNotAllowedException  
 	{
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
-			throw new MoveNotAllowedException ( "" ) ; 
+			throw new MoveNotAllowedException ( "THE " ) ; 
 		else  
 			if ( lastMove == null || lastMove != GameMoveType.BUY_CARD )
 			{

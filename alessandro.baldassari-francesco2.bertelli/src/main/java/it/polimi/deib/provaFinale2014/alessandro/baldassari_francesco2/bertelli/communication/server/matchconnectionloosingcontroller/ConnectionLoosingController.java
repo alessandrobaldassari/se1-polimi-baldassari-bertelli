@@ -42,7 +42,7 @@ public interface ConnectionLoosingController extends Observable < ConnectionLoos
 		public void onBeginSuspensionControl ( Suspendable pendant ) ;
 		
 		/***/
-		public void onEndSuspensionControl ( boolean suspendedRetrieved ) ;
+		public void onEndSuspensionControl ( Boolean suspendedRetrieved ) ;
 		
 		/***/
 		public void onConnectionRetrieved ( Suspendable retrievedElem ) ;

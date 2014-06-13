@@ -11,27 +11,26 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.CardFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.FactorySupport;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WithFactorySupportObject;
 
-public class BankFactory implements Serializable
+/**
+ * This class implements the Factory pattern for the Bank object to control the creation of
+ * Bank objects. 
+ */
+public class BankFactory extends WithFactorySupportObject < Match > implements Serializable
 {
 
 	/**
 	 * Instance variable to implement to Singleton Pattern. 
 	 */
-	private static BankFactory instance = new BankFactory () ;
-	
-	/**
-	 * The object needed to implement the Factory pattern 
-	 */
-	private FactorySupport < Match > factorySupport ;
+	private static BankFactory instance ;
 	
 	/***/
 	private BankFactory () 
 	{
-		factorySupport = new FactorySupport < Match > () ; 
+		super () ;
 	}
 	
 	/**
@@ -39,8 +38,10 @@ public class BankFactory implements Serializable
 	 * 
 	 * @return the only existing instance of the BankFactory class.
 	 */
-	public static BankFactory getInstance () 
+	public synchronized static BankFactory getInstance () 
 	{
+		if ( instance == null )
+			instance = new BankFactory () ;
 		return instance ;
 	}
 	
@@ -59,9 +60,9 @@ public class BankFactory implements Serializable
 		Iterable < Card > initialCards ;
 		Iterable < SellableCard > otherCards ;
 		byte i ;
-		if ( factorySupport.isAlreadyUser ( caller ) == false )
+		if ( getFactorySupport().isAlreadyUser ( caller ) == false )
 		{
-			factorySupport.addUser ( caller ) ;
+			getFactorySupport().addUser ( caller ) ;
 			initFences = new ArrayList < Fence > ( GameConstants.NON_FINAL_FENCE_NUMBER + GameConstants.FINAL_FENCE_NUMBER ) ;
 			for ( i = 0 ; i < GameConstants.NON_FINAL_FENCE_NUMBER ; i ++ )
 				initFences.add ( new Fence ( FenceType.NON_FINAL ) ) ;

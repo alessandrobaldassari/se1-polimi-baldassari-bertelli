@@ -4,236 +4,313 @@ import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.DataFilePaths;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.LoginView.LoginViewObserver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.ObservableFrameworkedWithGridBagLayoutPanel;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.InputView;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.ObservableFrameworkedWithGridBagLayoutDialog;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observer;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-/***/
-public class LoginView extends JDialog 
+/**
+ * This View implements the User Interface for the Login phase, the process where a Player has to 
+ * enter a name. 
+ */
+public class LoginView extends ObservableFrameworkedWithGridBagLayoutDialog < LoginViewObserver > 
 {
-
-	/***/
+	
+	/**
+	 * The effective view. 
+	 */
+	private InputView inputView ;
+	
+	/**
+	 * The View where effectively input data. 
+	 */
 	private LoginViewPanel loginViewPanel ;
 	
-	/***/
+	/**
+	 * @param observer an observer for this view.
+	 */
 	public LoginView ( LoginViewObserver observer ) 
 	{
 		super ( ( Frame ) null , PresentationMessages.APP_NAME , true ) ;
-		GridBagLayout g ;
-		Insets insets ;
+		addObserver ( observer ) ;		
+		System.out.println ( "LOGIN_VIEW : CONSTRUCTOR_EXECUTED" ) ;
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	protected void createComponents () 
+	{
+		inputView = new InputView () ;
 		loginViewPanel = new LoginViewPanel () ;
-		g = new GridBagLayout () ;
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	protected void manageLayout () 
+	{
+		Insets insets ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
-		GraphicsUtilities.setComponentLayoutProperties ( loginViewPanel , g , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
-		loginViewPanel.addObserver ( observer ) ;
-		setLayout ( g ) ;
+		layoutComponent ( inputView , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
-		add ( loginViewPanel ) ;
 		setAlwaysOnTop ( true ) ;
+		inputView.setShowKo ( false ) ;	
+		pack () ;
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	protected void bindListeners () 
+	{
+		inputView.setOkAction ( new Couple < Boolean , Runnable > ( false , new OkAction () ) ) ;		
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	protected void injectComponents () 
+	{
+		add ( inputView ) ;
+		inputView.setContentsPanel ( loginViewPanel ) ;		
 	}
 	
-	/***/
+	/**
+	 * Class to manage the ok action. 
+	 */
+	private class OkAction implements Runnable 
+	{
+		
+		private final String NAME_OF_THE_METHOD_TO_CALL = "onNameEntered" ;
+		
+		/**
+		 * As the super's one. 
+		 */
+		@Override
+		public void run () 
+		{
+			String name ;
+			name = loginViewPanel.getName () ;
+			if ( name != null && name.compareTo ( Utilities.EMPTY_STRING ) == 0 )
+				try 
+				{
+					notifyObservers ( NAME_OF_THE_METHOD_TO_CALL , name ) ;
+				}
+				catch (MethodInvocationException e) 
+				{
+					e.printStackTrace();
+				}
+			else
+				JOptionPane.showMessageDialog ( LoginView.this , PresentationMessages.INVALID_CHOOSE_MESSAGE , PresentationMessages.APP_NAME , JOptionPane.ERROR_MESSAGE ) ;
+		}
+		
+	}
+	
+	/**
+	 * Preperare this LoginView for showing. 
+	 */
 	public void prepareView () 
 	{
 		loginViewPanel.prepareView () ;
 	}
 	
-	/***/
+	/**
+	 * This interface defines the events a LoginViewObserver can listen to. 
+	 */
 	public interface LoginViewObserver extends Observer
 	{
 		
-		/***/
+		/**
+		 * Called when the User choosed and confirmed his name. 
+		 */
 		public void onNameEntered ( String enteredName ) ;
 		
-		/***/
+		/**
+		 * Called when the user does not want to complete this operation. 
+		 */
 		public void onDoNotWantToEnterName () ;
 		
 	}
 	
+	private static AtomicReference <String> name ;
+	
+	public static String showDialog () 
+	{
+		LoginView l ;
+		l = new LoginView ( new DummyObs () ) ;
+		name = new AtomicReference < String > ( null ) ;
+		GraphicsUtilities.showUnshowWindow ( l , false , true ) ;
+		synchronized ( name ) 
+		{
+			while ( name.get() == null )
+				try {
+					name.wait () ;
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}
+		GraphicsUtilities.showUnshowWindow ( l , false , false ) ;
+		return name.get();
+	}
+	
+	private static class DummyObs implements LoginViewObserver 
+	{
+
+		@Override
+		public void onNameEntered ( String enteredName ) 
+		{
+			synchronized (name) {
+				name.set(enteredName); 
+				name.notifyAll();
+			}
+			
+		}
+
+		@Override
+		public void onDoNotWantToEnterName() {
+			// TODO Auto-generated method stub
+			
+		}
+		
+		
+		
+	}
+	
+	public static void main ( String [] args ) 
+	{
+		String x ;
+		x = LoginView.showDialog();
+		System.out.println ( x ) ;
+	}
+	
 }
 
-/***/
-class LoginViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < LoginViewObserver >
+/**
+ * This class effectively implements the LoginView panel 
+ */
+class LoginViewPanel extends FrameworkedWithGridBagLayoutPanel 
 {
 
+	/***/
 	private static final String EMPTY_NAME_ERROR_MESSAGE = "Un nome vuoto non va bene..." ;
 	
-	private static final String BACKGROUND_IMAGE_FILE_PATH = "sheepland_cover.jpg" ; ;
-	
-	/***/
+	/**
+	 * The background image for this View. 
+	 */
 	private Image backgroundImage ;
 	
-	/***/
-	private JLabel textLabel ;
-	
-	/***/
+	/**
+	 * A label to show if the value entered is not ok. 
+	 */
 	private JLabel errorLabel ;
 	
 	/***/
 	private JTextField nameField ;
 	
 	/***/
-	private JButton enterButton ;
-	
-	/***/
-	private JButton exitButton ;
-	
-	/***/
 	public LoginViewPanel () 
 	{
 		super () ;
 	}
-	
+
 	/***/
 	public void prepareView ()
 	{
 		nameField.setText ( Utilities.EMPTY_STRING ) ;
 		errorLabel.setText ( Utilities.EMPTY_STRING ) ;
+		errorLabel.setVisible ( false ) ;
 	}
 	
-	/***/
-	@Override
-	public void paintComponent ( Graphics g ) 
-	{
-		super.paintComponent ( g ) ;
-		g.drawImage ( backgroundImage , 0 , 0 , getWidth () , getHeight () , this ) ;
-	}
-	
-	/***/
+	/**
+	 * AS THE SUPER'S ONE.
+	 */
 	@Override
 	protected void createComponents ()  
 	{
+		nameField = new JTextField () ;
+		errorLabel = new JLabel () ;
 		try 
 		{
-			backgroundImage = GraphicsUtilities.getImage ( BACKGROUND_IMAGE_FILE_PATH ) ;
-			textLabel = new JLabel () ;
-			nameField = new JTextField () ;
-			errorLabel = new JLabel () ;
-			enterButton = new JButton () ;
-			exitButton = new JButton () ;
-		} 
-		catch ( IOException e ) 
+			backgroundImage = GraphicsUtilities.getImage ( DataFilePaths.BACKGROUND_IMAGE_FILE_PATH ) ;
+		}
+		catch ( IOException e )
 		{
 			e.printStackTrace();
-			throw new RuntimeException ( e ) ;
 		}
-	}
+	}	
 	
-	/***/
+	/**
+	 * AS THE SUPER'S ONE.
+	 */
 	@Override
 	protected void manageLayout () 
 	{
 		Insets insets ; 
 		insets = new Insets ( 5 , 5 , 5 , 5 ) ;
-		layoutComponent ( textLabel , 0 , 0 , 0 , 0 , 1 , 2 , 5 , 5 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
 		layoutComponent ( nameField , 0 , 1 , 0 , 0 , 1 , 2 , 5 , 5 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
-		layoutComponent ( nameField , 0 , 2 , 0 , 0 , 1 , 2 , 5 , 5 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
-		layoutComponent ( enterButton , 0 , 3 , 0.5 , 0 , 1 , 1 , 5 , 5 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
-		layoutComponent ( exitButton , 1 , 3 , 0.5 , 0 , 1 , 1 , 5 , 5 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
-		textLabel.setText ( PresentationMessages.NAME_REQUEST_MESSAGE ) ;
-		textLabel.setHorizontalTextPosition ( SwingConstants.CENTER ) ;
+		layoutComponent ( errorLabel , 0 , 2 , 0 , 0 , 1 , 2 , 5 , 5 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
 		errorLabel.setHorizontalTextPosition ( SwingConstants.CENTER ) ;
 		errorLabel.setForeground ( Color.RED ) ;
 	}
 	
-	/***/
+	/**
+	 * AS THE SUPER'S ONE.
+	 */
 	@Override
-	protected void bindListeners () 
-	{
-		Action okAction ;
-		Action exitAction ;
-		okAction = new OkAction ( "ENTRA" ) ;
-		exitAction = new ExitAction ( "ESCI" )  ;
-		enterButton.setAction ( okAction ) ;
-		exitButton.setAction ( exitAction ) ;
-	}
+	protected void bindListeners () {}
 	
-	/***/
+	/**
+	 * AS THE SUPER'S ONE.
+	 */
 	@Override
 	protected void injectComponents () 
 	{
-		add ( textLabel ) ;
 		add ( nameField ) ;
 		add ( errorLabel ) ;
-		add ( enterButton ) ;
-		add ( exitButton ) ;
 	}
 	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	private class OkAction extends AbstractAction 
+	@Override
+	public void paintComponent ( Graphics g ) 
 	{
-
-		/***/
-		public OkAction ( String frontEndText )  
-		{
-			super ( frontEndText ) ;
-		}
-		
-		/***/
-		@Override
-		public void actionPerformed ( ActionEvent e ) 
-		{
-			try 
-			{
-				if ( nameField.getText ().compareToIgnoreCase ( Utilities.EMPTY_STRING ) == 0 )
-					errorLabel.setText ( EMPTY_NAME_ERROR_MESSAGE ) ;
-				else
-					notifyObservers ( "onNameEntered" , nameField.getText () ) ;
-			} 
-			catch ( MethodInvocationException e1 ) 
-			{
-				e1.printStackTrace();
-			}
-		}
-		
+		super.paintComponent(g); 
+		if ( backgroundImage != null )
+			g.drawImage ( backgroundImage , 0 , 0 , getWidth () , getHeight() , this );
 	}
 	
 	/***/
-	private class ExitAction extends AbstractAction 
+	public String getName () 
 	{
-
-		/***/
-		public ExitAction ( String frontEndText ) 
+		String res ; 
+		res = nameField.getText () ;
+		if ( res == null || res.compareToIgnoreCase ( Utilities.EMPTY_STRING ) == 0 )
 		{
-			super ( frontEndText ) ;
+			errorLabel.setText ( EMPTY_NAME_ERROR_MESSAGE ) ;
+			errorLabel.setVisible ( true ) ;
 		}
-		
-		/**
-		 * AS THE SUPER'S ONE. 
-		 */
-		@Override
-		public void actionPerformed ( ActionEvent e ) 
-		{
-			try 
-			{
-				notifyObservers ( "onDoNotWantToEnterName" ) ;
-			} 
-			catch ( MethodInvocationException e1 ) 
-			{
-				e1.printStackTrace();
-			}
-		}
-				
+		return res ;
 	}
 	
 }

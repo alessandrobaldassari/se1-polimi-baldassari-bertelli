@@ -7,10 +7,10 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.io.IOException;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.DataFilePaths;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observer;
 
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -20,7 +20,7 @@ import javax.swing.SwingConstants;
 /**
  * This View offer a component to use during waiting times. 
  */
-public class WaitingView extends JDialog 
+public class WaitingView extends JDialog implements NotificationContainer
 {
 	
 	/**
@@ -31,9 +31,10 @@ public class WaitingView extends JDialog
 	/***/
 	public WaitingView () 
 	{
-		super ( ( Frame ) null , PresentationMessages.APP_NAME , true ) ;
+		super ( ( Frame ) null , PresentationMessages.APP_NAME , false ) ;
 		waitingPanel = new WaitingViewPanel () ;
 		add ( waitingPanel ) ;
+		setSize ( GraphicsUtilities.getVGAResolution() ) ;
 		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
 	}
 	
@@ -43,38 +44,44 @@ public class WaitingView extends JDialog
 	public void setText ( String text ) 
 	{
 		waitingPanel.setText ( text ) ;
+		repaint () ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
 	public void addNotification ( String msg ) 
 	{
 		waitingPanel.addNotification ( msg ) ;
 	}
 	
-	// INNER INTERFACES
-	
-	public interface WaitingViewObserver extends Observer {}
-	
 }
 
 /**
- * The  
+ * The effective WaitingView panel.
  */
 class WaitingViewPanel extends FrameworkedWithGridBagLayoutPanel 
 {
-
-	/***/
-	private final String BACKGROUND_IMAGE_FILE_PATH = "sheepland_init.jpg"; ;
 	
-	/***/
+	/**
+	 * The background image for this Panel. 
+	 */
 	private Image backgroundImage ;
 	
-	/***/
+	/**
+	 * The Label that indicates the User why is he waiting. 
+	 */
 	private JLabel textLabel ;
 	
-	/***/
+	/**
+	 * An area to show notification to the user during the waiting time. 
+	 */
 	private NotificationPanel notificationArea ;
 	
-	/***/
+	/**
+	 * A ProgressBar to indicate the User that something is working behind the scenes. 
+	 */
 	private JProgressBar p ;
 	
 	/***/
@@ -89,7 +96,7 @@ class WaitingViewPanel extends FrameworkedWithGridBagLayoutPanel
 		if ( text != null )
 		{
 			textLabel.setText ( text ) ;
-			textLabel.repaint () ;
+			repaint () ;
 		}
 		else
 			throw new IllegalArgumentException () ;
@@ -98,17 +105,23 @@ class WaitingViewPanel extends FrameworkedWithGridBagLayoutPanel
 	public void addNotification ( String n ) 
 	{
 		notificationArea.addNotification ( n ) ;
-		notificationArea.repaint () ;
+		repaint () ;
 	}
 	
-	/***/
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public void paintComponent ( Graphics g ) 
 	{
 		super.paintComponent ( g ) ;
-		g.drawImage ( backgroundImage , 0 , 0 , getWidth () , getHeight () , this ) ;
+		if ( backgroundImage != null )
+			g.drawImage ( backgroundImage , 0 , 0 , getWidth () , getHeight () , this ) ;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void createComponents () 
 	{
@@ -117,7 +130,7 @@ class WaitingViewPanel extends FrameworkedWithGridBagLayoutPanel
 			textLabel = new JLabel () ;
 			notificationArea = new NotificationPanel();
 			p = new JProgressBar () ;
-			backgroundImage = GraphicsUtilities.getImage ( BACKGROUND_IMAGE_FILE_PATH ) ;
+			backgroundImage = GraphicsUtilities.getImage ( DataFilePaths.BACKGROUND_IMAGE_FILE_PATH ) ;
 		} 
 		catch ( IOException e ) 
 		{
@@ -126,6 +139,9 @@ class WaitingViewPanel extends FrameworkedWithGridBagLayoutPanel
 			
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void manageLayout () 
 	{
@@ -144,6 +160,9 @@ class WaitingViewPanel extends FrameworkedWithGridBagLayoutPanel
 	@Override
 	protected void bindListeners () {}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void injectComponents () 
 	{

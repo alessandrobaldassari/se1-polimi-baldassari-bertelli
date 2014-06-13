@@ -11,11 +11,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Ovine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMoveType;
@@ -27,10 +30,9 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.guimap.SocketGUIMapClient;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.LoginView.LoginViewObserver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.CardsChooseView.CardsChooseViewObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.MoveChooseView.MoveChooseViewObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.SheperdColorView.SheperdColorRequestViewObserver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
@@ -40,63 +42,19 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * It is a Controller in the sense of the MVC pattern : it shows windows, handle gui events and so on. 
  */
 public class GUIController extends ViewPresenter 
-	implements LoginViewObserver , SheperdColorRequestViewObserver , MoveChooseViewObserver , GameMapViewObserver
+	implements SheperdColorRequestViewObserver , MoveChooseViewObserver , CardsChooseViewObserver , GameMapViewObserver
 {
 	
-	/**
-	 * Identifier for the WaitingView. 
-	 */
-	private static final String WAITING_VIEW_KEY = "WAITING" ;
+	/***/
+	private WaitingView waitingView ;
 	
-	/**
-	 * Identifier for the LoginView. 
-	 */
-	private static final String LOGIN_VIEW_KEY = "LOGIN" ;
-	
-	/**
-	 * Identifier for the SheperdColorView
-	 */
-	private static final String SHEPERD_COLOR_KEY = "SHEPERD_COLOR" ;
-	
-	/**
-	 * Identifier for the MoveChooseView. 
-	 */
-	private static final String MOVE_CHOOSE_KEY = "MOVE_CHOOSE" ;
-	
-	/**
-	 * Identifier for the GameView. 
-	 */
-	private static final String GAME_VIEW_KEY = "GAME" ;
-	
-	/**
-	 * A Map containing the windows used in the App. 
-	 */
-	private final Map < String , Window > views ;
-	
-	/**
-	 * Synch variable for the name input process. 
-	 */
-	private final AtomicReference < String > name ;
-		
-	/**
-	 * Synch variable for the color input process. 
-	 */
-	private final AtomicReference < NamedColor > color ;
-	
-	/**
-	 * Synch variable for the move input process 
-	 */
-	private final AtomicReference < GameMoveType > move ;
+	/***/
+	private GameView gameView ;
 	
 	/**
 	 * Synch variable for inputs that returns an Integer value. 
 	 */
 	private final AtomicReference < Integer > index ;
-	
-	/**
-	 * Synch variable for inputs that returns a Card value. 
-	 */
-	private final AtomicReference < Card > card ;
 	
 	/**
 	 * A component to manage thread issues. 
@@ -109,28 +67,19 @@ public class GUIController extends ViewPresenter
 	private Window currentShownWindow ;
 	
 	/**
-	 * A boolean flag that, if true, indicates that the user wants to exit the App. 
+	 * Boolean flag that indicates the User wants to change move. 
 	 */
-	private boolean wantExit ;
-	
+	private boolean userWantsToChangeMove ;
+			
 	/***/
 	public GUIController () 
 	{
 		super () ;
-		views = new HashMap < String , Window > () ;
-		name = new AtomicReference < String > () ;
-		color = new AtomicReference < NamedColor > () ;
-		index = new AtomicReference < Integer > () ;
-		move = new AtomicReference < GameMoveType > () ;
-		card = new AtomicReference < Card > () ;
-		name.set ( null ) ;
-		color.set ( null ) ;
+		index = new AtomicReference < Integer > () ;		
 		index.set ( null ) ;
-		move.set ( null ) ;
 		currentShownWindow = null ;
 		executorService = Executors.newCachedThreadPool() ;
-		wantExit = false ;
-		SwingUtilities.invokeLater ( new GUIElementsCreatorRunnable () ) ;
+		userWantsToChangeMove = false ;
 	}
 	/**
 	 * AS THE SUPER'S ONE. 
@@ -138,18 +87,15 @@ public class GUIController extends ViewPresenter
 	@Override
 	public void startApp () 
 	{
-		SwingUtilities.invokeLater ( new Runnable () 
-		{ 
-			public void run () 
-			{
-				WaitingView waitingView ;
-				while ( getView ( WAITING_VIEW_KEY ) == null ) ;
-				waitingView = ( WaitingView ) getView ( WAITING_VIEW_KEY ) ;
-				currentShownWindow = waitingView ;
-				waitingView.setText ( PresentationMessages.WELCOME_MESSAGE + "\n" + PresentationMessages.SERVER_CONNECTION_MESSAGE ) ;
-				showView ( waitingView ) ;
-			} 
-		} );
+		WaitingView waitingView ;
+		//views.put ( SHEPERD_COLOR_KEY , new SheperdColorView ( GUIController.this ) ) ;
+		//views.put ( MOVE_CHOOSE_KEY , new MoveChooseView ( GUIController.this ) ) ;
+		//views.put ( CHOOSE_CARDS_KEY , new CardsChooseView ( GUIController.this ) ) ;
+		//views.put ( GAME_VIEW_KEY , new GameView () ) ;
+		waitingView = ( WaitingView ) getView ( WAITING_VIEW_KEY ) ;
+		currentShownWindow = waitingView ;
+		waitingView.setText ( PresentationMessages.WELCOME_MESSAGE + Utilities.CARRIAGE_RETURN + PresentationMessages.SERVER_CONNECTION_MESSAGE ) ;
+		GraphicsUtilities.showUnshowWindow ( waitingView , false , true ) ;
 	}
 	
 	/**
@@ -158,19 +104,12 @@ public class GUIController extends ViewPresenter
 	@Override
 	protected void onTermination () throws IOException 
 	{
+		System.out.println ( "GUICONTROLLER - ON_TERMINATION : INIZIO" ) ;
+		// notify the user the Game is going to be closed.
 		generationNotification ( PresentationMessages.BYE_MESSAGE ) ;
-		SwingUtilities.invokeLater ( new Runnable () 
-		{ 
-			public void run () 
-			{
-				unshowView ( currentShownWindow ) ;
-				for ( Window w : views.values () )
-				{
-					w.setVisible ( false ) ;
-					w.dispose () ;
-				}	
-			} 				
-		} );
+		GraphicsUtilities.showUnshowWindow ( currentShownWindow , true , false ) ;
+		// destroy all the windows
+		SwingUtilities.invokeLater ( new WindowsDisposer () ) ;
 	}	
 	
 	/**
@@ -180,35 +119,15 @@ public class GUIController extends ViewPresenter
 	public String onNameRequest () 
 	{
 		String res ;
-		SwingUtilities.invokeLater ( new Runnable () 
-		{ 
-			public void run () 
-			{
-				LoginView loginView ;
-				while ( getView ( LOGIN_VIEW_KEY ) == null ) ;
-				loginView = ( LoginView ) getView ( LOGIN_VIEW_KEY ) ;
-				loginView.prepareView () ;
-				name.set ( null ) ;
-				showView ( loginView ) ;
-			} 
-		} );
-		waitForAtomicVariable ( name ) ;
-		if ( wantExit == false )
+		WaitingView waitingView ;
+		res = ( String ) JOptionPane.showInputDialog ( currentShownWindow , PresentationMessages.NAME_REQUEST_MESSAGE , PresentationMessages.APP_NAME , JOptionPane.QUESTION_MESSAGE ) ;
+		while ( res == null || res.compareTo ( Utilities.EMPTY_STRING ) == 0 )
 		{
-			res = name.get () ;
-			SwingUtilities.invokeLater ( new Runnable () 
-			{ 
-				public void run () 
-				{
-					WaitingView waitingView ;
-					waitingView = ( WaitingView ) getView ( WAITING_VIEW_KEY ) ;
-					waitingView.setText ( PresentationMessages.NAME_VERIFICATION_MESSAGE ) ;
-					name.set(null);
-				} 
-			} );
+			JOptionPane.showMessageDialog ( currentShownWindow , PresentationMessages.INVALID_CHOOSE_MESSAGE , PresentationMessages.APP_NAME , JOptionPane.ERROR_MESSAGE ) ;
+			res = ( String ) JOptionPane.showInputDialog ( currentShownWindow , PresentationMessages.NAME_REQUEST_MESSAGE , PresentationMessages.APP_NAME , JOptionPane.QUESTION_MESSAGE ) ;	
 		}
-		else
-			res = null ;
+		waitingView = (WaitingView) getView ( WAITING_VIEW_KEY ) ;
+		waitingView.setText ( PresentationMessages.NAME_VERIFICATION_MESSAGE ) ;
 		return res ;
 	}
 	
@@ -218,22 +137,17 @@ public class GUIController extends ViewPresenter
 	@Override
 	public void onNameRequestAck ( boolean isOk , final String notes ) 
 	{
-		Runnable r ;
+		WaitingView waitingView ;
+		System.out.println ( "GUI_CONTROLLER - ON_NAME_REQUEST_ACK : BEGIN." ) ;
 		if ( isOk )
 		{
-			generationNotification ( PresentationMessages.NAME_ACCEPTED_MESSAGE + "\n" + notes );
-			SwingUtilities.invokeLater ( new Runnable () 
-			{ 
-				public void run () 
-				{
-					WaitingView waitingView ;
-					waitingView = ( WaitingView ) getView ( WAITING_VIEW_KEY ) ;
-					waitingView.setText ( PresentationMessages.WAITING_FOR_OTHER_PLAYERS_MESSAGE ) ;
-				} 
-			} ) ;
+			generationNotification ( PresentationMessages.NAME_ACCEPTED_MESSAGE + Utilities.CARRIAGE_RETURN + notes );
+			waitingView = ( WaitingView ) getView ( WAITING_VIEW_KEY ) ;
+			waitingView.setText ( PresentationMessages.WAITING_FOR_OTHER_PLAYERS_MESSAGE ) ;
 		}
 		else
 			generationNotification ( PresentationMessages.NAME_REJECTED_MESSAGE + Utilities.CARRIAGE_RETURN + notes );
+		System.out.println ( "GUI_CONTROLLER - ON_NAME_REQUEST_ACK : FINISHED." ) ;
 	}
 
 	/**
@@ -242,25 +156,21 @@ public class GUIController extends ViewPresenter
 	@Override
 	public void onNotifyMatchStart () 
 	{
+		System.out.println ( "notify match start" ) ;
+		GameView gameView ;
 		generationNotification ( PresentationMessages.MATCH_STARTING_MESSAGE ) ;
-		SwingUtilities.invokeLater ( new Runnable () 
-		{
-			public void run () 
-			{
-				GameView gameView ;
-				unshowView ( currentShownWindow );
-				gameView = ( GameView ) getView ( GAME_VIEW_KEY ) ;
-				currentShownWindow = gameView ;
-				showView ( gameView ) ;
-			}
-		} ) ;
+		GraphicsUtilities.showUnshowWindow ( currentShownWindow , true , false ) ;
+		while ( getView ( GAME_VIEW_KEY ) == null ) ;
+		gameView = ( GameView ) getView ( GAME_VIEW_KEY ) ;
+		currentShownWindow = gameView ;
+		GraphicsUtilities.showUnshowWindow ( gameView , false , true ) ;
 	}
 	
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void onMatchWillNotStartNotification ( final String msg ) 
+	public void onMatchWillNotStartNotification ( String msg ) 
 	{
 		generationNotification ( msg ) ;
 		stopApp () ;
@@ -270,33 +180,22 @@ public class GUIController extends ViewPresenter
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public NamedColor onSheperdColorRequest ( final Iterable < NamedColor > availableColors ) 
+	public NamedColor onSheperdColorRequest ( Iterable < NamedColor > availableColors ) 
 	{
+		System.out.println ( "GUI_CONTROLLER - ON_SHEPERD_COLOR_REQUEST : INIZIO" ) ;
 		NamedColor res ;
-		SwingUtilities.invokeLater ( new Runnable () 
-		{ 
-			public void run () 
-			{
-				SheperdColorView sheperdColorView ;
-				sheperdColorView = ( SheperdColorView ) getView ( SHEPERD_COLOR_KEY ) ;
-				sheperdColorView.setColors(availableColors ) ;
-				color.set ( null ) ;
-				wantExit = false ;
-				showView ( sheperdColorView ) ;
-			} 
-		} );
+		SheperdColorView sheperdColorView ;
+		sheperdColorView = ( SheperdColorView ) getView ( SHEPERD_COLOR_KEY ) ;
+		sheperdColorView.setColors ( availableColors ) ;
+		color.set ( null ) ;
+		GraphicsUtilities.showUnshowWindow ( sheperdColorView , true , true ) ;
 		waitForAtomicVariable ( color ) ;
-		if ( wantExit == false )
-		{
-			res = color.get () ;
-		}
-		else
-		{
-			res = null ;
-		}
+		res = color.get () ;
+		System.out.println ( "GUI_CONTROLLER - ON_SHEPERD_COLOR_REQUEST : FINE" ) ;
 		return res ;
 	}
 	
+	// implement in the game map make selectable only the available roads.
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
@@ -309,39 +208,25 @@ public class GUIController extends ViewPresenter
 		gameView = ( GameView ) getView ( GAME_VIEW_KEY ) ;
 		index.set(null); 
 		gameView.setInputMode ( GameViewInputMode.ROADS ) ;
-		synchronized ( index )
-		{
-			while ( index.get () == null )
-				try 
-				{
-					index.wait () ;
-				}
-				catch ( InterruptedException e ) 
-				{
-					e.printStackTrace();
-				}
-		}
-		if ( index.get () >= 0 )
-		{
-			res = null ;
-			for ( Road road : availableRoads )
-				if ( road.getUID () == index.get () )
-				{
-					res = road ;
-					break ;
-				}
-		}
-		else
-			res = null ;
-		System.out.println ( "RES : " + res ) ;
+		waitForAtomicVariable(index);
+		res = null ;
+		for ( Road road : availableRoads )
+			if ( road.getUID () == index.get () )
+			{
+				res = road ;
+				break ;
+			}
+		if ( res == null )
+			throw new IOException () ;
 		return res ;
 	}		
 	
+	// make selectable only the available sheperds
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public Sheperd onChooseSheperdForATurn ( Iterable < Sheperd > sheperds )
+	public Sheperd onChooseSheperdForATurn ( Iterable < Sheperd > sheperds ) throws IOException
 	{
 		Sheperd res ;
 		GameView gameView ;
@@ -349,36 +234,16 @@ public class GUIController extends ViewPresenter
 		gameView = ( GameView ) getView ( GAME_VIEW_KEY ) ;
 		index.set(null); 
 		gameView.setInputMode ( GameViewInputMode.SHEPERDS ) ;
-		synchronized ( index )
-		{
-			while ( index.get () == null )
-				try 
-				{
-					index.wait () ;
-				}
-				catch ( InterruptedException e ) 
-				{
-					e.printStackTrace();
-				}
-		}
-		if ( index.get () >= 0 )
-		{
-			res = null ;
-			for ( Sheperd sheperd : sheperds )
-				if ( sheperd.getUID () == index.get () )
-				{
-					res = sheperd ;
-					break ;
-				}
-			if ( res == null )
-			{	
-				generationNotification ( PresentationMessages.INVALID_CHOOSE_MESSAGE + Utilities.CARRIAGE_RETURN + "Sicuro di avere scelto uno dei tuoi pastori ?!" + Utilities.CARRIAGE_RETURN + "Non imbrogliare, scegli tra i tuoi !" );
-				res = onChooseSheperdForATurn ( sheperds ) ;
+		waitForAtomicVariable ( index ) ;
+		res = null ;
+		for ( Sheperd sheperd : sheperds )
+			if ( sheperd.getUID () == index.get () )
+			{
+				res = sheperd ;
+				break ;
 			}
-		}
-		else
-			res = null ;
-		System.out.println ( "RES : " + res ) ;
+		if ( res == null )
+			throw new IOException () ;
 		return res ;
 	}
 	
@@ -388,195 +253,147 @@ public class GUIController extends ViewPresenter
 	@Override
 	public GameMove onDoMove ( MoveFactory moveFactory , GameMap gameMap ) 
 	{
+		MoveChooseView moveChooseView ;		
+		CardsChooseView cardsChooseView ;
+		GameView gameView ;
 		GameMove res ;
+		RegionType type ;
 		Region region ;
 		Road road ;
 		Animal animal ;
 		boolean endCycle ;
 		// first ask the user what move he wants to do.
-		move.set ( null ) ;
+		moveChooseView = ( MoveChooseView ) getView ( MOVE_CHOOSE_KEY ) ;
+		cardsChooseView = (CardsChooseView) getView ( CHOOSE_CARDS_KEY ) ;
+		gameView = ( GameView ) getView ( GAME_VIEW_KEY ) ;
 		res = null ;
-		SwingUtilities.invokeLater ( new Runnable () 
-		{ 
-			public void run () 
-			{
-				MoveChooseView moveChooseView ;
-				moveChooseView = ( MoveChooseView ) getView ( MOVE_CHOOSE_KEY ) ;
-				move.set ( null ) ;
-				wantExit = false ;
-				showView ( moveChooseView ) ;
-			} 
-		} );
-		waitForAtomicVariable ( move ) ;
-		if ( wantExit == false )
+		do
 		{
-			unshowView ( getView ( MOVE_CHOOSE_KEY ) ) ;
-			GameView gameView ;
-			gameView = ( GameView ) getView ( GAME_VIEW_KEY ) ;
+			move.set ( null ) ;
+			GraphicsUtilities.showUnshowWindow ( moveChooseView , true , true ) ;
+			waitForAtomicVariable ( move ) ;
+			GraphicsUtilities.showUnshowWindow ( moveChooseView , false , false ) ; 
+			userWantsToChangeMove = false ;
 			// allow the user the do his move
 			switch ( move.get() )
 			{
 				case BREAK_DOWN :
 					endCycle = false ;
-					while ( endCycle == false )
-					{	// let the user choose where do the break down.
-						generationNotification ( "Scegli la regione dove perpetrare il misfatto..." );
-						gameView.setInputMode ( GameViewInputMode.REGIONS ) ;
+					// let the user choose where do the break down.
+					generationNotification ( "Scegli la regione dove perpetrare il misfatto..." );
+					gameView.setInputMode ( GameViewInputMode.REGIONS ) ;
+					index.set ( null ) ;
+					waitForAtomicVariable ( index ) ;
+					if ( this.userWantsToChangeMove == false )
+					{	
+						region = gameMap.getRegionByUID ( index.get () ) ;
 						index.set ( null ) ;
-						wantExit = false ;
+						generationNotification ( "Seleziona, all'interno della regione che hai scelto, l'animale da abbattere!" );
+						gameView.setInputMode ( GameViewInputMode.ANIMALS ) ;
 						waitForAtomicVariable ( index ) ;
-						if ( wantExit == false )
+						if ( this.userWantsToChangeMove == false )
 						{
-							region = gameMap.getRegionByUID ( index.get () ) ;
-							if ( CollectionsUtilities.iterableSize( region.getContainedAnimals () ) > 0 )
-							{
-								index.set ( null ) ;
-								wantExit = false ;
-								generationNotification ( "Seleziona, all'interno della regione che hai scelto, l'animale da abbattere!" );
-								gameView.setInputMode ( GameViewInputMode.ANIMALS ) ;
-								waitForAtomicVariable ( index ) ;
-								if ( wantExit == false )
+							animal = null ;
+							for ( Animal a : region.getContainedAnimals () )
+								if ( a.getUID () == index.get () )
 								{
-									animal = null ;
-									for ( Animal a : region.getContainedAnimals () )
-										if ( a.getUID () == index.get () )
-										{
-											animal = a ;
-											break ;
-										}
-									if ( animal != null )
-										try 
-										{
-											moveFactory.newBreakDownMove ( animal ) ;
-										}
-										catch (MoveNotAllowedException e) 
-										{
-											e.printStackTrace();
-										}
-									else
-									{
-										res = null ;
-										endCycle = true ;
-									}
+									animal = a ;
+									break ;
 								}
-							else
+							if ( animal != null )
+							try 
 							{
-								res  = null ;
-								endCycle = true ;
+								moveFactory.newBreakDownMove ( animal ) ;
 							}
-						}
-						else
-						{
-							res = null ;
-							endCycle = true ;
-						}
-						}
+							catch (MoveNotAllowedException e) 
+							{
+								JOptionPane.showMessageDialog ( null , PresentationMessages.MOVE_NOT_ALLOWED_MESSAGE , PresentationMessages.APP_NAME , JOptionPane.ERROR_MESSAGE ) ;
+								userWantsToChangeMove = true ;
+							}
+						}	
 					}
-				break ;
-				case BUY_CARD :
-					// 
-				break ;
-				case MATE :
-					endCycle = false ;
-					while ( ! endCycle )
+			break ;
+			case BUY_CARD :
+				// prompt the User with a List of Regions to choose.
+				type = ( RegionType ) JOptionPane.showInputDialog ( gameView , "Scegli la regione di cui vuoi acquistare una carta dalla Banca!" + Utilities.CARRIAGE_RETURN + "Annulla per cambiare mossa" , PresentationMessages.APP_NAME , JOptionPane.QUESTION_MESSAGE , null , RegionType.allTheTypesExceptSheepsburg().toArray (), RegionType.HILL ) ;
+				if ( type != null )
+					try 
 					{
-						gameView.setInputMode ( GameViewInputMode.REGIONS ) ;
-						generationNotification ( "Scegli la regione dove vuoi provare a far eseguire l'accoppiamento." );
-						index.set ( null ) ;
-						wantExit = false ;
-						waitForAtomicVariable ( index ) ;
-						if ( wantExit == false ) 
-						{						
-								region = gameMap.getRegionByUID ( index.get () ) ;
-								try 
-								{
-									res = moveFactory.newMate ( region ) ;
-									endCycle = true ;
-								}
-								catch (MoveNotAllowedException e)
-								{
-									generationNotification ( "Sorry, ma questa mossa non può avvenire!\n"+e.getMessage () + "\nScegli un'altra regione!" ) ; 
-									endCycle = false ;
-								}
-							
-						}
+						res = moveFactory.newBuyCard ( type ) ;
 					}
-				break ;
-				case MOVE_SHEEP :
-					endCycle = false ;
-					while ( ! endCycle )
+					catch (MoveNotAllowedException e1) 
 					{
-						gameView.setInputMode ( GameViewInputMode.REGIONS ) ;
-						generationNotification ( "Scegli la regione da dove spostare l'ovino." ) ;
-						index.set ( null ) ;
-						wantExit = false ;
-						waitForAtomicVariable ( index ) ;
-						if ( wantExit == false )
-						{
-							region = gameMap.getRegionByUID ( index.get() ) ;
-							if ( GameMap.areAdjacents ( moveFactory.getAssociatedSheperd().getPosition () , region ) )
-							{
-								generationNotification ( "Ok, ora scegli un ovino da muovere" ) ;
-								gameView.setInputMode ( GameViewInputMode.ANIMALS ) ;
-								index.set ( null ) ;
-								wantExit = false ;
-								waitForAtomicVariable ( index ) ;
-								if ( ! wantExit )
-								{
-									animal = null ;
-								}
-								else
-								{
-									res = null ;
-									endCycle = true ;
-								}
-							}
-							else
-							{
-								generationNotification ( "Sorry, ma non puoi agire su questa regione!\nDevi selezionare una regione adiacente al Pastore che stai usando!" ) ;
-								endCycle = false ;
-							}
-						}
-						else
-						{
-							res = null ;
-							endCycle = true ;
-						}
+						e1.printStackTrace();
+						userWantsToChangeMove = true ;
 					}
-				break ;
-				case MOVE_SHEPERD :
-					endCycle = false ;
-					while ( ! endCycle )
+			break ;
+			case MATE :
+				gameView.setInputMode ( GameViewInputMode.REGIONS ) ;
+				generationNotification ( "Scegli la regione dove vuoi provare a far eseguire l'accoppiamento." );
+				index.set ( null ) ;
+				waitForAtomicVariable ( index ) ;
+				if ( this.userWantsToChangeMove == false )		
+				{	region = gameMap.getRegionByUID ( index.get () ) ;
+					try 
 					{
-						gameView.setInputMode ( GameViewInputMode.REGIONS ) ;
-						index.set(null) ;
-						wantExit = false ;
-						waitForAtomicVariable ( index ) ;
-						if ( ! wantExit )
+						res = moveFactory.newMate ( region ) ;
+					}
+					catch (MoveNotAllowedException e)
+					{
+						generationNotification ( "Sorry, ma questa mossa non può avvenire!\n"+e.getMessage () + "\nScegli un'altra regione!" ) ; 
+						userWantsToChangeMove = true ;
+					}		
+				}
+			break ;
+			case MOVE_SHEEP :
+				gameView.setInputMode ( GameViewInputMode.REGIONS ) ;
+				generationNotification ( "Scegli la regione da dove spostare l'ovino." ) ;
+				index.set ( null ) ;
+				waitForAtomicVariable ( index ) ;
+				if ( this.userWantsToChangeMove  == false )
+				{
+					region = gameMap.getRegionByUID ( index.get() ) ;
+					generationNotification ( "Ok, ora scegli un ovino da muovere" ) ;
+					gameView.setInputMode ( GameViewInputMode.ANIMALS ) ;
+					index.set ( null ) ;
+					waitForAtomicVariable ( index ) ;
+					if ( this.userWantsToChangeMove == false )
+					{
+						// find the ovine with the index selected by the User.
+						animal = null ;
+						for ( Animal a : region.getContainedAnimals () )
+							if ( a.getUID () == index.get () )
+							{
+								animal = a ;
+								break ;
+							}
+						try 
 						{
-							road = gameMap.getRoadByUID ( index.get () ) ;
-							if ( road.getElementContained () == null )
-							{
-								try
-								{
-									res = moveFactory.newMoveSheperd ( road ) ;
-									endCycle = true ;
-								}
-								catch (MoveNotAllowedException e)
-								{
-									e.printStackTrace();
-								}
-							}
-							else
-							{
-								generationNotification ( "Sorry, ma la regione è occupata, non puoi andarci!\nScegline una libera!" ) ;
-								endCycle = false ;
-							}
+							res = moveFactory.newMoveSheep ( ( Ovine ) animal , region ) ;
 						}
-						else
+						catch (MoveNotAllowedException e) 
 						{
-							res = null ;
-							endCycle = true ;
+							e.printStackTrace();
+							userWantsToChangeMove = true ;
+						}
+					}	
+				}
+			break ;
+			case MOVE_SHEPERD :
+					gameView.setInputMode ( GameViewInputMode.REGIONS ) ;
+					index.set(null) ;
+					waitForAtomicVariable ( index ) ;
+					if ( this.userWantsToChangeMove == false )
+					{
+						road = gameMap.getRoadByUID ( index.get () ) ;
+						try
+						{
+							res = moveFactory.newMoveSheperd ( road ) ;
+						}
+						catch (MoveNotAllowedException e)
+						{
+							e.printStackTrace();
+							userWantsToChangeMove = false ;
 						}
 					}
 				break ;
@@ -584,10 +401,7 @@ public class GUIController extends ViewPresenter
 					throw new RuntimeException () ;
 			}
 		}
-		else
-		{
-			res = null ;
-		}
+		while ( userWantsToChangeMove == true ) ;
 		return res ;	
 	}
 	
@@ -597,6 +411,7 @@ public class GUIController extends ViewPresenter
 	@Override
 	public Iterable < SellableCard > onChooseCardsEligibleForSelling ( Iterable < SellableCard > playerCards ) 
 	{
+		
 		return null ;
 	}
 	
@@ -618,7 +433,8 @@ public class GUIController extends ViewPresenter
 		GameView gameView ;
 		while ( getView ( GAME_VIEW_KEY ) == null ) ;
 		SocketGUIMapClient c ;
-		try {
+		try 
+		{
 			gameView = (GameView) getView ( GAME_VIEW_KEY ) ;
 			c = new SocketGUIMapClient ( ( Integer ) guiConnector ) ;
 			executorService.submit(c);
@@ -636,42 +452,7 @@ public class GUIController extends ViewPresenter
 		
 	}
 	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public void onNameEntered ( String enteredName ) 
-	{
-		SwingUtilities.invokeLater ( new Runnable () 
-		{ 
-			public void run () 
-			{
-				LoginView loginView ;
-				loginView = (LoginView) getView ( LOGIN_VIEW_KEY ) ;
-				unshowView ( loginView ) ;
-			} 
-		} );
-		synchronized ( name )
-		{	
-			name.set ( enteredName ) ;
-			name.notifyAll () ;
-			wantExit = false ;
-		}
-	}
-	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public void onDoNotWantToEnterName () 
-	{
-		synchronized ( name )
-		{
-			wantExit = true ;
-			name.notifyAll () ;
-		}
-		stopApp () ;
-	}
+	// EVENT HANDLERS
 
 	/**
 	 * AS THE SUPER'S ONE. 
@@ -679,32 +460,23 @@ public class GUIController extends ViewPresenter
 	@Override
 	public void onColorChoosed ( NamedColor selectedColor ) 
 	{
-		SwingUtilities.invokeLater ( new Runnable () 
-		{ 
-			public void run () 
-			{
-				SheperdColorView s ;
-				s = (SheperdColorView) getView ( SHEPERD_COLOR_KEY ) ;
-				unshowView ( s ) ;
-			} 
-		} );
+		GraphicsUtilities.showUnshowWindow ( getView ( SHEPERD_COLOR_KEY ) , false , false ) ;
 		synchronized ( color )
 		{
 			color.set ( selectedColor ) ;
 			color.notifyAll () ;
-			wantExit = false ;
 		}
 	}
 
 	/**
 	 * AS THE SUPER'S ONE. 
+	 * Not called in this version.
 	 */
 	@Override
 	public void onDoNotWantChooseColor () 
 	{
 		synchronized  ( color ) 
 		{
-			wantExit = true ;
 			color.notifyAll () ;
 		}
 		stopApp () ;
@@ -716,20 +488,11 @@ public class GUIController extends ViewPresenter
 	@Override
 	public void onMoveChoosed ( GameMoveType move ) 
 	{
-		SwingUtilities.invokeLater ( new Runnable () 
-		{ 
-			public void run () 
-			{
-				MoveChooseView moveChooseView ;
-				moveChooseView = (MoveChooseView) getView ( SHEPERD_COLOR_KEY ) ;
-				unshowView ( moveChooseView ) ;
-			} 
-		} );
+		GraphicsUtilities.showUnshowWindow ( getView ( SHEPERD_COLOR_KEY ) , false , false );
 		synchronized ( move )
 		{
 			this.move.set ( move ) ;
 			this.color.notifyAll () ;
-			wantExit = false ;
 		}
 	}
 	
@@ -739,6 +502,17 @@ public class GUIController extends ViewPresenter
 	@Override
 	public void onDoNotWantChooseMove() 
 	{
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void onCardChoosed(Iterable<Card> selectedCard) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void onDoNotWantChooseAnyCard() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -783,12 +557,28 @@ public class GUIController extends ViewPresenter
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void onDoNotWantToMakeAnySelection () {}
+	public void onWantToChangeMove () 
+	{
+		index.set ( -1 ) ;
+		userWantsToChangeMove = true ;
+	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
-	public SellableCard onChoseCardToBuy ( Iterable < SellableCard > acquirables ) 
+	public Iterable < SellableCard > onChoseCardToBuy ( Iterable < SellableCard > acquirables ) 
 	{
 		return null ;
+		
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void onGameConclusionNotification(String cause) throws IOException 
+	{
 		
 	}
 	
@@ -801,20 +591,6 @@ public class GUIController extends ViewPresenter
 	private Window getView ( String key ) 
 	{
 		return views.get ( key ) ;
-	}
-	
-	/**
-	 *  
-	 */
-	private void showView ( Window view ) 
-	{
-		view.setVisible ( true ) ;
-	}
-	
-	/***/
-	private void unshowView ( Window view ) 
-	{
-		view.setVisible ( false ) ;
 	}
 	
 	/***/
@@ -859,32 +635,6 @@ public class GUIController extends ViewPresenter
 		}
 	}
 	
-	/**
-	 * Runnable object for the StartApp event. 
-	 */
-	private class GUIElementsCreatorRunnable implements Runnable 
-	{
-
-		/**
-		 * AS THE SUPER'S ONE. 
-		 */
-		@Override
-		public void run () 
-		{
-			views.put ( WAITING_VIEW_KEY , new WaitingView () ) ;
-			views.put ( LOGIN_VIEW_KEY , new LoginView ( GUIController.this ) ) ;
-			views.put ( SHEPERD_COLOR_KEY , new SheperdColorView ( GUIController.this ) ) ;
-			views.put ( MOVE_CHOOSE_KEY , new MoveChooseView ( GUIController.this ) ) ;
-			views.put ( GAME_VIEW_KEY , new GameView () ) ;
-			views.get ( WAITING_VIEW_KEY ).setSize ( GraphicsUtilities.getVGAResolution () ) ;
-			views.get ( LOGIN_VIEW_KEY ).setSize ( GraphicsUtilities.getVGAResolution () ) ;
-			views.get ( SHEPERD_COLOR_KEY ).setSize ( GraphicsUtilities.getVGAResolution () ) ;
-			views.get ( MOVE_CHOOSE_KEY ).setSize ( GraphicsUtilities.getVGAResolution () ) ;
-			( ( GameView ) views.get ( GAME_VIEW_KEY ) ).setExtendedState ( Frame.MAXIMIZED_BOTH ) ;
-		}
-		
-	}
-	
 	private class NotificationShowingRunnable implements Runnable
 	{
 		private Notifier notifier ;
@@ -907,23 +657,42 @@ public class GUIController extends ViewPresenter
 	
 	private class Notifier 
 	{
-		
-		public void notify ( String messsage ) 
+	
+		/***/
+		public void notify ( String message ) 
 		{
-			WaitingView waitingView ;
-			GameView gameView ;
-			if ( currentShownWindow instanceof WaitingView )
+			if ( currentShownWindow != null )
+			synchronized ( currentShownWindow )
 			{
-				waitingView = ( WaitingView ) currentShownWindow ;
-				waitingView.addNotification(messsage);
-			}
-			else
-			{
-				gameView = ( GameView ) currentShownWindow ;
-				gameView.addNotification(messsage);
+				NotificationContainer notificationContainer ;
+				notificationContainer = ( NotificationContainer ) currentShownWindow ;
+				System.out.println ( "NOTIFIER : NOTIFICATION CONTAINER RETRIEVED : " + currentShownWindow ) ;
+				notificationContainer.addNotification ( message ) ;
+				currentShownWindow.notifyAll () ;
+				System.out.println ( "NOTIFIER : FINISH " ) ;
 			}
 		}
 		
 	}
 
+	/**
+	 * This class dispose of the Windows running in the Game when it finishes. 
+	 */
+	private class WindowsDisposer implements Runnable 
+	{
+		
+		/**
+		 * AS THE SUPER'S ONE. 
+		 */
+		@Override
+		public void run () 
+		{
+			for ( Window w : views.values () )
+			{
+				w.setVisible ( false ) ;
+				w.dispose () ;
+			}	
+		}
+		
+	}
 }

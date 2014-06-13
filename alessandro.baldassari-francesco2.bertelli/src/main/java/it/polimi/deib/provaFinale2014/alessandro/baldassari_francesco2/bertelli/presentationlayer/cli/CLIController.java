@@ -34,8 +34,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  */
 public class CLIController extends ViewPresenter
 {
-
-	public static final String CANNOT_DO_THIS_MOVE_EXCEPTION = "Spiacenti, ma non puoi fare questa mossa." ;
 	
 	/**
 	 * The time to wait after that shutdown the program. 
@@ -104,20 +102,20 @@ public class CLIController extends ViewPresenter
 		try 
 		{
 			writer.println ( PresentationMessages.NAME_REQUEST_MESSAGE ) ;
-			writer.println ( "-1. Esci"  ) ;
 			res = reader.readLine ().trim () ;
-			if ( res.compareToIgnoreCase ( "-1" ) == 0 )
-			{
-				res = null ;
-				executorService.execute ( new DownAction () ) ;
+			
+			while ( res == null || res.compareTo ( Utilities.EMPTY_STRING ) == 0 )
+			{	
+				writer.println ( PresentationMessages.INVALID_CHOOSE_MESSAGE + Utilities.CARRIAGE_RETURN ) ;
+				writer.println ( PresentationMessages.NAME_REQUEST_MESSAGE ) ;
+				res = reader.readLine ().trim () ;
 			}
-			else
-				writer.println ( PresentationMessages.NAME_VERIFICATION_MESSAGE ) ;
+			writer.println ( PresentationMessages.NAME_VERIFICATION_MESSAGE ) ;
 		} 
 		catch (IOException e) 
 		{
 			res = null ;
-			executorService.execute ( new DownAction () ) ;
+			stopApp () ;
 		}
 		return res ;
 	}
@@ -130,9 +128,9 @@ public class CLIController extends ViewPresenter
 	{
 		String msg ;
 		if ( isOk ) 
-			msg =PresentationMessages.NAME_ACCEPTED_MESSAGE + "\n" + notes ;
+			msg =PresentationMessages.NAME_ACCEPTED_MESSAGE + Utilities.CARRIAGE_RETURN + notes ;
 		else
-			msg = PresentationMessages.NAME_REJECTED_MESSAGE + "\n" + notes ;
+			msg = PresentationMessages.NAME_REJECTED_MESSAGE + Utilities.CARRIAGE_RETURN + notes ;
 		writer.println ( msg );
 	}
 	
@@ -156,25 +154,16 @@ public class CLIController extends ViewPresenter
 		NamedColor res ;
 		int i ;
 		colors = CollectionsUtilities.newListFromIterable ( availableColors ) ;
-		s = "Prego, inserisci il numero del colore che vuoi scegliere per il tuo pastore\n" ;
+		s = PresentationMessages.CHOOSE_COLOR_FOR_SHEPERD_MESSAGE + Utilities.CARRIAGE_RETURN ;
 		i = 0 ;
 		for ( Color c : colors )
 		{
-			s = s + i + ". " + c + "\n" ;
+			s = s + i + ". " + c + Utilities.CARRIAGE_RETURN ;
 			i ++ ;
 		}
-		s = s + "-1. Esci da JSheepland." ;
-		i = GraphicsUtilities.checkedIntInput ( 0 , colors.size () - 1 , -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
-		if ( i != - 1 )
-		{
-			res = colors.get ( i ) ;
-			System.out.println ( "Colore scelto : " + res.getName () ) ;			
-		}
-		else
-		{
-			res = null ;
-			stopApp () ;
-		}	
+		i = GraphicsUtilities.checkedIntInputWithoutEscape ( 0 , colors.size () - 1 , -1 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
+		res = colors.get ( i ) ;
+		System.out.println ( "Colore scelto : " + res.getName () ) ;			
 		return res ;
 	}
 	
@@ -192,7 +181,7 @@ public class CLIController extends ViewPresenter
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public Road chooseInitRoadForSheperd(Iterable<Road> availableRoads) throws IOException 
+	public Road chooseInitRoadForSheperd ( Iterable < Road > availableRoads ) throws IOException 
 	{
 		List < Road > availableRoadsList ;
 		Road res ;
@@ -202,19 +191,10 @@ public class CLIController extends ViewPresenter
 		i = 0 ;
 		s = PresentationMessages.CHOOSE_INITIAL_ROAD_FOR_A_SHEPERD_MESSAGE + Utilities.CARRIAGE_RETURN ;
 		for ( i = 0 ; i < availableRoadsList.size () ; i ++ )
-		{
-			s = s + i + ". " + availableRoadsList.get ( i ) + Utilities.CARRIAGE_RETURN ;
-			i ++ ;
-		}
+			s = s + i + ". " + availableRoadsList.get ( i ++ ) + Utilities.CARRIAGE_RETURN ;
 		s = s + "-1. Esci da JSheepland" + Utilities.CARRIAGE_RETURN ;
-		i = GraphicsUtilities.checkedIntInput ( 0 , availableRoadsList.size ()-1, -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
-		if ( i != -1 )
-			res = availableRoadsList.get ( i ) ;
-		else
-		{
-			res = null ;
-			stopApp () ;
-		}
+		i = GraphicsUtilities.checkedIntInputWithoutEscape ( 0 , availableRoadsList.size ()-1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
+		res = availableRoadsList.get ( i ) ;
 		return res ;
 	}
 	
@@ -236,14 +216,8 @@ public class CLIController extends ViewPresenter
 			s = s + i + ".  " + sh + Utilities.CARRIAGE_RETURN ;
 			i ++ ;
 		}
-		i = GraphicsUtilities.checkedIntInput ( 0 , sheperds.size () - 1 , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
-		if ( i != -1 )
-			res = sheperds.get( i ) ;
-		else
-		{
-			res = null ;
-			stopApp () ;
-		}
+		i = GraphicsUtilities.checkedIntInputWithoutEscape ( 0 , sheperds.size () - 1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
+		res = sheperds.get( i ) ;
 		return res ;
 	}
 
@@ -256,50 +230,57 @@ public class CLIController extends ViewPresenter
 		GameMove res = null ;
 		String s ;
 		int i ;
-		s = "Situazione della mappa di gioco" + Utilities.CARRIAGE_RETURN ;
-		s = s + m + Utilities.CARRIAGE_RETURN ;
-		writer.println ( s ) ;
-		s = PresentationMessages.DO_MOVE_MESSAGE + Utilities.CARRIAGE_RETURN ;
-		s = s + "1. Uccidere un ovino in una regione" + Utilities.CARRIAGE_RETURN ;
-		s = s + "2. Comperare una carta dalla banca" + Utilities.CARRIAGE_RETURN ;
-		s = s + "3. Fare una accoppiamento" + Utilities.CARRIAGE_RETURN ;
-		s = s + "4. Muovere una pecora." + Utilities.CARRIAGE_RETURN ;
-		s = s + "5. Muovere il pastore" + Utilities.CARRIAGE_RETURN ;
-		i = GraphicsUtilities.checkedIntInput ( 1 , 5 , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
-		if ( i != -1 )
+		boolean repeat ;
+		do
 		{
-			switch ( i ) 
+			s = "Situazione della mappa di gioco" + Utilities.CARRIAGE_RETURN ;
+			s = s + m + Utilities.CARRIAGE_RETURN ;
+			writer.println ( s ) ;
+			s = PresentationMessages.DO_MOVE_MESSAGE + Utilities.CARRIAGE_RETURN ;
+			s = s + "1. Uccidere un ovino in una regione" + Utilities.CARRIAGE_RETURN ;
+			s = s + "2. Comperare una carta dalla banca" + Utilities.CARRIAGE_RETURN ;
+			s = s + "3. Fare una accoppiamento" + Utilities.CARRIAGE_RETURN ;
+			s = s + "4. Muovere una pecora." + Utilities.CARRIAGE_RETURN ;
+			s = s + "5. Muovere il pastore" + Utilities.CARRIAGE_RETURN ;
+			s = s + "-1. Esci da JSheepland" ;
+			i = GraphicsUtilities.checkedIntInputWithEscape ( 1 , 5 , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
+			if ( i != -1 )
 			{
-				case 1 :
-					res = killing(f, m);
-				break ;
-				case 2 :
-					res = buyCard ( f , m ) ;
-				break ;
-				case 3 :
-					res = mate ( f , m ) ;
-				break ;
-				case 4 :
-					res = moveOvine ( f , m ) ;
-				break ;
-				case 5 :
-					res = moveSheperd ( f , m ) ;
-				break ;
-				default :
-					res = null ;
-				break ;
+				switch ( i ) 
+				{
+					case 1 :
+						res = killing ( f , m ) ;
+					break ;
+					case 2 :
+						res = buyCard ( f , m ) ;
+					break ;
+					case 3 :
+						res = mate ( f , m ) ;
+					break ;
+					case 4 :
+						res = moveOvine ( f , m ) ;
+					break ;
+					case 5 :
+						res = moveSheperd ( f , m ) ;
+					break ;
+					default :
+						res = null ;
+					break ;
+				}
+				if ( res == null )
+					repeat = true ;
+				else
+					repeat = false ;
+			}
+			else
+			{
+				repeat = false ;
+				res = null ; 
+				stopApp () ;
 			}
 		}
+		while ( repeat ) ;
 		return res ;
-	}
-	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public void generationNotification ( String msg ) 
-	{
-		writer.println ( msg ) ;
 	}
 	
 	/**
@@ -315,16 +296,18 @@ public class CLIController extends ViewPresenter
 		int j ;
 		for ( SellableCard s : sellableCards )
 		{
-			msg = "Tua carta : " + s + "\n" + "Vuoi venderla ? ( 1 : s / 2 : n )" ;
-			i = GraphicsUtilities.checkedIntInput ( 1 , 2 , -1 , -2 , msg , "Scelta non valida" , writer , reader ) ;
+			msg = "Tua carta : " + s + Utilities.CARRIAGE_RETURN + "Vuoi venderla ? ( 1 : s / 2 : n )" ;
+			i = GraphicsUtilities.checkedIntInputWithoutEscape ( 1 , 2 , -1 , msg , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
 			if ( i == 1 )
 			{
 				s.setSellable ( true ) ;
-				msg = "Quanto vuoi chiedere per questa carta ? " ;
-				j = GraphicsUtilities.checkedIntInput ( 1 , 5 , -1 , -2 , msg , "Scelta non valida" , writer , reader ) ;
+				msg = "Quanto vuoi chiedere per questa carta ? " + Utilities.CARRIAGE_RETURN ;
+				j = GraphicsUtilities.checkedIntInputWithoutEscape ( 1 , 5 , -1 , msg , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
 				s.setSellingPrice ( j ) ;
-				res.add(s);
+				res.add ( s ) ;
 			}
+			else
+				s.setSellable ( false ) ;
 		}
 		return res ;
 	}
@@ -333,34 +316,48 @@ public class CLIController extends ViewPresenter
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public SellableCard onChoseCardToBuy ( Iterable < SellableCard > sellableCards ) throws IOException 
+	public Iterable < SellableCard > onChoseCardToBuy ( Iterable < SellableCard > sellableCards ) throws IOException 
 	{
-		List < SellableCard > l ;
-		SellableCard res ;
+		List < SellableCard > availableCards ;
+		List < SellableCard > res ;
 		String s ;
 		int i ;
-		l = CollectionsUtilities.newListFromIterable ( sellableCards ) ;
-			s = "Scegli la carta che vuoi comprare:" ;
+		availableCards = CollectionsUtilities.newListFromIterable ( sellableCards ) ;
+		res = new LinkedList < SellableCard > () ;
+		do{
+			s = "Scegli una carta che vuoi comprare:" ;
 			s = s + "-1. Non voglio comprare alcuna carta." ;
-	 		for ( i = 0 ; i < l.size() ; i ++ )
-				s = s + i + ". " + l.get ( i ) ;
-			i = Integer.parseInt ( reader.readLine () ) ;
-		i = GraphicsUtilities.checkedIntInput ( 0 , l.size () - 1 , -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
-		if ( i == -1 )
-			res = null ;
-		else
-			res = l.get ( i ) ;
+			for ( i = 0 ; i < availableCards.size() ; i ++ )
+				s = s + i + ". " + availableCards.get ( i ) ;
+			i = GraphicsUtilities.checkedIntInputWithEscape ( 0 , availableCards.size () - 1 , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
+			if ( i != -1 )
+				res.add ( availableCards.get ( i ) ) ;
+		}
+		while ( i != -1 ) ;
 		return res ;
 	}
 
-	private GameMove killing ( MoveFactory f , GameMap m ) throws IOException 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void generationNotification ( String msg ) 
 	{
+		writer.println ( msg ) ;
+	}
+	
+	/**
+	 * This method manages the killing action. 
+	 */
+	private GameMove killing ( MoveFactory f , GameMap m ) throws IOException 
+	{ 
+		List <Ovine> killableAnimals ;
 		String s ;
 		GameMove res ;
 		Region r1, r2;
-		List <Ovine> killableAnimals = new LinkedList<Ovine>();
+		killableAnimals = new LinkedList<Ovine>();
 		int j;
-		s = "Elenco degli ovini che può abbattere";
+		s = "Elenco degli ovini che puoi abbattere : " + Utilities.CARRIAGE_RETURN;
 		r1 = f.getAssociatedSheperd().getPosition().getFirstBorderRegion();
 		r2 = f.getAssociatedSheperd().getPosition().getSecondBorderRegion();
 		for ( Animal animal : r1.getContainedAnimals () )
@@ -372,41 +369,47 @@ public class CLIController extends ViewPresenter
 		j=0;
 		for ( Ovine ovine : killableAnimals )
 		{
-			s = s + j + ". " +ovine + "\n";
+			s = s + j + ". " +ovine + Utilities.CARRIAGE_RETURN;
 			j++;
 		}
-		s = s + "Chi vuoi abbattere?";
-		j = GraphicsUtilities.checkedIntInput ( 0 , killableAnimals.size() - 1 , -1 , -2 , s , "Scelta errata." , writer , reader ) ;
-		try 
-		{
-			res = f.newBreakDownMove(killableAnimals.get(j));
-		} 
-		catch (MoveNotAllowedException e1) 
-		{
-			writer.println ( CANNOT_DO_THIS_MOVE_EXCEPTION ) ;
+		s = s + "Chi vuoi abbattere ? " + Utilities.CARRIAGE_RETURN + "-1. Cambia mossa";
+		j = GraphicsUtilities.checkedIntInputWithEscape ( 0 , killableAnimals.size() - 1 , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
+		if ( j != -1 )
+			try 
+			{
+				res = f.newBreakDownMove(killableAnimals.get(j));
+			} 
+			catch (MoveNotAllowedException e1) 
+			{
+				writer.println ( PresentationMessages.MOVE_NOT_ALLOWED_MESSAGE + Utilities.CARRIAGE_RETURN + "Provane un'altra!" ) ;
+				res = null ;
+			}
+		else
 			res = null ;
-		}		
 		return res ;
 	}
 	
-	/***/
+	/**
+	 * This message  
+	 */
 	private GameMove buyCard ( MoveFactory f , GameMap m ) throws IOException 
 	{
 		List < RegionType > regs ;
 		String s ;
 		GameMove res ;
 		int i ;
-		s = "Quale carta vuoi comprare ( regione ) ?\n" ;
+		s = "Quale carta vuoi comprare ( regione ) ?" + Utilities.CARRIAGE_RETURN ;
 		regs = new LinkedList < RegionType > ()  ;
 		i = 0 ;
 		for ( RegionType rt : RegionType.values () ) 
 			if ( rt != RegionType.SHEEPSBURG )
 			{
-				s = s + i + ". " + rt ;
+				s = s + i + ". " + rt + Utilities.CARRIAGE_RETURN ;
 				regs.add ( rt );
 				i ++ ;	
 			}
-		i = GraphicsUtilities.checkedIntInput ( 0 , regs.size() - 1 , -1 , -2 , s , "Scelta non valida." , writer , reader) ;
+		s = s + "-1. Cambia mossa" + Utilities.CARRIAGE_RETURN ;
+		i = GraphicsUtilities.checkedIntInputWithEscape ( 0 , regs.size() - 1 , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader) ;
 		if ( i != -1 )
 			try 
 			{
@@ -414,7 +417,7 @@ public class CLIController extends ViewPresenter
 			} 
 			catch (MoveNotAllowedException e1) 
 			{
-				writer.println ( CANNOT_DO_THIS_MOVE_EXCEPTION ) ;
+				writer.println ( PresentationMessages.INVALID_CHOOSE_MESSAGE + Utilities.CARRIAGE_RETURN + "Provane un'altra !" ) ;
 				res = null ;
 			}
 		else
@@ -422,24 +425,27 @@ public class CLIController extends ViewPresenter
 		return res ;
 	}
 
-	/***/
+	/**
+	 * This message manage the mate action. 
+	 */
 	private GameMove mate ( MoveFactory f , GameMap m ) throws IOException 
 	{
 		GameMove res ;
 		String s ;
 		int i ;
-		s = "Regioni dove puoi compire l'accoppiamento:" ;
-		s = s + "0 . " + f.getAssociatedSheperd().getPosition().getFirstBorderRegion() + "\n";
-		s = s + "1 . " + f.getAssociatedSheperd().getPosition().getSecondBorderRegion() + "\n";
-		i = GraphicsUtilities.checkedIntInput ( 0 , 1 , -1 , -2 , s , "Scelta non valida" , writer , reader ) ; 
+		s = "Regioni dove puoi compire l'accoppiamento : " + Utilities.CARRIAGE_RETURN ;
+		s = s + "0 . " + f.getAssociatedSheperd().getPosition().getFirstBorderRegion() + Utilities.CARRIAGE_RETURN;
+		s = s + "1 . " + f.getAssociatedSheperd().getPosition().getSecondBorderRegion() + Utilities.CARRIAGE_RETURN;
+		s = s + "-1. Scegli un'altra mossa." ;
+		i = GraphicsUtilities.checkedIntInputWithEscape ( 0 , 1 , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ; 
 		if ( i != -1 )
 			try 
 			{
 				res = f.newMate ( i == 0 ? f.getAssociatedSheperd().getPosition().getFirstBorderRegion() : f.getAssociatedSheperd().getPosition().getSecondBorderRegion() ) ;
 			}
-			catch (MoveNotAllowedException e1) 
+			catch ( MoveNotAllowedException e1 ) 
 			{
-				writer.println ( CANNOT_DO_THIS_MOVE_EXCEPTION ) ;
+				writer.println ( PresentationMessages.INVALID_CHOOSE_MESSAGE + Utilities.CARRIAGE_RETURN + "Provane un'altra !" ) ;
 				res = null ;
 			}
 		else
@@ -447,7 +453,9 @@ public class CLIController extends ViewPresenter
 		return res ;
 	}
 	
-	/***/
+	/**
+	 * This method manage the moveOvine action. 
+	 */
 	private GameMove moveOvine ( MoveFactory f , GameMap m ) throws IOException 
 	{
 		List < Ovine > movableAnimals ;
@@ -460,7 +468,7 @@ public class CLIController extends ViewPresenter
 		int i ;
 		movableAnimals = new LinkedList<Ovine>();
 		sh = f.getAssociatedSheperd () ;
-		s = "Elenco degli ovini che puoi spostare\n" ;
+		s = "Elenco degli ovini che puoi spostare" + Utilities.CARRIAGE_RETURN ;
 		r3 = sh.getPosition().getFirstBorderRegion () ;
 		r4 = sh.getPosition().getSecondBorderRegion () ;
 		for ( Animal animal : r3.getContainedAnimals () )
@@ -472,11 +480,12 @@ public class CLIController extends ViewPresenter
 		i = 0 ;
 		for ( Ovine ovine : movableAnimals )
 		{
-			s = s + i + ". " +ovine + "\n";
+			s = s + i + ". " +ovine + Utilities.CARRIAGE_RETURN;
 			i ++ ;
 		}
-		s = s + "Chi vuoi muovere?" ;
-		i = GraphicsUtilities.checkedIntInput ( 0 , movableAnimals.size () - 1 , -1 , -2 , s , "Scelta non valida." , writer , reader ) ;
+		s = s + "Chi vuoi muovere ? " + Utilities.CARRIAGE_RETURN ;
+		s = s + "-1. Voglio fare un'altra mosssa" ;
+		i = GraphicsUtilities.checkedIntInputWithEscape ( 0 , movableAnimals.size () - 1 , -1 , -2 , s , "Scelta non valida." , writer , reader ) ;
 		if ( i != -1 )
 			try 
 			{
@@ -485,7 +494,7 @@ public class CLIController extends ViewPresenter
 			} 
 			catch (MoveNotAllowedException e1) 
 			{
-				writer.println ( CANNOT_DO_THIS_MOVE_EXCEPTION ) ;
+				writer.println ( PresentationMessages.INVALID_CHOOSE_MESSAGE + Utilities.CARRIAGE_RETURN + "Provane un'altra !" ) ;
 				res = null ;
 			}
 		else
@@ -493,7 +502,9 @@ public class CLIController extends ViewPresenter
 		return res ;
 	}
 	
-	/***/
+	/**
+	 * This method manages the moveSheperd action. 
+	 */
 	private GameMove moveSheperd ( MoveFactory f , GameMap m ) throws IOException 
 	{
 		List < Road > l ;
@@ -501,11 +512,12 @@ public class CLIController extends ViewPresenter
 		GameMove res ;
 		int i ;
 		l = CollectionsUtilities.newListFromIterable ( m.getFreeRoads () ) ;
-		s =  "Strade ok :" ;
+		s =  "Strade ok : " + Utilities.CARRIAGE_RETURN ;
 		for ( i = 0 ; i < l.size() ; i ++ )
-			s = s + i+1 + " : strada : " + l.get(i) ;
-		s = s + "In quale strada vuoi andare ?" ;
-		i = GraphicsUtilities.checkedIntInput ( 1 , l.size() , -1 , -2 , s , "Scelta non valida" , writer , reader ) ;
+			s = s + i+1 + " : strada : " + l.get( i ) + Utilities.CARRIAGE_RETURN ;
+		s = s + "In quale strada vuoi andare ? " + Utilities.CARRIAGE_RETURN ;
+		s = s + "-1. Altra mossa" ;
+		i = GraphicsUtilities.checkedIntInputWithEscape ( 1 , l.size() , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
 		if ( i != -1 )
 			try
 			{
@@ -513,7 +525,7 @@ public class CLIController extends ViewPresenter
 			}
 			catch (MoveNotAllowedException e) 
 			{
-				writer.println ( CANNOT_DO_THIS_MOVE_EXCEPTION ) ;
+				writer.println ( PresentationMessages.INVALID_CHOOSE_MESSAGE + Utilities.CARRIAGE_RETURN + "Provane un'altra !" ) ;
 				res = null ;
 			}
 		else
@@ -521,20 +533,31 @@ public class CLIController extends ViewPresenter
 		return res ;
 	}
 
-	
-	/***/
 	@Override
-	public void onGUIConnectorOnNotification ( Serializable guiConnector ) 
+	public void onGameConclusionNotification ( String cause ) throws IOException 
 	{
-		// I will not use this feture.
+		writer.println ( cause ) ;
+		stopApp () ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE.
+	 * Obviously, the CLI does not do anything with this functionality.
+	 */
+	@Override
+	public void onGUIConnectorOnNotification ( Serializable guiConnector ) {}
 	
 	// INNNER CLASSES
 	
+	/**
+	 * Runnable that implements the ShutDownApp action. 
+	 */
 	private class DownAction implements Runnable 
 	{
 
+		/**
+		 * AS THE SUPER'S ONE.
+		 */
 		@Override
 		public void run () 
 		{
@@ -542,5 +565,7 @@ public class CLIController extends ViewPresenter
 		}
 		
 	}
+
+	
 	
 }

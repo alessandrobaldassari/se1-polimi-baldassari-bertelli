@@ -2,7 +2,9 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observer;
 
-/***/
+/**
+ * This class defines the events a GameMapViewObserver can listen to. 
+ */
 public interface GameMapViewObserver extends Observer 
 {
 	
@@ -19,6 +21,6 @@ public interface GameMapViewObserver extends Observer
 	public void onAnimalSelected ( Integer animalId ) ;
 	
 	/***/
-	public void onDoNotWantToMakeAnySelection () ;
+	public void onWantToChangeMove () ;
 	
 }

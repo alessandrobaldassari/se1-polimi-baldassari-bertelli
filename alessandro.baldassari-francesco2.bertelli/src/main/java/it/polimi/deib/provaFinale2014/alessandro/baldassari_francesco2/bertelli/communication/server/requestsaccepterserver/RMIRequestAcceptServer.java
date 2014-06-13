@@ -6,6 +6,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
 import java.io.IOException;
+import java.rmi.AccessException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
@@ -14,6 +15,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * This interface defines the behavior of an RMI Server  
@@ -45,18 +48,13 @@ public interface RMIRequestAcceptServer extends Remote
 /**
  * Implementation of the RMI Server interface subclassing the RequestAccepterServer
  */
-class RMIRequestAcceptServerImpl extends RequestAccepterServer implements RMIRequestAcceptServer 
+class RMIRequestAcceptServerImpl extends RequestAccepterServer implements RMIRequestAcceptServer , RMIObjectUnbinder
 {
 
 	/**
 	 * Sleep time for a dummy-implementation of the lifeLoopImplementation method. 
 	 */
 	private static final long SLEEP_TIME = 25 * Utilities.MILLISECONDS_PER_SECOND ;
-	
-	/**
-	 * Static variable to generate a different name for each ClientHandler. 
-	 */
-	private static int lastRMIIdGenerated = -1 ;
 
 	/**
 	 * Registry object to implement the RMI protocol. 
@@ -67,6 +65,11 @@ class RMIRequestAcceptServerImpl extends RequestAccepterServer implements RMIReq
 	 * The stub of this object to export. 
 	 */
 	private RMIRequestAcceptServer stub ;
+
+	/**
+	 * A Map object to implement the RMI object removal functionality. 
+	 */
+	private Map < String , RMIClientBroker > brokerStubs ;
 	
 	/**
 	 * @param matchAdderCommunicationController the matchAdderCommunicationController field value.
@@ -81,6 +84,7 @@ class RMIRequestAcceptServerImpl extends RequestAccepterServer implements RMIReq
 		if ( localhostAddress != null && registryPort >= 0 )
 		{
 			registry = LocateRegistry.createRegistry ( registryPort ) ;
+			brokerStubs = new LinkedHashMap < String , RMIClientBroker > () ;
 			System.out.println ( "RMI_REQUEST_ACCEPT_SERVER - : REGISTRY LOCATED : " + registry ) ;
 		}
 		else
@@ -93,32 +97,38 @@ class RMIRequestAcceptServerImpl extends RequestAccepterServer implements RMIReq
 	@Override
 	public String addPlayer () throws RemoteException 
 	{
-		String clientBrokerName ;
 		RMIClientHandler clientHandler ;
 		RMIClientBroker stub ;
 		RMIClientBroker broker ;
-		clientBrokerName = null ;
+		String res ;
 		try 
 		{
 			System.out.println ( "RMI_REQUEST_ACCEPT_SERVER - ADD_PLAYER : BEGIN_ACCEPT_REQUEST" ) ;
+			// initialize the broker.
 			broker = new RMIClientBrokerImpl () ;
 			System.out.println ( "RMI_REQUEST_ACCEPT_SERVER - EXPORT CLIENT BROKER FOR THIS REQUEST" ) ;
+			// create a stub for the broker.
 			stub = ( RMIClientBroker ) UnicastRemoteObject.exportObject ( broker , 0 ) ;		
+			brokerStubs.put ( broker.getRMIName () , stub ) ;
 			System.out.println ( "RMI_REQUEST_ACCEPT_SERVER - ADD_PLAYER : BROKER IS OUT." ) ;
 			System.out.println ( "RMI_REQUEST_ACCEPT_SERVER - ADD_PLAYER : CREATING CLIENT HANDLER." ) ;
-			clientHandler = new RMIClientHandler ( new ClientHandlerConnector < RMIClientBroker > ( broker ) ) ;
+			// initialize the ClientHandler.
+			clientHandler = new RMIClientHandler ( new ClientHandlerConnector < RMIClientBroker > ( broker ) , this ) ;
 			System.out.println ( "RMI_REQUEST_ACCEPT_SERVER - ADD_PLAYER : HANDLER ON." ) ;
+			// inject a new ClientHandler / Player in a Match.
 			submitToMatchAdderCommunicationController ( clientHandler )  ;
 			System.out.println ( "RMI_REQUEST_ACCEPT_SERVER - ADD_PLAYER : HANDLER SUBMITTED TO THE CONTROLLER" ) ;
-			lastRMIIdGenerated ++ ;
-			clientBrokerName = RMIClientHandler.LOGICAL_ABSTRACT_RMI_CLIENT_HANDLER + lastRMIIdGenerated ;
 			System.out.println ( "RMI_REQUEST_ACCEPT_SERVER - ADD_PLAYER : BINDING THE BROKER" ) ;
-			registry.bind ( clientBrokerName , stub ) ;
+			// bind the broker and make it available to name services.
+			registry.bind ( broker.getRMIName () , stub ) ;
 			System.out.println ( "RMI_REQUEST_ACCEPT_SERVER - ADD_PLAYER : BROKER BOUND." ) ;
+			res = broker.getRMIName () ;
 		}
 		catch ( RemoteException r ) 
 		{
 			// here probably the stub has not been created.
+			res = null ;
+			throw new RuntimeException ( r );
 		}
 		catch ( AlreadyBoundException e ) 
 		{
@@ -130,7 +140,7 @@ class RMIRequestAcceptServerImpl extends RequestAccepterServer implements RMIReq
 			// problems with the handler
 			throw new RuntimeException ( e ) ;
 		}
-		return clientBrokerName ;
+		return res ;
 	}
 
 	/**
@@ -203,6 +213,34 @@ class RMIRequestAcceptServerImpl extends RequestAccepterServer implements RMIReq
 			}
 			catch ( NoSuchObjectException e ) {}
 		super.shutDown (); 
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void unbind ( String rmiName ) throws UnbindingException 
+	{
+		RMIClientBroker dying ;
+		try 
+		{
+			dying = brokerStubs.get ( rmiName ) ;
+			registry.unbind ( rmiName ) ;
+			UnicastRemoteObject.unexportObject ( dying , true ) ;
+			brokerStubs.remove ( rmiName ) ;
+		} 
+		catch (AccessException e) 
+		{
+			throw new UnbindingException ( e , rmiName ) ;
+		}
+		catch (RemoteException e) 
+		{
+			throw new UnbindingException ( e , rmiName ) ;
+		}
+		catch ( NotBoundException e ) 
+		{
+			throw new UnbindingException ( e , rmiName ) ;
+		} 
 	}
 	
 }

@@ -21,6 +21,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import javax.imageio.ImageIO;
+import javax.swing.SwingUtilities;
 
 public final class GraphicsUtilities 
 {
@@ -36,7 +37,7 @@ public final class GraphicsUtilities
 	
 	// make it total.
 	/***/
-	public static int checkedIntInput ( int minVal , int maxVal, int exitVal , int wrongVal , String reqMsg , String errorMsg , PrintStream out , BufferedReader in ) throws IOException
+	public static int checkedIntInputWithEscape ( int minVal , int maxVal, int exitVal , int wrongVal , String reqMsg , String errorMsg , PrintStream out , BufferedReader in ) throws IOException
 	{
 		int res ;		
 		out.println ( reqMsg ) ;
@@ -49,6 +50,35 @@ public final class GraphicsUtilities
 			res = wrongVal ;
 		}
 		while ( ( res < minVal || res > maxVal ) && res != exitVal  )
+		{
+			out.println ( errorMsg ) ;
+			out.println ( reqMsg ) ;
+			try 
+			{
+				res = Integer.parseInt ( in.readLine ().trim () ) ;
+			}
+			catch (NumberFormatException e)
+			{
+				res = wrongVal ;
+			}
+		}
+		return res ;
+	}
+	
+	/***/
+	public static int checkedIntInputWithoutEscape ( int minVal , int maxVal, int wrongVal , String reqMsg , String errorMsg , PrintStream out , BufferedReader in ) throws IOException
+	{
+		int res ;		
+		out.println ( reqMsg ) ;
+		try 
+		{
+			res = Integer.parseInt ( in.readLine ().trim () ) ;
+		}
+		catch (NumberFormatException e)
+		{
+			res = wrongVal ;
+		}
+		while ( ( res < minVal || res > maxVal ) )
 		{
 			out.println ( errorMsg ) ;
 			out.println ( reqMsg ) ;
@@ -117,6 +147,27 @@ public final class GraphicsUtilities
 	    return resized ;
 	}
 	
+	public static void showUnshowWindow ( Window toShow , boolean block , boolean show )
+	{
+		Runnable r ;
+		r = new WindowShowerHiderRunnable ( toShow , show ) ;
+		if ( block )
+			try
+			{
+				SwingUtilities.invokeAndWait ( r ) ;
+			}
+			catch (InvocationTargetException e) 
+			{
+				e.printStackTrace();
+			}
+			catch (InterruptedException e) 
+			{
+				e.printStackTrace();
+			}
+		else
+			SwingUtilities.invokeLater ( r ) ;
+	}
+	
 	/***/
 	public static void showWindow ( Class windowClass , Object ... args ) 
 	{
@@ -131,6 +182,36 @@ public final class GraphicsUtilities
 			exec = Executors.newCachedThreadPool () ;
 		exec.execute ( runnable ) ;
 	}
+	
+	private static class WindowShowerHiderRunnable implements Runnable 
+	{
+		
+		private final Window toShow ;
+
+		private final boolean showHide ;
+		
+		public WindowShowerHiderRunnable ( Window toShow , boolean showHide ) 
+		{
+			if ( toShow != null )
+			{
+				this.toShow = toShow ;
+				this.showHide = showHide ;
+			}
+			else
+				throw new IllegalArgumentException () ;
+		}
+		
+		@Override
+		public void run () 
+		{
+			if ( showHide )
+				toShow.setVisible ( true ) ;
+			else
+				toShow.setVisible ( false ) ;
+		}
+		
+	}
+	
 	
 	/***/
 	private class WindowLauncherRunnable implements Runnable 

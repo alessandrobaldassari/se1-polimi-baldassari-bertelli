@@ -10,12 +10,22 @@ public interface GameMapObserver extends Observer
 {
 	
 	/**
+	 * Called when an element is added into the observed GameMap. 
 	 * 
+	 * @param whereType the Type of the GameMapElement where the event took place. 
+	 * @param whereId the UID of the the GameMapElement where the event took place. 
+	 * @param whoType the type of the element inserted into this GameMap.
+	 * @param whoId the UID of the element inserted into this GameMap.
 	 */
 	public void onPositionableElementAdded ( GameMapElementType whereType , Integer whereId , PositionableElementType whoType , Integer whoId ) ;
 
 	/**
+	 * Called when an element is removed from the observed GameMap.
 	 * 
+	 * @param whereType the Type of GameMapElement where the event took place. 
+	 * @param whereId the UID of the GameMapElement where the event took place. 
+	 * @param whoType the type of the element removed from this GameMap.
+	 * @param whoId the UID of the element removed from this GameMap.
 	 */
 	public void onPositionableElementRemoved ( GameMapElementType whereType , Integer whereId , PositionableElementType whoType , Integer whoId ) ;
 	

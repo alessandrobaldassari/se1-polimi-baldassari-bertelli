@@ -86,7 +86,7 @@ public class NetworkCommunicantPlayer extends Player
 			public NamedColor call () throws IOException 
 			{
 				NamedColor res ;
-				res = clientHandler.requestSheperdColor(availableColors);
+				res = clientHandler.requestSheperdColor ( availableColors ) ;
 				setMethodCompleted();
 				return res ;
 			}  
@@ -111,7 +111,7 @@ public class NetworkCommunicantPlayer extends Player
 		{
 			throw new RuntimeException ( e ) ;
 		} 
-		catch (InterruptedException e) 
+		catch ( InterruptedException e ) 
 		{
 			throw new RuntimeException ( e ) ;
 		}
@@ -302,18 +302,18 @@ public class NetworkCommunicantPlayer extends Player
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public SellableCard chooseCardToBuy ( final Iterable<SellableCard > src ) throws TimeoutException 
+	public Iterable < SellableCard > chooseCardToBuy ( final Iterable<SellableCard > src ) throws TimeoutException 
 	{
-		SellableCard res  ;
-		Future < SellableCard > f ;
+		Iterable < SellableCard > res  ; 
+		Future < Iterable < SellableCard > > f ;
 		createAndLaunchRequestTimetoutTimer () ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = executorService.submit ( new Callable < SellableCard > () 
+		f = executorService.submit ( new Callable < Iterable < SellableCard > > () 
 		{
 			@Override
-			public SellableCard call () throws IOException
+			public Iterable < SellableCard > call () throws IOException
 			{
-				SellableCard res ;
+				Iterable < SellableCard > res ;
 				res = clientHandler.chooseCardToBuy ( src ) ;
 				setMethodCompleted () ;
 				return res ;
@@ -434,30 +434,69 @@ public class NetworkCommunicantPlayer extends Player
 	}
 	
 	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void matchEndNotification ( String cause ) 
+	{
+		try 
+		{
+			clientHandler.gameConclusionNotification ( cause ) ;
+			clientHandler.dispose () ;
+		}
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	/**
 	 * Allowes a method to wait for the methodCompleted property's value set property to become true.
 	 * It's a blocking method. 
 	 */
 	private void waitForMethodCompletedSet () 
 	{
-		while ( methodCompleted.isValueSet () ) ;
+		while ( methodCompleted.isValueSet () == false ) 
+			synchronized ( methodCompleted )
+			{
+				try 
+				{
+					methodCompleted.wait () ;
+				}
+				catch (InterruptedException e) 
+				{
+					e.printStackTrace();
+				}
+			}
 	}
 	
 	/**
 	 * This method allows to set the methodCompleted property. 
+	 * 
+	 * @return true if the method set the methodCompleted property to true, false if someone already 
+	 *         set that variable.
 	 */
 	private boolean setMethodCompleted () 
 	{
 		boolean res ;
-		try 
+		synchronized ( methodCompleted )
 		{
-			methodCompleted.setValue ( true ) ;
-			res = true ;
-		} 
-		catch ( WriteOncePropertyAlreadSetException e ) 
-		{
-			res = false ;
-			e.printStackTrace () ;
+			try 
+			{
+				methodCompleted.setValue ( true ) ;
+				res = true ;
+			} 
+			catch ( WriteOncePropertyAlreadSetException e ) 
+			{
+				res = false ;
+				e.printStackTrace () ;
+			}
+			finally
+			{
+				methodCompleted.notifyAll () ;
+			}
 		}
+		
 		return res ;
 	}
 	
@@ -474,14 +513,18 @@ public class NetworkCommunicantPlayer extends Player
 		@Override
 		public void run () 
 		{
-			try
+			synchronized ( methodCompleted )
 			{
-				methodCompleted.setValue ( false ) ;
-			}
-			catch ( WriteOncePropertyAlreadSetException e ) {}
-			finally
-			{
-				cancel () ;
+				try
+				{
+					methodCompleted.setValue ( false ) ;
+				}
+				catch ( WriteOncePropertyAlreadSetException e ) {}
+				finally
+				{
+					cancel () ;
+					methodCompleted.notifyAll () ;
+				}
 			}
 		}		
 		

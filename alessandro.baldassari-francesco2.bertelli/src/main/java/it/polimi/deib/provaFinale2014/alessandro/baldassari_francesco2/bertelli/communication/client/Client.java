@@ -11,6 +11,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Terminable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -101,7 +102,13 @@ public abstract class Client extends Thread implements Terminable
 	 */
 	protected abstract void directTechnicalConnect () throws IOException ;
 		
-	/***/
+	/**
+	 * Method called by the workflow when the connection fell.
+	 * It tries to resume a connection with some mechanism.
+	 * If the method effectively resume the connection, this methods completes normally.
+	 * If the connection can not be resumed, it launches an IOException.
+	 * At this point, nothing else can be done to resume it.  
+	 */
 	protected abstract void resumeConnectionConnect () throws IOException ;
 	
 	/**
@@ -112,19 +119,26 @@ public abstract class Client extends Thread implements Terminable
 	protected abstract void technicalDisconnect () throws IOException ;
 	
 	/**
-	 * @return
-	 * @throws 
+	 * Technical subclasses has to implement this method to retrieve the next incoming message.
+	 * 
+	 * @return the next incoming message.
+	 * @throws IOException if there is a problem due to Message reading.
 	 */
 	protected abstract Message read () throws IOException ;
 		
 	/**
-	 * @return
-	 * @throws 
+	 * Technical subclasses has to implement this method to write a Message over the net.
+	 * 
+	 * @param messageToWrite the message to write.
+	 * @throws IOException if something goes wrong with the Message Writing
 	 */
-	protected abstract void write ( Message m ) throws IOException ;
+	protected abstract void write ( Message messageToWrite ) throws IOException ;
 	
 	/**
-	 * @throws IOException
+	 * With the client has to do when a communication operation is notified to be finished.
+	 * Actions here may be synchronization operations , buffer management and so on.
+	 * 
+	 * @throws IOException if something goes wrong during the execution.
 	 */
 	protected abstract void operationFinished () throws IOException ;
 	
@@ -139,9 +153,7 @@ public abstract class Client extends Thread implements Terminable
 		if ( technicallyOn )
 			super.start () ;
 	}
-	
-	private void connectionDownManagement () {}
-	
+		
 	/**
 	 * AS THE SUPER'S ONE.
 	 * For every time the value of the technicallyOn attribute is true, it continues to call
@@ -160,7 +172,6 @@ public abstract class Client extends Thread implements Terminable
 		GameMove move ;
 		MoveFactory gf ;
 		GameMap gm ;
-		SellableCard c ;
 		NamedColor n ;
 		Message m ;
 		String s ;
@@ -172,9 +183,9 @@ public abstract class Client extends Thread implements Terminable
 		{
 			try 
 			{
-				System.out.println ( "CLIENT : WAITING FOR A MESSAGE." ) ;
+				System.out.println ( "CLIENT - RUN : WAITING FOR A MESSAGE." ) ;
 				m = read () ;
-				System.out.println ( "CLIENT : MESSAGE RECEIVED." ) ;
+				System.out.println ( "CLIENT - RUN : MESSAGE RECEIVED." ) ;
 				inParams = CollectionsUtilities.newListFromIterable ( m.getParameters () ) ;
 				System.out.println ( "CLIENT : PARAMETERS LOADED." ) ;
 				outParams.clear () ;
@@ -241,8 +252,8 @@ public abstract class Client extends Thread implements Terminable
 					break ;
 					case CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST :
 						cards = ( Iterable < SellableCard > ) inParams.get ( 0 ) ;
-						c = dataPicker.onChoseCardToBuy ( cards ) ; 
-						outParams.add ( c ) ;
+						cards = dataPicker.onChoseCardToBuy ( cards ) ; 
+						outParams.add ( ( Serializable ) cards ) ;
 						m = Message.newInstance ( GameProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_RESPONSE , outParams ) ;
 						write ( m ) ;
 					break ;
@@ -254,6 +265,9 @@ public abstract class Client extends Thread implements Terminable
 						s = ( String ) inParams.get ( 0 ) ;							
 						dataPicker.generationNotification ( s ) ;
 					break;
+					case GAME_CONCLUSION_NOTIFICATION :
+						s = ( String ) inParams.get ( 0 ) ;
+						dataPicker.generationNotification ( s ) ;
 					default :
 						throw new IOException ( "UNMANAGED_OPERATION" ) ;
 				}
@@ -263,16 +277,19 @@ public abstract class Client extends Thread implements Terminable
 			}
 			catch ( IOException e ) 
 			{
-				e.printStackTrace();
-				dataPicker.generationNotification ( "Server connection loosed.\nTry to resume it\nIt will take some time." );
+				System.out.println ( "CLIENT - RUN : IOEXCEPTION GENERATED " + Utilities.CARRIAGE_RETURN + "ERROR MESSAGE : " + e.getMessage () ) ;
+				// inform the user the connection fell.
+				dataPicker.generationNotification ( "Server connection loosed." + Utilities.CARRIAGE_RETURN + "Try to resume it" + Utilities.CARRIAGE_RETURN + "It will take some time." );
 				try 
 				{
+					// try to resume the connection
 					resumeConnectionConnect () ;
-					connectionDownManagement () ;
+					// if the method above is finished, the connection is now on.
 				} 
 				catch ( IOException e1 ) 
 				{
-					dataPicker.generationNotification ( "Can not try to resume the connection.\nSorry but there is nothing to do !\nThe program will be closed" );
+					// nothing to do, the connection is dead and can not be resumed.
+					dataPicker.generationNotification ( "Can not try to resume the connection." + Utilities.CARRIAGE_RETURN + "Sorry but there is nothing to do !" + Utilities.CARRIAGE_RETURN + "The program will be closed." );
 					technicallyOn = false ;
 				}
 			}

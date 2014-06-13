@@ -1,6 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.Message;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.UIDGenerator;
 
 import java.rmi.RemoteException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -11,6 +12,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class RMIClientBrokerImpl implements RMIClientBroker 
 {
+	
+	/**
+	 * The prefix of the name of every object of this class. 
+	 */
+	public static final String OBJECT_BASE_NAME = "RMI_CLIENT_BROKER_IMPL_#" ;
+	
+	/**
+	 * A UIDGenerator object to ensure every RMIClientBrokerImpl instance has a different name. 
+	 */
+	private static UIDGenerator uidGenerator ;
+	
+	/**
+	 * The RMI name of this RMIClientBroker. 
+	 */
+	private final String rmiName ;
 	
 	/**
 	 * The message the users of the object are exchanging.
@@ -25,10 +41,22 @@ public class RMIClientBrokerImpl implements RMIClientBroker
 	/***/
 	public RMIClientBrokerImpl () 
 	{
+		if ( uidGenerator == null )
+			uidGenerator = new UIDGenerator ( 0L ) ;
+		rmiName = OBJECT_BASE_NAME + uidGenerator.generateNewValue () ;
 		message = null ;
 		flag = new AtomicBoolean ( false ) ;
 	}
-
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public String getRMIName () 
+	{
+		return rmiName ;
+	}
+	
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */

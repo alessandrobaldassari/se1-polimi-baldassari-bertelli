@@ -1,6 +1,5 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities;
 
-import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
@@ -41,7 +40,7 @@ public class DummyPlayer extends Player
 	}
 
 	@Override
-	public SellableCard chooseCardToBuy(Iterable<SellableCard> src)
+	public Iterable < SellableCard > chooseCardToBuy(Iterable<SellableCard> src)
 			throws TimeoutException {
 		// TODO Auto-generated method stub
 		return null;
@@ -70,6 +69,12 @@ public class DummyPlayer extends Player
 
 	@Override
 	public void genericNotification(String message) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void matchEndNotification(String cause) {
 		// TODO Auto-generated method stub
 		
 	}

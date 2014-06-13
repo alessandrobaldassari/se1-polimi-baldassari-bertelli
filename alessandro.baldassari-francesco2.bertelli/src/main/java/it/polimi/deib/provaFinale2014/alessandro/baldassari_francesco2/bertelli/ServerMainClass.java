@@ -2,6 +2,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.NetworkCommunicationController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.NetworkCommunicationControllerSingleton;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -37,10 +38,9 @@ public final class ServerMainClass
 		}
 		catch ( IOException e ) 
 		{
-			System.out.println ( "CAN NOT CREATE A NETWORK_COMMUNICATION_CONTROLLER." ) ;
+			System.out.println ( "SERVER_MAIN_CLASS : CAN NOT CREATE A NETWORK_COMMUNICATION_CONTROLLER." + Utilities.CARRIAGE_RETURN + "Error details : " + e.getMessage () ) ;
 			if ( threadExecutor != null )
 				threadExecutor.shutdownNow () ;
-			throw new RuntimeException ( e ) ;
 		}	
 	}
 	

@@ -10,12 +10,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.DataFilePaths;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.FactorySupport;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WithFactorySupportObject;
 
 /**
  * Factory class for the GameMap object.
@@ -24,28 +25,13 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * The implementation of the Singleton pattern ensures that just one instance of
  * this class exists in the whole Application.
  */
-public class GameMapFactory implements Serializable
+public class GameMapFactory extends WithFactorySupportObject < Match > implements Serializable
 {
-
-	/**
-	 * The path where find the file path of the Regions CSV file. 
-	 */
-	private static final String REGIONS_FILE_PATH = "regions.csv" ;
-	
-	/**
-	 * The path where find the file path of the Roads CSV file. 
-	 */
-	private static final String ROADS_FILE_PATH = "roads.csv" ;
 	
 	/**
 	 * This class instance to realize the Singleton pattern. 
 	 */
-	private static final GameMapFactory instance = new GameMapFactory () ;
-	
-	/**
-	 * Support component to ensure the one GameMap per Match idea. 
-	 */
-	private final FactorySupport < Match > factorySupport ;
+	private static GameMapFactory instance ;
 	
 	/**
 	 * A complex object containing the partial loaded data about the Regions in the GameMap 
@@ -57,22 +43,22 @@ public class GameMapFactory implements Serializable
 	 * A complex object containing the partial loaded data about the Roads in the GameMap 
 	 * which will be read by the data files
 	 */
-	private  Map < Integer , Couple < Road , int [] > > roadsMap ;
+	private Map < Integer , Couple < Road , int [] > > roadsMap ;
 	
 	/**
 	 * @throws RuntimeException if the data files are not accessible, so the Game can not run. 
 	 */
 	private GameMapFactory ()  
 	{
+		super () ;
 		InputStream regionsCSVInputStream ;
 		InputStream roadsCSVInputStream ;
 		try 
 		{
-			regionsCSVInputStream = Files.newInputStream ( Paths.get ( REGIONS_FILE_PATH ) , StandardOpenOption.READ  ) ;
-			roadsCSVInputStream = Files.newInputStream ( Paths.get ( ROADS_FILE_PATH ) , StandardOpenOption.READ ) ;
+			regionsCSVInputStream = Files.newInputStream ( Paths.get ( DataFilePaths.REGIONS_FILE_PATH ) , StandardOpenOption.READ  ) ;
+			roadsCSVInputStream = Files.newInputStream ( Paths.get ( DataFilePaths.ROADS_FILE_PATH ) , StandardOpenOption.READ ) ;
 			regionsMap = readRegionsDataFile ( regionsCSVInputStream ) ;
 			roadsMap = readRoadsDataFile ( roadsCSVInputStream , regionsMap ) ;
-			factorySupport = new FactorySupport < Match > () ;
 			regionsCSVInputStream.close () ;
 			roadsCSVInputStream.close () ;
 		} 
@@ -88,8 +74,10 @@ public class GameMapFactory implements Serializable
 	 * 
 	 * @return the only existing instance of this class. 
 	 */
-	public static GameMapFactory getInstance () 
+	public synchronized static GameMapFactory getInstance () 
 	{
+		if ( instance == null )
+			instance = new GameMapFactory () ;
 		return instance ;
 	}
 	
@@ -100,9 +88,9 @@ public class GameMapFactory implements Serializable
 	public GameMap newInstance ( Identifiable < Match > requester ) throws SingletonElementAlreadyGeneratedException 
 	{
 		GameMap res ;
-		if ( factorySupport.isAlreadyUser ( requester ) == false ) 
+		if ( getFactorySupport().isAlreadyUser ( requester ) == false ) 
 		{
-			factorySupport.addUser ( requester ) ;
+			getFactorySupport().addUser ( requester ) ;
 			res = new GameMap ( regionsMap , roadsMap ) ;
 		}
 		else
@@ -151,7 +139,7 @@ public class GameMapFactory implements Serializable
 	 *         an array of int, where each value matches the UID of a Road object ( if the workflow goes 
 	 *         well not already created ) adjacent to this region.
 	 */
-	private static Map < Integer , Couple < Road , int [] > > readRoadsDataFile ( InputStream roadsCSVInputStream , Map < Integer , Couple < Region , int [] > > regionsMap ) 
+	private Map < Integer , Couple < Road , int [] > > readRoadsDataFile ( InputStream roadsCSVInputStream , Map < Integer , Couple < Region , int [] > > regionsMap ) 
 	{
 		String [] lineComponents ;
 		int [] adjacentRoadsUID ;

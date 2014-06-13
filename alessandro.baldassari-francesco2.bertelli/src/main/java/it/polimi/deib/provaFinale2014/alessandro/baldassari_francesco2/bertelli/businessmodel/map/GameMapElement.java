@@ -2,6 +2,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionAbstractObservable;
 
 import java.io.Serializable;
@@ -16,14 +17,14 @@ public abstract class GameMapElement extends WithReflectionAbstractObservable < 
 	// ATTRIBUTES
 	
 	/**
-	 * The GameMapElementType of this Object. 
-	 */
-	private GameMapElementType gameMapElementType ;
-	
-	/**
 	 * The UID for this region, unique for every component of the map that extends this class
 	 */
 	private final int uid ;
+	
+	/**
+	 * The GameMapElementType of this Object. 
+	 */
+	private GameMapElementType gameMapElementType ;
 	
 	// METHODS 
 	
@@ -68,8 +69,8 @@ public abstract class GameMapElement extends WithReflectionAbstractObservable < 
 	public String toString ()
 	{
 		String res ;
-		res = "UID : " + uid ;
-		res = res + "Type : " + gameMapElementType + "\n" ;
+		res = "UID : " + uid + Utilities.CARRIAGE_RETURN ;
+		res = res + "Type : " + gameMapElementType + Utilities.CARRIAGE_RETURN ;
 		return res ;
 	}
 	

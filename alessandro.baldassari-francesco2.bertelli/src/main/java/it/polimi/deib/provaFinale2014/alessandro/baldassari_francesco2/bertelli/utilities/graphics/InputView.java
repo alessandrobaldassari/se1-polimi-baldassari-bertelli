@@ -18,7 +18,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 /**
  * A class that offers an infrastructure to show multioptions choose views.
  */
-public class MultioptionChooseView extends FrameworkedWithGridBagLayoutPanel 
+public class InputView extends FrameworkedWithGridBagLayoutPanel 
 {
 
 	/**
@@ -52,9 +52,14 @@ public class MultioptionChooseView extends FrameworkedWithGridBagLayoutPanel
 	 * The boolean field is true if the job has to block the flows, false if asynchronous execution is ok. 
 	 */
 	private Couple < Boolean , Runnable > koAction ;
+
+	/**
+	 * Boolean variable that, if false, hide the ko button. 
+	 */
+	private boolean showKo ;
 	
 	/***/
-	public MultioptionChooseView () 
+	public InputView () 
 	{
 		super () ;
 	}
@@ -69,6 +74,7 @@ public class MultioptionChooseView extends FrameworkedWithGridBagLayoutPanel
 		contentsPanel = new SimpleWithGridBagLayoutPanel() ;
 		okButton = new JButton () ;
 		koButton = new JButton () ;
+		showKo = true ;
 	}
 
 	/**
@@ -81,8 +87,8 @@ public class MultioptionChooseView extends FrameworkedWithGridBagLayoutPanel
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
 		layoutComponent ( titleLabel , 0 , 0 , 1 , 0.125 , 1 , 2 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets );
 		layoutComponent ( contentsPanel , 0 , 1 , 1 , 0.75 , 1 , 2 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets );		
-		layoutComponent ( okButton , 0 , 2 , 1 , 0.125 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets );
-		layoutComponent ( koButton , 1 , 2 , 1 , 0.125 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets );		
+		layoutComponent ( okButton , 0 , 2 , 0.5 , 0.125 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets );
+		layoutComponent ( koButton , 1 , 2 , 0.5 , 0.125 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets );		
 	}
 
 	/**
@@ -173,6 +179,30 @@ public class MultioptionChooseView extends FrameworkedWithGridBagLayoutPanel
 		contentsPanel.layoutComponent ( p , 0 , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets )  ;
 		contentsPanel.add ( p ) ;
 		repaint () ;
+	}
+	
+	/**
+	 * Setter method for the showKo property.
+	 * Adapts the layout as a consequence of the choice.
+	 * 
+	 * @param showKo the value for the showKo property. 
+	 */
+	public void setShowKo ( boolean showKo ) 
+	{
+		Insets insets ;
+		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
+		this.showKo = showKo ;
+		if ( showKo )
+		{
+			koButton.setVisible ( true ) ;
+			layoutComponent ( okButton , 0 , 2 , 0.5 , 0.125 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets );
+			layoutComponent ( koButton , 1 , 2 , 0.5 , 0.125 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets );		
+		}
+		else
+		{
+			koButton.setVisible ( false ) ;
+			layoutComponent ( okButton , 0 , 2 , 1 , 0.125 , 1 , 2 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets );
+		}
 	}
 	
 	/**

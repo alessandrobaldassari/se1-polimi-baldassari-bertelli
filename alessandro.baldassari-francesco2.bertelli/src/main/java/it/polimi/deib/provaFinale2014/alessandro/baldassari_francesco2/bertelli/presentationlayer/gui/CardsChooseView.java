@@ -7,14 +7,12 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.MultioptionChooseView;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.InputView;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.ObservableFrameworkedWithGridBagLayoutDialog;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observer;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionObservableSupport;
 
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -23,81 +21,105 @@ import java.util.List;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JToggleButton;
 
-public class CardsChooseView extends JDialog implements Observable < CardsChooseView.CardsChooseViewObserver >
+/**
+ * This component allows a User to select some Cards between a List. 
+ */
+public class CardsChooseView extends ObservableFrameworkedWithGridBagLayoutDialog < CardsChooseView.CardsChooseViewObserver >
 {
-
-	/***/
-	private WithReflectionObservableSupport < CardsChooseViewObserver > support ;
 	
-	/***/
-	private MultioptionChooseView view ;
+	/**
+	 * The generic InputView component. 
+	 */
+	private InputView view ;
 	
-	/***/
-	private CardChooseViewPanel colorsPanel ;
+	/**
+	 * The panel that effectively shows and allow to select some Cards.
+	 */
+	private CardChooseViewPanel cardsPanel ;
 	
-	/***/
+	/**
+	 * @param observer an Observer for this View. 
+	 */
 	public CardsChooseView ( CardsChooseViewObserver observer ) 
 	{ 
 		super ( ( Frame ) null , PresentationMessages.APP_NAME , true ) ;
-		GridBagLayout g ;
+		addObserver ( observer ) ;
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	protected void createComponents () 
+	{
+		view = new InputView () ;
+		cardsPanel = new CardChooseViewPanel () ;		
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	protected void manageLayout () 
+	{
 		Insets insets ;
-		support = new WithReflectionObservableSupport < CardsChooseViewObserver > () ;
-		view = new MultioptionChooseView () ;
-		colorsPanel = new CardChooseViewPanel () ;
-		g = new GridBagLayout () ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
-		
-		GraphicsUtilities.setComponentLayoutProperties ( view , g , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+		GraphicsUtilities.setComponentLayoutProperties ( view , getLayout () , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 		view.setTitle ( PresentationMessages.CHOOSE_COLOR_FOR_SHEPERD_MESSAGE ) ;
-		setLayout ( g ) ;
 		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
 		setResizable ( false ) ;
-		setAlwaysOnTop ( true ) ;
-		
-		view.setOkAction ( new Couple < Boolean , Runnable > ( true , new OkAction () ) ) ;
-		view.setKoAction ( new Couple < Boolean , Runnable > ( true , new KoAction () ) );
-		addObserver ( observer ) ;
-		
-		add ( view ) ;
-		view.setContentsPanel ( colorsPanel ) ;
+		setAlwaysOnTop ( true ) ;		
 	}
-	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public void addObserver ( CardsChooseViewObserver newObserver) 
-	{
-		support.addObserver ( newObserver ) ;
-	}
-	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
-	public void removeObserver( CardsChooseViewObserver oldObserver) 
+	protected void bindListeners () 
 	{
-		support.removeObserver ( oldObserver ) ;
+		view.setOkAction ( new Couple < Boolean , Runnable > ( true , new OkAction () ) ) ;
+		view.setKoAction ( new Couple < Boolean , Runnable > ( true , new KoAction () ) );		
+	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	protected void injectComponents () 
+	{
+		add ( view ) ;
+		view.setContentsPanel ( cardsPanel ) ;		
 	}
 	
-	/***/
-	public void setCards ( Iterable < Card > cards ) {}
+	/**
+	 * 
+	 */
+	public void setCards ( Iterable < Card > cards , boolean moreThanOneCard ) 
+	{
+		cardsPanel.setCards ( cards , moreThanOneCard ) ;
+	}
 	
-	/***/
+	/**
+	 * This interface defines the methods that a CardsChooseViewObserver can listen to. 
+	 */
 	public interface CardsChooseViewObserver extends Observer
 	{
 		
-		/***/
-		public void onCardChoosed ( Card selectedCard ) ;
+		/**
+		 * Called when the User has finished the choosing process and confirm his selection.
+		 * 
+		 * @param selectedCards the Cards the User has choosen.
+		 */
+		public void onCardChoosed ( Iterable < Card > selectedCards ) ;
 		
-		/***/
+		/**
+		 * Called when the User does not want to make any selection. 
+		 */
 		public void onDoNotWantChooseAnyCard () ;
 		
 	}
@@ -115,11 +137,11 @@ public class CardsChooseView extends JDialog implements Observable < CardsChoose
 		public void run () 
 		{
 			Iterable < Card > res ;
-			res = colorsPanel.getSelectedCard();
+			res = cardsPanel.getSelectedCards () ;
 			if ( res != null )
 				try 
 				{
-					support.notifyObservers ( "onCardChoosed" , res );
+					notifyObservers ( "onCardChoosed" , res );
 				}
 				catch (MethodInvocationException e1) 
 				{
@@ -143,7 +165,7 @@ public class CardsChooseView extends JDialog implements Observable < CardsChoose
 		{
 			try 
 			{
-				support.notifyObservers ( "onDoNotWantChooseAnyCard" ) ;
+				notifyObservers ( "onDoNotWantChooseAnyCard" ) ;
 			} 
 			catch ( MethodInvocationException e1 ) 
 			{
@@ -155,25 +177,46 @@ public class CardsChooseView extends JDialog implements Observable < CardsChoose
 	
 }
 
-/***/
+/**
+ * The effectively View that shows a list of Cards and allow the User to select some of them. 
+ */
 class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel 
 {
 
+	/**
+	 * A list containing the Cards among which the User can choose. 
+	 */
 	private List < Card > availableCards ;
 	
+	/**
+	 * A list containing the Cards the user selected. 
+	 */
 	private List < Card > selectedCards ;
 	
+	/**
+	 * The panels that will show a graphic representation of the Cards. 
+	 */
 	private List < JPanel > imagePanels ;
 
+	/**
+	 * The buttons that allows to select / unselect Cards. 
+	 */
 	private List < JToggleButton > selectors ;
 	
+	/**
+	 * A component that allows to select just one card.
+	 */
 	private ButtonGroup buttonGroup ;
 	
+	/***/
 	public CardChooseViewPanel () 
 	{
 		super () ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void createComponents () 
 	{
@@ -183,15 +226,25 @@ class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel
 		buttonGroup = new ButtonGroup () ;
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void manageLayout () {}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void bindListeners () {}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	protected void injectComponents () {}
 
+	/***/
 	public void setCards ( Iterable < Card > in , boolean multipleSelectionsAllowed ) 
 	{
 		Insets insets ;
@@ -227,21 +280,31 @@ class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel
 			
 	}
 	
-	public Iterable < Card > getSelectedCard () 
+	/**
+	 * Getter method for the selectedCards property.
+	 * 
+	 * @return the Cards the User selected.
+	 */
+	public Iterable < Card > getSelectedCards () 
 	{
 		return selectedCards ;
 	}
 	
+	/***/
 	private class SelectorListener implements ItemListener 
 	{
 
 		private int associatedIndex ;
 		
+		/***/
 		public SelectorListener ( int associatedIndex )
 		{
 			this.associatedIndex = associatedIndex ;
 		}
 		
+		/**
+		 * AS THE SUPER'S ONE. 
+		 */
 		@Override
 		public void itemStateChanged ( ItemEvent e ) 
 		{

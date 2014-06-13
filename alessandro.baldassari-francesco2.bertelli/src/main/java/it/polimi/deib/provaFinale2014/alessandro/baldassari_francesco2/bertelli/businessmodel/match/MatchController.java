@@ -17,6 +17,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Wolf;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.MapUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
@@ -36,6 +37,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.SellingPriceNotSetException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ConnectionLoosingController.ConnectionLoosingManagerObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunchercommunicationcontroller.MatchStartCommunicationController;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MathUtilities;
@@ -43,9 +45,10 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Suspendable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WorkflowException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
-import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -104,7 +107,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	 * A standard Timer object to mange the timer at the beginning of a Match.
 	 * It's a business rule. 
 	 */
-	private final Timer timer;
+	private transient final Timer timer;
 	
 	/**
 	 * An AnimalsFactory object to create all the Animal objects who play in the Game. 
@@ -173,11 +176,11 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void onEndSuspensionControl ( boolean suspendedRetrieved ) 
+	public void onEndSuspensionControl ( Boolean suspendedRetrieved ) 
 	{
 		if ( suspendedRetrieved )
 			for ( Player p : match.getPlayers() )
-				p.genericNotification ( "We are all ok again.\nThe show can go on!" );
+				p.genericNotification ( "We are all ok again." + Utilities.CARRIAGE_RETURN + "The show can go on!" );
 	}
 
 	
@@ -221,16 +224,31 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	 */
 	public void run () 
 	{
-		System.out.println ( "GAME CONTROLLER : PRIMA DELLA CREATING PHASE" ) ;
-		creatingPhase () ;
-		System.out.println ( "GAME CONTROLLER : PRIMA DELLA WAIT FOR PLAYER " ) ;
-		waitForPlayersPhase () ;
-		System.out.println ( "GAME CONTROLLER : PRIMA DELLA INITIALIZATION PHASE" ) ;
-		initializationPhase () ; 
-		System.out.println ( "GAME CONTROLLER : PRIMA DELLA TURNATION PHASE" ) ;
-		turnationPhase () ;
-		System.out.println ( "GAME CONTROLLER : PRIMA DELLA RESULTS CALCULATION PHASE" ) ;
-		resultsCalculationPhase () ;
+		String endMessage ;
+		endMessage = null ;
+		try 
+		{
+			System.out.println ( "GAME CONTROLLER : PRIMA DELLA CREATING PHASE" ) ;		
+			creatingPhase () ;
+			System.out.println ( "GAME CONTROLLER : PRIMA DELLA WAIT FOR PLAYER " ) ;
+			waitForPlayersPhase () ;
+			System.out.println ( "GAME CONTROLLER : PRIMA DELLA INITIALIZATION PHASE" ) ;
+			initializationPhase () ; 
+			System.out.println ( "GAME CONTROLLER : PRIMA DELLA TURNATION PHASE" ) ;
+			turnationPhase () ;
+			System.out.println ( "GAME CONTROLLER : PRIMA DELLA RESULTS CALCULATION PHASE" ) ;
+			resultsCalculationPhase () ;
+			endMessage = PresentationMessages.BYE_MESSAGE ;
+		}
+		catch (WorkflowException e) 
+		{
+			System.out.println ( "MATCH_CONTROLLER - RUN : WORKFLOW_EXCEPTION GENERATED" ) ;
+			endMessage = PresentationMessages.UNEXPECTED_ERROR_MESSAGE ;
+		}
+		finally 
+		{
+			matchFinishingProcedure ( endMessage ) ;
+		}
 	}
 	
 	/**
@@ -240,7 +258,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	 * 
 	 * @throws RuntimeException if the AnimalFactory Singleton mechanism fails.
 	 */
-	private void creatingPhase () 
+	private void creatingPhase () throws WorkflowException  
 	{
 		GameMap gameMap ;
 		Bank bank;
@@ -258,8 +276,8 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 		} 
 		catch ( SingletonElementAlreadyGeneratedException e ) 
 		{
-			// this should not happen.
-			throw new RuntimeException ( e ) ;
+			System.out.println ( "MATCH_CONTROLLER - CREATING PHASE : SINGLETON_ELEMENT_ALREADY_GENERATED_EXCETPION" ) ;
+			throw new WorkflowException () ;
 		}
 	}
 	
@@ -269,7 +287,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	 * When they do it, adds them to the Match, and if the MAX_NUMBER_OF_PLAYERS is reached,
 	 * cause the Match workflow to finish the INITIALIZATION phase and to move to the next phase. 
 	 */
-	private void waitForPlayersPhase () 
+	private void waitForPlayersPhase () throws WorkflowException
 	{
 		Player newPlayer ;
 		System.out.println ( "GAME CONTROLLER : WAIT FOR PLAYER PHASE - INIZIO" ) ;
@@ -297,8 +315,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 			}
 			catch ( WrongMatchStateMethodCallException e ) 
 			{
-				// something very wrong if here
-				throw new RuntimeException ( e ) ;
+				throw new WorkflowException () ;
 			}			
 		}
 		System.out.println ( "GAME CONTROLLER : WAIT FOR PLAYER PHASE - FINE" ) ;
@@ -312,7 +329,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	 * 3. The Players are provided with money from the Bank.
 	 * 4.
 	 */
-	public void initializationPhase ()
+	public void initializationPhase () throws WorkflowException 
 	{
 		System.out.println ( "GAME CONTROLLER : INITIALIZATION PHASE, PRIMA DI PLACE SHEEPS" ) ;
 		placeSheeps () ;
@@ -332,7 +349,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	 * in the Region of Sheepsburg.
 	 * 
 	 */
-	private void placeSheeps () 
+	private void placeSheeps () throws WorkflowException
 	{
 		Animal blackSheep ;
 		Animal wolf ;
@@ -358,16 +375,16 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 			sheepsburg.addAnimal ( wolf ) ;
 			blackSheep.moveTo ( sheepsburg ) ;
 			wolf.moveTo ( sheepsburg ) ;
-			playersGenericNotification ( "All animals are in the Map\nBeeeee!" ) ;
+			playersGenericNotification ( "All animals are in the Map!" + Utilities.CARRIAGE_RETURN + "Beeeee!" ) ;
 			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - PLACE SHEEPS : FINE " ) ;
 		} 
 		catch ( BlackSheepAlreadyGeneratedException e ) 
 		{
-			throw new RuntimeException ( e ) ;
+			throw new WorkflowException () ;
 		} 
 		catch ( WolfAlreadyGeneratedException e ) 
 		{
-			throw new RuntimeException ( e ) ;
+			throw new WorkflowException () ;
 		}
 	}
 	
@@ -375,7 +392,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	 * This methods emulates the phase where one Initial Card is given to each Player.
 	 * Which Card give to each Player is a randomic decision.
 	 */
-	private void distributeInitialCards ()
+	private void distributeInitialCards () throws WorkflowException
 	{
 		Stack < RegionType > regions ;
 		Card initCard ;
@@ -383,25 +400,26 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 		{
 			System.out.println ( "MATCH CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE INITIAL CARDS : INIZIO " ) ;
 			regions = new Stack < RegionType > () ;
-			for ( RegionType type : RegionType.values () ) 
-				regions.push ( type ) ;
-			regions.remove ( RegionType.SHEEPSBURG ) ;
+			regions.addAll ( RegionType.allTheTypesExceptSheepsburg () ) ;
 			CollectionsUtilities.listMesh ( regions ) ;
 			for( Player player : match.getPlayers () )
 			{
+				System.out.println ( "MATCH_CONTROLLER - DISTRIBUTE_INITIAL_CARDS : SERVENDO IL PLAYER :" + player.getName () ) ;
 				initCard = match.getBank ().takeInitialCard ( regions.pop() ) ;
 				player.setInitialCard ( initCard ) ;
-				player.genericNotification ( "Initial Card choosen for you !\nYour secret card has the type : " + initCard.getRegionType () + "\nRemember it!" ) ;
+				player.genericNotification ( "Initial Card choosen for you !" + Utilities.CARRIAGE_RETURN + "Your secret card has the type : " + initCard.getRegionType () + "\nRemember it!" ) ;
 			}
 			System.out.println ( "MATCH CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE INITIAL CARDS : FINE " ) ;
 		}
 		catch ( NoMoreCardOfThisTypeException e ) 
 		{
-			throw new RuntimeException ( e ) ;
+			System.out.println ( "MATCH_CONTROLLER - DISTRIBUTE_INITIAL_CARDS : NO_MORE_CARD_OF_THIS_TYPE_EXCEPTION GENERATED " ) ;
+			throw new WorkflowException () ;
 		}	
 		catch ( WriteOncePropertyAlreadSetException e ) 
 		{
-			throw new RuntimeException ( e ) ;
+			System.out.println ( "MATCH_CONTROLLER - DISTRIBUTE_INITIAL_CARDS : NO_MORE_CARD_OF_THIS_TYPE_EXCEPTION GENERATED " ) ;
+			throw new RuntimeException () ;
 		}
 	}
 	
@@ -433,8 +451,9 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	 * This method is the fourth in the INITIALIZATION PHASE.
 	 * It performs a randomic ordering on the Players list to determine who will play
 	 * first, second, and so on. 
-	 */
-	private void choosePlayersOrder () 
+	 * @throws WorkflowException if an unexpected error occurs 
+	 */ 
+	private void choosePlayersOrder () throws WorkflowException 
 	{
 		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - CHOOSE PLAYER ORDER PHASE : INIZIO " ) ;
 		Map < Player , Integer > playersMapOrder ;
@@ -457,12 +476,12 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - CHOOSE PLAYER ORDER PHASE : IMPOSTANDO L'ORDINE DEI GIOCATORI NEL MATCH." ) ;
 			match.setPlayerOrder ( playersMapOrder ) ;
 			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - CHOOSE PLAYER ORDER PHASE : ORDINE DEI GIOCATORI NEL MATCH IMPOSTATO." ) ;			
+			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - CHOOSE PLAYER ORDER PHASE : FINE " ) ;
 		} 
 		catch ( WrongMatchStateMethodCallException e ) 
 		{
-			throw new RuntimeException (e);
+			throw new WorkflowException () ;
 		}
-		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - CHOOSE PLAYER ORDER PHASE : FINE " ) ;
 	}
 	
 	/**
@@ -482,34 +501,34 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : INIZIO " ) ;
 		numberOfSheperdsPerPlayer = match.getNumberOfPlayers () == 2 ? 2 : 1 ;
 		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : INIZIO " ) ;
-		for ( Player p : match.getPlayers () )
-		{
-			if ( p.isSuspended() == false )
+		for ( Player currentPlayer : match.getPlayers () )
+			if ( currentPlayer.isSuspended() == false )
 			{
 				try 
 				{
-					System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : GESTITSCO IL PLAYER " + p.getName () ) ;
+					System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : GESTITSCO IL PLAYER " + currentPlayer.getName () ) ;
 					sheperds = new Sheperd [ numberOfSheperdsPerPlayer ] ;		
-					System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : CHIDEDENDO AL PLAYER " + p.getName () + " DI SCEGLIERE UN COLORE." ) ;
-					choosenColor = p.getColorForSheperd ( colors ) ;
-					System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : IL PLAYER " + p.getName () + " HA SCELTO IL COLORE " + choosenColor.getName () ) ;
+					System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : CHIDEDENDO AL PLAYER " + currentPlayer.getName () + " DI SCEGLIERE UN COLORE." ) ;
+					choosenColor = currentPlayer.getColorForSheperd ( colors ) ;
+					System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : IL PLAYER " + currentPlayer.getName () + " HA SCELTO IL COLORE " + choosenColor.getName () ) ;
 					colors.remove ( choosenColor ) ;				
-					sheperds [ 0 ] = new Sheperd ( p.getName () + "_#" + 0 , choosenColor , p ) ;
+					sheperds [ 0 ] = new Sheperd ( currentPlayer.getName () + "_#" + 0 , choosenColor , currentPlayer ) ;
 					if ( numberOfSheperdsPerPlayer == 2 )
-						sheperds [ 1 ] = new Sheperd ( p.getName () + "_#" + 1 , choosenColor , p ) ;				
+						sheperds [ 1 ] = new Sheperd ( currentPlayer.getName () + "_#" + 1 , choosenColor , currentPlayer ) ;				
 					try 
 					{
-						System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : SETTANDO I PASTORI PER IL PLAYER " + p.getName () ) ;
-						p.initializeSheperds ( sheperds ) ;
+						System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : SETTANDO I PASTORI PER IL PLAYER " + currentPlayer.getName () ) ;
+						currentPlayer.initializeSheperds ( sheperds ) ;
 					}
 					catch ( WriteOncePropertyAlreadSetException e ) 
 					{
-						e.printStackTrace () ;
-						throw new RuntimeException ( e ) ;
+						// something very wrong with the current player; remove him and continue with the others.
+						currentPlayer.matchEndNotification ( PresentationMessages.UNEXPECTED_ERROR_MESSAGE ) ;
+						match.removePlayer ( currentPlayer ) ;
 					}
-					for ( Sheperd s : p.getSheperds () )
+					for ( Sheperd s : currentPlayer.getSheperds () )
 					{
-						selectedRoad = p.chooseInitialRoadForASheperd ( match.getGameMap ().getFreeRoads () ) ;
+						selectedRoad = currentPlayer.chooseInitialRoadForASheperd ( match.getGameMap ().getFreeRoads () ) ;
 						s.moveTo ( selectedRoad ) ;
 						selectedRoad.setElementContained ( s ) ;
 					}
@@ -517,8 +536,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 				catch ( TimeoutException e1 ) 
 				{			
 					System.out.println ( "GAME CONTROLLER - DISTRIBUTE SHEPERDS : TIMEOUT EXCEPTION RAISED" ) ;
-					notifyPlayerDisconnected ( p ) ;
-				}
+					playersGenericNotification ( "The game is going to continue without " + currentPlayer.getName() + Utilities.CARRIAGE_RETURN + "May be he will come back later..." );
 			}
 		}
 		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : FINE " ) ;
@@ -529,8 +547,9 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	 * makes his moves.
 	 * It is implemented as a cycle, which, until the Game is finished asks every player
 	 * to do his moves, providing him the tools to do this. 
-	 */
-	private void turnationPhase () 
+	 * @throws WorkflowException if an unexpected message occurs. 
+	 */ 
+	private void turnationPhase () throws WorkflowException 
 	{
 		GameMove choosenMove ;
 		MoveFactory moveFactory ;
@@ -538,29 +557,35 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 		Wolf wolf ;
 		byte moveIndex ;
 		boolean gamePlaying ;
-		System.out.println ( "GAME CONTROLLER - TURNATION PHASE : INIZIO " ) ;
-		blackSheep = findBlackSheep () ;
-		wolf = findWolf () ;
-		gamePlaying = true ;
-		while ( gamePlaying )
+		try 
 		{
-			turnNumber ++ ;
-			System.out.println ( "GAME CONTROLLER - TURNATION PHASE - NUMERO TURNO : " + turnNumber ) ;
-			try 
+			System.out.println ( "GAME CONTROLLER - TURNATION PHASE : INIZIO " ) ;
+			blackSheep = MapUtilities.findBlackSheepAtStart ( match.getGameMap () ) ;
+			wolf = MapUtilities.findWolfAtStart ( match.getGameMap () ) ;
+			gamePlaying = true ;
+			while ( gamePlaying )
 			{
-				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PECORA NERA PROVA A SCAPPARE " ) ;
-				blackSheep.escape () ;
-				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PECORA NERA SI MUOVE " ) ;
-			}
-			catch ( CharacterDoesntMoveException e1 ) 
-			{
-				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PECORA NERA NON SI MUOVE " ) ;
-			}
-			for ( Player currentPlayer : match.getPlayers() )
-			{		
-				if ( currentPlayer.isSuspended () == false )
+				turnNumber ++ ;
+				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - NUMERO TURNO : " + turnNumber ) ;
+				try 
+				{
+					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PECORA NERA PROVA A SCAPPARE " ) ;
+					blackSheep.escape () ;
+					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PECORA NERA SI MUOVE " ) ;
+				}
+				catch ( CharacterDoesntMoveException e1 ) 
+				{
+					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PECORA NERA NON SI MUOVE " ) ;
+				}
+				// if all the Users left the game, the Match will finish.
+				if ( match.getNumberOfPlayers () == 0 )
+					throw new WorkflowException () ;
+				for ( Player currentPlayer : match.getPlayers() )
+				{		
+					if ( currentPlayer.isSuspended () == false )
 					{
 						System.out.println ( "GAME CONTROLLER - TURNATION PHASE - TURNO DEL PLAYER : " + currentPlayer.getName () ) ;
+						// if the last iteration brought us to the final phase, the turnation phase has to finish
 						if ( match.isInFinalPhase () )
 							break ;
 						try
@@ -579,44 +604,58 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 										System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " HA ESEGUITO LA MOSSA." ) ;									
 									}
 									else
-										throw new MoveNotAllowedException ( "" ) ;
+									{
+										// if a user does not want to do any move, it means that he does not want to play anymore; remove him from the match...
+										match.removePlayer ( currentPlayer ) ;
+										playersGenericNotification ( "Ehy boys, " + currentPlayer.getName() + " ci ha lasciati..." + Utilities.CARRIAGE_RETURN + "Peggio per lui !" ) ;
+										break ;
+									}
 								} 
 								catch ( MoveNotAllowedException e ) 
 								{
+									// the user tried to do an invalid move; give him another chance
 									System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - ERRORE DURANTE L'ESECUZIONE DELLA MOSSA." ) ;									
 									currentPlayer.genericNotification ( "Non puoi fare questa mossa, scegline un'altra!" ) ;
 									moveIndex -- ;								
 								} 
 							}
+						}
+						catch ( TimeoutException t ) 
+						{
+							playersGenericNotification ( "The game is going to continue without " + currentPlayer.getName() + Utilities.CARRIAGE_RETURN + "May be he will come back later..." );
+						}
 					}
-					catch ( TimeoutException t ) 
-					{
-						notifyPlayerDisconnected ( currentPlayer );
-					}
+					if ( match.isInFinalPhase () == false && match.getBank().hasAFenceOfThisType ( FenceType.NON_FINAL ) == false )
+						try 
+						{
+							System.out.println ( "GAME CONTROLLER - TURNATION PHASE - ENTRO NELLA FASE FINALE " ) ;															
+							playersGenericNotification ( "Final Phase !!!" );
+							match.enterFinalPhase () ;
+						} 
+						catch ( AlreadyInFinalPhaseException e ) {}
 				}
-				if ( match.isInFinalPhase () == false && match.getBank().hasAFenceOfThisType ( FenceType.NON_FINAL ) == false )
-					try 
-					{
-						System.out.println ( "GAME CONTROLLER - TURNATION PHASE - ENTRO NELLA FASE FINALE " ) ;															
-						match.enterFinalPhase () ;
-					} 
-					catch ( AlreadyInFinalPhaseException e ) {}
+				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PRIMA DELLA FASE DI MARKET." ) ;															
+				marketPhase () ;
+				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - DOPO LA FASE DI MARKET." ) ;															
+				try 
+				{
+					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - IL LUPO PROVA A SCAPPARE " ) ;															
+					wolf.escape () ;
+					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - IL LUPO PROVA E' SCAPPATO " ) ;															
+				}
+				catch (CharacterDoesntMoveException e) 
+				{
+					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - IL LUPO NON E' RIUSCITO A SCAPPARE " ) ;															
+				}
+				if ( match.isInFinalPhase () )
+					gamePlaying = false ;
 			}
-			System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PRIMA DELLA FASE DI MARKET." ) ;															
-			marketPhase () ;
-			System.out.println ( "GAME CONTROLLER - TURNATION PHASE - DOPO LA FASE DI MARKET." ) ;															
-			try 
-			{
-				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - IL LUPO PROVA A SCAPPARE " ) ;															
-				wolf.escape () ;
-				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - IL LUPO PROVA E' SCAPPATO " ) ;															
-			}
-			catch (CharacterDoesntMoveException e) 
-			{
-				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - IL LUPO NON E' RIUSCITO A SCAPPARE " ) ;															
-			}
-			if ( match.isInFinalPhase () )
-				gamePlaying = false ;
+		}
+		catch ( WrongStateMethodCallException e2 ) 
+		{
+			// system error, this should never happen - stop everything.
+			System.out.println ( "MATCH_CONTROLLER - TURNATION PHASE : WOLF OR BLACK_SHEEP NOT FOUND AT THE BEGINNING." ) ;
+			throw new WorkflowException () ;
 		}
 	}
 	
@@ -648,59 +687,14 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	}
 	
 	/**
-	 * This method finds the only BlackSheep which, at the beginning of the Game is in Sheepsburg.
-	 * 
-	 * @return a reference to the only BlackSheep present in the GameMap associated with this GameController
-	 */
-	private BlackSheep findBlackSheep () 
-	{
-		Iterable < Animal > sheepsburgAnimals ;
-		BlackSheep result ;
-		Region sheepsburg ;
-		sheepsburg = match.getGameMap().getRegionByType ( RegionType.SHEEPSBURG ).iterator().next () ;
-		sheepsburgAnimals = sheepsburg.getContainedAnimals () ;
-		result = null ;
-		for ( Animal a : sheepsburgAnimals )
-			if ( a instanceof BlackSheep )
-			{
-				result = ( BlackSheep ) a ;
-				break ;
-			}
-		return result ;
-	}
-	
-	/**
-	 * This method finds the only Wolf which, at the beginning of the Game is in Sheepsburg.
-	 * 
-	 * @return a reference to the only Wolf present in the GameMap associated with this GameController
-	 */
-	private Wolf findWolf () 
-	{
-		Iterable < Animal > sheepsburgAnimals ;
-		Wolf result ;
-		Region sheepsburg ;
-		sheepsburg = match.getGameMap().getRegionByType ( RegionType.SHEEPSBURG ).iterator().next () ;
-		sheepsburgAnimals = sheepsburg.getContainedAnimals () ;
-		result = null ;
-		for ( Animal a : sheepsburgAnimals )
-			if ( a instanceof Wolf )
-			{
-				result = ( Wolf ) a ;
-				break ;
-			}
-		return result ;
-	}
-	
-	/**
 	 * This method implements the Market phase of the Game.
 	 * The code is straightforward and highly tighted with the business rules.
 	 * It uses some private helper methods. 
 	 */
 	private void marketPhase () 
 	{
-		Collection < SellableCard > choosenCards ;
 		Collection < SellableCard > sellableCards ;
-		SellableCard sellableCard ;
+		Iterable < SellableCard > receivedSellableCards ;
 		int amount ;
 		try
 		{
@@ -709,47 +703,45 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 			for ( Player currentPlayer : match.getPlayers () )
 			{
 				try
-				{
+				{					
 					amount = 0 ;
-					choosenCards = new LinkedList < SellableCard > () ;
+					// generate a List containing all the Cards this Player can buy
 					sellableCards = generateGettableCardList ( currentPlayer ) ;
-					sellableCard = currentPlayer.chooseCardToBuy ( sellableCards ) ;
-					if ( sellableCard != null && currentPlayer.getMoney () >= sellableCard.getSellingPrice () )
-					{
-						amount = amount + sellableCard.getSellingPrice () ;
-						choosenCards.add ( sellableCard ) ;
-						sellableCards.remove ( sellableCard ) ;
-						sellableCard = currentPlayer.chooseCardToBuy ( sellableCards ) ;
-						while ( sellableCard != null && currentPlayer.getMoney () >= amount + sellableCard.getSellingPrice () )
-						{
-							amount = amount + sellableCard.getSellingPrice () ;
-							choosenCards.add ( sellableCard ) ;
-							sellableCards.remove ( sellableCard ) ;
-							sellableCard = currentPlayer.chooseCardToBuy ( sellableCards ) ;
-						}
-						for ( SellableCard s : choosenCards )
-						{
-							s.getOwner().getSellableCards().remove ( s ) ;
-							s.getOwner().receiveMoney ( s.getSellingPrice () ) ;
-							currentPlayer.getSellableCards().add ( s ) ;
-							currentPlayer.pay ( s.getSellingPrice() ) ;
-							s.setOwner ( currentPlayer ) ;
-						}
-					}
+					// ask the User which Cards he wants to buy
+					receivedSellableCards = currentPlayer.chooseCardToBuy ( sellableCards ) ;
+					for ( SellableCard s : receivedSellableCards )
+						amount = amount + s.getSellingPrice () ;
+					// if he has enough money 
+					if ( amount <= currentPlayer.getMoney () )
+						for ( SellableCard s : receivedSellableCards )
+							{
+								s.getOwner().getSellableCards().remove ( s ) ;
+								s.getOwner().receiveMoney ( s.getSellingPrice () ) ;
+								currentPlayer.getSellableCards().add ( s ) ;
+								currentPlayer.pay ( s.getSellingPrice() ) ;
+								s.setOwner ( currentPlayer ) ;
+							}
 					else
-					{
-						// non ha soldi per comperare nemmeno una carta.
-					}
+						throw currentPlayer.new TooFewMoneyException () ;
 				}
-				catch ( NotSellableException n ) {}
-				catch ( SellingPriceNotSetException e ){}
-				catch ( TooFewMoneyException t ) {}
+				catch ( NotSellableException n ) 
+				{
+					currentPlayer.genericNotification ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;					
+				}
+				catch ( SellingPriceNotSetException e )
+				{
+					currentPlayer.genericNotification ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;										
+				}
+				catch ( TooFewMoneyException t ) 
+				{
+					currentPlayer.genericNotification ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;					
+				}
 			}
 		}
 		catch ( TimeoutException t ) 
 		{
 			for ( Player p : match.getPlayers() )
-				p.genericNotification ( "One of the players is not connected yet, so this market phase can not go away.\nIt's not our fault, it's his !!!" );
+				p.genericNotification ( "One of the players is not connected yet, so this market phase can not go away." + Utilities.CARRIAGE_RETURN + "It's not our fault, it's his !!!" );
 		}
 	}
 	
@@ -776,8 +768,9 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	/**
 	 * This move is the last in the game workflow.
 	 * It calculate the points that every Player did and communicate the winner. 
-	 */
-	private void resultsCalculationPhase () 
+	 * @throws WorkflowException in an unexpected error occurs 
+	 */ 
+	private void resultsCalculationPhase () throws WorkflowException 
 	{
 		MatchResultsCalculator matchResultsCalculator ;
 		Map <Player, Integer> playerScoresMap;
@@ -792,24 +785,26 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 		}
 		catch ( WrongMatchStateMethodCallException e ) 
 		{
-			// something wrong here.
-			throw new RuntimeException ( e ) ;
+			throw new WorkflowException () ;
 		}
 		
 	}
 
+	/***/
+	private void matchFinishingProcedure ( String msg ) 
+	{
+		for ( Player currentPlayer : match.getPlayers () )
+			currentPlayer.matchEndNotification ( msg ) ;
+	}
+	
+	/**
+	 * 
+	 * */
 	private void playersGenericNotification ( String msg )
 	{
 		for ( Player p : match.getPlayers() )
 			if ( p.isSuspended() == false )
 				p.genericNotification ( msg ) ;
-	}
-	
-	private void notifyPlayerDisconnected ( Player disconnectedPlayer ) 
-	{
-		for ( Player p : match.getPlayers() )
-			if ( p.isSuspended() == false )
-				p.genericNotification ( "The game is going to continue without " + disconnectedPlayer.getName() + "\nMay be he will come back later..." );
 	}
 	
 	// INNER CLASSES
@@ -819,7 +814,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	 * when the Timer expires.
 	 * It set the MatchState to the INITIALIZATION value, and cancel the Timer. 
 	 */
-	private class WaitingPlayersTimerTask extends TimerTask
+	private class WaitingPlayersTimerTask extends TimerTask implements Serializable
 	{
 
 		/**
@@ -894,7 +889,7 @@ class MatchIdentifier implements Identifiable < Match >
 /**
  * Component that manages the evolution of the Lambs in the Game. 
  */
-class LambEvolverImpl implements LambEvolver
+class LambEvolverImpl implements LambEvolver , Serializable
 {
 
 	/**

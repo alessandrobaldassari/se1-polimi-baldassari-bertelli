@@ -2,9 +2,9 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionAbstractObservable;
 
 import java.io.Serializable;
@@ -178,18 +178,6 @@ public class GameMap extends WithReflectionAbstractObservable < GameMapObserver 
 				res.add ( road ) ;
 		return res ;
 	}
-
-	/***/
-	public static boolean areAdjacents ( Road road , Region target ) 
-	{
-		Region border1 ;
-		Region border2 ;
-		boolean res ;
-		border1 = road.getFirstBorderRegion () ;
-		border2 = road.getSecondBorderRegion () ;
-		res = border1.equals( target ) || border2.equals ( target ) ;
-		return res ;
-	}
 	
 	/**
 	 * AS THE SUPER ONE'S
@@ -198,13 +186,13 @@ public class GameMap extends WithReflectionAbstractObservable < GameMapObserver 
 	public String toString () 
 	{
 		String res ;
-		res = "GameMap." ;
-		res = res + "Regions : \n" ; 
+		res = "GameMap." + Utilities.CARRIAGE_RETURN ;
+		res = res + "Regions : " + Utilities.CARRIAGE_RETURN ; 
 		for ( Region r : regions.values() )
-			res = res + "* " + r + "\n" ;
-		res = res + "Roads :\n" ;
+			res = res + "* " + r + Utilities.CARRIAGE_RETURN ;
+		res = res + "Roads : " + Utilities.CARRIAGE_RETURN ;
 		for ( Road r : roads.values() )
-			res = res + "* " + r + "\n" ;
+			res = res + "* " + r + Utilities.CARRIAGE_RETURN ;
 		return res ;
 	}	
 	
