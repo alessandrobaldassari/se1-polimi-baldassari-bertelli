@@ -87,12 +87,10 @@ public class GUIController extends ViewPresenter
 	@Override
 	public void startApp () 
 	{
-		WaitingView waitingView ;
 		//views.put ( SHEPERD_COLOR_KEY , new SheperdColorView ( GUIController.this ) ) ;
 		//views.put ( MOVE_CHOOSE_KEY , new MoveChooseView ( GUIController.this ) ) ;
 		//views.put ( CHOOSE_CARDS_KEY , new CardsChooseView ( GUIController.this ) ) ;
 		//views.put ( GAME_VIEW_KEY , new GameView () ) ;
-		waitingView = ( WaitingView ) getView ( WAITING_VIEW_KEY ) ;
 		currentShownWindow = waitingView ;
 		waitingView.setText ( PresentationMessages.WELCOME_MESSAGE + Utilities.CARRIAGE_RETURN + PresentationMessages.SERVER_CONNECTION_MESSAGE ) ;
 		GraphicsUtilities.showUnshowWindow ( waitingView , false , true ) ;
@@ -119,14 +117,12 @@ public class GUIController extends ViewPresenter
 	public String onNameRequest () 
 	{
 		String res ;
-		WaitingView waitingView ;
 		res = ( String ) JOptionPane.showInputDialog ( currentShownWindow , PresentationMessages.NAME_REQUEST_MESSAGE , PresentationMessages.APP_NAME , JOptionPane.QUESTION_MESSAGE ) ;
 		while ( res == null || res.compareTo ( Utilities.EMPTY_STRING ) == 0 )
 		{
 			JOptionPane.showMessageDialog ( currentShownWindow , PresentationMessages.INVALID_CHOOSE_MESSAGE , PresentationMessages.APP_NAME , JOptionPane.ERROR_MESSAGE ) ;
 			res = ( String ) JOptionPane.showInputDialog ( currentShownWindow , PresentationMessages.NAME_REQUEST_MESSAGE , PresentationMessages.APP_NAME , JOptionPane.QUESTION_MESSAGE ) ;	
 		}
-		waitingView = (WaitingView) getView ( WAITING_VIEW_KEY ) ;
 		waitingView.setText ( PresentationMessages.NAME_VERIFICATION_MESSAGE ) ;
 		return res ;
 	}
@@ -137,12 +133,10 @@ public class GUIController extends ViewPresenter
 	@Override
 	public void onNameRequestAck ( boolean isOk , final String notes ) 
 	{
-		WaitingView waitingView ;
 		System.out.println ( "GUI_CONTROLLER - ON_NAME_REQUEST_ACK : BEGIN." ) ;
 		if ( isOk )
 		{
 			generationNotification ( PresentationMessages.NAME_ACCEPTED_MESSAGE + Utilities.CARRIAGE_RETURN + notes );
-			waitingView = ( WaitingView ) getView ( WAITING_VIEW_KEY ) ;
 			waitingView.setText ( PresentationMessages.WAITING_FOR_OTHER_PLAYERS_MESSAGE ) ;
 		}
 		else
@@ -157,11 +151,8 @@ public class GUIController extends ViewPresenter
 	public void onNotifyMatchStart () 
 	{
 		System.out.println ( "notify match start" ) ;
-		GameView gameView ;
 		generationNotification ( PresentationMessages.MATCH_STARTING_MESSAGE ) ;
 		GraphicsUtilities.showUnshowWindow ( currentShownWindow , true , false ) ;
-		while ( getView ( GAME_VIEW_KEY ) == null ) ;
-		gameView = ( GameView ) getView ( GAME_VIEW_KEY ) ;
 		currentShownWindow = gameView ;
 		GraphicsUtilities.showUnshowWindow ( gameView , false , true ) ;
 	}
@@ -184,9 +175,7 @@ public class GUIController extends ViewPresenter
 	{
 		System.out.println ( "GUI_CONTROLLER - ON_SHEPERD_COLOR_REQUEST : INIZIO" ) ;
 		NamedColor res ;
-		SheperdColorView sheperdColorView ;
-		sheperdColorView = ( SheperdColorView ) getView ( SHEPERD_COLOR_KEY ) ;
-		sheperdColorView.setColors ( availableColors ) ;
+		//sheperdColorView.setColors ( availableColors ) ;
 		color.set ( null ) ;
 		GraphicsUtilities.showUnshowWindow ( sheperdColorView , true , true ) ;
 		waitForAtomicVariable ( color ) ;
@@ -229,9 +218,7 @@ public class GUIController extends ViewPresenter
 	public Sheperd onChooseSheperdForATurn ( Iterable < Sheperd > sheperds ) throws IOException
 	{
 		Sheperd res ;
-		GameView gameView ;
 		generationNotification ( PresentationMessages.CHOOSE_SHEPERD_FOR_A_TURN_MESSAGE ) ;
-		gameView = ( GameView ) getView ( GAME_VIEW_KEY ) ;
 		index.set(null); 
 		gameView.setInputMode ( GameViewInputMode.SHEPERDS ) ;
 		waitForAtomicVariable ( index ) ;
@@ -253,9 +240,6 @@ public class GUIController extends ViewPresenter
 	@Override
 	public GameMove onDoMove ( MoveFactory moveFactory , GameMap gameMap ) 
 	{
-		MoveChooseView moveChooseView ;		
-		CardsChooseView cardsChooseView ;
-		GameView gameView ;
 		GameMove res ;
 		RegionType type ;
 		Region region ;
@@ -263,9 +247,6 @@ public class GUIController extends ViewPresenter
 		Animal animal ;
 		boolean endCycle ;
 		// first ask the user what move he wants to do.
-		moveChooseView = ( MoveChooseView ) getView ( MOVE_CHOOSE_KEY ) ;
-		cardsChooseView = (CardsChooseView) getView ( CHOOSE_CARDS_KEY ) ;
-		gameView = ( GameView ) getView ( GAME_VIEW_KEY ) ;
 		res = null ;
 		do
 		{
@@ -430,12 +411,9 @@ public class GUIController extends ViewPresenter
 	@Override
 	public void onGUIConnectorOnNotification ( Serializable guiConnector ) 
 	{
-		GameView gameView ;
-		while ( getView ( GAME_VIEW_KEY ) == null ) ;
 		SocketGUIMapClient c ;
 		try 
 		{
-			gameView = (GameView) getView ( GAME_VIEW_KEY ) ;
 			c = new SocketGUIMapClient ( ( Integer ) guiConnector ) ;
 			executorService.submit(c);
 			gameView.setGameMapObservable ( c ) ;
@@ -582,22 +560,9 @@ public class GUIController extends ViewPresenter
 		
 	}
 	
-	/**
-	 * Finds in the views map an object with the key equals to the parameter.
-	 * 
-	 * @param key the key.
-	 * @return the value associated with the key key, false if this key is not in the map.
-	 */
-	private Window getView ( String key ) 
-	{
-		return views.get ( key ) ;
-	}
-	
 	/***/
 	private void processGameViewIntResReceived ( int value , GameViewInputMode rightMode ) 
 	{
-		GameView gameView ;
-		gameView = ( GameView ) getView ( GAME_VIEW_KEY ) ;
 		if ( gameView.getInputMode () == rightMode )
 		{
 			gameView.setInputMode ( null ) ;
@@ -687,11 +652,8 @@ public class GUIController extends ViewPresenter
 		@Override
 		public void run () 
 		{
-			for ( Window w : views.values () )
-			{
-				w.setVisible ( false ) ;
-				w.dispose () ;
-			}	
+			waitingView.dispose();
+			gameView.dispose();
 		}
 		
 	}
