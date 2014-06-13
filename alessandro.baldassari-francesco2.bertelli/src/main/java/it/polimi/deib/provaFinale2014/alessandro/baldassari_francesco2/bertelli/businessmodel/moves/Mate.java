@@ -130,7 +130,7 @@ public class Mate extends GameMove
 					try 
 					{
 						// do the mate
-						lamb = sheep.mate ( ram ) ;
+						lamb = sheep.mate ( ram , clockSource.getTurnNumber () ) ;
 						whereMate.addAnimal ( lamb ) ;
 						lamb.moveTo ( whereMate );
 						// launch some stuff to mangage the evolution of the born Lamb.
@@ -145,13 +145,17 @@ public class Mate extends GameMove
 					catch ( MateNotSuccesfullException e ) 
 					{
 						// some type of notification ...
+					} 
+					catch ( WrongMatchStateMethodCallException e ) 
+					{
+						// someone called me but it's not the right time.
 					}
 				}
 				else
-					throw new MoveNotAllowedException ( "" ) ;
+					throw new MoveNotAllowedException ( "NO MOM" ) ;
 			}
 			else
-				throw new MoveNotAllowedException ( "" ) ;
+				throw new MoveNotAllowedException ( "NO DAD" ) ;
 		}
 		else throw new IllegalArgumentException () ;
 	}

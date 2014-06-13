@@ -57,7 +57,7 @@ public class AdultOvine extends Ovine
 	 *         to this AdultOvine's type
 	 * @throws MateNotSuccesfullException if this mate process does not go well.
 	 */
-	public Lamb mate ( AdultOvine partner ) throws CanNotMateWithHimException, MateNotSuccesfullException  
+	public Lamb mate ( AdultOvine partner , int currentTurn ) throws CanNotMateWithHimException, MateNotSuccesfullException  
 	{
 		AdultOvine father ;
 		AdultOvine mother ;
@@ -78,7 +78,7 @@ public class AdultOvine extends Ovine
 					mother = this ;
 					father = partner ;
 				}
-				res = new Lamb ( "" , 0 , father , mother ) ;
+				res = new Lamb ( "" , currentTurn , father , mother ) ;
 			}
 			else
 				throw new MateNotSuccesfullException ( this , partner ) ; 

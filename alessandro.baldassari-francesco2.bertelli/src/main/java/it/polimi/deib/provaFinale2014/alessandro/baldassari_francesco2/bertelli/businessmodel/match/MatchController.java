@@ -921,7 +921,8 @@ class LambEvolverImpl implements LambEvolver , Serializable
 		{
 			whereTheLambIsNow = lamb.getPosition () ;
 			whereTheLambIsNow.removeAnimal ( lamb ) ;
-			newOvine = animalFactory.newAdultOvine ( MathUtilities.genProbabilityValue() > 0.5 ? AdultOvineType.RAM : AdultOvineType.SHEEP ) ;
+			lamb.moveTo ( null ) ;
+			newOvine = animalFactory.newAdultOvine ( lamb.getName () + "EVOLVED" , MathUtilities.genProbabilityValue() > 0.5 ? AdultOvineType.RAM : AdultOvineType.SHEEP ) ;
 			newOvine.moveTo ( whereTheLambIsNow ) ;
 			whereTheLambIsNow.addAnimal ( newOvine ) ;
 		}

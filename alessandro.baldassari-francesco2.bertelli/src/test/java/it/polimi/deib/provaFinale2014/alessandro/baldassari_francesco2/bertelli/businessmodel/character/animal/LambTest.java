@@ -45,7 +45,7 @@ public class LambTest
 		lamb = null ;
 		while ( lamb == null )
 		try {
-			lamb = ram.mate(sheep);
+			lamb = ram.mate(sheep,4);
 		}
 		catch (CanNotMateWithHimException e) {}
 		catch (MateNotSuccesfullException e) {}

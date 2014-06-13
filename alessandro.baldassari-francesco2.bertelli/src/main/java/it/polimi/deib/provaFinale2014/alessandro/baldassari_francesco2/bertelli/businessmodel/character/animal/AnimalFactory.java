@@ -3,6 +3,8 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import java.io.Serializable;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.CanNotMateWithHimException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.MateNotSuccesfullException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.FactorySupport;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
@@ -121,6 +123,26 @@ public class AnimalFactory implements Serializable
 	{
 		Ovine res ;
 		res = newAdultOvine ( OVINE_BASE_NAME + uidGenerator.generateNewValue () , type ) ;
+		return res ;
+	}
+	
+	/**
+	 * Generates a new Ovine and returns it with a default name. 
+	 * 
+	 * @param birthTurn the turn when this Lamb has to born.
+	 * @param mom the Mom of the new Lamb.
+	 * @param dad the Dad of the new Lamb.
+	 * @return the created Lamb
+	 * @throws IllegalArgumentException if the dad parameter is not a RAM and mom is not a SHEEP or the
+	 *         birthTurn parameter is < 0.
+	 */
+	public Ovine newLamb ( int birthTurn , AdultOvine dad , AdultOvine mom ) 
+	{
+		Ovine res ;
+		if ( mom.getType () == AdultOvineType.SHEEP && dad.getType () == AdultOvineType.RAM && birthTurn >= 0 )
+			res = new Lamb ( OVINE_BASE_NAME + uidGenerator.generateNewValue () , birthTurn , dad , mom ) ;
+		else
+			throw new IllegalArgumentException () ;
 		return res ;
 	}
 	

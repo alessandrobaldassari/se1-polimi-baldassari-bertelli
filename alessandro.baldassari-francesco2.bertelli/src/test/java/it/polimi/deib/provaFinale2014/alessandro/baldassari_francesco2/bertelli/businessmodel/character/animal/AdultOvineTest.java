@@ -69,10 +69,10 @@ public class AdultOvineTest {
 	{
 		try 
 		{
-			lamb = ram.mate(sheep);
+			lamb = ram.mate(sheep,3);
 			if (lamb != null) 
 			{
-				assertTrue(lamb.getBirthTurn() == 0);
+				assertTrue(lamb.getBirthTurn() == 3);
 				assertTrue(lamb.getFather().equals( ram ) ) ;
 				assertTrue(lamb.getMother().equals ( sheep ) );
 				assertTrue(lamb.getName() == "");

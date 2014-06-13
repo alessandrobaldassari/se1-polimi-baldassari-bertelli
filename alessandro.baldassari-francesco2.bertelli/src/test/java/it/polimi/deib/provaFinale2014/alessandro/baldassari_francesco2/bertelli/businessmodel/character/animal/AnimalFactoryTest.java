@@ -104,6 +104,21 @@ public class AnimalFactoryTest
 	}
 	
 	@Test
+	public void newLamb () 
+	{
+		AdultOvine o1 ;
+		AdultOvine o2 ;
+		Lamb l ;
+		o1 = (AdultOvine) af.newAdultOvine ( AdultOvineType.RAM ) ;
+		o2 = (AdultOvine) af.newAdultOvine ( AdultOvineType.SHEEP ) ;
+		l = (Lamb) af.newLamb ( 3 , o1 , o2 ) ;
+		assertTrue ( l.getBirthTurn () == 3 ) ;
+		assertTrue ( l.getMother().equals ( o2 ) ) ;
+		assertTrue ( l.getFather().equals(o1) ) ;
+		
+	}
+	
+	@Test
 	public void newBlackSheep () 
 	{
 		Animal w ;

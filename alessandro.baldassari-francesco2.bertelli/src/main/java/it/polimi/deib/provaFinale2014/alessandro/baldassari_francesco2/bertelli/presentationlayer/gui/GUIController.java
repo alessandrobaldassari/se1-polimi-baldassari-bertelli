@@ -41,8 +41,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * This is the Component that manage all the GUI infrastructure.
  * It is a Controller in the sense of the MVC pattern : it shows windows, handle gui events and so on. 
  */
-public class GUIController extends ViewPresenter 
-	implements SheperdColorRequestViewObserver , MoveChooseViewObserver , CardsChooseViewObserver , GameMapViewObserver
+public class GUIController extends ViewPresenter implements GameMapViewObserver
 {
 	
 	/***/
@@ -174,12 +173,10 @@ public class GUIController extends ViewPresenter
 	public NamedColor onSheperdColorRequest ( Iterable < NamedColor > availableColors ) 
 	{
 		System.out.println ( "GUI_CONTROLLER - ON_SHEPERD_COLOR_REQUEST : INIZIO" ) ;
-		NamedColor res ;
+		NamedColor res = null ;
 		//sheperdColorView.setColors ( availableColors ) ;
-		color.set ( null ) ;
-		GraphicsUtilities.showUnshowWindow ( sheperdColorView , true , true ) ;
-		waitForAtomicVariable ( color ) ;
-		res = color.get () ;
+		//GraphicsUtilities.showUnshowWindow ( sheperdColorView , true , true ) ;
+		//res = color.get () ;
 		System.out.println ( "GUI_CONTROLLER - ON_SHEPERD_COLOR_REQUEST : FINE" ) ;
 		return res ;
 	}
@@ -192,9 +189,7 @@ public class GUIController extends ViewPresenter
 	public Road chooseInitRoadForSheperd ( Iterable < Road > availableRoads ) throws IOException 
 	{
 		Road res ;
-		GameView gameView ;
 		generationNotification ( PresentationMessages.CHOOSE_INITIAL_ROAD_FOR_A_SHEPERD_MESSAGE ) ;
-		gameView = ( GameView ) getView ( GAME_VIEW_KEY ) ;
 		index.set(null); 
 		gameView.setInputMode ( GameViewInputMode.ROADS ) ;
 		waitForAtomicVariable(index);
@@ -241,6 +236,7 @@ public class GUIController extends ViewPresenter
 	public GameMove onDoMove ( MoveFactory moveFactory , GameMap gameMap ) 
 	{
 		GameMove res ;
+		GameMoveType move ;
 		RegionType type ;
 		Region region ;
 		Road road ;
@@ -250,13 +246,14 @@ public class GUIController extends ViewPresenter
 		res = null ;
 		do
 		{
-			move.set ( null ) ;
-			GraphicsUtilities.showUnshowWindow ( moveChooseView , true , true ) ;
-			waitForAtomicVariable ( move ) ;
-			GraphicsUtilities.showUnshowWindow ( moveChooseView , false , false ) ; 
+			//move.set ( null ) ;
+			//GraphicsUtilities.showUnshowWindow ( moveChooseView , true , true ) ;
+			//waitForAtomicVariable ( move ) ;
+			//GraphicsUtilities.showUnshowWindow ( moveChooseView , false , false ) ; 
 			userWantsToChangeMove = false ;
 			// allow the user the do his move
-			switch ( move.get() )
+			move = null ; //destroy !
+			switch ( move )
 			{
 				case BREAK_DOWN :
 					endCycle = false ;
@@ -431,69 +428,6 @@ public class GUIController extends ViewPresenter
 	}
 	
 	// EVENT HANDLERS
-
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public void onColorChoosed ( NamedColor selectedColor ) 
-	{
-		GraphicsUtilities.showUnshowWindow ( getView ( SHEPERD_COLOR_KEY ) , false , false ) ;
-		synchronized ( color )
-		{
-			color.set ( selectedColor ) ;
-			color.notifyAll () ;
-		}
-	}
-
-	/**
-	 * AS THE SUPER'S ONE. 
-	 * Not called in this version.
-	 */
-	@Override
-	public void onDoNotWantChooseColor () 
-	{
-		synchronized  ( color ) 
-		{
-			color.notifyAll () ;
-		}
-		stopApp () ;
-	}
-	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public void onMoveChoosed ( GameMoveType move ) 
-	{
-		GraphicsUtilities.showUnshowWindow ( getView ( SHEPERD_COLOR_KEY ) , false , false );
-		synchronized ( move )
-		{
-			this.move.set ( move ) ;
-			this.color.notifyAll () ;
-		}
-	}
-	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public void onDoNotWantChooseMove() 
-	{
-		// TODO Auto-generated method stub
-		
-	}
-	
-	@Override
-	public void onCardChoosed(Iterable<Card> selectedCard) {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public void onDoNotWantChooseAnyCard() {
-		// TODO Auto-generated method stub
-		
-	}
 	
 	/**
 	 * AS THE SUPER'S ONE 
