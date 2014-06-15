@@ -17,11 +17,13 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveNotAllowedException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelection;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.NotSellableException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.SellingPriceNotSetException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
@@ -225,9 +227,9 @@ public class CLIController extends ViewPresenter
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public GameMove onDoMove ( MoveFactory f , GameMap m  ) throws IOException 
+	public MoveSelection onDoMove ( MoveSelector f , GameMap m  ) throws IOException 
 	{
-		GameMove res = null ;
+		MoveSelection res = null ;
 		String s ;
 		int i ;
 		boolean repeat ;
@@ -270,7 +272,10 @@ public class CLIController extends ViewPresenter
 				if ( res == null )
 					repeat = true ;
 				else
+				{
 					repeat = false ;
+					f.setSelection(res); 
+				}
 			}
 			else
 			{
@@ -316,7 +321,7 @@ public class CLIController extends ViewPresenter
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public Iterable < SellableCard > onChoseCardToBuy ( Iterable < SellableCard > sellableCards ) throws IOException 
+	public Iterable < SellableCard > onChoseCardToBuy ( Iterable < SellableCard > sellableCards , Integer playerMoney ) throws IOException 
 	{
 		List < SellableCard > availableCards ;
 		List < SellableCard > res ;
@@ -324,16 +329,50 @@ public class CLIController extends ViewPresenter
 		int i ;
 		availableCards = CollectionsUtilities.newListFromIterable ( sellableCards ) ;
 		res = new LinkedList < SellableCard > () ;
-		do{
-			s = "Scegli una carta che vuoi comprare:" ;
-			s = s + "-1. Non voglio comprare alcuna carta." ;
-			for ( i = 0 ; i < availableCards.size() ; i ++ )
-				s = s + i + ". " + availableCards.get ( i ) ;
-			i = GraphicsUtilities.checkedIntInputWithEscape ( 0 , availableCards.size () - 1 , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
-			if ( i != -1 )
-				res.add ( availableCards.get ( i ) ) ;
+		int sum  ;
+		boolean exit ;
+		do
+		{
+			sum = 0 ;
+			do
+			{
+				s = "Scegli una carta che vuoi comprare:" ;
+				s = s + "-1. Non voglio comprare alcuna carta." ;
+				for ( i = 0 ; i < availableCards.size() ; i ++ )
+					s = s + i + ". " + availableCards.get ( i ) ;
+				i = GraphicsUtilities.checkedIntInputWithEscape ( 0 , availableCards.size () - 1 , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
+				if ( i != -1 )
+				{
+					res.add ( availableCards.get ( i ) ) ;
+					try 
+					{
+						sum = sum + availableCards.get ( i ).getSellingPrice () ;
+					}
+					catch (NotSellableException e) 
+					{	
+						e.printStackTrace();
+					}
+					catch (SellingPriceNotSetException e) 
+					{
+						e.printStackTrace();
+					}
+				}
+			}
+			while ( i != -1 ) ;
+			if ( sum > playerMoney )
+			{
+				writer.println ( "Sorry, ma non hai abbastanza soldi !" ) ;
+				i = GraphicsUtilities.checkedIntInputWithoutEscape ( 1 , 2 , -1 , "Vuoi riselezionare le carte ( 1 ) o non comperarne alcuna ( 2 ) ?" , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer, reader ) ;
+				if ( i == 1 )
+					exit = false ;
+				else
+					exit = true ;
+				res.clear();
+			}
+			else
+				exit = true ;
 		}
-		while ( i != -1 ) ;
+		while ( ! exit ) ;
 		return res ;
 	}
 
@@ -349,11 +388,11 @@ public class CLIController extends ViewPresenter
 	/**
 	 * This method manages the killing action. 
 	 */
-	private GameMove killing ( MoveFactory f , GameMap m ) throws IOException 
+	private MoveSelection killing ( MoveSelector f , GameMap m ) throws IOException 
 	{ 
 		List <Ovine> killableAnimals ;
 		String s ;
-		GameMove res ;
+		MoveSelection res ;
 		Region r1, r2;
 		killableAnimals = new LinkedList<Ovine>();
 		int j;
@@ -377,9 +416,9 @@ public class CLIController extends ViewPresenter
 		if ( j != -1 )
 			try 
 			{
-				res = f.newBreakDownMove(killableAnimals.get(j));
+				res = f.newBreakdown(killableAnimals.get(j));
 			} 
-			catch (MoveNotAllowedException e1) 
+			catch (Exception e1) 
 			{
 				writer.println ( PresentationMessages.MOVE_NOT_ALLOWED_MESSAGE + Utilities.CARRIAGE_RETURN + "Provane un'altra!" ) ;
 				res = null ;
@@ -392,11 +431,11 @@ public class CLIController extends ViewPresenter
 	/**
 	 * This message  
 	 */
-	private GameMove buyCard ( MoveFactory f , GameMap m ) throws IOException 
+	private MoveSelection buyCard ( MoveSelector f , GameMap m ) throws IOException 
 	{
 		List < RegionType > regs ;
 		String s ;
-		GameMove res ;
+		MoveSelection res ;
 		int i ;
 		s = "Quale carta vuoi comprare ( regione ) ?" + Utilities.CARRIAGE_RETURN ;
 		regs = new LinkedList < RegionType > ()  ;
@@ -428,9 +467,9 @@ public class CLIController extends ViewPresenter
 	/**
 	 * This message manage the mate action. 
 	 */
-	private GameMove mate ( MoveFactory f , GameMap m ) throws IOException 
+	private MoveSelection mate ( MoveSelector f , GameMap m ) throws IOException 
 	{
-		GameMove res ;
+		MoveSelection res ;
 		String s ;
 		int i ;
 		s = "Regioni dove puoi compire l'accoppiamento : " + Utilities.CARRIAGE_RETURN ;
@@ -456,11 +495,11 @@ public class CLIController extends ViewPresenter
 	/**
 	 * This method manage the moveOvine action. 
 	 */
-	private GameMove moveOvine ( MoveFactory f , GameMap m ) throws IOException 
+	private MoveSelection moveOvine ( MoveSelector f , GameMap m ) throws IOException 
 	{
 		List < Ovine > movableAnimals ;
 		Region selReg ;
-		GameMove res ;
+		MoveSelection res ;
 		Sheperd sh ;
 		Region r3 ;
 		Region r4;
@@ -505,11 +544,11 @@ public class CLIController extends ViewPresenter
 	/**
 	 * This method manages the moveSheperd action. 
 	 */
-	private GameMove moveSheperd ( MoveFactory f , GameMap m ) throws IOException 
+	private MoveSelection moveSheperd ( MoveSelector f , GameMap m ) throws IOException 
 	{
 		List < Road > l ;
 		String s ;
-		GameMove res ;
+		MoveSelection res ;
 		int i ;
 		l = CollectionsUtilities.newListFromIterable ( m.getFreeRoads () ) ;
 		s =  "Strade ok : " + Utilities.CARRIAGE_RETURN ;

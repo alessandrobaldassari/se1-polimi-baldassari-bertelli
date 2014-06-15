@@ -60,7 +60,9 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
 		setAlwaysOnTop ( true ) ;	
 		view.setShowKo(false); 
-		pack () ;
+		setUndecorated(true);
+ 		setSize ( GraphicsUtilities.getVGAResolution () ) ;
+		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
 	}
 
 	/**

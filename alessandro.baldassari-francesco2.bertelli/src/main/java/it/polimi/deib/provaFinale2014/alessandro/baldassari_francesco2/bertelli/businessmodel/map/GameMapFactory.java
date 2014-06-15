@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.DataFilePaths;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.FilePaths;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
@@ -55,8 +55,8 @@ public class GameMapFactory extends WithFactorySupportObject < Match > implement
 		InputStream roadsCSVInputStream ;
 		try 
 		{
-			regionsCSVInputStream = Files.newInputStream ( Paths.get ( DataFilePaths.REGIONS_FILE_PATH ) , StandardOpenOption.READ  ) ;
-			roadsCSVInputStream = Files.newInputStream ( Paths.get ( DataFilePaths.ROADS_FILE_PATH ) , StandardOpenOption.READ ) ;
+			regionsCSVInputStream = Files.newInputStream ( Paths.get ( FilePaths.REGIONS_PATH ) , StandardOpenOption.READ  ) ;
+			roadsCSVInputStream = Files.newInputStream ( Paths.get ( FilePaths.ROADS_PATH ) , StandardOpenOption.READ ) ;
 			regionsMap = readRegionsDataFile ( regionsCSVInputStream ) ;
 			roadsMap = readRoadsDataFile ( roadsCSVInputStream , regionsMap ) ;
 			regionsCSVInputStream.close () ;

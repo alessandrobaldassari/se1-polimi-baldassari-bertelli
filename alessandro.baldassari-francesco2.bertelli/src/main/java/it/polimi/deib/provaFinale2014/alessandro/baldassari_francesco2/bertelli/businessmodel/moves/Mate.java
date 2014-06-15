@@ -60,7 +60,7 @@ public class Mate extends GameMove
 	 * @throws IllegalArgumentException if the theOneWhoWantsTheMate or the whereMate parameters
 	 *         is null.
 	 */
-	protected Mate ( TurnNumberClock clockSource , LambEvolver lambEvolver , Sheperd theOneWhoWantsTheMate , Region whereMate ) throws MoveNotAllowedException 
+	public Mate ( TurnNumberClock clockSource , LambEvolver lambEvolver , Sheperd theOneWhoWantsTheMate , Region whereMate ) throws MoveNotAllowedException 
 	{
 		List < AdultOvine > adults ;
 		System.out.println ( "clock : " + clockSource ) ;

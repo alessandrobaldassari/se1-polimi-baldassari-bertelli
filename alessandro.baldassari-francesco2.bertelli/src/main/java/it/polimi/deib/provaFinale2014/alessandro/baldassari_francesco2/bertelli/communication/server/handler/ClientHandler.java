@@ -3,7 +3,9 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.factory.MoveExecutor;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelection;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.PlayerWantsToExitGameException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
@@ -312,11 +314,15 @@ public abstract class ClientHandler < T >
 	 * @return the card the client wants to buy, null if he doesn't want to buy cards anymore.
 	 * @throws IOException if something goes wrong with the communication.
 	 */
-	public Iterable < SellableCard > chooseCardToBuy ( Iterable < SellableCard > src ) throws IOException 
+	public Iterable < SellableCard > chooseCardToBuy ( Iterable < SellableCard > src , Integer playerMoney ) throws IOException 
 	{
 		Message m ;
+		Collection < Serializable > params ;
 		Iterable < SellableCard > res ;
-		m = Message.newInstance ( GameProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST , Collections.<Serializable>singleton ( ( Serializable ) src ) ) ;
+		params = new ArrayList < Serializable > ( 2 ) ;
+		params.add ( (Serializable) src ) ;
+		params.add ( playerMoney ) ;
+		m = Message.newInstance ( GameProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST , params ) ;
 		write ( m ) ;
 		m = read () ;
 		if ( m.getOperation() == GameProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_RESPONSE )
@@ -338,13 +344,13 @@ public abstract class ClientHandler < T >
 	 * @return the move the client wants to do.
 	 * @throws IOException if something goes wrong with the communication.
 	 */
-	public GameMove doMove ( MoveFactory gameFactory , GameMap gameMap ) throws IOException 
+	public MoveSelection doMove ( MoveSelector moveSelector , GameMap gameMap ) throws IOException 
 	{
-		GameMove res ;
+		MoveSelection res ;
 		Collection < Serializable > params ;
 		Message m ;
 		params = new ArrayList < Serializable > ( 2 ) ;
-		params.add ( gameFactory ) ;
+		params.add ( moveSelector ) ;
 		params.add ( gameMap ) ;
 		m = Message.newInstance ( GameProtocolMessage.DO_MOVE_REQUESTING_REQUEST , params ) ;
 		write ( m ) ;
@@ -352,7 +358,7 @@ public abstract class ClientHandler < T >
 		if ( m.getOperation () == GameProtocolMessage.DO_MOVE_REQUESTING_RESPONSE )
 		{
 			System.out.println ( "CLIENT_HANDLER - DO_MOVE : RESPONSE HEADER OK." + m.getParameters() ) ;
-			res = ( GameMove ) CollectionsUtilities.newListFromIterable( m.getParameters() ).get ( 0 ) ;
+			res = ( MoveSelection ) CollectionsUtilities.newListFromIterable( m.getParameters() ).get ( 0 ) ;
 		}
 		else
 			throw new IOException ( "BAD_RESPONSE" ) ;

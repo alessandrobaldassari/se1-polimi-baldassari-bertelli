@@ -7,7 +7,7 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.io.IOException;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.DataFilePaths;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.FilePaths;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
@@ -36,6 +36,7 @@ public class WaitingView extends JDialog implements NotificationContainer
 		add ( waitingPanel ) ;
 		setSize ( GraphicsUtilities.getVGAResolution() ) ;
 		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
+		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
 	}
 	
 	/**
@@ -130,7 +131,7 @@ class WaitingViewPanel extends FrameworkedWithGridBagLayoutPanel
 			textLabel = new JLabel () ;
 			notificationArea = new NotificationPanel();
 			p = new JProgressBar () ;
-			backgroundImage = GraphicsUtilities.getImage ( DataFilePaths.BACKGROUND_IMAGE_FILE_PATH ) ;
+			backgroundImage = GraphicsUtilities.getImage ( FilePaths.COVER_IMAGE_PATH ) ;
 		} 
 		catch ( IOException e ) 
 		{

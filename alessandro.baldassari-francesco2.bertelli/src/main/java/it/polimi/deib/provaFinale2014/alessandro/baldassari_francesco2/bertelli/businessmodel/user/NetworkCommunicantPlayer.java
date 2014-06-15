@@ -12,8 +12,8 @@ import java.util.concurrent.TimeoutException;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelection;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ConnectionLoosingController;
@@ -57,7 +57,7 @@ public class NetworkCommunicantPlayer extends Player
 	 * @param clientHandler the value for the ClientHandler property.
 	 * @throws IllegalArgumentException if the clientHandler parameter is null.
 	 */
-	public NetworkCommunicantPlayer ( String name , ClientHandler clientHandler , ConnectionLoosingController connectionLoosingManager ) 
+	public NetworkCommunicantPlayer ( String name , ClientHandler < ? > clientHandler , ConnectionLoosingController connectionLoosingManager ) 
 	{
 		super ( name ) ;
 		if ( clientHandler != null && connectionLoosingManager != null )
@@ -141,6 +141,7 @@ public class NetworkCommunicantPlayer extends Player
 			public Boolean call () throws IOException
 			{
 				Iterable < SellableCard > arrived ;
+				SellableCard temp ;
 				boolean res ;
 				arrived = clientHandler.chooseCardsEligibleForSelling ( getSellableCards () ) ;
 				res = setMethodCompleted () ;
@@ -192,18 +193,18 @@ public class NetworkCommunicantPlayer extends Player
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public GameMove doMove ( final MoveFactory moveFactory , final GameMap gameMap ) throws TimeoutException 
+	public MoveSelection doMove ( final MoveSelector moveFactory , final GameMap gameMap ) throws TimeoutException 
 	{
-		GameMove res  ;
-		Future < GameMove > f ;
+		MoveSelection res  ;
+		Future < MoveSelection > f ;
 		createAndLaunchRequestTimetoutTimer () ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = executorService.submit ( new Callable < GameMove > () 
+		f = executorService.submit ( new Callable < MoveSelection > () 
 		{
 			@Override
-			public GameMove call () throws IOException 
+			public MoveSelection call () throws IOException 
 			{
-				GameMove res ;
+				MoveSelection res ;
 				res = clientHandler.doMove ( moveFactory , gameMap ) ;
 				setMethodCompleted () ;
 				return res ;
@@ -314,7 +315,7 @@ public class NetworkCommunicantPlayer extends Player
 			public Iterable < SellableCard > call () throws IOException
 			{
 				Iterable < SellableCard > res ;
-				res = clientHandler.chooseCardToBuy ( src ) ;
+				res = clientHandler.chooseCardToBuy ( src , getMoney() ) ;
 				setMethodCompleted () ;
 				return res ;
 			}  

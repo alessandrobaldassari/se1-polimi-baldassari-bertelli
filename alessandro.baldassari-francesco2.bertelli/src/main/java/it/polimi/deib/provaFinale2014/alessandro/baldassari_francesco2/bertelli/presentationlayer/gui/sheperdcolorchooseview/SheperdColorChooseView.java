@@ -72,7 +72,9 @@ public class SheperdColorChooseView extends ObservableFrameworkedWithGridBagLayo
 		view.setShowKo(false); 
 		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
 		setAlwaysOnTop ( true ) ;
-		pack () ;
+		setUndecorated(true); 
+		setSize ( GraphicsUtilities.getVGAResolution () ) ;
+		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
 	}
 
 	/**

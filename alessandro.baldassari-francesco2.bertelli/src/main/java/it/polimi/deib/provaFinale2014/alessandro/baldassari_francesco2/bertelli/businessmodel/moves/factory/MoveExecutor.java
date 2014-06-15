@@ -1,4 +1,4 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.factory;
 
 import java.io.Serializable;
 
@@ -8,11 +8,19 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.TurnNumberClock;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.BreakDown;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.BuyCard;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMoveType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.Mate;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveNotAllowedException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveSheep;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveSheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 
 /***/
-public class MoveFactory implements Serializable
+public class MoveExecutor implements Serializable
 {
 
 	/***/
@@ -40,7 +48,7 @@ public class MoveFactory implements Serializable
 	}
 	
 	/***/
-	protected MoveFactory ( Sheperd sheperd , TurnNumberClock clockSource , LambEvolver lambEvolver ) 
+	protected MoveExecutor ( Sheperd sheperd , TurnNumberClock clockSource , LambEvolver lambEvolver ) 
 	{
 		if ( sheperd != null && clockSource != null && lambEvolver != null )
 		{
@@ -56,86 +64,86 @@ public class MoveFactory implements Serializable
 	}
 	
 	/***/
-	public static MoveFactory newInstance ( Sheperd s , TurnNumberClock clockSource , LambEvolver lambEvolver ) 
+	public static MoveExecutor newInstance ( Sheperd s , TurnNumberClock clockSource , LambEvolver lambEvolver ) 
 	{
-		MoveFactory res ;
+		MoveExecutor res ;
 		if ( s != null && clockSource != null && lambEvolver != null )
-			res = new MoveFactory ( s , clockSource , lambEvolver ) ;
+			res = new MoveExecutor ( s , clockSource , lambEvolver ) ;
 		else
 			throw new IllegalArgumentException () ;
 		return res ;
 	}
 	
 	/***/
-	public GameMove newBreakDownMove ( Animal animalToBreak ) throws MoveNotAllowedException
+	public void executeBreakdown ( Match match , Animal animalToBreak ) throws MoveNotAllowedException
 	{
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new MoveNotAllowedException ( "" ) ;
 		else 
 			if ( lastMove == null || lastMove != GameMoveType.BREAK_DOWN )
 			{
+				new BreakDown ( sheperd , animalToBreak ).execute ( match ) ;
 				numberOfMovesDone ++ ;
 				lastMove = GameMoveType.BREAK_DOWN ;
-				return new BreakDown ( sheperd , animalToBreak ) ;
 			}
 			else
 				throw new MoveNotAllowedException ( "" ) ; 
 	} 
 	
 	/***/
-	public GameMove newBuyCard ( RegionType buyingCardType ) throws MoveNotAllowedException 
+	public void executeBuyCard ( Match match , RegionType buyingCardType ) throws MoveNotAllowedException 
 	{
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new MoveNotAllowedException ( "" ) ; 
 		else 
 			if ( lastMove == null || lastMove != GameMoveType.BUY_CARD )
 			{
+				new BuyCard ( sheperd , buyingCardType ).execute ( match ) ;
 				numberOfMovesDone ++ ;
 				lastMove = GameMoveType.BUY_CARD ;
-				return new BuyCard ( sheperd , buyingCardType ) ;
 			}
 			else
 				throw new MoveNotAllowedException ( "" ) ; 
 	}
 	
 	/***/
-	public GameMove newMate ( Region whereMate ) throws MoveNotAllowedException  
+	public void executeMate ( Match match , Region whereMate ) throws MoveNotAllowedException  
 	{
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new MoveNotAllowedException ( "THE " ) ; 
 		else  
 			if ( lastMove == null || lastMove != GameMoveType.BUY_CARD )
 			{
+				new Mate ( clockSource , lambEvolver , sheperd , whereMate ).execute ( match ); ;
 				numberOfMovesDone ++ ;
 				lastMove = GameMoveType.MATE ;
-				return new Mate ( clockSource , lambEvolver , sheperd , whereMate ) ;
 			}
 			else
 				throw new MoveNotAllowedException ( "" ) ; 
 	}
 	
 	/***/
-	public GameMove newMoveSheep ( Ovine movingOvine , Region ovineDestinationRegion ) throws MoveNotAllowedException 
+	public void executeMoveSheep ( Match match , Ovine movingOvine , Region ovineDestinationRegion ) throws MoveNotAllowedException 
 	{
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new MoveNotAllowedException ( "" ) ; 
 		else  
 			if ( lastMove == null || lastMove != GameMoveType.BUY_CARD )
 			{
+				new MoveSheep ( sheperd , movingOvine , ovineDestinationRegion ).execute ( match ) ;
 				numberOfMovesDone ++ ;
 				lastMove = GameMoveType.MATE ;
-				return new MoveSheep ( sheperd , movingOvine , ovineDestinationRegion ) ;
 			}
 			else
 				throw new MoveNotAllowedException ( "" ) ; 
 		}
 	
 	/***/
-	public GameMove newMoveSheperd ( Road roadWhereGo ) throws MoveNotAllowedException 
+	public void executeMoveSheperd ( Match match , Road roadWhereGo ) throws MoveNotAllowedException 
 	{
+		new MoveSheperd ( sheperd , roadWhereGo ).execute ( match ); 
 		sheperdMoved = true ;
 		numberOfMovesDone ++ ;
-		return new MoveSheperd ( sheperd , roadWhereGo ) ;
 	}
 	
 }

@@ -4,7 +4,9 @@ import static org.junit.Assert.*;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.factory.MoveExecutor;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelection;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummySocketServer;
@@ -105,7 +107,7 @@ class ProtocolResponser implements CommunicationProtocolResponser{
 	}
 
 	@Override
-	public GameMove onDoMove(MoveFactory f, GameMap m) throws IOException {
+	public MoveSelection onDoMove(MoveSelector f, GameMap m) throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -118,7 +120,7 @@ class ProtocolResponser implements CommunicationProtocolResponser{
 	}
 
 	@Override
-	public Iterable < SellableCard > onChoseCardToBuy(Iterable<SellableCard> acquirables)
+	public Iterable < SellableCard > onChoseCardToBuy(Iterable<SellableCard> acquirables , Integer i )
 			throws IOException {
 		// TODO Auto-generated method stub
 		return null;

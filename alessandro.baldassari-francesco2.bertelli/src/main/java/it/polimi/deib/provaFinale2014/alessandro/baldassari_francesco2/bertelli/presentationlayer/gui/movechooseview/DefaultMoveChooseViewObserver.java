@@ -1,8 +1,8 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.movechooseview;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMoveType;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DefaultMoveChooseViewObserver implements MoveChooseViewObserver 
 {
@@ -26,7 +26,5 @@ public class DefaultMoveChooseViewObserver implements MoveChooseViewObserver
 
 	@Override
 	public void onDoNotWantChooseMove () {}
-
-	
 	
 }

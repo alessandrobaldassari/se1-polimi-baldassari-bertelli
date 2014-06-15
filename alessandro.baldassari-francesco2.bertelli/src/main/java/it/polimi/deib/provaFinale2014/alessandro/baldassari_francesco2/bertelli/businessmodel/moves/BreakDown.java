@@ -50,7 +50,7 @@ public class BreakDown extends GameMove
 	 * @throws IllegalArgumentException if the breaker or the animalToBreak parameter
 	 *         is null. 
 	 */
-	protected BreakDown ( Sheperd breaker , Animal animalToBreak ) throws MoveNotAllowedException  
+	public BreakDown ( Sheperd breaker , Animal animalToBreak ) throws MoveNotAllowedException  
 	{
 		if ( breaker != null && animalToBreak != null )
 			if ( breaker.getPosition ().getFirstBorderRegion ().equals ( animalToBreak.getPosition() ) || breaker.getPosition ().getSecondBorderRegion ().equals ( animalToBreak.getPosition () ) )

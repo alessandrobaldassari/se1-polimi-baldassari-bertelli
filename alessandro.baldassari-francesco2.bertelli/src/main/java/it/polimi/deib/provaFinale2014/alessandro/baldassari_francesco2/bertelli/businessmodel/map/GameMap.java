@@ -1,5 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
@@ -73,6 +74,21 @@ public class GameMap extends WithReflectionAbstractObservable < GameMapObserver 
 				adjacentRoads.add ( roadsMap.get ( roadUID ).getFirstObject() ) ;
 			road.setAdjacentRoads ( adjacentRoads ) ;
 		}
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void addObserver ( GameMapObserver newObserver ) 
+	{
+		super.addObserver ( newObserver ) ;
+		for ( Region region : regions.values () )
+			for ( Animal animal : region.getContainedAnimals () )
+			onElementAdded ( GameMapElementType.REGION , region.getUID (), animal.getPositionableElementType () , animal.getUID () );
+		for ( Road road : roads.values () )
+			if ( road.getElementContained () != null )
+			onElementAdded ( GameMapElementType.ROAD , road.getUID () , road.getElementContained().getPositionableElementType () , road.getElementContained ().getUID () );
 	}
 	
 	/**

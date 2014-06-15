@@ -3,7 +3,9 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.factory.MoveExecutor;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelection;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.GameProtocolMessage;
@@ -169,14 +171,15 @@ public abstract class Client extends Thread implements Terminable
 		Iterable < Sheperd > sheperds ;
 		Iterable < Road > roads ;
 		Serializable se ;
-		GameMove move ;
-		MoveFactory gf ;
+		MoveSelection move ;
+		MoveSelector gf ;
 		GameMap gm ;
 		NamedColor n ;
 		Message m ;
 		String s ;
 		Sheperd sh ;
 		Road r ;
+		int money ;
 		boolean b ;
 		outParams = new LinkedList < Serializable > () ;
 		while ( technicallyOn )
@@ -236,7 +239,7 @@ public abstract class Client extends Thread implements Terminable
 						write ( m ) ;
 					break ;
 					case DO_MOVE_REQUESTING_REQUEST :
-						gf = ( MoveFactory ) inParams.get ( 0 ) ;
+						gf = ( MoveSelector ) inParams.get ( 0 ) ;
 						gm = ( GameMap ) inParams.get ( 1 ) ;
 						move = dataPicker.onDoMove ( gf , gm ) ;
 						outParams.add ( move ) ;
@@ -252,7 +255,8 @@ public abstract class Client extends Thread implements Terminable
 					break ;
 					case CHOOSE_CARDS_TO_BUY_REQUESTING_REQUEST :
 						cards = ( Iterable < SellableCard > ) inParams.get ( 0 ) ;
-						cards = dataPicker.onChoseCardToBuy ( cards ) ; 
+						money = ( Integer ) inParams.get ( 1 ) ;
+						cards = dataPicker.onChoseCardToBuy ( cards , money ) ; 
 						outParams.add ( ( Serializable ) cards ) ;
 						m = Message.newInstance ( GameProtocolMessage.CHOOSE_CARDS_TO_BUY_REQUESTING_RESPONSE , outParams ) ;
 						write ( m ) ;

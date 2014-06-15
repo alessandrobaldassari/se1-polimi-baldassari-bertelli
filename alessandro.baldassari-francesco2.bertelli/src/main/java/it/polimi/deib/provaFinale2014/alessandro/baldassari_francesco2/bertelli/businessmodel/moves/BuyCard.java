@@ -31,7 +31,7 @@ public class BuyCard extends GameMove
 	 * @throws MoveNotAllowedException if some business rules are broken by the parameters
 	 * @throws IllegalArgumentException if the buyer or the buyingCardType parameter is null.
 	 */
-	protected BuyCard ( Sheperd buyer , RegionType buyingCardType ) throws MoveNotAllowedException
+	public BuyCard ( Sheperd buyer , RegionType buyingCardType ) throws MoveNotAllowedException
 	{
 		if ( buyer != null && buyingCardType != null ) 
 		{

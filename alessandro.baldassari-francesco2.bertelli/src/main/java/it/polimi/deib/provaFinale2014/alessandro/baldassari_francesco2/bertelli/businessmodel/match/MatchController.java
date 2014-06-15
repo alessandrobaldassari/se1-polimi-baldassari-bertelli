@@ -17,24 +17,22 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Wolf;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.MapUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.AlreadyInFinalPhaseException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.MatchState;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveNotAllowedException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.factory.MoveExecutor;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelection;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.CharacterDoesntMoveException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player.TooFewMoneyException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.NotSellableException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.SellingPriceNotSetException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ConnectionLoosingController.ConnectionLoosingManagerObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunchercommunicationcontroller.MatchStartCommunicationController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
@@ -44,16 +42,15 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Suspendable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.UIDGenerator;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WorkflowException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -82,9 +79,9 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	public static final long DELAY = 45 * Utilities.MILLISECONDS_PER_SECOND ;
 	
 	/**
-	 * Static variable to generate id's for the Match objects here created. 
+	 * Object to generate id's for the Match objects here created. 
 	 */
-	private static int lastMatchIdentifierUID = -1 ;
+	private static UIDGenerator uidGenerator ;
 	
 	/**
 	 * The component this GameController will invoke to notify that the Initialization phase of this
@@ -133,18 +130,21 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	 */
 	private int turnNumber ;
 		
+	private transient Iterable < GameMapObserver > mapObservers ;
+	
 	/**
 	 * @param matchStartCommunicationController the value for the matchStartCommunicationController field.
 	 * @throws IllegalArgumentException if the parameter passed is null.
 	 */
-	public MatchController ( MatchStartCommunicationController matchStartCommunicationController ) 
+	public MatchController ( MatchStartCommunicationController matchStartCommunicationController , Iterable < GameMapObserver > mapObservers ) 
 	{
-		if ( matchStartCommunicationController != null )
+		if ( matchStartCommunicationController != null && mapObservers != null )
 		{
 			this.matchStartCommunicationController = matchStartCommunicationController ;
 			timer = new Timer();
 			tempBlockingQueue = new LinkedBlockingQueue < Player > () ;
 			turnNumber = 0 ;
+			this.mapObservers = mapObservers ;
 		}
 		else
 			throw new IllegalArgumentException () ;
@@ -179,8 +179,7 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	public void onEndSuspensionControl ( Boolean suspendedRetrieved ) 
 	{
 		if ( suspendedRetrieved )
-			for ( Player p : match.getPlayers() )
-				p.genericNotification ( "We are all ok again." + Utilities.CARRIAGE_RETURN + "The show can go on!" );
+			playersGenericNotification ( "We are all ok again." + Utilities.CARRIAGE_RETURN + "The show can go on!" ) ;
 	}
 
 	
@@ -264,14 +263,17 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 		Bank bank;
 		try 
 		{
-			lastMatchIdentifierUID ++ ;
-			matchIdentifier = new MatchIdentifier ( lastMatchIdentifierUID ) ;
+			if ( uidGenerator == null )
+				uidGenerator = new UIDGenerator ( 0L ) ;
+			matchIdentifier = new MatchIdentifier ( uidGenerator.generateNewValue () ) ;
 			animalsFactory = AnimalFactory.newAnimalFactory ( matchIdentifier ) ;
 			lambEvolver = new LambEvolverImpl ( animalsFactory ) ;
 			gameMap = GameMapFactory.getInstance().newInstance ( matchIdentifier ) ;
 			bank = BankFactory.getInstance().newInstance ( matchIdentifier ) ;
 			match = new Match ( gameMap , bank ) ;		
-			match.setMatchState ( MatchState.WAIT_FOR_PLAYERS );
+			match.setMatchState ( MatchState.WAIT_FOR_PLAYERS ) ;
+			for ( GameMapObserver g : mapObservers )
+				match.getGameMap().addObserver ( g ) ;
 			timer.schedule ( new WaitingPlayersTimerTask () , DELAY ) ;
 		} 
 		catch ( SingletonElementAlreadyGeneratedException e ) 
@@ -509,9 +511,11 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 					System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : GESTITSCO IL PLAYER " + currentPlayer.getName () ) ;
 					sheperds = new Sheperd [ numberOfSheperdsPerPlayer ] ;		
 					System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : CHIDEDENDO AL PLAYER " + currentPlayer.getName () + " DI SCEGLIERE UN COLORE." ) ;
+					// ask the player a color
 					choosenColor = currentPlayer.getColorForSheperd ( colors ) ;
 					System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : IL PLAYER " + currentPlayer.getName () + " HA SCELTO IL COLORE " + choosenColor.getName () ) ;
 					colors.remove ( choosenColor ) ;				
+					// create sheperds
 					sheperds [ 0 ] = new Sheperd ( currentPlayer.getName () + "_#" + 0 , choosenColor , currentPlayer ) ;
 					if ( numberOfSheperdsPerPlayer == 2 )
 						sheperds [ 1 ] = new Sheperd ( currentPlayer.getName () + "_#" + 1 , choosenColor , currentPlayer ) ;				
@@ -528,7 +532,9 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 					}
 					for ( Sheperd s : currentPlayer.getSheperds () )
 					{
+						// ask the player a position for one of his players
 						selectedRoad = currentPlayer.chooseInitialRoadForASheperd ( match.getGameMap ().getFreeRoads () ) ;
+						selectedRoad = match.getGameMap ().getRoadByUID ( selectedRoad.getUID() ) ;
 						s.moveTo ( selectedRoad ) ;
 						selectedRoad.setElementContained ( s ) ;
 					}
@@ -551,10 +557,12 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	 */ 
 	private void turnationPhase () throws WorkflowException 
 	{
-		GameMove choosenMove ;
-		MoveFactory moveFactory ;
+		MoveExecutor moveFactory ;
+		MoveSelector selector ;
+		MoveSelection selection ;
 		BlackSheep blackSheep ;
 		Wolf wolf ;
+		MarketManager marketManager ;
 		byte moveIndex ;
 		boolean gamePlaying ;
 		try 
@@ -593,14 +601,16 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 							moveFactory = moveFactoryGenerator ( currentPlayer ) ;
 							for ( moveIndex = 0 ; moveIndex < GameConstants.NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ )
 							{	
+								selector = new MoveSelector ( moveFactory.getAssociatedSheperd() ) ;
 								try 
 								{
 									System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - CHIEDENDO DI FARE UNA MOSSA " ) ;				
-									choosenMove = currentPlayer.doMove ( moveFactory , match.getGameMap () ) ;
-									if ( choosenMove != null )
+									selection = currentPlayer.doMove ( selector , match.getGameMap () ) ;
+									if ( selection != null )
 									{
-										System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - MOSSA SCELTA " + choosenMove.toString () ) ;									
-										choosenMove.execute ( match ) ;
+										System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - MOSSA SCELTA " + selection.getSelectedType().toString() ) ;									
+										// effectively execute the move.
+										execMove ( moveFactory , selection, match ) ;
 										System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " HA ESEGUITO LA MOSSA." ) ;									
 									}
 									else
@@ -635,7 +645,8 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 						catch ( AlreadyInFinalPhaseException e ) {}
 				}
 				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PRIMA DELLA FASE DI MARKET." ) ;															
-				marketPhase () ;
+				marketManager = new MarketManager ( match.getPlayers() ) ;
+				marketManager.marketPhase();
 				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - DOPO LA FASE DI MARKET." ) ;															
 				try 
 				{
@@ -660,6 +671,57 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	}
 	
 	/**
+	 * This method effectively execte a Move selected by the User.
+	 * 
+	 * @param exec the object that will execute the move.
+	 * @param selection a reference to the move the User has choosedn.
+	 * @param match the Match over which operate.
+	 * @throws MoveNotAllowedException if the execution of the move is not allowed ( probably due to business rules ).
+	 */
+	private void execMove ( MoveExecutor exec , MoveSelection selection , Match match ) throws MoveNotAllowedException
+	{
+		List < Serializable > params ;
+		params = CollectionsUtilities.newListFromIterable ( selection.getParams() ) ; 
+		int mapUID ;
+		switch ( selection.getSelectedType() )
+		{	
+			case BREAK_DOWN :
+				mapUID =  ( ( Animal ) params.get(0) ).getPosition().getUID () ;
+				exec.executeBreakdown ( match , findAnimalByUID ( match.getGameMap().getRegionByUID ( mapUID ) , ( ( Animal ) params.get(0) ).getUID () ) ) ;
+			break ;
+			case BUY_CARD :
+				exec.executeBuyCard ( match , (RegionType) params.get(0) ) ;
+			break ;
+			case MATE :
+				mapUID = ( ( Region ) params.get ( 0 ) ).getUID () ;
+				exec.executeMate ( match , match.getGameMap ().getRegionByUID ( mapUID ) ) ;
+			break ;
+			case MOVE_SHEEP :
+				mapUID = ( ( Region ) params.get ( 1 ) ).getUID () ;
+				exec.executeMoveSheep ( match , ( Ovine ) params.get(0) , match.getGameMap ().getRegionByUID ( mapUID ) ); 
+			break ;
+			case MOVE_SHEPERD :
+				mapUID = ( (Road) params.get (0 ) ).getUID () ;
+				exec.executeMoveSheperd ( match, match.getGameMap ().getRoadByUID ( mapUID ) ); 
+			break ;
+		}
+	}
+	
+	/***/
+	private Animal findAnimalByUID ( Region location , int uid )
+	{
+		Animal res ;
+		res = null ;
+		for ( Animal a : location.getContainedAnimals () )
+			if ( a.getUID () == uid )
+			{
+				res = a ;
+				break ;
+			}
+		return res ;
+	}
+	
+	/**
 	 * Helper method that allows the System to choose a Sheperd for a Player's turn ( eventually aking him who ),
 	 * and then create a MoveFactory for this User to play.
 	 * 
@@ -668,100 +730,27 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	 * @throws TimeoutException if the currentPlayer has to choose between some Sheperds and
 	 * 	       does not answer before a timeout.
 	 */
-	private MoveFactory moveFactoryGenerator ( Player currentPlayer ) throws TimeoutException 
+	private MoveExecutor moveFactoryGenerator ( Player currentPlayer ) throws TimeoutException 
 	{
-		MoveFactory res ;
+		MoveExecutor res ;
 		Sheperd choosenSheperd ;
 		System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR : INIZIO" ) ;
 		if ( match.getNumberOfPlayers () == 2 )
 		{
 			System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR - CHIDENDO AL PLAYER : " + currentPlayer.getName () + " DI SCEGLIERE UN PASTORE" ) ;					
 			choosenSheperd = currentPlayer.chooseSheperdForATurn ( currentPlayer.getSheperds () ) ;
+			for ( Sheperd s : currentPlayer.getSheperds() )
+				if ( s.getUID () == choosenSheperd.getUID () )
+				{
+					choosenSheperd = s ;
+					break ;
+				}
 			System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR - IL PLAYER : " + currentPlayer.getName () + " HA SCELTO IL PASTORE " + choosenSheperd.getName () ) ;									
-			res = MoveFactory.newInstance ( choosenSheperd , this , lambEvolver ) ;
+			res = MoveExecutor.newInstance ( choosenSheperd , this , lambEvolver ) ;
 		}
 		else
-			res = MoveFactory.newInstance ( currentPlayer.getSheperds ().iterator ().next () , this , lambEvolver ) ;
+			res = MoveExecutor.newInstance ( currentPlayer.getSheperds ().iterator ().next () , this , lambEvolver ) ;
 		System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR : END" ) ;
-		return res ;
-	}
-	
-	/**
-	 * This method implements the Market phase of the Game.
-	 * The code is straightforward and highly tighted with the business rules.
-	 * It uses some private helper methods. 
-	 */
-	private void marketPhase () 
-	{
-		Collection < SellableCard > sellableCards ;
-		Iterable < SellableCard > receivedSellableCards ;
-		int amount ;
-		try
-		{
-			for ( Player currentPlayer : match.getPlayers() )
-				currentPlayer.chooseCardsEligibleForSelling () ;
-			for ( Player currentPlayer : match.getPlayers () )
-			{
-				try
-				{					
-					amount = 0 ;
-					// generate a List containing all the Cards this Player can buy
-					sellableCards = generateGettableCardList ( currentPlayer ) ;
-					// ask the User which Cards he wants to buy
-					receivedSellableCards = currentPlayer.chooseCardToBuy ( sellableCards ) ;
-					for ( SellableCard s : receivedSellableCards )
-						amount = amount + s.getSellingPrice () ;
-					// if he has enough money 
-					if ( amount <= currentPlayer.getMoney () )
-						for ( SellableCard s : receivedSellableCards )
-							{
-								s.getOwner().getSellableCards().remove ( s ) ;
-								s.getOwner().receiveMoney ( s.getSellingPrice () ) ;
-								currentPlayer.getSellableCards().add ( s ) ;
-								currentPlayer.pay ( s.getSellingPrice() ) ;
-								s.setOwner ( currentPlayer ) ;
-							}
-					else
-						throw currentPlayer.new TooFewMoneyException () ;
-				}
-				catch ( NotSellableException n ) 
-				{
-					currentPlayer.genericNotification ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;					
-				}
-				catch ( SellingPriceNotSetException e )
-				{
-					currentPlayer.genericNotification ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;										
-				}
-				catch ( TooFewMoneyException t ) 
-				{
-					currentPlayer.genericNotification ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;					
-				}
-			}
-		}
-		catch ( TimeoutException t ) 
-		{
-			for ( Player p : match.getPlayers() )
-				p.genericNotification ( "One of the players is not connected yet, so this market phase can not go away." + Utilities.CARRIAGE_RETURN + "It's not our fault, it's his !!!" );
-		}
-	}
-	
-	/**
-	 * This method generate a Collection containing all the Cards ( owned buy Match Players ) which
-	 * the Player passed buy parameter is able to buy.
-	 * 
-	 * @param buyer the Player who is going to buy some cards.
-	 * @return a Collection < SellableCard > containing all the Cards owned by other Players than
-	 * 		   the one passed by parameter which the buyer Player is able to buy. 
-	 */
-	private Collection < SellableCard > generateGettableCardList ( Player buyer ) 
-	{
-		Collection < SellableCard > res ;
-		res = new LinkedList < SellableCard > () ;
-		for ( Player p : match.getPlayers () )
-			if ( buyer.equals ( buyer ) )
-				for ( SellableCard s : p.getSellableCards () )
-						if ( s.isSellable () )
-							res.add ( s ) ;
 		return res ;
 	}
 	
@@ -798,8 +787,10 @@ public class MatchController implements Runnable , TurnNumberClock , ConnectionL
 	}
 	
 	/**
+	 * Notifies all the non suspended Players in the Match of a Message
 	 * 
-	 * */
+	 * @param msg the message to pass.
+	 */
 	private void playersGenericNotification ( String msg )
 	{
 		for ( Player p : match.getPlayers() )
@@ -850,12 +841,12 @@ class MatchIdentifier implements Identifiable < Match >
 	/**
 	 * The unique identifier for this MatchIdentifier.
 	 */
-	private int uid ;
+	private long uid ;
 	
 	/**
 	 * @param uid the unique identifier for this MatchIdentifier. 
 	 */
-	protected MatchIdentifier ( int uid ) 
+	protected MatchIdentifier ( long uid ) 
 	{
 		this.uid = uid ;
 	}
@@ -865,7 +856,7 @@ class MatchIdentifier implements Identifiable < Match >
 	 * 
 	 * @return the uid property. 
 	 */
-	public int getUID () 
+	public long getUID () 
 	{
 		return uid ;
 	}
@@ -930,104 +921,4 @@ class LambEvolverImpl implements LambEvolver , Serializable
 			throw new IllegalArgumentException () ;	
 	}
 
-}
-
-/**
- * Component that calculate the results of a Match 
- */
-class MatchResultsCalculator 
-{
-
-	/**
-	 * The match where operate. 
-	 */
-	private Match match ;
-	
-	/**
-	 * A Map containing the points that every regions has. 
-	 */
-	private Map <RegionType, Integer> regionValuesMap;
-	
-	/**
-	 * @param match the match where operate.
-	 * @throws IllegalArgumentException if the match parameter is null.
-	 * @throws WrongMatchStateMethodCallException if the match parameter's state is not CALCULATING_RESULTS. 
-	 */
-	protected MatchResultsCalculator ( Match match ) throws WrongMatchStateMethodCallException
-	{
-		if ( match != null )
-			if ( match.getMatchState() == MatchState.CALCULATING_RESULTS )
-			{
-				this.match = match ;
-				regionValuesMap = new HashMap < RegionType , Integer > ( RegionType.values ().length - 1 ) ;
-			}
-			else
-				throw new WrongMatchStateMethodCallException ( match.getMatchState () ) ;
-		else
-			throw new IllegalArgumentException () ;
-		
-	}
-
-	/**
-	 * Helper method to calculate the points for every region. 
-	 */
-	private void calculateRegionsResults () 
-	{
-		for ( RegionType r : RegionType.values () )
-			if ( r != RegionType.SHEEPSBURG )
-				regionValuesMap.put ( r , calculateRegionValue ( r ) ) ;
-	}
-	
-	/**
-	 * This method calculate the value of the RegionType passed by parameter.
-	 * The procedure used to determine this value is the one specified by business rules.
-	 * 
-	 * @param rt the RegionType about that calculate the value.
-	 * @return the value of the RegionType passed by parameter.
-	 */
-	private int calculateRegionValue ( RegionType rt )
-	{
-		Iterable<Region> regions;
-		Iterable<Animal> animals;
-		int amount;
-		amount = 0;
-		regions = match.getGameMap().getRegionByType ( rt ) ;
-		for(Region r : regions)
-		{
-			animals = r.getContainedAnimals();
-			for ( Animal a : animals )
-				if ( ! ( a instanceof Wolf ) )
-				{
-					if ( a instanceof BlackSheep )
-						amount = amount + 2;
-					else 
-						amount = amount + 1;
-				}
-		}
-		return amount ;	
-	}
-	
-	/**
-	 * Calculate the score of the Player passed by parameter and returns it.
-	 * 
-	 * @param player the Player on which calculate the score.
-	 * @param regionValuesMap a map containing, for each RegionType, the value of that RegionType in
-	 *        this Match.
-	 * @return the score of the Player passed by parameter.
-	 */
-	public int calculatePlayerScore ( Player player )
-	{
-		int res;
-		Collection <Card> playerCards;
-		if ( regionValuesMap.isEmpty () )
-			calculateRegionsResults () ;
-		playerCards = new ArrayList<Card>(player.getSellableCards().size() + 1);
-		playerCards.addAll(player.getSellableCards());
-		playerCards.add(player.getInitialCard());
-		res = 0;
-		for(Card card : playerCards)
-			res = res + regionValuesMap.get(card.getRegionType());
-		return 0;	
-	}
-	
 }

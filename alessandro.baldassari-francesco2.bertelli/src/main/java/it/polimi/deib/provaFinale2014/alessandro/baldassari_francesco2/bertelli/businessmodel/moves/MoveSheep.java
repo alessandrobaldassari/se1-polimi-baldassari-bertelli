@@ -35,7 +35,7 @@ public class MoveSheep extends GameMove
 	 * @throws IllegalArgumentException if the moverSheperd or the movingOvine or the
 	 *         ovineDestinationRegion parameter is null.  
 	 */
-	MoveSheep ( Sheperd moverSheperd , Ovine movingOvine , Region ovineDestinationRegion ) 
+	public MoveSheep ( Sheperd moverSheperd , Ovine movingOvine , Region ovineDestinationRegion ) 
 	{
 		if ( moverSheperd != null && movingOvine != null && ovineDestinationRegion != null )
 		{

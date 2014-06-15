@@ -37,7 +37,7 @@ public class MoveSheperd extends GameMove
 	 * @throws MoveNotAllowedException if the Sheperd wants to move where he already is.
 	 * @throws IllegalArgumentException if the sheperdToMove or the roadWhereGo parameter is null.
 	 */ 
-	protected MoveSheperd ( Sheperd sheperdToMove , Road roadWhereGo ) throws MoveNotAllowedException 
+	public MoveSheperd ( Sheperd sheperdToMove , Road roadWhereGo ) throws MoveNotAllowedException 
 	{
 		if ( sheperdToMove != null && roadWhereGo != null )
 		{

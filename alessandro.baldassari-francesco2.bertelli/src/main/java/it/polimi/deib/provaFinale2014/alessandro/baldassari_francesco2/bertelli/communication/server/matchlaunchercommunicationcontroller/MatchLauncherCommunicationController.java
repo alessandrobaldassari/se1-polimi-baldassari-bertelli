@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -11,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.MatchState;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.NetworkCommunicantPlayer;
@@ -232,17 +234,20 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 	 */
 	private void createAndLaunchNewGameController () 
 	{
-		currentGameController = new MatchController ( this ) ;
-		try {
+		try 
+		{
 			guiServer = new SocketGUIMapServer () ;
-		} catch (IOException e) {
+			currentGameController = new MatchController ( this , Collections.<GameMapObserver>singleton ( guiServer ) ) ;
+			currentClientHandlers.clear () ;
+			currentClientNames.clear () ;
+			connectionLoosingController.addObserver ( currentGameController ) ;
+			threadExecutor.submit ( currentGameController ) ;
+			threadExecutor.submit ( guiServer ) ;
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
-		currentClientHandlers.clear () ;
-		currentClientNames.clear () ;
-		connectionLoosingController.addObserver ( currentGameController ) ;
-		threadExecutor.submit ( currentGameController ) ;
-		threadExecutor.submit ( guiServer ) ;
+		
 	}
 	
 	/**

@@ -7,7 +7,7 @@ import java.awt.Insets;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.DataFilePaths;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.FilePaths;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
@@ -73,14 +73,16 @@ public class LoginView extends ObservableFrameworkedWithGridBagLayoutDialog < Lo
 		inputView.setTitle ( PresentationMessages.NAME_REQUEST_MESSAGE ) ;
 		try 
 		{
-			backgroundImage = GraphicsUtilities.getImage ( DataFilePaths.BACKGROUND_IMAGE_FILE_PATH ) ;
+			backgroundImage = GraphicsUtilities.getImage ( FilePaths.COVER_IMAGE_PATH ) ;
 			inputView.setBackgroundImage( backgroundImage ) ;
 		}
 		catch ( IOException e )
 		{
 			e.printStackTrace();
 		}
-		pack () ;
+		setUndecorated(true);
+ 		setSize ( GraphicsUtilities.getVGAResolution () ) ;
+		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
 	}
 
 	/**

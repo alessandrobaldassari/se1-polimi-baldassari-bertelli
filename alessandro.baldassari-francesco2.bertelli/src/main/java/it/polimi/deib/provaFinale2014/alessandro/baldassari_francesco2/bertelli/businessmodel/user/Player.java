@@ -1,8 +1,9 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelection;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MathUtilities;
@@ -336,7 +337,7 @@ public abstract class Player implements Serializable , Suspendable
 	 * @return a GameMove object which represents the move the Player wants to make.
 	 * @throws TimeoutException 
 	 */
-	public abstract GameMove doMove ( final MoveFactory moveFactory , final GameMap gameMap ) throws TimeoutException ; 
+	public abstract MoveSelection doMove ( final MoveSelector moveSelector , final GameMap gameMap ) throws TimeoutException ; 
 		
 	/**
 	 * This method is called by the System during the initialization phase to ask
@@ -379,6 +380,19 @@ public abstract class Player implements Serializable , Suspendable
 	 * @param cause the cause of the match finish in the form of a User friendly message.
 	 */
 	public abstract void matchEndNotification ( String cause ) ;
+	
+	public enum PlayerState 
+	{
+		
+		NOT_CONNECTED ,
+		
+		PLAYING ,
+		
+		SUSPENDED ,
+		
+		DISCONNECTED 
+		
+	}
 	
 	/**
 	 * AS THE SUPER'S ONE. 

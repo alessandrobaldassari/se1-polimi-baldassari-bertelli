@@ -189,20 +189,32 @@ public class Region extends GameMapElement
 	public enum RegionType 
 	{
 				
-		HILL ,
+		HILL ( "HILL" ) ,
 		
-		FOREST ,
+		FOREST ( "FOREST" ) ,
 		
-		LACUSTRINE ,
+		LACUSTRINE ( "LACUSTRINE" ) ,
 		
-		CULTIVABLE ,
+		CULTIVABLE ( "CULTIVABLE" ) ,
 		
-		MOUNTAIN ,
+		MOUNTAIN ( "MOUNTAIN" ) ,
 		
-		DESERT ,
+		DESERT ( "DESERT" ) ,
 		
-		SHEEPSBURG ;
+		SHEEPSBURG ( "SHEEPSBURG" ) ;
 			
+		private String humanName ;
+		
+		RegionType ( String humanName ) 
+		{
+			this.humanName = humanName ;
+		}
+		
+		public String getHumanName () 
+		{
+			return  humanName ;
+		}
+		
 		/**
 		 * Returns an Iterable containing all the RegionType values except Sheepsburg.
 		 * 

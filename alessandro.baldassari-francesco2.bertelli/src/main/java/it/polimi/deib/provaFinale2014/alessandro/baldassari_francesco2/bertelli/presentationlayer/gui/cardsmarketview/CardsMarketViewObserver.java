@@ -1,12 +1,12 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.choosecardsview;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.cardsmarketview;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observer;
 
 /**
  * This interface defines the methods that a CardsChooseViewObserver can listen to. 
  */
-public interface CardsChooseViewObserver extends Observer
+public interface CardsMarketViewObserver extends Observer
 {
 	
 	/**
@@ -14,7 +14,7 @@ public interface CardsChooseViewObserver extends Observer
 	 * 
 	 * @param selectedCards the Cards the User has choosen.
 	 */
-	public void onCardChoosed ( Iterable < Card > selectedCards ) ;
+	public void onCardChoosed ( Iterable < SellableCard > selectedCards ) ;
 	
 	/**
 	 * Called when the User does not want to make any selection. 

@@ -2,15 +2,21 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
+import java.awt.AlphaComposite;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.Transparency;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
+import java.awt.image.RescaleOp;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -134,6 +140,15 @@ public final class GraphicsUtilities
 		return res ;
 	}
 	
+	public static Point getCenterTopLeftCorner ( Dimension windowSize ) 
+	{
+		Point res ;
+		res = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint () ;
+		res.x = res.x - windowSize.width / 2 ;
+		res.y = res.y - windowSize.height / 2 ;
+		return res ;
+	}
+	
 	/***/
 	public static BufferedImage scaleImage ( BufferedImage original , int newW , int newH ) 
 	{
@@ -146,6 +161,20 @@ public final class GraphicsUtilities
 	    g.dispose();
 	    return resized ;
 	}
+	
+	public static BufferedImage makeImageTranslucent(BufferedImage source, float alpha) 
+	{
+		    BufferedImage target = new BufferedImage ( source.getWidth() , source.getHeight(), Transparency.TRANSLUCENT);
+		    // Get the images graphics
+		    Graphics2D g = target.createGraphics();
+		    g.setComposite ( AlphaComposite.getInstance(AlphaComposite.SRC_OVER , alpha ) ) ;
+		    // Draw the image into the prepared reciver image
+		    g.drawImage(source, null, 0, 0);
+		    // let go of all system resources in this Graphics
+		    g.dispose();
+		    // Return the image
+		    return target;
+		  }
 	
 	public static void showUnshowWindow ( Window toShow , boolean block , boolean show )
 	{

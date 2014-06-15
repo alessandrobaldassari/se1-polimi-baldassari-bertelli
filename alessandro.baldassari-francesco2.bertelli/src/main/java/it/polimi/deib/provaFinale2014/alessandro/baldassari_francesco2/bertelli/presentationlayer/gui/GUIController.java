@@ -1,10 +1,10 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui;
 
-import java.awt.Frame;
 import java.awt.Window;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
@@ -20,24 +20,22 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMoveType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveNotAllowedException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelection;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.guimap.SocketGUIMapClient;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client.SocketGUIMapClient;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.choosecardsview.CardsChooseView;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.cardsmarketview.CardsMarketView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.GameMapViewObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.GameView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.GameViewInputMode;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.loginview.LoginView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.movechooseview.MoveChooseView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.sheperdcolorchooseview.SheperdColorChooseView;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.sheperdcolorchooseview.SheperdColorChooseViewObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
@@ -181,19 +179,25 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		return res ;
 	}
 	
-	// implement in the game map make selectable only the available roads.
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
 	public Road chooseInitRoadForSheperd ( Iterable < Road > availableRoads ) throws IOException 
 	{
+		Collection < Integer > roadIndexes ;
 		Road res ;
+		roadIndexes = new LinkedList < Integer > () ;
 		generationNotification ( PresentationMessages.CHOOSE_INITIAL_ROAD_FOR_A_SHEPERD_MESSAGE ) ;
-		index.set(null); 
+		for ( Road road : availableRoads )
+			roadIndexes.add ( road.getUID() ) ;
+		index.set ( null ) ; 
 		gameView.setInputMode ( GameViewInputMode.ROADS ) ;
+		gameView.beginHighlightVisualization ( roadIndexes ) ;
 		// highlight effects
-		waitForAtomicVariable(index);
+		waitForAtomicVariable ( index ) ;
+		gameView.setInputMode ( null ) ;
+		System.out.println ( index.get() ) ;
 		res = null ;
 		for ( Road road : availableRoads )
 			if ( road.getUID () == index.get () )
@@ -206,7 +210,6 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		return res ;
 	}		
 	
-	// make selectable only the available sheperds
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
@@ -234,15 +237,14 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public GameMove onDoMove ( MoveFactory moveFactory , GameMap gameMap ) 
+	public MoveSelection onDoMove ( MoveSelector selector , GameMap gameMap ) 
 	{
-		GameMove res ;
+		MoveSelection res ;
 		GameMoveType move ;
 		RegionType type ;
 		Region region ;
 		Road road ;
 		Animal animal ;
-		boolean endCycle ;
 		// first ask the user what move he wants to do.
 		res = null ;
 		do
@@ -252,7 +254,6 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 			switch ( move )
 			{
 				case BREAK_DOWN :
-					endCycle = false ;
 					// let the user choose where do the break down.
 					generationNotification ( "Scegli la regione dove perpetrare il misfatto..." );
 					gameView.setInputMode ( GameViewInputMode.REGIONS ) ;
@@ -277,9 +278,9 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 							if ( animal != null )
 							try 
 							{
-								moveFactory.newBreakDownMove ( animal ) ;
+								selector.newBreakdown ( animal ) ;
 							}
-							catch (MoveNotAllowedException e) 
+							catch (Exception e) 
 							{
 								JOptionPane.showMessageDialog ( null , PresentationMessages.MOVE_NOT_ALLOWED_MESSAGE , PresentationMessages.APP_NAME , JOptionPane.ERROR_MESSAGE ) ;
 								userWantsToChangeMove = true ;
@@ -293,7 +294,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 				if ( type != null )
 					try 
 					{
-						res = moveFactory.newBuyCard ( type ) ;
+						res = selector.newBuyCard ( type ) ;
 					}
 					catch (MoveNotAllowedException e1) 
 					{
@@ -310,7 +311,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 				{	region = gameMap.getRegionByUID ( index.get () ) ;
 					try 
 					{
-						res = moveFactory.newMate ( region ) ;
+						res = selector.newMate ( region ) ;
 					}
 					catch (MoveNotAllowedException e)
 					{
@@ -343,7 +344,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 							}
 						try 
 						{
-							res = moveFactory.newMoveSheep ( ( Ovine ) animal , region ) ;
+							res = selector.newMoveSheep ( ( Ovine ) animal , region ) ;
 						}
 						catch (MoveNotAllowedException e) 
 						{
@@ -362,7 +363,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 						road = gameMap.getRoadByUID ( index.get () ) ;
 						try
 						{
-							res = moveFactory.newMoveSheperd ( road ) ;
+							res = selector.newMoveSheperd ( road ) ;
 						}
 						catch (MoveNotAllowedException e)
 						{
@@ -379,25 +380,29 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		return res ;	
 	}
 	
-	// non gli passare le carte, passagli una rappresentazione ! -> card view !
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
 	public Iterable < SellableCard > onChooseCardsEligibleForSelling ( Iterable < SellableCard > playerCards ) 
 	{
-		Collection < SellableCard > res ;
-		Collection < Card > in ;
-		Iterable < Card > out ;
+		Iterable < SellableCard > res ;
 		res = new LinkedList < SellableCard > () ;
-		in = new LinkedList < Card > () ;
-		for ( SellableCard s : playerCards )
-			in.add ( s ) ;
 		generationNotification ( "Scegli le carte che vuoi vendere" );
-		out = CardsChooseView.showDialog ( in , true ) ;
-		for ( Card c : out )
-			res.add ( ( SellableCard ) c ) ;
+		res = CardsMarketView.showDialog ( playerCards , true , -1 ) ;
 		return res ;
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public Iterable < SellableCard > onChoseCardToBuy ( Iterable < SellableCard > acquirables , Integer playerMoney ) 
+	{
+		Iterable < SellableCard > res ;
+		generationNotification ( "Scegli le carte che vuoi vendere" );
+		res = CardsMarketView.showDialog ( acquirables , false , playerMoney ) ;
+		return res ;		
 	}
 	
 	/**
@@ -419,8 +424,9 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		try 
 		{
 			c = new SocketGUIMapClient ( ( Integer ) guiConnector ) ;
-			executorService.submit(c);
 			gameView.setGameMapObservable ( c ) ;
+			gameView.setGameMapViewObserver ( this ) ;
+			executorService.submit ( c ) ;
 			gameView.setInputMode ( null ) ;
 		}
 		catch (UnknownHostException e) 
@@ -481,16 +487,6 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		index.set ( -1 ) ;
 		userWantsToChangeMove = true ;
 	}
-	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public Iterable < SellableCard > onChoseCardToBuy ( Iterable < SellableCard > acquirables ) 
-	{
-		return null ;
-		
-	}
 
 	/**
 	 * AS THE SUPER'S ONE. 
@@ -541,6 +537,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		}
 	}
 	
+	/***/
 	private class NotificationShowingRunnable implements Runnable
 	{
 		private Notifier notifier ;
@@ -561,6 +558,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		
 	}
 	
+	/***/
 	private class Notifier 
 	{
 	
