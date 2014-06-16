@@ -260,6 +260,7 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 			{
 				c.uidNotification () ;
 				guiHandler = guiServer.addClient () ;
+				session.addPlayerObserver ( guiServer.getPlayerObserver ( guiHandler  ) , c.getUID() );
 				c.sendGuiConnectorNotification ( guiHandler ) ;
 				c.notifyMatchStart();
 			}

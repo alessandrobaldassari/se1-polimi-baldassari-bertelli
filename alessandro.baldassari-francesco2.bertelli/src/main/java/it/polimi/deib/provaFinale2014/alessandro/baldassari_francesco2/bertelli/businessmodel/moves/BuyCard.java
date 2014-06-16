@@ -80,7 +80,7 @@ public class BuyCard extends GameMove
 			price = match.getBank().getPeekCardPrice ( buyingCardType ) ;
 			buyer.getOwner ().pay ( price ) ;
 			theCard = match.getBank ().sellACard ( price , buyingCardType ) ;
-			buyer.getOwner().getSellableCards ().add ( theCard ) ;
+			buyer.getOwner().addCard ( theCard ) ;
 		} 
 		catch ( NoMoreCardOfThisTypeException e ) 
 		{

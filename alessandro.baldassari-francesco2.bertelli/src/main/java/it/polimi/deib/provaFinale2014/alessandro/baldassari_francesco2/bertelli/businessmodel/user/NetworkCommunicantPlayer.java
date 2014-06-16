@@ -70,6 +70,11 @@ public class NetworkCommunicantPlayer extends Player
 			throw new IllegalArgumentException();
 	}
 	
+	public ClientHandler < ? > getClientHandler () 
+	{
+		return clientHandler ;
+	}
+	
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
@@ -147,10 +152,10 @@ public class NetworkCommunicantPlayer extends Player
 				res = setMethodCompleted () ;
 				if ( res )
 					for ( SellableCard s : arrived )
-						if ( getSellableCards ().contains ( s ) )
+						if ( hasCard( s )  )
 						{
-							getSellableCards ().remove ( s ) ;
-							getSellableCards ().add ( s ) ;
+							removeCard ( s ) ;
+							addCard ( s ) ;
 						}
 				return res ;
 			}  

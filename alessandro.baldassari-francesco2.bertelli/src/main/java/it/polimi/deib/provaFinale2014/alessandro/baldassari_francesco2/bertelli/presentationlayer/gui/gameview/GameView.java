@@ -13,6 +13,10 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.NotificationContainer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.NotificationPanel;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.GameMapViewInputMode;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.GameMapViewObserver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.GameMapViewPanel;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.playerinfoview.PlayerInfoView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observable;
@@ -58,20 +62,19 @@ public class GameView extends JFrame implements NotificationContainer
 		gameViewPanel.setGameMapViewObserver ( observer ) ;
 	}
 	
-	/***/
-	public void setGameMapObservable ( Observable < GameMapObserver > src ) 
+	public GameMapObserver getGameMapObserver () 
 	{
-		src.addObserver ( gameViewPanel.getGameMapObserver () ) ;
+		return gameViewPanel.getGameMapObserver();
 	}
 	
 	/***/
-	public void setInputMode ( GameViewInputMode mode ) 
+	public void setInputMode ( GameMapViewInputMode mode ) 
 	{
 		gameViewPanel.setInputMode ( mode ) ;
 	}
 
 	/***/
-	public GameViewInputMode getInputMode () 
+	public GameMapViewInputMode getInputMode () 
 	{
 		return gameViewPanel.getInputMode () ;
 	}
@@ -87,7 +90,7 @@ public class GameView extends JFrame implements NotificationContainer
 		GameView g ;
 		g = new GameView () ;
 		g.setExtendedState ( GameView.MAXIMIZED_BOTH );
-		g.setInputMode ( GameViewInputMode.ROADS ) ;
+		g.setInputMode ( GameMapViewInputMode.ROADS ) ;
 		g.setVisible ( true ) ;
 	}
 	
@@ -104,12 +107,12 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	/**
 	 * A PlayersCardView to manage the Cards a User owns. 
 	 */
-	private PlayersDataViewPanel playersCardPanel ;
+	private PlayerInfoView playersCardPanel ;
 	
 	/**
 	 * A MapView to render the Map and let the User interact with it. 
 	 */
-	private MapViewPanel mapPanel ;
+	private GameMapViewPanel mapPanel ;
 	
 	/**
 	 * A panel to show some notifications to the User. 
@@ -133,8 +136,8 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	@Override
 	protected void createComponents () 
 	{
-		playersCardPanel = new PlayersDataViewPanel () ;
-		mapPanel = new MapViewPanel () ;
+		playersCardPanel = new PlayerInfoView () ;
+		mapPanel = new GameMapViewPanel () ;
 		notificationArea = new NotificationPanel();
 		backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getCoverImage();
 	}
@@ -157,7 +160,10 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	protected void bindListeners () {}
+	protected void bindListeners () 
+	{
+		
+	}
 
 	/**
 	 * AS THE SUPER'S ONE. 
@@ -190,13 +196,13 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 
 	/***/
 	/***/
-	protected void setInputMode ( GameViewInputMode mode ) 
+	protected void setInputMode ( GameMapViewInputMode mode ) 
 	{
 		mapPanel.setCurrentInputMode ( mode ) ;
 	}
 	
 	/***/
-	public GameViewInputMode getInputMode () 
+	public GameMapViewInputMode getInputMode () 
 	{
 		return mapPanel.getCurrentInputMode () ;
 	}

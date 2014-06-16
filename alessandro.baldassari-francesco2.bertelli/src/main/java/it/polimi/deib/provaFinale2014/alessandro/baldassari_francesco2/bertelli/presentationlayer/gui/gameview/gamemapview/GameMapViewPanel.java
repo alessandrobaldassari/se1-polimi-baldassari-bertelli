@@ -1,4 +1,4 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.GameConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
@@ -45,7 +45,7 @@ import javax.swing.SwingUtilities;
 /**
  * A component that manage the rendering of the Map and the interaction of the User with it. 
  */
-public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMapViewObserver > implements GameMapObserver 
+public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < GameMapViewObserver > implements GameMapObserver 
 {
 
 	// ATTRIBUTES
@@ -78,7 +78,7 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 	/**
 	 * The input mode this GameView is, null if none. 
 	 */
-	private GameViewInputMode currentInputMode ;
+	private GameMapViewInputMode currentInputMode ;
 	
 	/***/
 	private boolean highlightMode ;
@@ -89,7 +89,7 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 	// METHODS
 	
 	/***/
-	protected MapViewPanel () 
+	public GameMapViewPanel () 
 	{
 		super () ;	
 	}
@@ -170,13 +170,13 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 	 * 
 	 * @param currentInputMode the value for the currentInputModeProperty.
 	 */
-	public void setCurrentInputMode ( GameViewInputMode currentInputMode ) 
+	public void setCurrentInputMode ( GameMapViewInputMode currentInputMode ) 
 	{
 		this.currentInputMode = currentInputMode ;
 	}
 	
 	/***/
-	public GameViewInputMode getCurrentInputMode () 
+	public GameMapViewInputMode getCurrentInputMode () 
 	{
 		return currentInputMode ;
 	}
@@ -306,7 +306,7 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 					if ( animalsInRegion.get ( t ).size () > 0 )
 					{
 						// determine if this image has to be transparent or not.
-						transparent = highlightMode && ( ( currentInputMode != GameViewInputMode.ANIMALS ) || ( currentInputMode == GameViewInputMode.ANIMALS && CollectionsUtilities.contains ( toHighlight , i ) ) ) ; 
+						transparent = highlightMode && ( ( currentInputMode != GameMapViewInputMode.ANIMALS ) || ( currentInputMode == GameMapViewInputMode.ANIMALS && CollectionsUtilities.contains ( toHighlight , i ) ) ) ; 
 						// retrieve the image to draw
 						toDraw = SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage( t , transparent ) ; 
 						// draw the image
@@ -351,7 +351,7 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 					// retrieve the type of object with which we are dealing with.
 					type = elementContained.getFirstObject () ;
 					// determine if transparency is needed.
-					transparent = highlightMode && ( type == PositionableElementType.FENCE || ( type == PositionableElementType.SHEPERD && currentInputMode == GameViewInputMode.SHEPERDS ) ) ;
+					transparent = highlightMode && ( type == PositionableElementType.FENCE || ( type == PositionableElementType.SHEPERD && currentInputMode == GameMapViewInputMode.SHEPERDS ) ) ;
 					// select the appropriate image.
 					toDraw = SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( type , transparent ) ;
 					// determine the right coordinates.
@@ -389,7 +389,7 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 			preferredDimension.width = newW ;
 			preferredDimension.height = newH ;
 		    SheeplandClientApp.getInstance().getImagesHolder().zoomMapViewImages ( xFactor , yFactor ) ;
-			SwingUtilities.updateComponentTreeUI ( MapViewPanel.this ) ;
+			SwingUtilities.updateComponentTreeUI ( GameMapViewPanel.this ) ;
 		    coordinatesManager.scale ( xFactor , yFactor ) ; 
 		}
 		

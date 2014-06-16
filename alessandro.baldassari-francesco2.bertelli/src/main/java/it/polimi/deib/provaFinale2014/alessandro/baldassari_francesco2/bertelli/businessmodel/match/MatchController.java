@@ -22,7 +22,9 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.MatchState;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.NetworkCommunicantPlayer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.PlayerObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ConnectionLoosingController.ConnectionLoosingManagerObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunchercommunicationcontroller.MatchStartCommunicationController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
@@ -119,6 +121,13 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 		}
 		else
 			throw new IllegalArgumentException () ;
+	}
+	
+	public void addPlayerObserver ( PlayerObserver playerObserver , int clientHandlerUID ) 
+	{
+		for ( Player p : match.getPlayers () )
+			if ( ( ( NetworkCommunicantPlayer ) p ).getClientHandler ().getUID() == clientHandlerUID )
+				( ( NetworkCommunicantPlayer ) p ).addObserver(playerObserver);
 	}
 	
 	/**

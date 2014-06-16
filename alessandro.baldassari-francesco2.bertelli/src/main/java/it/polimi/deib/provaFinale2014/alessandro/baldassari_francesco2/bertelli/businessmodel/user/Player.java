@@ -7,10 +7,12 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MathUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Suspendable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionAbstractObservable;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -23,7 +25,7 @@ import java.util.concurrent.TimeoutException;
  * This class is widely used in the whole model of the Game, so also if the implemented methods are not declared final, they should
  * not be overridden, and in the case, the contract ( particularly the raising of exceptions ) should be onered.
  */
-public abstract class Player implements Serializable , Suspendable
+public abstract class Player extends WithReflectionAbstractObservable < PlayerObserver > implements Serializable , Suspendable
 {
 
 	// ATTRIBUTES
@@ -72,6 +74,7 @@ public abstract class Player implements Serializable , Suspendable
 	 */
 	public Player ( String name ) 
 	{
+		super () ;
 		if ( name != null )
 		{
 			this.name = name ;
@@ -85,12 +88,43 @@ public abstract class Player implements Serializable , Suspendable
 			throw new IllegalArgumentException () ;
 	}
 	
+	public void addCard ( SellableCard toAdd ) 
+	{
+		sellableCards.add(toAdd) ;
+		try 
+		{
+			notifyObservers ( "onCardAdded" , toAdd ) ;
+		}
+		catch (MethodInvocationException e) 
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	public void removeCard ( SellableCard toRemove ) 
+	{
+		sellableCards.remove ( toRemove ) ;
+		try 
+		{
+			notifyObservers ( "onCardRemoved" , toRemove ) ;
+		}
+		catch (MethodInvocationException e) 
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	public boolean hasCard ( SellableCard s )
+	{
+		return sellableCards.contains ( s ) ;
+	}
+	
 	/**
 	 * Getter methods for the sellableCards property.
 	 * 
 	 * @return the sellableCards property.
 	 */
-	public Collection < SellableCard > getSellableCards () 
+	public Iterable < SellableCard > getSellableCards () 
 	{
 		return sellableCards ;
 	}
@@ -131,13 +165,52 @@ public abstract class Player implements Serializable , Suspendable
 		if ( amountToPay >= 0 )
 		{
 			if ( money >= amountToPay )
+			{
 				money = money - amountToPay ;
+				try 
+				{
+					notifyObservers ( "onPay" , amountToPay , money );
+				}
+				catch (MethodInvocationException e) 
+				{
+					e.printStackTrace();
+				}
+			}
 			else
 				throw new TooFewMoneyException () ;
 		}
 		else
 			throw new IllegalArgumentException () ;
 		return amountToPay ;
+	}
+	
+	/**
+	 * Add some money to this Player.
+	 * Because this method essentially models a payment to this Player, the parameter must be > 0.
+	 * Technically it increments the money property by the value indicated by the parameter.
+	 * 
+	 * @param amountToReceive the amount of money to add.
+	 * @throws IllegalArgumentException if the amountToAdd parameter is < 0
+	 */
+	public void receiveMoney ( int amountToReceive ) 
+	{
+		if ( amountToReceive >= 0 )
+		{
+			if ( money == null )
+				money = amountToReceive ;
+			else
+				money = money + amountToReceive ;
+			try 
+			{
+				notifyObservers ( "onPay" , amountToReceive , money );
+			}
+			catch (MethodInvocationException e) 
+			{
+				e.printStackTrace();
+			}
+		}
+		else 
+			throw new IllegalArgumentException () ;
 	}
 	
 	/**
@@ -280,25 +353,6 @@ public abstract class Player implements Serializable , Suspendable
 	public Card getInitialCard () 
 	{
 		return initialCard ;
-	}
-	
-	/**
-	 * Add some money to this Player.
-	 * Because this method essentially models a payment to this Player, the parameter must be > 0.
-	 * Technically it increments the money property by the value indicated by the parameter.
-	 * 
-	 * @param amountToReceive the amount of money to add.
-	 * @throws IllegalArgumentException if the amountToAdd parameter is < 0
-	 */
-	public void receiveMoney ( int amountToReceive ) 
-	{
-		if ( amountToReceive >= 0 )
-			if ( money == null )
-				money = amountToReceive ;
-			else
-				money = money + amountToReceive ;
-		else 
-			throw new IllegalArgumentException () ;
 	}
 	
 	/**

@@ -4,6 +4,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.PlayerObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.RMIGUIMapServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 
@@ -40,6 +41,11 @@ class MatchLauncherSession
 	public void addPlayer ( Player player ) throws WrongMatchStateMethodCallException 
 	{
 		matchController.addPlayer ( player ) ; 
+	}
+	
+	public void addPlayerObserver ( PlayerObserver playerObserver , int clientHandlerUID )
+	{
+		matchController.addPlayerObserver ( playerObserver , clientHandlerUID ) ;
 	}
 	
 	/***/

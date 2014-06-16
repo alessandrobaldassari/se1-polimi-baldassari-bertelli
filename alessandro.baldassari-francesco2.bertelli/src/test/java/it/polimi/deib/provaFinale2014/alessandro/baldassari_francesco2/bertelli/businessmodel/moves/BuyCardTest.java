@@ -259,12 +259,12 @@ private DummyMatch d ;
 		{
 			int bankPeekPr ;
 			int minit = d.players.get(0).getMoney();
-			int nc0 = d.players.get(0).getSellableCards().size();
+			int nc0 = CollectionsUtilities.iterableSize( d.players.get(0).getSellableCards() );
 			bankPeekPr = d.match.getBank().getPeekCardPrice(RegionType.CULTIVABLE);
 			b = new BuyCard ( d.sheperds.get(0) , RegionType.CULTIVABLE ) ;
 			b.execute ( d.match ) ;
 			assertTrue ( 1 + bankPeekPr == d.match.getBank().getPeekCardPrice(RegionType.CULTIVABLE) ) ;
-			assertTrue ( 1 + nc0 == d.players.get(0).getSellableCards().size() );
+			assertTrue ( 1 + nc0 == CollectionsUtilities.iterableSize( d.players.get(0).getSellableCards() ) );
 			assertTrue ( d.players.get ( 0 ).getMoney() == minit - bankPeekPr ) ;
 		}
 		catch (MoveNotAllowedException e) 

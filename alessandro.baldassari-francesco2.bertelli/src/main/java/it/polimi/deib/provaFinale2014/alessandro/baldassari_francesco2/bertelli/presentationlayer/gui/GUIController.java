@@ -30,9 +30,9 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.cardsmarketview.CardsMarketView;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.GameMapViewObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.GameView;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.GameViewInputMode;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.GameMapViewInputMode;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.GameMapViewObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.loginview.LoginView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.movechooseview.MoveChooseView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.regiontypechooseview.RegionTypeChooseView;
@@ -194,7 +194,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 			roadIndexes.add ( road.getUID() ) ;
 		generationNotification ( PresentationMessages.CHOOSE_INITIAL_ROAD_FOR_A_SHEPERD_MESSAGE ) ;
 		index.set ( null ) ; 
-		gameView.setInputMode ( GameViewInputMode.ROADS ) ;
+		gameView.setInputMode ( GameMapViewInputMode.ROADS ) ;
 		gameView.beginHighlightVisualization ( roadIndexes ) ;
 		waitForAtomicVariable ( index ) ;
 		gameView.setInputMode ( null ) ;
@@ -227,7 +227,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		for ( Sheperd s : sheperds )
 			rightIndexes.add ( s.getUID () ) ;
 		gameView.beginHighlightVisualization ( rightIndexes ) ;
-		gameView.setInputMode ( GameViewInputMode.SHEPERDS ) ;
+		gameView.setInputMode ( GameMapViewInputMode.SHEPERDS ) ;
 		System.out.println ( "GUI-CONTROLLER - CHOOSE_SHEPERD_FOR_A_TURN : PRIMA DELLA BARRIERA DI ATTESA." ) ;
 		waitForAtomicVariable ( index ) ;
 		System.out.println ( "GUI-CONTROLLER - CHOOSE_SHEPERD_FOR_A_TURN : DOPO LA BARRIERA DI ATTESA." ) ;
@@ -257,7 +257,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		rightIndexes.add ( selector.getAssociatedSheperd().getPosition().getSecondBorderRegion().getUID() );
 		// let the user choose where do the break down.
 		generationNotification ( "Scegli la regione dove perpetrare il misfatto ( tra quelle vicine al tuo pastore scelto )..." ) ;
-		gameView.setInputMode ( GameViewInputMode.REGIONS ) ;
+		gameView.setInputMode ( GameMapViewInputMode.REGIONS ) ;
 		gameView.beginHighlightVisualization ( rightIndexes );
 		index.set ( null ) ;
 		waitForAtomicVariable ( index ) ;
@@ -270,7 +270,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 			for ( Animal a : region.getContainedAnimals () )
 				rightIndexes.add ( a.getUID () ) ;
 			gameView.beginHighlightVisualization ( rightIndexes ) ;
-			gameView.setInputMode ( GameViewInputMode.ANIMALS ) ;
+			gameView.setInputMode ( GameMapViewInputMode.ANIMALS ) ;
 			waitForAtomicVariable ( index ) ;
 			if ( userWantsToChangeMove == false )
 			{
@@ -343,7 +343,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		rightIndexes.add ( selector.getAssociatedSheperd().getPosition().getFirstBorderRegion().getUID() );
 		rightIndexes.add ( selector.getAssociatedSheperd().getPosition().getSecondBorderRegion().getUID() );
 		gameView.beginHighlightVisualization ( rightIndexes ) ;
-		gameView.setInputMode ( GameViewInputMode.REGIONS ) ;
+		gameView.setInputMode ( GameMapViewInputMode.REGIONS ) ;
 		generationNotification ( "Scegli la regione dove vuoi provare a far eseguire l'accoppiamento." );
 		index.set ( null ) ;
 		waitForAtomicVariable ( index ) ;
@@ -377,7 +377,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		rightIndexes.add ( selector.getAssociatedSheperd().getPosition().getFirstBorderRegion().getUID() );
 		rightIndexes.add ( selector.getAssociatedSheperd().getPosition().getSecondBorderRegion().getUID() );
 		gameView.beginHighlightVisualization ( rightIndexes ) ;
-		gameView.setInputMode ( GameViewInputMode.REGIONS ) ;
+		gameView.setInputMode ( GameMapViewInputMode.REGIONS ) ;
 		generationNotification ( "Scegli la regione da dove spostare l'ovino ( tra quelle vicine al pastore che hai scelto)." ) ;
 		index.set ( null ) ;
 		waitForAtomicVariable ( index ) ;
@@ -390,7 +390,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 				if ( a instanceof Ovine )
 					rightIndexes.add ( a.getUID () ) ;
 			gameView.beginHighlightVisualization ( rightIndexes ) ;
-			gameView.setInputMode ( GameViewInputMode.ANIMALS ) ;
+			gameView.setInputMode ( GameMapViewInputMode.ANIMALS ) ;
 			index.set ( null ) ;
 			waitForAtomicVariable ( index ) ;
 			if ( userWantsToChangeMove == false )
@@ -432,7 +432,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		for ( Road r : gameMap.getFreeRoads () )
 			rightIndexes.add ( r.getUID() ) ;
 		gameView.beginHighlightVisualization ( rightIndexes ) ;
-		gameView.setInputMode ( GameViewInputMode.REGIONS ) ;
+		gameView.setInputMode ( GameMapViewInputMode.REGIONS ) ;
 		index.set(null) ;
 		waitForAtomicVariable ( index ) ;
 		if ( this.userWantsToChangeMove == false )
@@ -542,7 +542,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		{
 			c = new RMIGUIMapClient ( ( String ) guiConnector ) ;
 			c.connect ( this ) ;
-			gameView.setGameMapObservable ( c ) ;
+			c.setGameMapObserver ( gameView.getGameMapObserver () );
 			gameView.setGameMapViewObserver ( this ) ;
 			executorService.submit ( c ) ;
 			gameView.setInputMode ( null ) ;
@@ -562,7 +562,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	@Override
 	public void onRegionSelected ( Integer regionUID ) 
 	{
-		processGameViewIntResReceived ( regionUID , GameViewInputMode.REGIONS ) ;
+		processGameViewIntResReceived ( regionUID , GameMapViewInputMode.REGIONS ) ;
 	}
 	
 	/**
@@ -571,7 +571,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	@Override
 	public void onRoadSelected ( Integer roadUID ) 
 	{
-		processGameViewIntResReceived ( roadUID , GameViewInputMode.ROADS ) ;
+		processGameViewIntResReceived ( roadUID , GameMapViewInputMode.ROADS ) ;
 	}
 	
 	/**
@@ -580,7 +580,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	@Override
 	public void onSheperdSelected ( Integer sheperdId ) 
 	{
-		processGameViewIntResReceived ( sheperdId , GameViewInputMode.SHEPERDS ) ;
+		processGameViewIntResReceived ( sheperdId , GameMapViewInputMode.SHEPERDS ) ;
 	}
 	
 	/**
@@ -589,7 +589,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	@Override
 	public void onAnimalSelected ( Integer animalId ) 
 	{
-		processGameViewIntResReceived ( animalId , GameViewInputMode.ANIMALS ) ;
+		processGameViewIntResReceived ( animalId , GameMapViewInputMode.ANIMALS ) ;
 	}
 	
 	/**
@@ -613,7 +613,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	}
 	
 	/***/
-	private void processGameViewIntResReceived ( Integer value , GameViewInputMode rightMode ) 
+	private void processGameViewIntResReceived ( Integer value , GameMapViewInputMode rightMode ) 
 	{
 		System.out.println ( "GUI_CONTROLLER - processGameViewIntResReceived :\n value = " + value + "\nRight mode = " + rightMode + "\nActual mode : " + gameView.getInputMode() ) ;
 		if ( gameView.getInputMode () == rightMode )

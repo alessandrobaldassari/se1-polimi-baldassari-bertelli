@@ -1,5 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.regiontypechooseview;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
@@ -77,6 +78,8 @@ public class RegionTypeChooseView extends ObservableFrameworkedWithGridBagLayout
 		setUndecorated(true);
  		setSize ( GraphicsUtilities.getVGAResolution () ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
+		inputView.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getBackgroundImage () ) ;
+
 	}
 
 	/**

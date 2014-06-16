@@ -7,21 +7,21 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class RMIGUIClientBrokerImpl implements RMIGUIClientBroker 
 {
 
-	private BlockingQueue < GUIMapNotificationMessage > messages ;
+	private BlockingQueue < GUINotificationMessage > messages ;
 	
 	public RMIGUIClientBrokerImpl () 
 	{
-		messages = new LinkedBlockingQueue < GUIMapNotificationMessage > () ;
+		messages = new LinkedBlockingQueue < GUINotificationMessage > () ;
 	}
 	
 	@Override
-	public void putMessage ( GUIMapNotificationMessage nextMessage ) throws RemoteException
+	public void putMessage ( GUINotificationMessage nextMessage ) throws RemoteException
 	{
 		messages.offer ( nextMessage ) ;
 	}
 	
 	@Override
-	public GUIMapNotificationMessage getMessage () throws RemoteException
+	public GUINotificationMessage getMessage () throws RemoteException
 	{
 		try 
 		{

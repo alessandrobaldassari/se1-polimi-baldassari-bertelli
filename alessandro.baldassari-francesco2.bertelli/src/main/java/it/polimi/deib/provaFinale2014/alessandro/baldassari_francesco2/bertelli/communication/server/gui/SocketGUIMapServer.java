@@ -35,10 +35,10 @@ public class SocketGUIMapServer implements Runnable , GameMapObserver , Serializ
 	private Collection < ObjectOutputStream > clients ;
 	
 	/***/
-	private List < GUIMapNotificationMessage > messages ;
+	private List < GUIGameMapNotificationMessage > messages ;
 	
 	/***/
-	private Queue < GUIMapNotificationMessage > messagesForOthers ;
+	private Queue < GUIGameMapNotificationMessage > messagesForOthers ;
 	
 	/***/
 	private Executor executor ;
@@ -50,9 +50,9 @@ public class SocketGUIMapServer implements Runnable , GameMapObserver , Serializ
 		port = lastPortEmitted ;
 		serverSocket = new ServerSocket ( port ) ;
 		clients = new ArrayList < ObjectOutputStream > () ;
-		messages = new ArrayList < GUIMapNotificationMessage > () ;
+		messages = new ArrayList < GUIGameMapNotificationMessage > () ;
 		executor = Executors.newCachedThreadPool () ;
-		messagesForOthers = new LinkedList < GUIMapNotificationMessage > () ;
+		messagesForOthers = new LinkedList < GUIGameMapNotificationMessage > () ;
 	}
 
 	/***/
@@ -116,8 +116,8 @@ public class SocketGUIMapServer implements Runnable , GameMapObserver , Serializ
 	private void notificationAlgo ( String actionAssociated , GameMapElementType whereType,
 			int whereId, PositionableElementType whoType, int whoId ) 
 	{
-		GUIMapNotificationMessage m ;
-		m = new GUIMapNotificationMessage ( actionAssociated , whereType , whereId , whoType , whoId ) ;
+		GUIGameMapNotificationMessage m ;
+		m = new GUIGameMapNotificationMessage ( actionAssociated , whereType , whereId , whoType , whoId ) ;
 		messages.add ( m ) ;
 		synchronized ( messagesForOthers ) 
 		{
@@ -162,7 +162,7 @@ public class SocketGUIMapServer implements Runnable , GameMapObserver , Serializ
 			synchronized ( messagesForOthers ) 
 			{
 				System.out.println ( "SOCKET_GUI_MAP_SERVER - NOTIFICATION_ALGO : BEFORE DO A LAST ARRIVIED NOTIFICATION." ) ;
-				for ( GUIMapNotificationMessage m : messagesForOthers )
+				for ( GUIGameMapNotificationMessage m : messagesForOthers )
 					try 
 					{
 						lastArrived.writeObject ( m ) ;

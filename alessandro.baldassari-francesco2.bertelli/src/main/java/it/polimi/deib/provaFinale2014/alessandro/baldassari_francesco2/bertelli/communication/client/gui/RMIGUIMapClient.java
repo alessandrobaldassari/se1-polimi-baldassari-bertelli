@@ -6,13 +6,18 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.GUIMapNotificationMessage;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.PlayerObserver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.GUIGameMapNotificationMessage;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.GUINotificationMessage;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.GUIPlayerNotificationMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.RMIGUIClientBroker;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionAbstractObservable;
 
-public class RMIGUIMapClient extends WithReflectionAbstractObservable < GameMapObserver > implements Runnable
+public class RMIGUIMapClient implements Runnable
 {
 
 	/**
@@ -38,12 +43,21 @@ public class RMIGUIMapClient extends WithReflectionAbstractObservable < GameMapO
 	
 	private ViewPresenter viewPresenter ;
 	
+	private GameMapObserver gameMapObserver ;
+	
+	private PlayerObserver playerObserver ;
+	
 	/***/
 	public RMIGUIMapClient ( String brokerName ) 
 	{
 		super () ;
 		this.brokerName = brokerName ;
 		viewPresenter = null ;
+	}
+	
+	public void setGameMapObserver ( GameMapObserver g ) 
+	{
+		this.gameMapObserver = g ;
 	}
 	
 	public void connect ( ViewPresenter viewPresenter ) throws IOException 
@@ -69,21 +83,20 @@ public class RMIGUIMapClient extends WithReflectionAbstractObservable < GameMapO
 	@Override
 	public void run () 
 	{
-		GUIMapNotificationMessage m ;
+		GUINotificationMessage m ;
 		String methodName ;
 		while ( on )
 		{
 			try 
 			{
 				System.out.println ( "RMI_GUI_MAP_CLIENT : WAITING FOR A MESSAGE" ) ;
-				m = ( GUIMapNotificationMessage ) clientBroker.getMessage () ;
+				m = ( GUINotificationMessage ) clientBroker.getMessage () ;
 				System.out.println ( "SOCKET_GUI_MAP_CLIENT : MESSAGE CATCH" ) ;
-				if ( m.getActionAssociated ().compareTo ( "ADDED" ) == 0 )
-					methodName = "onPositionableElementAdded" ;
-				else
-					methodName = "onPositionableElementRemoved" ;
 				System.out.println ( "SOCKET_GUI_MAP_CLIENT : BEFORE NOTIFYING." ) ;
-				notifyObservers ( methodName , m.getWhereType() , m.getWhereId () , m.getWhoType () , m.getWhoId () );
+				if ( m instanceof GUIGameMapNotificationMessage )
+					manageGameMapMessage ( (GUIGameMapNotificationMessage) m ) ;
+				else
+					mangePlayerMessage ( (GUIPlayerNotificationMessage) m ) ;
 				System.out.println ( "SOCKET_GUI_MAP_CLIENT : AFTER NOTIFYING." ) ;
 			}
 			catch (IOException e) 
@@ -91,12 +104,36 @@ public class RMIGUIMapClient extends WithReflectionAbstractObservable < GameMapO
 				e.printStackTrace();
 				viewPresenter.stopApp();
 			} 
-			catch  ( MethodInvocationException e ) 
-			{
-				e.printStackTrace();
-				viewPresenter.stopApp();
-			}
 		}		
 	}
-
+	
+	private void manageGameMapMessage ( GUIGameMapNotificationMessage m ) 
+	{
+		if ( gameMapObserver != null )
+		{
+		if ( m.getActionAssociated ().compareTo ( "ADDED" ) == 0 )
+			gameMapObserver.onPositionableElementAdded ( m.getWhereType() , m.getWhereId () , m.getWhoType () , m.getWhoId () ) ;
+		else
+			gameMapObserver.onPositionableElementRemoved ( m.getWhereType() , m.getWhereId () , m.getWhoType () , m.getWhoId () ) ;
+		}
+	}
+	
+	private void mangePlayerMessage ( GUIPlayerNotificationMessage m )
+	{
+		if ( playerObserver != null )
+		{
+			if ( m.getActionAssociated().compareToIgnoreCase ( "onPay" ) == 0 )
+				playerObserver.onPay ( ( Integer ) m.getFirstParam() , (Integer) m.getSecondParam() );
+			else
+				if ( m.getActionAssociated().compareToIgnoreCase ( "onGetPayed" ) == 0 )
+					playerObserver.onGetPayed ( ( Integer ) m.getFirstParam() , (Integer) m.getSecondParam() );
+				else
+					if ( m.getActionAssociated().compareToIgnoreCase ( "onCardAdded" ) == 0 )
+						playerObserver.onCardAdded ( (Card) m.getFirstParam() );
+					else
+						if ( m.getActionAssociated().compareToIgnoreCase ( "onCardRemoved" ) == 0 )
+							playerObserver.onCardRemoved ( (Card) m.getFirstParam() );
+		}
+	}
+	
 }

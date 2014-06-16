@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JCheckBox;
-import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
 import javax.swing.SpinnerModel;
@@ -91,6 +90,7 @@ public class CardsMarketView extends ObservableFrameworkedWithGridBagLayoutDialo
 		setUndecorated(true);
  		setSize ( GraphicsUtilities.getVGAResolution () ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
+		view.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getBackgroundImage() );
 	}
 
 	/**

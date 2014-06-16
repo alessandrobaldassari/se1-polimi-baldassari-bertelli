@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMoveType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
@@ -65,6 +66,7 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 		setUndecorated(true);
  		setSize ( GraphicsUtilities.getVGAResolution () ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
+		view.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getBackgroundImage() );
 	}
 
 	/**

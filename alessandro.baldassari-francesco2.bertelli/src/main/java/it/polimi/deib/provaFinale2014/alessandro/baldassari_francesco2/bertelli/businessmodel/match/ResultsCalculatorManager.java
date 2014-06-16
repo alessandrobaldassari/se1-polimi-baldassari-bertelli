@@ -9,6 +9,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.MatchState;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -104,8 +105,9 @@ class ResultsCalculatorManager
 		Collection <Card> playerCards;
 		if ( regionValuesMap.isEmpty () )
 			calculateRegionsResults () ;
-		playerCards = new ArrayList<Card>(player.getSellableCards().size() + 1);
-		playerCards.addAll(player.getSellableCards());
+		playerCards = new ArrayList<Card> () ;
+		for ( SellableCard s : player.getSellableCards () )
+			playerCards.add ( s ) ;
 		playerCards.add(player.getInitialCard());
 		res = 0;
 		for(Card card : playerCards)

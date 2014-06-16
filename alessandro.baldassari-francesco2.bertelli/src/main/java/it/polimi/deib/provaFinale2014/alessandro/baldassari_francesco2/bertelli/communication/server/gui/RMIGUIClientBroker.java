@@ -6,8 +6,8 @@ import java.rmi.RemoteException;
 public interface RMIGUIClientBroker extends Remote
 {
 
-	public abstract void putMessage ( GUIMapNotificationMessage nextMessage ) throws RemoteException ;
+	public abstract void putMessage ( GUINotificationMessage nextMessage ) throws RemoteException ;
 
-	public abstract GUIMapNotificationMessage getMessage () throws RemoteException ;
+	public abstract GUINotificationMessage getMessage () throws RemoteException ;
 
 }

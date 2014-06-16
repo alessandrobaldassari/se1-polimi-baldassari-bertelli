@@ -95,9 +95,9 @@ class MarketPhaseManager
 	{
 		for ( SellableCard s : receivedSellableCards )
 		{
-			s.getOwner().getSellableCards().remove ( s ) ;
+			s.getOwner().removeCard ( s ) ;
 			s.getOwner().receiveMoney ( s.getSellingPrice () ) ;
-			buyer.getSellableCards().add ( s ) ; 
+			buyer.addCard ( s ) ; 
 			buyer.pay ( s.getSellingPrice() ) ;
 			s.setOwner ( buyer ) ;
 		}

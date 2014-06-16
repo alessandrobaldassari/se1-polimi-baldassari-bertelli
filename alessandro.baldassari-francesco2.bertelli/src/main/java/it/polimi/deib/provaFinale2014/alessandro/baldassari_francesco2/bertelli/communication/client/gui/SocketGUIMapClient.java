@@ -10,7 +10,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.GUIMapNotificationMessage;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.GUIGameMapNotificationMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionAbstractObservable;
 
@@ -54,14 +54,14 @@ public class SocketGUIMapClient extends WithReflectionAbstractObservable < GameM
 	@Override
 	public void run () 
 	{
-		GUIMapNotificationMessage m ;
+		GUIGameMapNotificationMessage m ;
 		String methodName ;
 		while ( on )
 		{
 			try 
 			{
 				System.out.println ( "SOCKET_GUI_MAP_CLIENT : WAITING FOR A MESSAGE" ) ;
-				m = ( GUIMapNotificationMessage ) ois.readObject () ;
+				m = ( GUIGameMapNotificationMessage ) ois.readObject () ;
 				System.out.println ( "SOCKET_GUI_MAP_CLIENT : MESSAGE CATCH" ) ;
 				if ( m.getActionAssociated ().compareTo ( "ADDED" ) == 0 )
 					methodName = "onPositionableElementAdded" ;

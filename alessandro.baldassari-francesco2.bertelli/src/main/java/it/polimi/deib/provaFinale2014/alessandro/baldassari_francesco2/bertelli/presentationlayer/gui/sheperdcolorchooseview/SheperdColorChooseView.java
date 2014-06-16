@@ -1,9 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.sheperdcolorchooseview;
 
 import java.awt.Frame;
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
-import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -81,6 +79,7 @@ public class SheperdColorChooseView extends ObservableFrameworkedWithGridBagLayo
 		setUndecorated(true); 
 		setSize ( GraphicsUtilities.getVGAResolution () ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
+		view.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getBackgroundImage () ) ;
 	}
 
 	/**
