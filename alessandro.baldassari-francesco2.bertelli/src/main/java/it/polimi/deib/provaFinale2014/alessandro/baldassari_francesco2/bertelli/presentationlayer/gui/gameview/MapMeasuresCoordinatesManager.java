@@ -4,6 +4,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.GameConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
 import java.awt.Polygon;
@@ -14,8 +15,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -42,6 +45,7 @@ public class MapMeasuresCoordinatesManager
 	/***/
 	private Map < Integer , PositionableElementType > objectsInRoads ;
 	
+	/***/
 	private PositionableElementCoordinatesManager positionableElementsManager ;
 	
 	// METHODS
@@ -138,7 +142,7 @@ public class MapMeasuresCoordinatesManager
 	}
 		
 	/***/
-	public Shape getRegionBorder ( int regionUID )
+	public Polygon getRegionBorder ( int regionUID )
 	{
 		return regionsCoordinates.get ( regionUID ) ;
 	}
@@ -153,7 +157,13 @@ public class MapMeasuresCoordinatesManager
 	public Integer getRegionId ( int x , int y ) 
 	{
 		Integer res ;
-		res = lookForAPointObjectId ( regionsCoordinates , x, y ) ;
+		res = null ;
+		for ( Integer uid : regionsCoordinates.keySet () )
+			if ( regionsCoordinates.get(uid).contains ( x , y ) )
+			{
+				res = uid ;
+				break ;
+			}
 		return res ;
 	}
 	
@@ -161,62 +171,84 @@ public class MapMeasuresCoordinatesManager
 	public Integer getRoadId ( int x , int y ) 
 	{
 		Integer res ;
-		res = lookForAPointObjectId ( roadsCoordinates , x , y ) ;
+		res = null ;
+		for ( Integer uid : roadsCoordinates.keySet () )
+			if ( roadsCoordinates.get ( uid ).contains ( x , y ) )
+			{
+				res = uid ;
+				break ;
+			}
 		return res ;
 	}
 
 	/***/
 	public Integer getSheperdId ( int x , int y ) 
 	{
-		PositionableElementType type ;
+		Couple < PositionableElementType , Integer > selectedRoadInfo ;
 		Integer res ;
-		Integer roadId ;
-		// first, find the road where it happened, if it exists.
-		roadId = getRegionId ( x , y ) ;
-		if ( roadId != null )
-		{
-			type = objectsInRoads.get ( roadId ) ;
-			if ( type != null && type == PositionableElementType.SHEPERD )
-				res = positionableElementsManager.findPlaceOf ( GameMapElementType.ROAD , roadId , type ) ;
-			else
-				res = null ;
-		}
+		Integer roadUID ;
+		roadUID = getRoadId ( x , y ) ;
+		selectedRoadInfo = positionableElementsManager.getElementInRoad ( roadUID ) ;
+		if ( selectedRoadInfo != null && selectedRoadInfo.getFirstObject().equals ( PositionableElementType.SHEPERD ) )
+			res = selectedRoadInfo.getSecondObject () ;
 		else
 			res = null ;
 		return res ;
 	}
 	
 	/***/
-	public Integer getAnimalId ( int x , int y ) 
+	public Collection < Integer > getAnimalsId ( int x , int y ) 
 	{
-		Integer res ;
-		Integer regionId ;
-		PositionableElementType type ;
-		// first, find the region where it happened, if it exists.
-		regionId = getRegionId ( x , y ) ;
-		if ( regionId != null )
+		Map < PositionableElementType , Collection < Integer > > animalsIds ;
+		Collection < Integer > res ;
+		Integer regionUID ;
+		PositionableElementType elementTypeSelected ;
+		regionUID = getRegionId ( x , y ) ;
+		elementTypeSelected = findType ( regionUID , x, y ) ;
+		if ( elementTypeSelected != null )
 		{
-			type = null ;
-			for ( PositionableElementType t : animalsInRegions.get ( regionId ).keySet() )
-				if ( animalsInRegions.get ( regionId ).get ( t ).contains ( x , y ) )
-				{
-					type = t ;
-					break ;
-				}
-			if ( type != null )
-				res = positionableElementsManager.findPlaceOf ( GameMapElementType.REGION , regionId , type ) ;
+			animalsIds = positionableElementsManager.getAnimalsInRegion ( regionUID ) ;
+			if ( animalsIds.containsKey ( elementTypeSelected ) )
+				res = animalsIds.get ( elementTypeSelected ) ;
 			else
-				res = null ;
+				res = new LinkedList < Integer > () ;
 		}
 		else
-			res = null ;
+			res = new LinkedList < Integer > () ;
 		return res ;
+	}
+	
+	private PositionableElementType findType ( int regionUID , int x , int y )
+	{
+		Map < PositionableElementType , Shape > elementsInRegion ;
+		PositionableElementType res ;
+		elementsInRegion = animalsInRegions.get ( regionUID ) ;
+		res = null ;
+		for ( PositionableElementType t : elementsInRegion.keySet () )
+			if ( elementsInRegion.get ( t ).contains ( x , y ) )
+			{
+				res = t ;
+				break ;
+			}
+		return res ;
+	}
+	
+	/***/
+	public void resetRegionData ( int regionUID ) 
+	{
+		animalsInRegions.get ( regionUID ).clear () ;
 	}
 	
 	/***/
 	public void updateAnimalsInRegionsMap ( int regionId , PositionableElementType t , Shape loc ) 
 	{
 		animalsInRegions.get ( regionId ).put ( t , loc ) ;
+	}
+	
+	/***/
+	public void resetRoadData ( int roadUID ) 
+	{
+		objectsInRoads.put ( roadUID , null ) ;
 	}
 	
 	/***/

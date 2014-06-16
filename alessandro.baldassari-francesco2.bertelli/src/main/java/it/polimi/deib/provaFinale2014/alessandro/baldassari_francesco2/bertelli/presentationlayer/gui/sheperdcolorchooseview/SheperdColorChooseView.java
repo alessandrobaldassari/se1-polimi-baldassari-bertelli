@@ -1,15 +1,19 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.sheperdcolorchooseview;
 
 import java.awt.Frame;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
@@ -19,10 +23,12 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.InputView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.ObservableFrameworkedWithGridBagLayoutDialog;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.WithBackgroundImagePanel;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.SwingConstants;
 
 /**
  * This class allows the User to select one color for one of his Sheperds. 
@@ -205,7 +211,7 @@ public class SheperdColorChooseView extends ObservableFrameworkedWithGridBagLayo
  */
 class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel 
 {
-
+	
 	/**
 	 * The color the user has selected. 
 	 */
@@ -214,7 +220,7 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 	/**
 	 * Panels to represent the Colors to the User. 
 	 */
-	private List < JPanel > colorPanels ;
+	private List < WithBackgroundImagePanel > colorPanels ;
 
 	/**
 	 * Buttons to allow the User to select a Color. 
@@ -239,11 +245,11 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 	protected void createComponents () 
 	{
 		selected = null ;
-		colorPanels = new LinkedList < JPanel > () ;
+		colorPanels = new LinkedList < WithBackgroundImagePanel > () ;
 		selectors = new LinkedList < JRadioButton > () ;
 		buttonGroup = new ButtonGroup () ;
 	}
-
+	
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
@@ -275,16 +281,24 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
 		colors = CollectionsUtilities.newListFromIterable ( in ) ;
 		for ( NamedColor n : in )
-			colorPanels.add ( new JPanel () ) ;
+			colorPanels.add ( new WithBackgroundImagePanel () ) ;
 		for ( NamedColor n : in )
 			selectors.add ( new JRadioButton () ) ;
 		for ( i = 0 ; i < colors.size() ; i ++ )
 		{
 			layoutComponent ( colorPanels.get ( i ) , i , 1 , 1 , 0.7 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 			layoutComponent ( selectors.get ( i ) , i , 2 , 1 , 0.3 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
-			colorPanels.get(i).setBackground ( colors.get ( i ) ) ;
+			try 
+			{
+				colorPanels.get(i).setBackgroundImage ( GraphicsUtilities.getImage ( "sheepland_" + colors.get ( i ).getName().toLowerCase() + "_sheperd.png" ) );
+			}
+			catch (IOException e) 
+			{
+				e.printStackTrace();
+			}
 			selectors.get ( i ).addItemListener ( new SelectorListener ( colors.get ( i ) ) ) ;
 			selectors.get(i).setText ( colors.get ( i ).getName () ) ; 
+			selectors.get ( i ).setHorizontalAlignment ( SwingConstants.CENTER ) ;
 		}
 		for ( JPanel p : colorPanels )
 			add ( p ) ;

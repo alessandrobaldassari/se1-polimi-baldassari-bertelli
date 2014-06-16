@@ -81,6 +81,8 @@ public class ImagesHolder
 			normalPositionableImages.put ( PositionableElementType.SHEEP , im ) ;
 			im = GraphicsUtilities.getImage ( FilePaths.WOLF_IMAGE_PATH ) ;
 			normalPositionableImages.put ( PositionableElementType.WOLF , im ) ;
+			im = GraphicsUtilities.getImage ( FilePaths.RED_SHEPERD_IMAGE_PATH ) ;
+			normalPositionableImages.put ( PositionableElementType.SHEPERD , im ) ;
 		} 
 		catch (IOException e) 
 		{

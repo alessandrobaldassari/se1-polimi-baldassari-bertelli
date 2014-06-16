@@ -7,9 +7,11 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Counter;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.FrameworkedWithGridBagLayoutPanel;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.ObservableFrameworkedWithGridBagLayoutPanel;
 
 import java.awt.Color;
@@ -20,6 +22,7 @@ import java.awt.GridBagConstraints;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
@@ -27,6 +30,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RectangularShape;
 import java.awt.image.BufferedImage;
+import java.util.Collection;
 import java.util.Map;
 
 import javax.swing.AbstractAction;
@@ -146,8 +150,8 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 	public void onPositionableElementAdded ( GameMapElementType whereType , Integer whereId , 
 			PositionableElementType whoType , Integer whoId ) 
 	{
-		System.out.println ( "ELEMENT ADDED\n\n\n\n\n\\n\n\n\n\n\n\n\n\n\n\n\n\n\\n\n\n" ) ;
 		positionableElementsManager.addElement(whereType, whereId, whoType, whoId);
+		repaint () ;
 	}
 
 	/**
@@ -157,8 +161,8 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 	public void onPositionableElementRemoved(GameMapElementType whereType , Integer whereId , 
 			PositionableElementType whoType , Integer whoId) 
 	{
-		System.out.println ( "ELEMENT ADDED\n\n\n\n\n\\n\n\n\n\n\n\n\n\n\n\n\n\n\\n\n\n" ) ;
 		positionableElementsManager.removeElement ( whereType , whereId , whoType , whoId ) ;
+		repaint () ;
 	}
 
 	/**
@@ -251,7 +255,8 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 			Image backgroundImage ;
 			Point res ;
 			res = new Point ( 0 , 0 ) ;
-			backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getMapImage ( highlightMode ) ;
+			//backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getMapImage ( highlightMode ) ;
+			backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getMapImage ( false ) ;
 			res = new Point ( 0 , 0 ) ;
 			// consider the Map may not fill the entire space offered by this panel.
 			if ( backgroundImage.getWidth ( this ) < getWidth () ) 
@@ -266,7 +271,8 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 		{
 			Image backgroundImage ;
 			Point tlc ;
-			backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getMapImage ( highlightMode ) ;	
+			//backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getMapImage ( highlightMode ) ;	
+			backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getMapImage ( false ) ;	
 			tlc = generateTopLeftCorner() ;
 			// draw the map
 			g.drawImage ( backgroundImage , tlc.x , tlc.y , backgroundImage.getWidth ( this ) , backgroundImage.getHeight ( this ) , this );
@@ -275,51 +281,43 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 		/***/
 		private void drawRegionsElement ( Graphics g ) 
 		{
-			Map < Integer , Map < PositionableElementType , Counter > > dataMap ;
-			Map < PositionableElementType , Counter > specData ;
+			Map < PositionableElementType , Collection < Integer > > animalsInRegion ;
 			BufferedImage toDraw ;
-			Rectangle boundingBox ;
-			Shape shape ;
+			Polygon shape ;
+			Point highest ;
 			int currentHeight ;
-			int imageWidth ;
-			int imageHeight ;
 			int i ;
 			boolean transparent ;
 			// retrieve data about regions
-			dataMap = positionableElementsManager.getData ( GameMapElementType.REGION ) ;
 			// for each region
 			for ( i = 1 ; i <= GameConstants.NUMBER_OF_REGIONS ; i ++ )
 			{
+				coordinatesManager.resetRegionData ( i ) ;
 				// retrieve the coordinates of this region
 				shape = coordinatesManager.getRegionBorder ( i ) ;
 				// retrieve data about animals in the region.
-				specData = dataMap.get ( i ) ;
-				// if there is someone in this region
-				if ( specData != null )
+				animalsInRegion = positionableElementsManager.getAnimalsInRegion ( i ) ;
+				// from where start drawing.
+				highest = GraphicsUtilities.findHighestY ( shape ) ;
+				currentHeight = highest.y ;
+				// for each Type of Animal in the region
+				for ( PositionableElementType t : animalsInRegion.keySet () ) 
 				{
-					// approximate the region with a Rectangle.
-					boundingBox = shape.getBounds () ;
-					// determine an acceptable value for the height of the images.
-					imageHeight = boundingBox.height / ( 2 * specData.size () ) ;
-					// determine an acceptable value for the width of the images.
-					imageWidth = boundingBox.width / ( 2 * specData.size ()) ;
-					// begin draw in the top left corner.
-					currentHeight = 0 ;
-					// for each Type of Animal in the region
-					for ( PositionableElementType t : specData.keySet() ) 
+					// if there are exemplars of this Type
+					if ( animalsInRegion.get ( t ).size () > 0 )
 					{
 						// determine if this image has to be transparent or not.
-						transparent = highlightMode && ( ( currentInputMode != GameViewInputMode.ANIMALS ) || ( currentInputMode == GameViewInputMode.ANIMALS && CollectionsUtilities.contains ( toHighlight , i ) ) ) ; 
+						//transparent = highlightMode && ( ( currentInputMode != GameViewInputMode.ANIMALS ) || ( currentInputMode == GameViewInputMode.ANIMALS && CollectionsUtilities.contains ( toHighlight , i ) ) ) ; 
 						// retrieve the image to draw
-						toDraw = SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage( t , transparent ) ; 
+						toDraw = SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage( t , false ) ; 
 						// draw the image
-						g.drawImage ( toDraw , boundingBox.x , currentHeight , imageWidth , imageHeight , this ) ;
+						g.drawImage ( toDraw , highest.x , currentHeight , coordinatesManager.ROADS_RADIUS , coordinatesManager.ROADS_RADIUS , this ) ;
 						// the number of animals of this type.
-						g.drawString ( specData.get ( t ).getValue() + "" , boundingBox.x , currentHeight + imageHeight - 20 ) ;
+						g.drawString ( animalsInRegion.get ( t ).size () + Utilities.EMPTY_STRING , highest.x , currentHeight + coordinatesManager.ROADS_RADIUS ) ;
 						// update the coordinates manager to manage the click events.
-						coordinatesManager.updateAnimalsInRegionsMap ( i , t , new Rectangle ( boundingBox.x , currentHeight , imageWidth , imageHeight ) );
+						coordinatesManager.updateAnimalsInRegionsMap ( i , t , new Rectangle ( highest.x , currentHeight , coordinatesManager.ROADS_RADIUS , coordinatesManager.ROADS_RADIUS ) );
 						// increment the current height for the next image
-						currentHeight = currentHeight + 2 * imageHeight ;
+						currentHeight = currentHeight + coordinatesManager.ROADS_RADIUS ;
 					}
 				}
 			}
@@ -328,8 +326,7 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 		/***/
 		private void drawRoadsElements ( Graphics g ) 
 		{
-			Map < Integer , Map < PositionableElementType , Counter > > dataMap ;
-			Map < PositionableElementType , Counter > specData ;
+			Couple < PositionableElementType , Integer > elementContained ;
 			PositionableElementType type ;
 			BufferedImage toDraw ;
 			Shape shape ;
@@ -340,24 +337,24 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 			int y0 ;
 			boolean transparent ;
 			// retrieve data about roads
-			dataMap = positionableElementsManager.getData ( GameMapElementType.ROAD ) ;
 			// for each roads
 			tlc = generateTopLeftCorner () ;
 			for ( i = 1 ; i <= GameConstants.NUMBER_OF_ROADS ; i ++ )
 			{
+				coordinatesManager.resetRoadData ( i ) ;
 				// retrieve the geo info about this road
 				shape = coordinatesManager.getRoadBorder ( i ) ;
 				// data about thie content of this road
-				specData = dataMap.get ( i ) ;
+				elementContained = positionableElementsManager.getElementInRoad ( i ) ;
 				// it there is someone in
-				if ( specData != null ) 
+				if ( elementContained != null ) 
 				{
 					// retrieve the type of object with which we are dealing with.
-					type = specData.keySet().iterator().next () ;
+					type = elementContained.getFirstObject () ;
 					// determine if transparency is needed.
-					transparent = highlightMode && ( type == PositionableElementType.FENCE || ( type == PositionableElementType.SHEPERD && currentInputMode == GameViewInputMode.SHEPERDS ) ) ;
+					//transparent = highlightMode && ( type == PositionableElementType.FENCE || ( type == PositionableElementType.SHEPERD && currentInputMode == GameViewInputMode.SHEPERDS ) ) ;
 					// select the appropriate image.
-					toDraw = SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( type , transparent ) ;
+					toDraw = SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( type , false ) ;
 					// determine the right coordinates.
 					x = tlc.x == 0 ? 0 : ( getWidth () - preferredDimension.width ) / 2 ;
 					x0 = ( int ) ( ( ( RectangularShape ) shape).getMinX() + x ) ;
@@ -371,16 +368,10 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 		}
 		
 		/***/
-		private void drawRegionsHighlighted ( Graphics g ) 
-		{
-			
-		}
+		private void drawRegionsHighlighted ( Graphics g ) {}
 		
 		/***/
-		public void drawRoadHighlighted ( Graphics g ) 
-		{
-			
-		}
+		public void drawRoadHighlighted ( Graphics g ) {}
 		
 		/**
 		 * Zooms this GameView, the GameMap it represents and also every component drawed on it. 
@@ -417,6 +408,7 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 			@Override
 		    public void mouseClicked(MouseEvent e) 
 		    {
+				Collection < Integer > uids ;
 				String methodName ;
 				Integer uid ;
 				int x ;
@@ -426,37 +418,61 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 				{
 					x = e.getX () ;
 					y = e.getY () ;
+					System.out.println ( "CLICK_MANAGER : BEFORE SWITCHING" ) ;
 					switch ( currentInputMode )
 					{
 						case REGIONS :
+							System.out.println ( "CLICK_MANAGER : REGION." ) ;
 							uid = coordinatesManager.getRegionId ( x , y ) ;
 							if ( uid != null )
 								methodName = "onRegionSelected" ;
 						break ;
 						case ROADS :
+							System.out.println ( "CLICK_MANAGER : ROAD." ) ;
 							uid = coordinatesManager.getRoadId ( x , y ) ;
 							if ( uid != null )
 								methodName = "onRoadSelected" ;
 						break ;
 						case ANIMALS :
-							uid = coordinatesManager.getAnimalId ( x , y ) ;
-							if ( uid != null )
-								methodName = "onSheperdSelected" ;
+							System.out.println ( "CLICK_MANAGER : ANIMAL." ) ;
+							uids = coordinatesManager.getAnimalsId ( x , y ) ;
+							if ( uids.size () > 0 )
+							{
+								uid = null ;
+								for ( Integer i : uids )
+								{
+									for ( Integer j : toHighlight )
+										if ( i == j )
+										{
+											uid = i ;
+											break ;
+										}
+									if ( uid != null )
+										break ;
+								}
+								if ( uid != null )
+									methodName = "onAnimalSelected" ;
+							}
+							else
+								uid = null ;
 						break ;
 						case SHEPERDS :
+							System.out.println ( "CLICK_MANAGER : SHEPERD." ) ;
 							uid = coordinatesManager.getSheperdId ( x , y ) ;
 							if ( uid != null )
-								methodName = "onAnimalSelected" ;
+								methodName = "onSheperdSelected" ;
 						break ;
 						default :
 							throw new RuntimeException () ;
 					}
 					try 
 					{
-						if ( uid != null )
+						System.out.println ( "MAP VIEW PANEL - AFTER SWITCH : UID = " + uid ) ;
+						if ( uid != null && CollectionsUtilities.contains ( toHighlight , uid ) )
 						{
-							System.out.println ( uid ) ;
+							System.out.println ( "MAP VIEW PANEL - BEFORE NOTIFICATION" ) ;
 							notifyObservers ( methodName , uid ) ;
+							System.out.println ( "MAP VIEW PANEL - AFTER NOTIFICATION" ) ;
 						}
 						else
 						{

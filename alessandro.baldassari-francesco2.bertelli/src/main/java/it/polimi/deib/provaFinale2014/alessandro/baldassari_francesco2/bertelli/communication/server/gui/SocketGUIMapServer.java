@@ -1,10 +1,11 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.guimap;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.ServerSocket;
@@ -74,11 +75,12 @@ public class SocketGUIMapServer implements Runnable , GameMapObserver , Serializ
 				System.out.println ( "SOCKET_GUI_MAP_SERVER - RUN : WAITING FOR REQUESTS." ) ;
 				s = serverSocket.accept () ;
 				System.out.println ( "SOCKET_GUI_MAP_SERVER - RUN : REQUEST CATCH." ) ;
+				new ObjectInputStream ( s.getInputStream () ) ;
 				out = new ObjectOutputStream ( s.getOutputStream () ) ;
 				synchronized ( clients )
 				{
 					clients.add ( out ) ;
-					clients.notifyAll () ;
+					clients.notifyAll();
 				}
 				System.out.println ( "SOCKET_GUI_MAP_SERVER - RUN : REQUEST SERVED." ) ;
 				executor.execute ( new LastArriviedNotifier ( out ) ); 

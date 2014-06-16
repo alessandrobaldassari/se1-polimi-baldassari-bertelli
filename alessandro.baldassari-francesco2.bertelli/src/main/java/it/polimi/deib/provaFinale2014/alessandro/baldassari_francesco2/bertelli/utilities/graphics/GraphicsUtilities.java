@@ -12,6 +12,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.Polygon;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.Window;
@@ -106,6 +108,77 @@ public final class GraphicsUtilities
 		if ( vgaResolution == null )
 			vgaResolution = new Dimension ( 640 , 480 ) ;
 		return vgaResolution ;
+	}
+	
+	/***/
+	public static Rectangle approximateSimple ( Polygon p ) 
+	{
+		Rectangle res ;
+		res = p.getBounds () ;
+		while ( p.contains ( res ) == false )
+		{
+			res.x = res.x + res.width / 4 ;
+			res.y = res.y + res.height / 4 ;
+			res.width = res.width / 2 ;
+			res.height = res.height / 2 ;
+		}
+		return res ;
+	}
+	
+	public static Point findHighestY ( Polygon p ) 
+	{
+		Point max ;
+		int i ;
+		max = new Point ( p.xpoints [ 0 ] , p.ypoints [ 0 ] ) ;
+		for ( i = 0 ; i < p.npoints ; i ++ )
+		{
+			if ( p.ypoints [ i ] < max.y )
+			{
+				max.x = p.xpoints [ i ] ;
+				max.y = p.ypoints [ i ] ;
+			}
+		}
+		return max ;
+	}
+	
+	/***/
+	public static Rectangle approximateComplex ( Polygon p ) 
+	{  
+		Rectangle boundingBox ;
+		Rectangle current ;
+		int divider ;
+		int multiplier ;
+		int w ;
+		int h ;
+		boolean up ;
+		boundingBox = p.getBounds () ;
+		current = boundingBox ;
+		up = true ;
+		divider = 2 ;
+		multiplier = 2 ;
+		while ( ! p.contains ( current ) )
+		{
+			// if the last time you enlarged this, reduce 
+			if ( up ) 
+			{
+				// diminuisci le dimensioni
+				w = current.width / divider ;
+				h = current.height / divider ;
+				current = new Rectangle ( current.x + ( boundingBox.width - w ) / 2 , ( boundingBox.height - h ) / 2 , w , h ) ;
+				multiplier = multiplier / 2 ;
+				up = false ;
+			}
+			else
+			{
+				// aumenta le dimensioni
+				w = current.width * multiplier ;
+				h = current.height * multiplier ;
+				current = new Rectangle ( current.x - ( boundingBox.width - w ) / 2 ,  ( boundingBox.height - h ) , w , h ) ;
+				divider = divider * 2 ;
+				up = true ;
+			}
+		}
+		return current ;
 	}
 	
 	/***/

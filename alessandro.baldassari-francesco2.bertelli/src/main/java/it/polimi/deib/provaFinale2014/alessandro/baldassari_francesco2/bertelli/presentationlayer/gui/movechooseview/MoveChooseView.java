@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.SwingConstants;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMoveType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
@@ -19,6 +20,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.InputView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.ObservableFrameworkedWithGridBagLayoutDialog;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.WithBackgroundImagePanel;
 
 public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog < MoveChooseViewObserver >
 {
@@ -30,7 +32,7 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 	private MoveListPanel moveListPanel ;
 	
 	/**
-	 * @param observer 
+	 * @param observer an Observer for this MoveChooseView to notity of the events.
 	 */
 	public MoveChooseView ( DefaultMoveChooseViewObserver observer ) 
 	{ 
@@ -179,7 +181,7 @@ class MoveListPanel extends FrameworkedWithGridBagLayoutPanel
 	private GameMoveType selected ;
 	
 	/***/
-	private JPanel [] imagePanels ;
+	private WithBackgroundImagePanel [] imagePanels ;
 
 	/***/
 	private JRadioButton [] selectors ;
@@ -201,15 +203,16 @@ class MoveListPanel extends FrameworkedWithGridBagLayoutPanel
 	{
 		int i ;
 		selected = null ;
-		imagePanels = new JPanel [ GameMoveType.values().length ] ;
+		imagePanels = new WithBackgroundImagePanel [ GameMoveType.values().length ] ;
 		for ( i = 0 ; i < imagePanels.length ; i ++ )
-			imagePanels [ i ] = new JPanel () ;
+			imagePanels [ i ] = new WithBackgroundImagePanel () ;
 		selectors = new JRadioButton [ imagePanels.length ] ;
 		for ( i = 0 ; i < imagePanels.length ; i ++ )
 			selectors [ i ] = new JRadioButton () ;
 		buttonGroup = new ButtonGroup () ;
 	}
 
+	/***/
 	@Override
 	protected void manageLayout () 
 	{
@@ -221,11 +224,13 @@ class MoveListPanel extends FrameworkedWithGridBagLayoutPanel
 		for ( i = 0 ; i < imagePanels.length ; i ++ )
 		{
 			layoutComponent ( imagePanels [ i ] , i , 1 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
-			layoutComponent ( selectors [ i ] , i , 2 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+			layoutComponent ( selectors [ i ] , i , 2 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
 			selectors [ i ].setText ( moveTypes [ i ].name () ) ;
+			selectors [ i ].setHorizontalAlignment ( SwingConstants.CENTER ) ;
 		}
 	}
 
+	/***/
 	@Override
 	protected void bindListeners () 
 	{

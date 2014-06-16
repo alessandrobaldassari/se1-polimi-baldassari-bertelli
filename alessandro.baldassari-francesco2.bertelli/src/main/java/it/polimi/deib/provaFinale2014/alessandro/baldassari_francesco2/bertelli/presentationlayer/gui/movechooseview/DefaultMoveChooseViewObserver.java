@@ -7,23 +7,27 @@ import java.util.concurrent.atomic.AtomicReference;
 public class DefaultMoveChooseViewObserver implements MoveChooseViewObserver 
 {
 
+	/***/
 	private AtomicReference < GameMoveType > move ;
 	
+	/***/
 	public DefaultMoveChooseViewObserver ( AtomicReference < GameMoveType > move ) 
 	{
 		this.move = move ;
 	}
 	
+	/***/
 	@Override
-	public void onMoveChoosed ( GameMoveType move ) 
+	public void onMoveChoosed ( GameMoveType choosenMove ) 
 	{
-		synchronized ( this.move ) 
+		synchronized ( move ) 
 		{
-			this.move.set ( move ) ;
-			this.move.notifyAll () ;
+			move.set ( choosenMove ) ;
+			move.notifyAll () ;
 		}
 	}
 
+	/***/
 	@Override
 	public void onDoNotWantChooseMove () {}
 	

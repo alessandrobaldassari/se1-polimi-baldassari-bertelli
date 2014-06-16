@@ -1,13 +1,16 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client.gui;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.guimap.GUIMapNotificationMessage;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.GUIMapNotificationMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionAbstractObservable;
 
@@ -19,6 +22,9 @@ public class SocketGUIMapClient extends WithReflectionAbstractObservable < GameM
 	private final String SERVER_IP = "127.0.0.1" ;
 	
 	/***/
+	private int serverPort ;
+	
+	/***/
 	private Socket socket ;
 	
 	/***/
@@ -28,11 +34,21 @@ public class SocketGUIMapClient extends WithReflectionAbstractObservable < GameM
 	private ObjectInputStream ois ;
 	
 	/***/
-	public SocketGUIMapClient ( int serverPort ) throws UnknownHostException, IOException
+	public SocketGUIMapClient ( int serverPort )
 	{
-		socket = new Socket ( SERVER_IP , serverPort ) ;
+		this.serverPort = serverPort ;
+		socket = new Socket (  ) ;
+	}
+	
+	public void connect () throws IOException  
+	{
+		ObjectOutputStream oos ;
+		SocketAddress socketAddress ;
+		socketAddress = new InetSocketAddress ( SERVER_IP , serverPort ) ;
+		socket.connect ( socketAddress ) ;
+		System.out.println ( "SOCKET_CLIENT - TECHNICAL CONNECT : CONNECTION CREATED." ) ;		
 		ois = new ObjectInputStream ( socket.getInputStream () ) ;
-		on = true ;
+		oos = new ObjectOutputStream ( socket.getOutputStream () ) ;
 	}
 	
 	@Override

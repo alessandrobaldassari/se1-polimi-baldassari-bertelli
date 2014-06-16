@@ -18,7 +18,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.NetworkCommunicantPlayer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.PlayerWantsToExitGameException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.NetworkCommunicationController;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.guimap.SocketGUIMapServer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.RMIGUIMapServer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.SocketGUIMapServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ConnectionLoosingController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ConnectionLoosingControllerImpl;
@@ -100,7 +101,7 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 	private transient ResumeConnectionServer < ? > rmiResumeConnectionServer ;
 	
 	/***/
-	private transient SocketGUIMapServer guiServer ;
+	private transient RMIGUIMapServer guiServer ;
 	
 	/**
 	 * @throws IOException if something goes wrong with the creation of the member objects. 
@@ -236,7 +237,7 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 	{
 		try 
 		{
-			guiServer = new SocketGUIMapServer () ;
+			guiServer = new RMIGUIMapServer () ;
 			currentGameController = new MatchController ( this , Collections.<GameMapObserver>singleton ( guiServer ) ) ;
 			currentClientHandlers.clear () ;
 			currentClientNames.clear () ;
@@ -296,12 +297,14 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 	@Override
 	public synchronized void notifyFinishAddingPlayers () 
 	{
+		String guiHandler ;
 		System.out.println ( "MASTER SERVER : NOTIFICA AI CLIENT CHE IL MATCH STA PARTENDO" ) ;
 		for ( ClientHandler < ? > c : currentClientHandlers )
 			try 
 			{
 				c.uidNotification () ;
-				c.sendGuiConnectorNotification ( guiServer.getPort () ) ;
+				guiHandler = guiServer.addClient () ;
+				c.sendGuiConnectorNotification ( guiHandler ) ;
 				c.notifyMatchStart () ;
 			}
 			catch ( IOException e ) 

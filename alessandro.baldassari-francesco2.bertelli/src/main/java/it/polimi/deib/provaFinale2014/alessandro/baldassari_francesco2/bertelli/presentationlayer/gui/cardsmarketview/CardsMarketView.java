@@ -1,5 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.cardsmarketview;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.NotSellableException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.SellingPriceNotSetException;
@@ -12,6 +13,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.InputView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.ObservableFrameworkedWithGridBagLayoutDialog;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.WithBackgroundImagePanel;
 
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -239,7 +241,7 @@ class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel
 	/**
 	 * The panels that will show a graphic representation of the Cards. 
 	 */
-	private List < JPanel > imagePanels ;
+	private List < WithBackgroundImagePanel > imagePanels ;
 
 	/**
 	 * The buttons that allows to select / unselect Cards. 
@@ -259,7 +261,7 @@ class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel
 	protected void createComponents () 
 	{
 		selectedCards = new LinkedList < SellableCard > () ;
-		imagePanels = new LinkedList < JPanel > () ;
+		imagePanels = new LinkedList < WithBackgroundImagePanel > () ;
 		selectors = new LinkedList < JCheckBox > () ;
 	}
 
@@ -291,7 +293,7 @@ class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel
 	public void setCards ( Iterable < SellableCard > in , boolean allowEdit ) 
 	{
 		Insets insets ;
-		JPanel imagePanel ;
+		WithBackgroundImagePanel imagePanel ;
 		JCheckBox checkBox ;
 		JSpinner spinner ;
 		SpinnerModel spinnerModel ;
@@ -303,10 +305,11 @@ class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel
 		i = 0 ;
 		for ( SellableCard n : in )
 		{
-			imagePanel = new JPanel () ;
+			imagePanel = new WithBackgroundImagePanel () ;
 			checkBox = new JCheckBox () ;
 			layoutComponent ( imagePanel , i , 1 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 			layoutComponent ( checkBox , i , 2 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
+			imagePanel.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCardImage ( n.getRegionType() ) );
 			imagePanels.add ( imagePanel ) ;
 			selectors.add ( checkBox ) ;
 			selectorListener = new SelectorListener ( n ) ; 
