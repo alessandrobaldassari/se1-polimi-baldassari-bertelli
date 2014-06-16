@@ -37,8 +37,10 @@ import java.util.concurrent.TimeoutException;
 class TurnationPhaseManager implements TurnNumberClock
 {
 
+	/***/
 	private Match match ;
 	
+	/***/
 	private LambEvolver lambEvolver ;
 	
 	/**
@@ -114,7 +116,7 @@ class TurnationPhaseManager implements TurnNumberClock
 							moveFactory = moveFactoryGenerator ( currentPlayer ) ;
 							for ( moveIndex = 0 ; moveIndex < GameConstants.NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ )
 							{	
-								selector = new MoveSelector ( moveFactory.getAssociatedSheperd () , generateCardPriceMap () ) ;
+								selector = new MoveSelector ( moveFactory.getAssociatedSheperd () , generateCardPriceMap ( moveFactory.getAssociatedSheperd () ) ) ;
 								try 
 								{
 									System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - CHIEDENDO DI FARE UNA MOSSA " ) ;				
@@ -138,8 +140,7 @@ class TurnationPhaseManager implements TurnNumberClock
 								{
 									// the user tried to do an invalid move; give him another chance
 									System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - ERRORE DURANTE L'ESECUZIONE DELLA MOSSA." ) ;									
-									currentPlayer.genericNotification ( "Non puoi fare questa mossa, scegline un'altra!\n" + e.getMessage () ) ;
-									moveIndex -- ;								
+									currentPlayer.genericNotification ( "Non puoi fare questa mossa, peccato, hai perso una occasione !" ) ;
 								} 
 							}
 						}
@@ -185,17 +186,18 @@ class TurnationPhaseManager implements TurnNumberClock
 	}
 	
 	/***/
-	private Map < RegionType , Integer > generateCardPriceMap () 
+	private Map < RegionType , Integer > generateCardPriceMap ( Sheperd s ) 
 	{
 		Map < RegionType , Integer > res ;
 		int price ;
 		res = new HashMap < RegionType , Integer > () ;
-		for ( RegionType r : RegionType.allTheTypesExceptSheepsburg() )
+		for ( RegionType rt : RegionType.allTheTypesExceptSheepsburg() )
 		{
 			try 
 			{
-				price = match.getBank().getPeekCardPrice ( r ) ;
-				res.put ( r , price ) ;
+				price = match.getBank().getPeekCardPrice ( rt ) ;
+				if ( s.getOwner ().getMoney () >= price && ( s.getPosition().getFirstBorderRegion().getType () == rt || s.getPosition().getSecondBorderRegion().getType() == rt ) )
+					res.put ( rt , price ) ;
 			}
 			catch (NoMoreCardOfThisTypeException e) {}
 		}

@@ -57,6 +57,8 @@ public class CLIController extends ViewPresenter
 	 */
 	private Executor executorService ;
 	
+	private String myName ;
+	
 	/***/
 	public CLIController () 
 	{
@@ -111,6 +113,7 @@ public class CLIController extends ViewPresenter
 				writer.println ( PresentationMessages.INVALID_CHOOSE_MESSAGE + Utilities.CARRIAGE_RETURN ) ;
 				writer.println ( PresentationMessages.NAME_REQUEST_MESSAGE ) ;
 				res = reader.readLine ().trim () ;
+				myName = res ;
 			}
 			writer.println ( PresentationMessages.NAME_VERIFICATION_MESSAGE ) ;
 		} 
@@ -130,7 +133,7 @@ public class CLIController extends ViewPresenter
 	{
 		String msg ;
 		if ( isOk ) 
-			msg =PresentationMessages.NAME_ACCEPTED_MESSAGE + Utilities.CARRIAGE_RETURN + notes ;
+			msg = PresentationMessages.NAME_ACCEPTED_MESSAGE + Utilities.CARRIAGE_RETURN + notes ;
 		else
 			msg = PresentationMessages.NAME_REJECTED_MESSAGE + Utilities.CARRIAGE_RETURN + notes ;
 		writer.println ( msg );
@@ -142,7 +145,7 @@ public class CLIController extends ViewPresenter
 	@Override
 	public void onNotifyMatchStart () 
 	{
-		writer.println ( PresentationMessages.MATCH_STARTING_MESSAGE ) ;
+		writer.println ( myName + " : " +  PresentationMessages.MATCH_STARTING_MESSAGE ) ;
 	}
 	
 	/**
@@ -156,7 +159,7 @@ public class CLIController extends ViewPresenter
 		NamedColor res ;
 		int i ;
 		colors = CollectionsUtilities.newListFromIterable ( availableColors ) ;
-		s = PresentationMessages.CHOOSE_COLOR_FOR_SHEPERD_MESSAGE + Utilities.CARRIAGE_RETURN ;
+		s = myName + " : " +  PresentationMessages.CHOOSE_COLOR_FOR_SHEPERD_MESSAGE + Utilities.CARRIAGE_RETURN ;
 		i = 0 ;
 		for ( Color c : colors )
 		{
@@ -175,7 +178,7 @@ public class CLIController extends ViewPresenter
 	@Override
 	public void onMatchWillNotStartNotification ( String msg ) 
 	{
-		writer.println ( PresentationMessages.MATCH_WILL_NOT_START_MESSAGE + "\n" + msg ) ;
+		writer.println ( myName + " : " +  PresentationMessages.MATCH_WILL_NOT_START_MESSAGE + "\n" + msg ) ;
 		executorService.execute ( new DownAction () ) ;
 	}
 	
@@ -191,7 +194,7 @@ public class CLIController extends ViewPresenter
 		int i ;
 		availableRoadsList = CollectionsUtilities.newListFromIterable  ( availableRoads ) ;
 		i = 0 ;
-		s = PresentationMessages.CHOOSE_INITIAL_ROAD_FOR_A_SHEPERD_MESSAGE + Utilities.CARRIAGE_RETURN ;
+		s = myName + " : " + PresentationMessages.CHOOSE_INITIAL_ROAD_FOR_A_SHEPERD_MESSAGE + Utilities.CARRIAGE_RETURN ;
 		for ( i = 0 ; i < availableRoadsList.size () ; i ++ )
 			s = s + i + ". " + availableRoadsList.get ( i ++ ) + Utilities.CARRIAGE_RETURN ;
 		s = s + "-1. Esci da JSheepland" + Utilities.CARRIAGE_RETURN ;
@@ -211,7 +214,7 @@ public class CLIController extends ViewPresenter
 		String s ;
 		int i ;
 		sheperds = CollectionsUtilities.newListFromIterable ( playersSheperd ) ;
-		s = PresentationMessages.CHOOSE_SHEPERD_FOR_A_TURN_MESSAGE + Utilities.CARRIAGE_RETURN ;
+		s = myName + " : " +  PresentationMessages.CHOOSE_SHEPERD_FOR_A_TURN_MESSAGE + Utilities.CARRIAGE_RETURN ;
 		i = 0 ;
 		for ( Sheperd sh : sheperds )
 		{
@@ -235,7 +238,8 @@ public class CLIController extends ViewPresenter
 		boolean repeat ;
 		do
 		{
-			s = "Situazione della mappa di gioco" + Utilities.CARRIAGE_RETURN ;
+			s = myName + " : \nTuoi soldi : " + f.getAssociatedSheperd().getOwner().getMoney() ;
+			s = s + "Situazione della mappa di gioco" + Utilities.CARRIAGE_RETURN ;
 			s = s + m + Utilities.CARRIAGE_RETURN ;
 			writer.println ( s ) ;
 			s = PresentationMessages.DO_MOVE_MESSAGE + Utilities.CARRIAGE_RETURN ;
@@ -299,20 +303,25 @@ public class CLIController extends ViewPresenter
 		String msg ;
 		int i ;
 		int j ;
-		for ( SellableCard s : sellableCards )
+		if ( CollectionsUtilities.iterableSize ( sellableCards ) > 0 )
 		{
-			msg = "Tua carta : " + s + Utilities.CARRIAGE_RETURN + "Vuoi venderla ? ( 1 : s / 2 : n )" ;
-			i = GraphicsUtilities.checkedIntInputWithoutEscape ( 1 , 2 , -1 , msg , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
-			if ( i == 1 )
+			msg = myName + " : scegli le carte che vuoi vendere" ; 
+			writer.println ( msg ) ;
+			for ( SellableCard s : sellableCards )
 			{
-				s.setSellable ( true ) ;
-				msg = "Quanto vuoi chiedere per questa carta ? " + Utilities.CARRIAGE_RETURN ;
-				j = GraphicsUtilities.checkedIntInputWithoutEscape ( 1 , 5 , -1 , msg , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
-				s.setSellingPrice ( j ) ;
-				res.add ( s ) ;
+				msg = "Tua carta : " + s + Utilities.CARRIAGE_RETURN + "Vuoi venderla ? ( 1 : s / 2 : n )" ;
+				i = GraphicsUtilities.checkedIntInputWithoutEscape ( 1 , 2 , -1 , msg , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
+				if ( i == 1 )
+				{
+					s.setSellable ( true ) ;
+					msg = "Quanto vuoi chiedere per questa carta ? " + Utilities.CARRIAGE_RETURN ;
+					j = GraphicsUtilities.checkedIntInputWithoutEscape ( 1 , 5 , -1 , msg , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
+					s.setSellingPrice ( j ) ;
+					res.add ( s ) ;
+				}
+				else
+					s.setSellable ( false ) ;
 			}
-			else
-				s.setSellable ( false ) ;
 		}
 		return res ;
 	}
@@ -331,48 +340,51 @@ public class CLIController extends ViewPresenter
 		res = new LinkedList < SellableCard > () ;
 		int sum  ;
 		boolean exit ;
-		do
+		if ( CollectionsUtilities.iterableSize ( sellableCards ) > 0 )
 		{
-			sum = 0 ;
 			do
 			{
-				s = "Scegli una carta che vuoi comprare:" ;
-				s = s + "-1. Non voglio comprare alcuna carta." ;
-				for ( i = 0 ; i < availableCards.size() ; i ++ )
-					s = s + i + ". " + availableCards.get ( i ) ;
-				i = GraphicsUtilities.checkedIntInputWithEscape ( 0 , availableCards.size () - 1 , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
-				if ( i != -1 )
+				sum = 0 ;
+				do
 				{
-					res.add ( availableCards.get ( i ) ) ;
-					try 
+					s = myName + " : \nTuoi soldi : " + playerMoney + Utilities.CARRIAGE_RETURN +  "Scegli una carta che vuoi comprare:" ;
+					s = s + "-1. Non voglio comprare alcuna carta." ;
+					for ( i = 0 ; i < availableCards.size() ; i ++ )
+						s = s + i + ". " + availableCards.get ( i ) ;
+					i = GraphicsUtilities.checkedIntInputWithEscape ( 0 , availableCards.size () - 1 , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
+					if ( i != -1 )
 					{
-						sum = sum + availableCards.get ( i ).getSellingPrice () ;
-					}
-					catch (NotSellableException e) 
-					{	
-						e.printStackTrace();
-					}
-					catch (SellingPriceNotSetException e) 
-					{
-						e.printStackTrace();
+						res.add ( availableCards.get ( i ) ) ;
+						try 
+						{
+							sum = sum + availableCards.get ( i ).getSellingPrice () ;
+						}
+						catch (NotSellableException e) 
+						{	
+							e.printStackTrace();
+						}
+						catch (SellingPriceNotSetException e) 
+						{
+							e.printStackTrace();
+						}
 					}
 				}
-			}
-			while ( i != -1 ) ;
-			if ( sum > playerMoney )
-			{
-				writer.println ( "Sorry, ma non hai abbastanza soldi !" ) ;
-				i = GraphicsUtilities.checkedIntInputWithoutEscape ( 1 , 2 , -1 , "Vuoi riselezionare le carte ( 1 ) o non comperarne alcuna ( 2 ) ?" , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer, reader ) ;
-				if ( i == 1 )
-					exit = false ;
+				while ( i != -1 ) ;
+				if ( sum > playerMoney )
+				{
+					writer.println ( "Sorry, ma non hai abbastanza soldi !" ) ;
+					i = GraphicsUtilities.checkedIntInputWithoutEscape ( 1 , 2 , -1 , "Vuoi riselezionare le carte ( 1 ) o non comperarne alcuna ( 2 ) ?" , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer, reader ) ;
+					if ( i == 1 )
+						exit = false ;
+					else
+						exit = true ;
+					res.clear();
+				}
 				else
 					exit = true ;
-				res.clear();
 			}
-			else
-				exit = true ;
+			while ( ! exit ) ;
 		}
-		while ( ! exit ) ;
 		return res ;
 	}
 
@@ -440,13 +452,12 @@ public class CLIController extends ViewPresenter
 		s = "Quale carta vuoi comprare ( regione ) ?" + Utilities.CARRIAGE_RETURN ;
 		regs = new LinkedList < RegionType > ()  ;
 		i = 0 ;
-		for ( RegionType rt : RegionType.values () ) 
-			if ( rt != RegionType.SHEEPSBURG )
-			{
-				s = s + i + ". " + rt + Utilities.CARRIAGE_RETURN ;
-				regs.add ( rt );
-				i ++ ;	
-			}
+		for ( RegionType rt : f.getBankPriceCards ().keySet () ) 
+		{
+			s = s + i + ". " + rt + Utilities.CARRIAGE_RETURN ;
+			regs.add ( rt );
+			i ++ ;
+		}	
 		s = s + "-1. Cambia mossa" + Utilities.CARRIAGE_RETURN ;
 		i = GraphicsUtilities.checkedIntInputWithEscape ( 0 , regs.size() - 1 , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader) ;
 		if ( i != -1 )

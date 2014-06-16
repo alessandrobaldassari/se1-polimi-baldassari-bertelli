@@ -142,6 +142,7 @@ public class NetworkCommunicantPlayer extends Player
 			{
 				Iterable < SellableCard > arrived ;
 				boolean res ;
+				System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling : " + getSellableCards () ) ;
 				arrived = clientHandler.chooseCardsEligibleForSelling ( getSellableCards () ) ;
 				res = setMethodCompleted () ;
 				if ( res )
@@ -314,6 +315,7 @@ public class NetworkCommunicantPlayer extends Player
 			public Iterable < SellableCard > call () throws IOException
 			{
 				Iterable < SellableCard > res ;
+				System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling : " + src ) ;
 				res = clientHandler.chooseCardToBuy ( src , getMoney() ) ;
 				setMethodCompleted () ;
 				return res ;

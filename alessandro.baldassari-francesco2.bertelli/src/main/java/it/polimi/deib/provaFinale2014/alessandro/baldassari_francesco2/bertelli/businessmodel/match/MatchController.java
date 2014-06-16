@@ -520,12 +520,26 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	{
 		ResultsCalculatorManager matchResultsCalculator ;
 		Map <Player, Integer> playerScoresMap;
+		Player winner ;
+		winner = null ;
+		int max = -1 ;
 		try 
 		{
 			matchResultsCalculator = new ResultsCalculatorManager ( match ) ;
 			playerScoresMap = new HashMap < Player , Integer> ( match.getNumberOfPlayers () ) ;
 			for ( Player p : match.getPlayers () )
 				playerScoresMap.put ( p , matchResultsCalculator.calculatePlayerScore ( p ) ) ;
+			for ( Player p : playerScoresMap.keySet() )
+				if ( playerScoresMap.get ( p ) > max )
+				{
+					winner = p ;
+					max = playerScoresMap.get ( p ) ;
+				}
+			for ( Player p : match.getPlayers() )
+				if ( p.equals ( winner ) )
+					p.genericNotification ( "Hai vinto !!!" );
+				else
+					p.genericNotification ( "Il vincitore è : " + winner.getName () ) ;
 			for ( Player p : match.getPlayers () )
 				p.genericNotification ( "Your points : " + playerScoresMap.get ( p ) ) ;
 		}
