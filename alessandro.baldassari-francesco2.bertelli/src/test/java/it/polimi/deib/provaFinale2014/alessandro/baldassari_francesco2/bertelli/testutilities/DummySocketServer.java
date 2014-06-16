@@ -1,6 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.ServerSocket;
@@ -17,6 +18,7 @@ public class DummySocketServer extends Thread  {
 	private ServerSocket serverSocket;
 	private Socket socket;
 	private ObjectOutputStream oos;
+	private ObjectInputStream ois;
 	
 	public void run(){
 		try {
@@ -47,6 +49,13 @@ public class DummySocketServer extends Thread  {
 			e1.printStackTrace();
 		}
 		System.out.println("Dummy Socket Server oos");
+		try{
+			ois = new ObjectInputStream(socket.getInputStream());
+		}
+		catch (IOException e){
+			e.printStackTrace();
+		}
+		System.out.println("Dummy Socket Server ois");
 		try {
 			oos.writeObject(Message.newInstance(GameProtocolMessage.UID_NOTIFICATION, (Iterable <Serializable>) new ArrayList<Serializable>()));
 		} catch (IOException e1) {
