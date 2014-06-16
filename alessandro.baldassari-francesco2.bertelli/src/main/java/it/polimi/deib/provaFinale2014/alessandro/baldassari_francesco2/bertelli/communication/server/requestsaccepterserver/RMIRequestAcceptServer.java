@@ -4,6 +4,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.RMIClientHandler;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunchercommunicationcontroller.MatchAdderCommunicationController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.net.RMIObjectUnbinder;
 
 import java.io.IOException;
 import java.rmi.AccessException;
@@ -28,11 +29,6 @@ public interface RMIRequestAcceptServer extends Remote
 	 * The logical name of this RMI Server.
 	 */
 	public static final String SERVER_NAME = "SHEEPLAND_RMI_REQUEST_ACCEPT_SERVER" ; 
-	
-	/**
-	 * The base server port associated with this Server. 
-	 */
-	public static final int SERVER_PORT = 3334 ;
  	
 	/**
 	 * Allows a Client to request to add himself to a Match.

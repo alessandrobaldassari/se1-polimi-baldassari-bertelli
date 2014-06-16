@@ -1,8 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.FilePaths;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.GameConstants;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.GameConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
@@ -189,7 +188,7 @@ public class MapMeasuresCoordinatesManager
 		Integer roadUID ;
 		roadUID = getRoadId ( x , y ) ;
 		selectedRoadInfo = positionableElementsManager.getElementInRoad ( roadUID ) ;
-		if ( selectedRoadInfo != null && selectedRoadInfo.getFirstObject().equals ( PositionableElementType.SHEPERD ) )
+		if ( selectedRoadInfo != null && PositionableElementType.isSheperd( selectedRoadInfo.getFirstObject() ) )
 			res = selectedRoadInfo.getSecondObject () ;
 		else
 			res = null ;
@@ -204,7 +203,9 @@ public class MapMeasuresCoordinatesManager
 		Integer regionUID ;
 		PositionableElementType elementTypeSelected ;
 		regionUID = getRegionId ( x , y ) ;
+		System.out.println ( "MAP_MEASURES_COORDINATES_MANAGER - GET_ANIMALS_ID : REGION UID RETRIEVED : " + regionUID ) ;
 		elementTypeSelected = findType ( regionUID , x, y ) ;
+		System.out.println ( "MAP_MEASURES_COORDINATES_MANAGER - GET_ANIMALS_ID : ELEMENT TYPE RETRIEVED : " + elementTypeSelected ) ;
 		if ( elementTypeSelected != null )
 		{
 			animalsIds = positionableElementsManager.getAnimalsInRegion ( regionUID ) ;
@@ -255,30 +256,6 @@ public class MapMeasuresCoordinatesManager
 	public void updateObjectInRoadsMap ( int roadId , PositionableElementType t ) 
 	{
 		objectsInRoads.put ( roadId , t ) ;
-	}
-	
-	/**
-	 * Find the key, if it exists for which the ( x , y ) point is in the value associated.
-	 * 
-	 * @param dataStr
-	 * @param x the x value of the interested position.
-	 * @param y the y value of the interested position.
-	 * @return the id ot the searched object, it it exists, null else.
-	 */
-	private Integer lookForAPointObjectId ( Map < Integer , ? extends Shape > dataStr , int x , int y ) 
-	{
-		Integer res ;
-		res = null ;
-		System.out.println ( "X = " + x + "\nY = " + y );
-		for ( Integer i : dataStr.keySet () )
-		{
-			System.out.println ( dataStr.get(i).getBounds() ) ;
-			if ( dataStr.get ( i ).contains ( x , y ) )
-			{
-				res = i ;
-				break ;
-			}
-		}return res ;
 	}
 	
 }

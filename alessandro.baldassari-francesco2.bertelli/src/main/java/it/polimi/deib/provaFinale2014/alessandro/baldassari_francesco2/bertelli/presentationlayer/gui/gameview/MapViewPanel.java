@@ -1,7 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.GameConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.GameConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
@@ -271,8 +271,7 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 		{
 			Image backgroundImage ;
 			Point tlc ;
-			//backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getMapImage ( highlightMode ) ;	
-			backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getMapImage ( false ) ;	
+			backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getMapImage ( highlightMode ) ;	
 			tlc = generateTopLeftCorner() ;
 			// draw the map
 			g.drawImage ( backgroundImage , tlc.x , tlc.y , backgroundImage.getWidth ( this ) , backgroundImage.getHeight ( this ) , this );
@@ -307,9 +306,9 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 					if ( animalsInRegion.get ( t ).size () > 0 )
 					{
 						// determine if this image has to be transparent or not.
-						//transparent = highlightMode && ( ( currentInputMode != GameViewInputMode.ANIMALS ) || ( currentInputMode == GameViewInputMode.ANIMALS && CollectionsUtilities.contains ( toHighlight , i ) ) ) ; 
+						transparent = highlightMode && ( ( currentInputMode != GameViewInputMode.ANIMALS ) || ( currentInputMode == GameViewInputMode.ANIMALS && CollectionsUtilities.contains ( toHighlight , i ) ) ) ; 
 						// retrieve the image to draw
-						toDraw = SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage( t , false ) ; 
+						toDraw = SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage( t , transparent ) ; 
 						// draw the image
 						g.drawImage ( toDraw , highest.x , currentHeight , coordinatesManager.ROADS_RADIUS , coordinatesManager.ROADS_RADIUS , this ) ;
 						// the number of animals of this type.
@@ -352,9 +351,9 @@ public class MapViewPanel extends ObservableFrameworkedWithGridBagLayoutPanel < 
 					// retrieve the type of object with which we are dealing with.
 					type = elementContained.getFirstObject () ;
 					// determine if transparency is needed.
-					//transparent = highlightMode && ( type == PositionableElementType.FENCE || ( type == PositionableElementType.SHEPERD && currentInputMode == GameViewInputMode.SHEPERDS ) ) ;
+					transparent = highlightMode && ( type == PositionableElementType.FENCE || ( type == PositionableElementType.SHEPERD && currentInputMode == GameViewInputMode.SHEPERDS ) ) ;
 					// select the appropriate image.
-					toDraw = SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( type , false ) ;
+					toDraw = SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( type , transparent ) ;
 					// determine the right coordinates.
 					x = tlc.x == 0 ? 0 : ( getWidth () - preferredDimension.width ) / 2 ;
 					x0 = ( int ) ( ( ( RectangularShape ) shape).getMinX() + x ) ;

@@ -104,21 +104,28 @@ public final class ClientMainClass
 					client = new RMIClient ( viewPresenter ) ;
 				try 
 				{
+					client.openConnection () ;
 					viewPresenter.setClientToTerminate ( client ) ;
 					executor = Executors.newSingleThreadExecutor () ;
-					client.openConnection () ;
 					executor.execute ( client ) ;
 					viewPresenter.startApp () ;
 				} 
 				catch ( WriteOncePropertyAlreadSetException e ) 
 				{
-					e.printStackTrace();
-					throw new RuntimeException ( e ) ;
+					out.println ( PresentationMessages.UNEXPECTED_ERROR_MESSAGE ) ;
+					System.exit ( 0 ) ;
+					// log this error to investingate about
+				}
+				catch ( IOException i )
+				{
+					out.println ( "Sorry, ma il server di JSheepland sembra non rispondere al momento..." + Utilities.CARRIAGE_RETURN + "Riprova più tardi !" ) ;
+					System.exit ( 0 ) ;
 				}
 			}
 		}
 	}
 	
+	/***/
 	private static void initializeStrings () 
 	{
 		netModeStr = "Benvenuto in JSheepland." + Utilities.CARRIAGE_RETURN ;

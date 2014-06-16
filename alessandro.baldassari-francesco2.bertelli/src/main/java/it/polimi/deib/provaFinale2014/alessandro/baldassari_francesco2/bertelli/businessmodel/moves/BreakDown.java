@@ -9,6 +9,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player.TooFewMoneyException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 
 /**
  * This class represents the BreakDown move: a Sheperd wants to kill an Animal in a 
@@ -59,7 +60,7 @@ public class BreakDown extends GameMove
 				this.animalToBreak = animalToBreak ;
 			}
 			else
-				throw new MoveNotAllowedException ( "" ) ;
+				throw new MoveNotAllowedException ( "BREAK_DOWN : SHEPERD NOT IN CORRECT POSITION TO BREAK THIS ANIMAL." ) ;
 		else
 			throw new IllegalArgumentException () ;
 	}
@@ -108,11 +109,11 @@ public class BreakDown extends GameMove
 			} 
 			catch ( TooFewMoneyException e ) 
 			{
-				throw new MoveNotAllowedException ( "This player has too few money to do this move." ) ;
+				throw new MoveNotAllowedException ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;
 			}
 		}
 		else
-			throw new IllegalArgumentException ( "The match parameter can not be null." ) ;
+			throw new IllegalArgumentException ( "BREAK_DOWN - EXECUTE : The match parameter can not be null." ) ;
 	}
 
 	/**

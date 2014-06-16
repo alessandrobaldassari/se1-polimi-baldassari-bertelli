@@ -20,7 +20,7 @@ public class MatchResultsCalculatorTest{
 	GameMap gameMap;
 	Bank bank;
 	DummyMatchIdentifier requesterDummyMatchIdentifier;
-	MatchResultsCalculator matchResultsCalculator;
+	ResultsCalculatorManager matchResultsCalculator;
 	
 	@Before
 	public void setUp(){
@@ -44,19 +44,19 @@ public class MatchResultsCalculatorTest{
 	{
 		match.setMatchState(MatchState.CALCULATING_RESULTS);
 		try {
-			matchResultsCalculator = new MatchResultsCalculator(match);
+			matchResultsCalculator = new ResultsCalculatorManager(match);
 		} catch (WrongMatchStateMethodCallException e) {
 			assertFalse(true);
 		}
 		match.setMatchState(MatchState.TURNATION);
 		try {
-			matchResultsCalculator = new MatchResultsCalculator(match);
+			matchResultsCalculator = new ResultsCalculatorManager(match);
 		} catch (WrongMatchStateMethodCallException e) {
 			assertTrue(e.getActualState() == MatchState.TURNATION);
 		}
 		match.setMatchState(MatchState.CALCULATING_RESULTS);
 		try {
-			matchResultsCalculator = new MatchResultsCalculator(null);
+			matchResultsCalculator = new ResultsCalculatorManager(null);
 		}
 		catch (IllegalArgumentException e) {
 			assertTrue(true);

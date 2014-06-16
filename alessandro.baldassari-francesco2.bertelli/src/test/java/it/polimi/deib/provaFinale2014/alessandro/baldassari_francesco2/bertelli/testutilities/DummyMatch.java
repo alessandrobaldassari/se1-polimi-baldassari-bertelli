@@ -15,6 +15,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
 
@@ -69,9 +70,9 @@ public class DummyMatch
 		players.add( new DummyPlayer ( "P1" ) ) ;
 		players.add ( new DummyPlayer ( "P2" ) ) ;
 		players.add ( new DummyPlayer ( "P3" ) ) ;
-		sheperds.add ( new Sheperd ( "3" , Color.red , players.get (0) ) ) ;
-		sheperds.add ( new Sheperd ( "1" , Color.red , players.get (1) ) ) ;
-		sheperds.add ( new Sheperd ( "2" , Color.red , players.get (2) ) ) ; 
+		sheperds.add ( new Sheperd ( "3" , new NamedColor ( 2550 , 0 , 0 , "red" ) , players.get (0) ) ) ;
+		sheperds.add ( new Sheperd ( "1" , new NamedColor ( 2550 , 0 , 0 , "red" ) , players.get (1) ) ) ;
+		sheperds.add ( new Sheperd ( "2" , new NamedColor ( 2550 , 0 , 0 , "red" ) , players.get (2) ) ) ; 
 		i = 0 ;
 		for ( Player p : players )
 		{

@@ -8,6 +8,7 @@ import java.rmi.registry.Registry;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.GUIMapNotificationMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.RMIGUIClientBroker;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionAbstractObservable;
 
@@ -35,13 +36,17 @@ public class RMIGUIMapClient extends WithReflectionAbstractObservable < GameMapO
 	/***/
 	private boolean on ;
 	
+	private ViewPresenter viewPresenter ;
+	
+	/***/
 	public RMIGUIMapClient ( String brokerName ) 
 	{
 		super () ;
 		this.brokerName = brokerName ;
+		viewPresenter = null ;
 	}
 	
-	public void connect() throws IOException 
+	public void connect ( ViewPresenter viewPresenter ) throws IOException 
 	{
 		Registry registry ;
 		try 
@@ -53,10 +58,11 @@ public class RMIGUIMapClient extends WithReflectionAbstractObservable < GameMapO
 			System.out.println ( "RMI_GUI_MAP_CLIENT - CONNECT : RETRIEVING INITIAL CONNECTION SERVER." ) ;
 			clientBroker = ( RMIGUIClientBroker ) registry.lookup ( brokerName ) ;
 			on = true ;
+			this.viewPresenter = viewPresenter ;
 		} 
 		catch ( NotBoundException e ) 
 		{
-			e.printStackTrace();
+			viewPresenter.stopApp();
 		}
 	}	
 	
@@ -83,10 +89,12 @@ public class RMIGUIMapClient extends WithReflectionAbstractObservable < GameMapO
 			catch (IOException e) 
 			{
 				e.printStackTrace();
+				viewPresenter.stopApp();
 			} 
-			catch  (MethodInvocationException e ) 
+			catch  ( MethodInvocationException e ) 
 			{
 				e.printStackTrace();
+				viewPresenter.stopApp();
 			}
 		}		
 	}

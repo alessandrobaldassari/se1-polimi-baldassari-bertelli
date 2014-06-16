@@ -1,12 +1,12 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.ServerEnvironment;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandlerConnector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.SocketClientHandler;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunchercommunicationcontroller.MatchAdderCommunicationController;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -19,16 +19,6 @@ import java.net.UnknownHostException;
  */
 public class SocketRequestAcceptServer extends RequestAccepterServer
 {
-
-	/**
-	 * The IP Address of the physical Server where this SocketServer is deployed. 
-	 */
-	private static String SERVER_ADDRESS ; 
-	
-	/**
-	 * The port where this Server Socket will be listening.
-	 */
-	private static final int SERVER_PORT = 3333 ;
 	
 	/**
 	 * The ServerSocket object that will be used to listen for inbound Socket connections. 
@@ -41,7 +31,7 @@ public class SocketRequestAcceptServer extends RequestAccepterServer
 	protected SocketRequestAcceptServer ( MatchAdderCommunicationController matchAdderCommunicationController ) throws IOException 
 	{
 		super ( matchAdderCommunicationController ) ;
-		serverSocket = new ServerSocket ( SERVER_PORT  ) ;
+		serverSocket = new ServerSocket ( ServerEnvironment.SOCKET_REQUEST_ACCEPT_SERVER_TCP_PORT  ) ;
 	}
 
 	/**
@@ -52,9 +42,7 @@ public class SocketRequestAcceptServer extends RequestAccepterServer
 	 */
 	public static String getServerIPAddress () throws UnknownHostException 
 	{
-		if ( SERVER_ADDRESS == null )
-			SERVER_ADDRESS = InetAddress.getLocalHost().getHostAddress () ;
-		return SERVER_ADDRESS ;
+		return ServerEnvironment.getInstance().getLocalhostIPAddress () ;
 	}
 	
 	/**
@@ -64,7 +52,7 @@ public class SocketRequestAcceptServer extends RequestAccepterServer
 	 */
 	public static int getServerPort () 
 	{
-		return SERVER_PORT ;
+		return ServerEnvironment.SOCKET_REQUEST_ACCEPT_SERVER_TCP_PORT ;
 	}
 	
 	/**

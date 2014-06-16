@@ -69,6 +69,14 @@ public abstract class PositionableElement < T extends GameMapElement > implement
 	{
 		this.position = position ;
 	}
+
+	protected void setElementType ( PositionableElementType newType ) 
+	{
+		if ( newType != null )
+			this.positionableElementType = newType ;
+		else
+			throw new IllegalArgumentException () ;
+	}
 	
 	/**
 	 * Getter for the position property.

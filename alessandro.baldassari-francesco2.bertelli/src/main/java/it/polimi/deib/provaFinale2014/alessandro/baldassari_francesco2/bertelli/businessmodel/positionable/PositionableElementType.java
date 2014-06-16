@@ -7,7 +7,15 @@ public enum PositionableElementType
 	FENCE ,
 	
 	SHEPERD ,
-
+	
+	RED_SHEPERD ,
+	
+	BLUE_SHEPERD ,
+	
+	GREEN_SHEPERD ,
+	
+	YELLOW_SHEPERD ,
+	
 	WOLF ,
 
 	LAMB ,
@@ -16,6 +24,19 @@ public enum PositionableElementType
 	
 	SHEEP ,
 	
-	BLACK_SHEEP ,
-		
+	BLACK_SHEEP ;
+
+	public static boolean isSheperd ( PositionableElementType p )
+	{
+		boolean res ;
+		if ( p != null )
+			if ( p == RED_SHEPERD || p == BLUE_SHEPERD || p == GREEN_SHEPERD || p == YELLOW_SHEPERD )
+				res = true ;
+			else
+				res = false ;
+		else
+			res = false ;
+		return res ;
+	}
+	
 }

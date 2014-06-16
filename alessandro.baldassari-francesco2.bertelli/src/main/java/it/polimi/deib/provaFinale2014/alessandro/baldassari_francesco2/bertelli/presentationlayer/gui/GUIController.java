@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
@@ -45,7 +46,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * This is the Component that manage all the GUI infrastructure.
  * It is a Controller in the sense of the MVC pattern : it shows windows, handle gui events and so on. 
  */
-public class GUIController extends ViewPresenter implements GameMapViewObserver
+public class GUIController extends ViewPresenter implements GameMapViewObserver 
 {
 	
 	/**
@@ -299,14 +300,19 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	private MoveSelection buyCardManagement ( MoveSelector selector ) 
 	{
 		MoveSelection res ;
+		Map < RegionType , Integer > bankSummary ;
 		Collection < Couple < RegionType , Integer > > allowedMoves ;
 		RegionType type ;
+		int userMoney ;
 		// prompt the User with a List of Regions to choose.
+		bankSummary = selector.getBankPriceCards();
 		allowedMoves = new ArrayList < Couple < RegionType , Integer > > () ;
 		// right prices fix !
-		for ( RegionType r : RegionType.allTheTypesExceptSheepsburg() )
-			allowedMoves.add ( new Couple < RegionType , Integer > ( r , 100000 ) ) ;
-		type = RegionTypeChooseView.showDialog ( allowedMoves , -1 ).getFirstObject () ; 
+		userMoney = selector.getAssociatedSheperd ().getOwner ().getMoney () ;
+		for ( RegionType r : bankSummary.keySet() )
+			if ( bankSummary.get ( r ) <= userMoney )
+				allowedMoves.add ( new Couple < RegionType , Integer > ( r , 0 ) ) ;
+		type = RegionTypeChooseView.showDialog ( allowedMoves , userMoney ).getFirstObject () ; 
 		if ( type != null )
 			try 
 			{
@@ -456,14 +462,12 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	{
 		MoveSelection res ;
 		GameMoveType move ;
-		Region region ;
-		Road road ;
-		Animal animal ;
 		// first ask the user what move he wants to do.
 		res = null ;
 		System.out.println ( "GUI_CONTROLLER - ON_DO_MOVE : INIZIO" ) ;
 		do
 		{
+			generationNotification ( PresentationMessages.CHOOSE_SHEPERD_FOR_A_TURN_MESSAGE );
 			userWantsToChangeMove = false ;
 			// controlli a priori sulle mosse che si possono fare ?
 			move = MoveChooseView.showDialog () ;
@@ -537,7 +541,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		try 
 		{
 			c = new RMIGUIMapClient ( ( String ) guiConnector ) ;
-			c.connect();
+			c.connect ( this ) ;
 			gameView.setGameMapObservable ( c ) ;
 			gameView.setGameMapViewObserver ( this ) ;
 			executorService.submit ( c ) ;
@@ -709,4 +713,5 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		}
 		
 	}
+	
 }

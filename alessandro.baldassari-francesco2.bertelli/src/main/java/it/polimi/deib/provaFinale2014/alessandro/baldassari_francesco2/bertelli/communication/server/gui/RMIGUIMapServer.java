@@ -1,37 +1,25 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.ServerEnvironment;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandlerConnector;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.RMIClientHandler;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIClientBroker;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIClientBrokerImpl;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.UIDGenerator;
 
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class RMIGUIMapServer implements Runnable , GameMapObserver , Serializable
 {
-	
-	private static int port = 7000 ;
-	
+		
 	private static int session = 0 ;
 	
 	private UIDGenerator uidGen ;
@@ -47,7 +35,7 @@ public class RMIGUIMapServer implements Runnable , GameMapObserver , Serializabl
 		super () ;
 		if ( myRegistry == null )
 		{
-			myRegistry = LocateRegistry.createRegistry ( port ) ;
+			myRegistry = LocateRegistry.createRegistry ( ServerEnvironment.RMI_GUI_MAP_SERVER_PORT ) ;
 		}
 		uidGen =new UIDGenerator ( 0 ) ;
 		messages = new Vector <GUIMapNotificationMessage> () ;

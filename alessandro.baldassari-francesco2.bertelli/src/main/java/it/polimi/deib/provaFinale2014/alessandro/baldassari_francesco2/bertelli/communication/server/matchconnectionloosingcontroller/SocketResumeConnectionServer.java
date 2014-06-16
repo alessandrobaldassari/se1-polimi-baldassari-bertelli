@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.ServerEnvironment;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandlerConnector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
@@ -16,12 +17,15 @@ public class SocketResumeConnectionServer extends ResumeConnectionServer < Socke
 {
 
 	/***/
-	public static final int PORT = 3331 ;
-	
-	/***/
 	public SocketResumeConnectionServer ( ConnectionLoosingController c ) throws IOException 
 	{
 		super ( c ) ;
+		
+	}
+	
+	@Override
+	public void connect () throws IOException 
+	{
 		Executor exec ;
 		Runnable r ;
 		exec = Executors.newSingleThreadExecutor () ;
@@ -57,7 +61,7 @@ public class SocketResumeConnectionServer extends ResumeConnectionServer < Socke
 		/***/
 		public ListenerServer () throws IOException 
 		{
-			ss = new ServerSocket ( PORT ) ;
+			ss = new ServerSocket ( ServerEnvironment.SOCKET_RESUME_CONNECTION_SERVER_TCP_PORT ) ;
 		}
 		
 		/***/

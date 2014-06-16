@@ -2,11 +2,11 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.GameConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
@@ -82,7 +82,13 @@ public class ImagesHolder
 			im = GraphicsUtilities.getImage ( FilePaths.WOLF_IMAGE_PATH ) ;
 			normalPositionableImages.put ( PositionableElementType.WOLF , im ) ;
 			im = GraphicsUtilities.getImage ( FilePaths.RED_SHEPERD_IMAGE_PATH ) ;
-			normalPositionableImages.put ( PositionableElementType.SHEPERD , im ) ;
+			normalPositionableImages.put ( PositionableElementType.RED_SHEPERD , im ) ;
+			im = GraphicsUtilities.getImage ( FilePaths.BLUE_SHEPERD_IMAGE_PATH ) ;
+			normalPositionableImages.put ( PositionableElementType.BLUE_SHEPERD , im ) ;
+			im = GraphicsUtilities.getImage ( FilePaths.YELLOW_SHEPERD_IMAGE_PATH ) ;
+			normalPositionableImages.put ( PositionableElementType.YELLOW_SHEPERD , im ) ;
+			im = GraphicsUtilities.getImage ( FilePaths.GREEN_SHEPERD_IMAGE_PATH ) ;
+			normalPositionableImages.put ( PositionableElementType.GREEN_SHEPERD , im ) ;
 		} 
 		catch (IOException e) 
 		{

@@ -2,8 +2,6 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMove;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.factory.MoveExecutor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelection;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
@@ -188,7 +186,7 @@ public abstract class Client extends Thread implements Terminable
 			{
 				System.out.println ( "CLIENT - RUN : WAITING FOR A MESSAGE." ) ;
 				m = read () ;
-				System.out.println ( "CLIENT - RUN : MESSAGE RECEIVED." ) ;
+				System.out.println ( "CLIENT - RUN : MESSAGE RECEIVED : " + m.getOperation() ) ; 
 				inParams = CollectionsUtilities.newListFromIterable ( m.getParameters () ) ;
 				System.out.println ( "CLIENT : PARAMETERS LOADED." ) ;
 				outParams.clear () ;

@@ -35,8 +35,13 @@ public class RMIResumerConnectionServerImpl extends ResumeConnectionServer < RMI
 	public RMIResumerConnectionServerImpl ( ConnectionLoosingController c ) throws RemoteException 
 	{
 		super ( c ) ;
-		registry = LocateRegistry.createRegistry ( PORT ) ;
-		newNames = new HashMap < Integer , String > () ;
+		newNames = new HashMap < Integer , String > () ; 
+	}
+	
+	@Override
+	public void connect () throws RemoteException 
+	{
+		registry = LocateRegistry.createRegistry ( PORT ) ;		
 	}
 	
 	/**

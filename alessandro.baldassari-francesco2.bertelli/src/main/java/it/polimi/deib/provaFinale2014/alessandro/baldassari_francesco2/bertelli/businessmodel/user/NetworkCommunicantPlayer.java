@@ -141,7 +141,6 @@ public class NetworkCommunicantPlayer extends Player
 			public Boolean call () throws IOException
 			{
 				Iterable < SellableCard > arrived ;
-				SellableCard temp ;
 				boolean res ;
 				arrived = clientHandler.chooseCardsEligibleForSelling ( getSellableCards () ) ;
 				res = setMethodCompleted () ;

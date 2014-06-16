@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Ovine;
@@ -14,41 +15,55 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveNotAllowedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 
+/***/
 public class MoveSelector implements Serializable
 {
 
+	/***/
 	private Sheperd associatedSheperd ;
+
+	/***/
+	private Map < RegionType , Integer > bankPriceCards ;
 	
-	private Iterable < GameMoveType > allowedMoves ;
-	
+	/***/
 	private MoveSelection selection ;
 	
-	public MoveSelector ( Sheperd associatedSheperd ) 
+	/***/
+	public MoveSelector ( Sheperd associatedSheperd , Map < RegionType , Integer > bankPriceCards ) 
 	{
-		selection = null ;
-		this.associatedSheperd = associatedSheperd ;
+		if ( associatedSheperd != null && bankPriceCards != null )
+		{
+			selection = null ;
+			this.associatedSheperd = associatedSheperd ;
+			this.bankPriceCards = bankPriceCards ;
+		}
+		else
+			throw new IllegalArgumentException ( "MOVE_SELECTOR - <INIT> :" ) ;
 	}
 	
+	public Map < RegionType , Integer > getBankPriceCards () 
+	{
+		return bankPriceCards ;
+	}
+	
+	/***/
 	public Sheperd getAssociatedSheperd () 
 	{
 		return associatedSheperd ;
 	}
-	
-	public Iterable < GameMoveType > getAllowedMoves () 
-	{
-		return allowedMoves ;
-	}
 
+	/***/
 	public void setSelection ( MoveSelection selection )
 	{
 		this.selection = selection ;
 	}
 	
+	/***/
 	public MoveSelection getSelection () 
 	{
 		return selection ;
 	}
-	
+		
 	/***/
 	public MoveSelection newBreakdown ( Animal animalToBreak )
 	{

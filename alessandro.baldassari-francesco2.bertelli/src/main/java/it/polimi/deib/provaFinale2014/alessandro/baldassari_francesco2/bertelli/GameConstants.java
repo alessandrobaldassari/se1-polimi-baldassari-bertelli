@@ -1,4 +1,4 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 
@@ -51,6 +51,7 @@ public final class GameConstants
 	 */
 	public static final int NUMBER_OF_MOVES_PER_USER_PER_TURN = 3 ;
 	
+	/***/
 	public static final int NUMBER_OF_REGION_TYPE = 7 ;
 	
 	/***/

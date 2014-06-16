@@ -18,7 +18,7 @@ import java.util.Map;
 /**
 * Component that calculate the results of a Match 
 */
-class MatchResultsCalculator 
+class ResultsCalculatorManager 
 {
 
 	/**
@@ -36,7 +36,7 @@ class MatchResultsCalculator
 	 * @throws IllegalArgumentException if the match parameter is null.
 	 * @throws WrongMatchStateMethodCallException if the match parameter's state is not CALCULATING_RESULTS. 
 	 */
-	protected MatchResultsCalculator ( Match match ) throws WrongMatchStateMethodCallException
+	protected ResultsCalculatorManager ( Match match ) throws WrongMatchStateMethodCallException
 	{
 		if ( match != null )
 			if ( match.getMatchState() == MatchState.CALCULATING_RESULTS )

@@ -12,6 +12,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyPlayer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -81,7 +82,7 @@ public class RoadTest
 	@Test
 	public void setGetElementContained () 
 	{
-		Sheperd p = new Sheperd ( "" , Color.red , new DummyPlayer ( "" ) ) ;
+		Sheperd p = new Sheperd ( "" , new NamedColor ( 2550 , 0 , 0 , "red" ), new DummyPlayer ( "" ) ) ;
 		r = new Road ( 3 , 4 , r1 , r2 ) ;
 		assertTrue ( r.getElementContained() == null ) ;
 		r.setElementContained ( p ) ;

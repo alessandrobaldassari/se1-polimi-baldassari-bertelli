@@ -15,7 +15,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * This class manages the Market Phase of the Game. 
  */
-class MarketManager 
+class MarketPhaseManager 
 {
 
 	/**
@@ -27,7 +27,7 @@ class MarketManager
 	 * @param players the List of Players over which operate.
 	 * @throws IllegalArgumentException if the players parameter is null.
 	 */
-	public MarketManager ( Iterable < Player > players ) 
+	public MarketPhaseManager ( Iterable < Player > players ) 
 	{
 		if ( players != null )
 			this.players = players ;
@@ -48,6 +48,7 @@ class MarketManager
 		try
 		{
 			for ( Player currentPlayer : players )
+				if ( ! currentPlayer.isSuspended () )
 				currentPlayer.chooseCardsEligibleForSelling () ;
 			for ( Player currentPlayer : players )
 			{

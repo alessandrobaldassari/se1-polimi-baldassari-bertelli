@@ -1,0 +1,18 @@
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli;
+
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
+
+public class TimeConstants 
+{
+
+	/**
+	 * The time this Controller has to wait w.r.t the Game Controller during the Match starting. 
+	 */
+	public static final long MATCH_LAUNCHER_COMMUNICATION_CONTROLLER_WAITING_TIME = 15 * Utilities.MILLISECONDS_PER_SECOND ;
+
+	/**
+	 * The Timer value about the time to wait before begin a Match. 
+	 */
+	public static final long MATCH_CONTROLLER_TIMER_TIME = 45 * Utilities.MILLISECONDS_PER_SECOND ;
+	
+}

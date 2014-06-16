@@ -7,6 +7,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player.TooFewMoneyException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 
 /**
  * This class models the BuyCard action, which is the situation where a Player wants to 
@@ -41,7 +42,7 @@ public class BuyCard extends GameMove
 				this.buyingCardType = buyingCardType ;
 			}
 			else
-				throw new MoveNotAllowedException ( "This Player can not do this move." ) ;
+				throw new MoveNotAllowedException ( "BUY_CARD : THE PLAYER CAN NOT BUY A CARD OF THIS TYPE DUE TO HIS CURRENT POSITION." ) ;
 		}
 		else
 			throw new IllegalArgumentException () ;
@@ -83,11 +84,11 @@ public class BuyCard extends GameMove
 		} 
 		catch ( NoMoreCardOfThisTypeException e ) 
 		{
-			throw new MoveNotAllowedException ( "This player can not do this move" ) ;
+			throw new MoveNotAllowedException ( "BREAK_DOWN - EXECUTE : NO MORE CARD OF THIS TYPE." ) ;
 		} 
 		catch ( TooFewMoneyException e ) 
 		{
-			throw new MoveNotAllowedException ( "This player can not do this move" ) ;
+			throw new MoveNotAllowedException ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;
 		} 
 		catch ( CardPriceNotRightException e ) 
 		{

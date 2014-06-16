@@ -11,7 +11,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public abstract class ResumeConnectionServer < T > implements Runnable
 {
 	
-	
 	/***/
 	private boolean on ;
 	
@@ -28,6 +27,9 @@ public abstract class ResumeConnectionServer < T > implements Runnable
 		requests = new LinkedBlockingQueue < Couple < Integer , T > > () ;
 		this.connectionLoosingController = connectionLoosingController ;
 	} 
+	
+	/***/
+	public abstract void connect () throws IOException ;
 	
 	/***/
 	protected ClientHandler < T > getHandler ( Integer key ) 

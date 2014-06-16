@@ -1,4 +1,4 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.net;
 
 /**
  * Interface that defines an object that is able to unbind RMI objects 

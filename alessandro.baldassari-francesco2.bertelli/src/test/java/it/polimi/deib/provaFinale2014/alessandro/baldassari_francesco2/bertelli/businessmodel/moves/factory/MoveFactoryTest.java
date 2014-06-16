@@ -11,6 +11,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.factory.MoveExecutor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyPlayer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +27,7 @@ public class MoveFactoryTest {
 	@Before
 	public void setUp () 
 	{
-		sh = new Sheperd("p", Color.red , new DummyPlayer ( "q" ));
+		sh = new Sheperd("p", new NamedColor ( 2550 , 0 , 0 , "red" ) , new DummyPlayer ( "q" ));
 		tnc = new DummytTNC();
 		mf = new MoveExecutor( sh , tnc , new DummyLambEvolver() ) ; 
 	}

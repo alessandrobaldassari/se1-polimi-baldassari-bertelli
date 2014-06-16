@@ -2,6 +2,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 
 import java.awt.Color;
 
@@ -23,7 +24,7 @@ public class Sheperd extends Character < Road >
 	/**
 	 * The color of the pawn representative of the Sheperd. 
 	 */
-	private final Color color ;
+	private final NamedColor color ;
 	
 	// METHODS
 	
@@ -33,18 +34,35 @@ public class Sheperd extends Character < Road >
 	 * @param owner the Player object bound to this Sheperd ( his owner ).
 	 * @throw IllegalArgumentException if the color or the owner property is null.
 	 */
-	public Sheperd ( String name , Color color , Player owner ) 
+	public Sheperd ( String name , NamedColor color , Player owner ) 
 	{
 		super ( PositionableElementType.SHEPERD , name ) ;
 		if ( color != null && owner != null )
 		{
 			this.color = color ;
 			this.owner = owner ;
+			associateColorAndType () ; 
 		}
 		else
 			throw new IllegalArgumentException () ;
 	}
-
+	
+	/***/
+	private final void associateColorAndType ()
+	{
+		if ( color.getName ().compareToIgnoreCase( "RED" ) == 0 )
+			setElementType ( PositionableElementType.RED_SHEPERD  ) ;
+		else
+			if ( color.getName ().compareToIgnoreCase ( "BLUE" ) == 0 )
+				setElementType ( PositionableElementType.BLUE_SHEPERD ) ;
+			else
+				if ( color.getName ().compareToIgnoreCase ( "YELLOW" ) == 0 )
+					setElementType ( PositionableElementType.YELLOW_SHEPERD ) ;
+				else
+					if ( color.getName ().compareToIgnoreCase ( "GREEN" ) == 0 )
+						setElementType ( PositionableElementType.GREEN_SHEPERD ) ;
+	}
+	
 	/**
 	 * Getter for the owner property.
 	 * 
