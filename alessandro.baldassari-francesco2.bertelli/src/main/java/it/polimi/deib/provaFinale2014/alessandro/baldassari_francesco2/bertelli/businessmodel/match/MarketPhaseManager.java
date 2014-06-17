@@ -6,6 +6,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.NotSellableException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.SellingPriceNotSetException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
 import java.util.Collection;
@@ -47,9 +48,11 @@ class MarketPhaseManager
 		int amount ;
 		try
 		{
+			System.out.println ( "MARKET_PHASE_MANAGER - MARKET PHASE : ASKING THE PLAYERS WHICH CARDS THEY WANT TO SELL" ) ;
 			for ( Player currentPlayer : players )
 				if ( ! currentPlayer.isSuspended () )
 				currentPlayer.chooseCardsEligibleForSelling () ;
+			System.out.println ( "MARKET_PHASE_MANAGER - MARKET PHASE : ASKING THE PLAYERS WHICH CARDS THEY WANT TO BUY" ) ;			
 			for ( Player currentPlayer : players )
 			{
 				try
@@ -57,15 +60,25 @@ class MarketPhaseManager
 					amount = 0 ;
 					// generate a List containing all the Cards this Player can buy
 					sellableCards = generateGettableCardList ( currentPlayer ) ;
-					// ask the User which Cards he wants to buy
-					receivedSellableCards = currentPlayer.chooseCardToBuy ( sellableCards ) ;
-					for ( SellableCard s : receivedSellableCards )
-						amount = amount + s.getSellingPrice () ;
-					// if he has enough money 
-					if ( amount <= currentPlayer.getMoney () )
-						transferCards ( receivedSellableCards , currentPlayer ) ;
+					if ( sellableCards.size () > 0 )
+					{
+						// ask the User which Cards he wants to buy
+						receivedSellableCards = currentPlayer.chooseCardToBuy ( sellableCards ) ;
+						// if the user selected some cards...
+						if ( CollectionsUtilities.iterableSize ( receivedSellableCards ) > 0 )
+						{
+							// calculate the amount of the transaction
+							for ( SellableCard s : receivedSellableCards )
+								amount = amount + s.getSellingPrice () ;
+							// if he has enough money 
+							if ( amount <= currentPlayer.getMoney () )
+								transferCards ( receivedSellableCards , currentPlayer ) ;
+							else
+								throw currentPlayer.new TooFewMoneyException () ;
+							}
+						}
 					else
-						throw currentPlayer.new TooFewMoneyException () ;
+						currentPlayer.genericNotification ( "Sorry, ma per questa fase non ci sono carte che tu possa acquistare\nMagari al prossimo turno..." );
 				}
 				catch ( NotSellableException n ) 
 				{
@@ -116,7 +129,7 @@ class MarketPhaseManager
 		Collection < SellableCard > res ;
 		res = new LinkedList < SellableCard > () ;
 		for ( Player p : players )
-			if ( buyer.equals ( buyer ) )
+			if ( buyer.equals ( buyer ) == false )
 				for ( SellableCard s : p.getSellableCards () )
 						if ( s.isSellable () )
 							res.add ( s ) ;

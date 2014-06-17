@@ -93,7 +93,7 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 		sellableCards.add(toAdd) ;
 		try 
 		{
-			notifyObservers ( "onCardAdded" , toAdd ) ;
+			notifyObservers ( "onCardAdded" , toAdd.getRegionType() ) ;
 		}
 		catch (MethodInvocationException e) 
 		{
@@ -106,7 +106,7 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 		sellableCards.remove ( toRemove ) ;
 		try 
 		{
-			notifyObservers ( "onCardRemoved" , toRemove ) ;
+			notifyObservers ( "onCardRemoved" , toRemove.getRegionType() ) ;
 		}
 		catch (MethodInvocationException e) 
 		{
@@ -277,7 +277,17 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 		if ( this.initialCard == null )
 		{
 			if ( initialCard != null )
+			{
 				this.initialCard = initialCard ;
+				try 
+				{
+					notifyObservers ( "onCardAdded" , initialCard.getRegionType() ) ;
+				}
+				catch (MethodInvocationException e) 
+				{
+					e.printStackTrace();
+				}
+			}
 			else
 				throw new IllegalArgumentException () ;
 		}

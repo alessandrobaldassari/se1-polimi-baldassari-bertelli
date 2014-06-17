@@ -6,16 +6,13 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.PlayerObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.GUIGameMapNotificationMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.GUINotificationMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.GUIPlayerNotificationMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.RMIGUIClientBroker;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observable;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionAbstractObservable;
 
 public class RMIGUIMapClient implements Runnable
 {
@@ -134,10 +131,10 @@ public class RMIGUIMapClient implements Runnable
 					playerObserver.onGetPayed ( ( Integer ) m.getFirstParam() , (Integer) m.getSecondParam() );
 				else
 					if ( m.getActionAssociated().compareToIgnoreCase ( "onCardAdded" ) == 0 )
-						playerObserver.onCardAdded ( (Card) m.getFirstParam() );
+						playerObserver.onCardAdded ( (RegionType) m.getFirstParam());
 					else
 						if ( m.getActionAssociated().compareToIgnoreCase ( "onCardRemoved" ) == 0 )
-							playerObserver.onCardRemoved ( (Card) m.getFirstParam() );
+							playerObserver.onCardRemoved ( (RegionType) m.getFirstParam() );
 		}
 	}
 	

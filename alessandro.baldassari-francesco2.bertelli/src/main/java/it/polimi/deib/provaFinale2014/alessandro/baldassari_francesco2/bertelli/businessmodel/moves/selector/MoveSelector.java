@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
@@ -25,6 +26,8 @@ public class MoveSelector implements Serializable
 	/***/
 	private Map < RegionType , Integer > bankPriceCards ;
 	
+	private Map < GameMoveType , Boolean > moveAllowedMap ;
+	
 	/***/
 	private MoveSelection selection ;
 	
@@ -44,6 +47,16 @@ public class MoveSelector implements Serializable
 	public Map < RegionType , Integer > getBankPriceCards () 
 	{
 		return bankPriceCards ;
+	}
+	
+	public void setMoveAllowedMap ( Map < GameMoveType , Boolean > moveAllowedMap ) 
+	{
+		this.moveAllowedMap = moveAllowedMap ;
+	}
+	
+	public boolean isMapAllowed ( GameMoveType moveType ) 
+	{
+		return moveAllowedMap.get ( moveType ) ;
 	}
 	
 	/***/

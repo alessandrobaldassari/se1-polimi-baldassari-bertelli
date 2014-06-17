@@ -1,4 +1,4 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.factory;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.executor;
 
 import java.io.Serializable;
 
@@ -18,7 +18,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveSheep;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveSheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 
 /***/
 public class MoveExecutor implements Serializable
@@ -48,8 +47,8 @@ public class MoveExecutor implements Serializable
 		return sheperd;
 	}
 	
-	/***/
-	protected MoveExecutor ( Sheperd sheperd , TurnNumberClock clockSource , LambEvolver lambEvolver ) 
+	/***/ 
+	public MoveExecutor ( Sheperd sheperd , TurnNumberClock clockSource , LambEvolver lambEvolver ) 
 	{
 		if ( sheperd != null && clockSource != null && lambEvolver != null )
 		{
@@ -88,7 +87,7 @@ public class MoveExecutor implements Serializable
 				lastMove = GameMoveType.BREAK_DOWN ;
 			}
 			else
-				throw new MoveNotAllowedException ( "" ) ; 
+				throw new MoveNotAllowedException ( "Can not do two equals moves sequentially." ) ; 
 	} 
 	
 	/***/
@@ -104,7 +103,7 @@ public class MoveExecutor implements Serializable
 				lastMove = GameMoveType.BUY_CARD ;
 			}
 			else
-				throw new MoveNotAllowedException ( "" ) ; 
+				throw new MoveNotAllowedException ( "Can not do two equals moves sequentially." ) ; 
 	}
 	
 	/***/
@@ -115,12 +114,12 @@ public class MoveExecutor implements Serializable
 		else  
 			if ( lastMove == null || lastMove != GameMoveType.BUY_CARD )
 			{
-				new Mate ( clockSource , lambEvolver , sheperd , whereMate ).execute ( match ); ;
+				new Mate ( clockSource , lambEvolver , sheperd , whereMate ).execute ( match ); 
 				numberOfMovesDone ++ ;
 				lastMove = GameMoveType.MATE ;
 			}
 			else
-				throw new MoveNotAllowedException ( "" ) ; 
+				throw new MoveNotAllowedException ( "Can not do two equals moves sequentially." ) ; 
 	}
 	
 	/***/
@@ -136,7 +135,7 @@ public class MoveExecutor implements Serializable
 				lastMove = GameMoveType.MATE ;
 			}
 			else
-				throw new MoveNotAllowedException ( "" ) ; 
+				throw new MoveNotAllowedException ( "Can not do two equals moves sequentially." ) ; 
 		}
 	
 	/***/

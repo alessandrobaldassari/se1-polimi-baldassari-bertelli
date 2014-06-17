@@ -20,6 +20,8 @@ public class PlayerInfoViewModel extends WithReflectionAbstractObservable < Play
 	{
 		super () ;
 		cards = new LinkedHashMap < RegionType , Integer > () ;
+		for ( RegionType r : RegionType.allTheTypesExceptSheepsburg() )
+			cards.put ( r , 0 );
 		moneyReserve = 0 ;
 	}
 	
@@ -78,25 +80,25 @@ public class PlayerInfoViewModel extends WithReflectionAbstractObservable < Play
 	@Override
 	public void onPay ( Integer paymentAmount, Integer moneyYouHaveNow ) 
 	{
-		pay ( paymentAmount ) ;
+		pay ( moneyYouHaveNow ) ;
 	}
 
 	@Override
 	public void onGetPayed ( Integer paymentAmount, Integer moneyYouHaveNow) 
 	{
-		receiveMoney ( paymentAmount ) ;
+		receiveMoney ( moneyYouHaveNow ) ;
 	}
 
 	@Override
-	public void onCardAdded ( Card addedCard ) 
+	public void onCardAdded ( RegionType cardType ) 
 	{
-		addCard ( addedCard.getRegionType() ) ;
+		addCard ( cardType ) ;
 	}
 
 	@Override
-	public void onCardRemoved ( Card removedCard ) 
+	public void onCardRemoved ( RegionType cardType ) 
 	{
-		removeCard ( removedCard.getRegionType() ) ;
+		removeCard ( cardType ) ;
 	}
 	
 }

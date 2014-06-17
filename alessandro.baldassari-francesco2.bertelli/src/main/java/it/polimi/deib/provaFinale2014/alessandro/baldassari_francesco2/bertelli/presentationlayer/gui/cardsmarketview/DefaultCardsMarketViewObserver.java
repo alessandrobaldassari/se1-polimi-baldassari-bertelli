@@ -17,7 +17,9 @@ public class DefaultCardsMarketViewObserver implements CardsMarketViewObserver
 		this.cards = cards ;
 	}
 	
-	/***/
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public void onCardChoosed ( Iterable < SellableCard > selectedCards ) 
 	{
@@ -28,6 +30,9 @@ public class DefaultCardsMarketViewObserver implements CardsMarketViewObserver
 		}
 	}
 
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public void onDoNotWantChooseAnyCard () {}
 

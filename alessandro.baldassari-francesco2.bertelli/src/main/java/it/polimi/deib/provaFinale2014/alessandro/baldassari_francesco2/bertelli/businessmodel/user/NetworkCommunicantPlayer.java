@@ -130,68 +130,60 @@ public class NetworkCommunicantPlayer extends Player
 		return res ;
 		
 	}
-	
+
 	/**
-	 * AS THE SUPER'S ONE.  
+	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void chooseCardsEligibleForSelling () throws TimeoutException
+	public Sheperd chooseSheperdForATurn ( final Iterable < Sheperd > sheperds ) throws TimeoutException
 	{
-		Future < Boolean > f ;
+		Sheperd res  ;
+		Future < Sheperd > f ;
 		createAndLaunchRequestTimetoutTimer () ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = executorService.submit ( new Callable < Boolean > () 
+		f = executorService.submit ( new Callable < Sheperd > () 
 		{
 			@Override
-			public Boolean call () throws IOException
+			public Sheperd call () throws IOException
 			{
-				Iterable < SellableCard > arrived ;
-				boolean res ;
-				System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling : " + getSellableCards () ) ;
-				arrived = clientHandler.chooseCardsEligibleForSelling ( getSellableCards () ) ;
-				res = setMethodCompleted () ;
-				if ( res )
-					for ( SellableCard s : arrived )
-						if ( hasCard( s )  )
-						{
-							removeCard ( s ) ;
-							addCard ( s ) ;
-						}
+				Sheperd res ;
+				res = clientHandler.chooseSheperdForATurn ( sheperds ) ;
+				setMethodCompleted () ;
 				return res ;
 			}  
 		} ) ;
 		waitForMethodCompletedSet () ;
 		try 
 		{
-			if ( methodCompleted.getValue () == false )
+			if ( methodCompleted.getValue() == true )
+			{
+				requestTimeoutTimer.cancel () ;
+				res = f.get () ;
+			}
+			else
 			{
 				if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
 					throw new TimeoutException () ;
 				else
-					chooseCardsEligibleForSelling();
+					res = chooseSheperdForATurn ( sheperds ) ;
 			}
-			else
-				try 
-				{
-					requestTimeoutTimer.cancel () ;
-					f.get () ;
-				}
-				catch ( InterruptedException e ) 
-				{
-					throw new RuntimeException ( e ) ;
-				}
-				catch ( ExecutionException e ) 
-				{
-					if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
-						throw new TimeoutException () ;
-					else
-						chooseCardsEligibleForSelling();
-				}
 		}
 		catch ( PropertyNotSetYetException e ) 
 		{
 			throw new RuntimeException ( e ) ;
+		} 
+		catch (InterruptedException e) 
+		{
+			throw new RuntimeException ( e ) ;
 		}
+		catch ( ExecutionException e ) 
+		{
+			if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
+				throw new TimeoutException () ;
+			else
+				res = chooseSheperdForATurn ( sheperds );
+		}
+		return res ;
 	}
 
 	/**
@@ -250,60 +242,76 @@ public class NetworkCommunicantPlayer extends Player
 	}
 
 	/**
-	 * AS THE SUPER'S ONE. 
+	 * AS THE SUPER'S ONE.  
 	 */
 	@Override
-	public Sheperd chooseSheperdForATurn ( final Iterable < Sheperd > sheperds ) throws TimeoutException
+	public void chooseCardsEligibleForSelling () throws TimeoutException
 	{
-		Sheperd res  ;
-		Future < Sheperd > f ;
+		System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling - INIZIO" ) ;
 		createAndLaunchRequestTimetoutTimer () ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = executorService.submit ( new Callable < Sheperd > () 
+		System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling - SUBMITTING FUTURE" ) ;
+		executorService.submit ( new Runnable () 
 		{
 			@Override
-			public Sheperd call () throws IOException
+			public void run ()  
 			{
-				Sheperd res ;
-				res = clientHandler.chooseSheperdForATurn ( sheperds ) ;
-				setMethodCompleted () ;
-				return res ;
+				Iterable < SellableCard > arrived ;
+				boolean res ;
+				System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling : " + getSellableCards () ) ;
+				try 
+				{
+					arrived = clientHandler.chooseCardsEligibleForSelling ( getSellableCards () ) ;
+					res = setMethodCompleted () ;
+					if ( res )
+						for ( SellableCard s : arrived )
+							if ( hasCard( s )  )
+							{
+								removeCard ( s ) ;
+								addCard ( s ) ;
+							}
+				}
+				catch ( IOException e ) 
+				{
+					System.err.println ( e.getMessage() ) ;
+					synchronized ( methodCompleted ) 
+					{
+						try 
+						{
+							methodCompleted.setValue(false);
+						} 
+						catch (WriteOncePropertyAlreadSetException e1 )
+						{
+							e1.printStackTrace();
+						} 
+					}
+ 					e.printStackTrace();
+				}
 			}  
 		} ) ;
+		System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling - BEFORE BARRIER" ) ;
 		waitForMethodCompletedSet () ;
+		System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling - AFTER BARRIER" ) ;
 		try 
 		{
-			if ( methodCompleted.getValue() == true )
-			{
-				requestTimeoutTimer.cancel () ;
-				res = f.get () ;
-			}
-			else
+			if ( methodCompleted.getValue () == false )
 			{
 				if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
 					throw new TimeoutException () ;
 				else
-					res = chooseSheperdForATurn ( sheperds ) ;
+					chooseCardsEligibleForSelling();
 			}
+			else
+				requestTimeoutTimer.cancel ();
 		}
 		catch ( PropertyNotSetYetException e ) 
 		{
 			throw new RuntimeException ( e ) ;
-		} 
-		catch (InterruptedException e) 
-		{
-			throw new RuntimeException ( e ) ;
 		}
-		catch ( ExecutionException e ) 
-		{
-			if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
-				throw new TimeoutException () ;
-			else
-				res = chooseSheperdForATurn ( sheperds );
-		}
-		return res ;
+		System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling - END" ) ;
 	}
 
+	
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */

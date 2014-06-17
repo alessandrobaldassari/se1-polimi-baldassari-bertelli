@@ -3,6 +3,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.GameConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank.Bank.NoMoreCardOfThisTypeException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.BlackSheepAlreadyGeneratedException;
@@ -300,9 +301,9 @@ public class BreakDownTest
 			for ( byte i = 0 ; i < d.sheperds.size () ; i ++ )
 				initMon [ i ] = d.sheperds.get(i).getOwner().getMoney();
 			b.execute ( d.match ) ;
-			assertTrue ( initMon [ 0 ] == d.sheperds.get(0).getOwner().getMoney() + 2 * BreakDown.AMOUNT_TO_PAY_FOR_SILENCE ) ;
-			assertTrue ( initMon [ 1 ] == d.sheperds.get(1).getOwner().getMoney() - BreakDown.AMOUNT_TO_PAY_FOR_SILENCE ) ;
-			assertTrue ( initMon [ 2 ] == d.sheperds.get(2).getOwner().getMoney() - BreakDown.AMOUNT_TO_PAY_FOR_SILENCE ) ;
+			assertTrue ( initMon [ 0 ] == d.sheperds.get(0).getOwner().getMoney() + 2 * GameConstants.AMOUNT_TO_PAY_FOR_SILENCE ) ;
+			assertTrue ( initMon [ 1 ] == d.sheperds.get(1).getOwner().getMoney() - GameConstants.AMOUNT_TO_PAY_FOR_SILENCE ) ;
+			assertTrue ( initMon [ 2 ] == d.sheperds.get(2).getOwner().getMoney() - GameConstants.AMOUNT_TO_PAY_FOR_SILENCE ) ;
 			assertTrue ( d.animals.get(0).getPosition() == null ) ;
 			assertFalse ( CollectionsUtilities.contains( d.match.getGameMap().getRegionByUID(2).getContainedAnimals() , d.animals.get(0) ) ) ;
 		}

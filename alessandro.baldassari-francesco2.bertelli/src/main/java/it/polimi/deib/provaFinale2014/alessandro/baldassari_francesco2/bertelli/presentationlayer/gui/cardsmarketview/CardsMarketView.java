@@ -30,6 +30,7 @@ import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -50,7 +51,11 @@ public class CardsMarketView extends ObservableFrameworkedWithGridBagLayoutDialo
 	 */
 	private CardChooseViewPanel cardsPanel ;
 	
-	/***/
+	/**
+	 * The max amount the User using this View can spend.
+	 * Obviously, it is not meaningless only if we are in a buy session 
+	 * ( else this value is not useful, may be set to a negative number ) 
+	 */
 	private int maxAmount ;
 	
 	/**
@@ -134,6 +139,7 @@ public class CardsMarketView extends ObservableFrameworkedWithGridBagLayoutDialo
 			Iterable < SellableCard > res ;
 			int sum ;
 			res = cardsPanel.getSelectedData () ;
+			// if we are in a buying session
 			if ( maxAmount >= 0)
 			{	
 				sum = 0 ;
@@ -161,9 +167,17 @@ public class CardsMarketView extends ObservableFrameworkedWithGridBagLayoutDialo
 						}
 					else
 						view.setErrors ( "Non hai abbastanza soldi per questo !" ) ; 
-				}
 			}
-				
+			else
+				try 
+				{
+					notifyObservers ( "onCardChoosed" , res );
+				}
+			catch (MethodInvocationException e1) 
+			{
+				e1.printStackTrace();
+			}
+		}
 	}
 	
 	/***/
@@ -213,18 +227,6 @@ public class CardsMarketView extends ObservableFrameworkedWithGridBagLayoutDialo
 		return cards.get() ;
 	}
 	
-	public static void main ( String [] args ) 
-	{
-		ArrayList < NamedColor > a = new ArrayList < NamedColor > () ;
-		a.add(new NamedColor ( 0 , 0 , 0 , "BLACK" ) ) ;
-		a.add ( new NamedColor ( 255 , 0 , 0 , "RED" ) ) ;
-		a.add ( new NamedColor ( 0 , 255 , 0 , "GREEN") ) ;
-		NamedColor n ;
-		n = SheperdColorChooseView.showDialog( a );
-		System.out.println ( n ) ;
-	}
-	
-	
 }
 
 /**
@@ -269,7 +271,10 @@ class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	protected void manageLayout () {}
+	protected void manageLayout () 
+	{
+		setOpaque ( false ) ; 
+	}
 
 	/**
 	 * AS THE SUPER'S ONE. 
@@ -307,18 +312,23 @@ class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel
 		{
 			imagePanel = new WithBackgroundImagePanel () ;
 			checkBox = new JCheckBox () ;
+			checkBox.setOpaque(false);
+			imagePanel.setOpaque(false); 
 			layoutComponent ( imagePanel , i , 1 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 			layoutComponent ( checkBox , i , 2 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
 			imagePanel.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCardImage ( n.getRegionType() ) );
+			checkBox.setHorizontalAlignment ( SwingConstants.CENTER ) ;
 			imagePanels.add ( imagePanel ) ;
 			selectors.add ( checkBox ) ;
 			selectorListener = new SelectorListener ( n ) ; 
 			selectors.get ( i ).addItemListener ( selectorListener ) ;
+			add ( checkBox ) ;
+			add ( imagePanel ) ;
 			if ( allowEdit )
 			{
 				spinner = new JSpinner () ;
 				spinner.setModel ( spinnerModel ) ;
-				layoutComponent ( checkBox , i , 2 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;				
+				layoutComponent ( spinner , i , 2 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;				
 				changeListener = new SpinnerListener ( n ) ;
 				selectorListener.setAssociatedValueEnter ( spinner ) ;
 				spinner.addChangeListener ( changeListener ) ;
@@ -336,10 +346,12 @@ class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel
 				}
 				catch (NotSellableException e)
 				{
+					System.err.println(e.getMessage());
 					e.printStackTrace();
 				}
 				catch (SellingPriceNotSetException e) 
 				{
+					System.err.println(e.getMessage());
 					e.printStackTrace();
 				}
 			}
@@ -378,8 +390,10 @@ class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel
 	private class SelectorListener implements ItemListener 
 	{
 
+		/***/
 		private SellableCard myItem ;
-				
+			
+		/***/
 		private JSpinner associatedValueEnter ;
 		
 		/***/
@@ -388,6 +402,7 @@ class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel
 			this.myItem = myItem ;
 		}
 		
+		/***/
 		public void setAssociatedValueEnter ( JSpinner associatedValueEnter )
 		{
 			this.associatedValueEnter = associatedValueEnter ;			

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.GameConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
@@ -26,11 +27,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  */
 public class Mate extends GameMove
 {
-
-	/**
-	 * The number of turns after a Lamb should become a Ram or a Sheep. 
-	 */
-	public static final int NUMBER_OF_TURN_AFTER_THOSE_A_LAMB_EVOLVE = 2 ;
 	
 	/**
 	 * The Sheperd who wants to perform this action. 
@@ -153,10 +149,10 @@ public class Mate extends GameMove
 					}
 				}
 				else
-					throw new MoveNotAllowedException ( "NO MOM" ) ;
+					throw new MoveNotAllowedException ( "No female to mate!" ) ;
 			}
 			else
-				throw new MoveNotAllowedException ( "NO DAD" ) ;
+				throw new MoveNotAllowedException ( "No male to mate!" ) ;
 		}
 		else throw new IllegalArgumentException () ;
 	}
@@ -253,7 +249,7 @@ public class Mate extends GameMove
 				while ( finished == false )
 				{
 					currentTurn = turnNumberClock.getTurnNumber () ;
-					if ( currentTurn - initTurn == NUMBER_OF_TURN_AFTER_THOSE_A_LAMB_EVOLVE )
+					if ( currentTurn - initTurn == GameConstants.NUMBER_OF_TURN_AFTER_THOSE_A_LAMB_EVOLVE )
 					{
 						lambEvolver.evolve ( lambToEvolve ) ;
 						finished = true ;

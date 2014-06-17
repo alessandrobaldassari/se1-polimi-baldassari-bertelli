@@ -7,6 +7,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Vector;
 
 /**
  * This class models a Region in the GameMap, a place where Animals can stay.
@@ -46,7 +47,7 @@ public class Region extends GameMapElement
 		if ( type != null )
 		{
 			this.type = type ;
-			containedAnimals = new LinkedList < Animal > () ;
+			containedAnimals = new Vector < Animal > () ;
 		}
 		else
 			throw new IllegalArgumentException () ;

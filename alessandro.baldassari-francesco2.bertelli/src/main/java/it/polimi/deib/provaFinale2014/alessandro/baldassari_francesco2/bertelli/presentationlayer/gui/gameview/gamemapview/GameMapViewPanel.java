@@ -147,7 +147,6 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
-	@Override
 	public void onPositionableElementAdded ( GameMapElementType whereType , Integer whereId , PositionableElementType whoType , Integer whoId ) 
 	{
 		positionableElementsManager.addElement(whereType, whereId, whoType, whoId);
@@ -157,7 +156,6 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
-	@Override
 	public void onPositionableElementRemoved(GameMapElementType whereType , Integer whereId , PositionableElementType whoType , Integer whoId) 
 	{
 		positionableElementsManager.removeElement ( whereType , whereId , whoType , whoId ) ;
@@ -418,19 +416,6 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 				Point tlc ;
 				int x ;
 				int y ;
-				tlc = generateTopLeftCorner () ;
-				x = e.getX () ;
-				y = e.getY () ;
-				if ( tlc.x != 0 )
-					x = x - ( getWidth() - preferredDimension.width ) / 2 ;
-				if ( tlc.y != 0 )
-					y = y - ( getHeight() - preferredDimension.height ) / 2 ;
-				System.out.println ( "CLICK_MANAGER : ROAD." ) ;
-				uid = coordinatesManager.getRoadId ( x , y ) ;
-				System.out.println ( "CLICK_MANAGER : ROAD_UID : " + uid ) ;
-				if ( uid != null )
-					methodName = "onRoadSelected" ;
-				/*
 				methodName = null ;
 				if ( currentInputMode != null )
 				{
@@ -510,7 +495,7 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 					{
 						e1.printStackTrace();
 					}
-				}*/
+				}
 		    }
 			
 		}
@@ -614,7 +599,6 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 			/**
 			 * AS THE SUPER'S ONE. 
 			 */
-			@Override
 			public void actionPerformed ( ActionEvent e ) 
 			{
 				try 
@@ -646,7 +630,6 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 			/**
 			 * AS THE SUPER'S ONE 
 			 */
-			@Override
 			public void actionPerformed ( ActionEvent e ) 
 			{
 				drawingPanel.zoom ( 0.5f , 0.5f ) ;
@@ -673,7 +656,6 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 			/**
 			 * AS THE SUPER'S ONE. 
 			 */
-			@Override
 			public void actionPerformed ( ActionEvent e ) 
 			{
 				drawingPanel.zoom ( 2f , 2f ) ;	

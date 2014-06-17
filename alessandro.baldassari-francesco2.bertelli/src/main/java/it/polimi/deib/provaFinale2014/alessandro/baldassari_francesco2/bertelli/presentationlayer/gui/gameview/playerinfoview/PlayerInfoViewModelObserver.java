@@ -10,9 +10,9 @@ public interface PlayerInfoViewModelObserver extends Observer
 	 * @param newAmount the amount of money the observed has now.
 	 * @param cause the cause of the change; if false ( negative ) it has been a payment, else the observed got payed.
 	 */
-	public void onMoneyReserveChanged ( int newAmount , boolean cause ) ;
+	public void onMoneyReserveChanged ( Integer newAmount , Boolean cause ) ;
 	
 	/***/
-	public void onCardsChanged ( RegionType cardType , int numberOfCardOfThisTypeNow ) ;
+	public void onCardsChanged ( RegionType cardType , Integer numberOfCardOfThisTypeNow ) ;
 	
 }

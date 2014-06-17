@@ -1,5 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.PlayerObserver;
 
@@ -87,13 +88,13 @@ public class RMIGUIGameMapNotifier implements Runnable , PlayerObserver
 	}
 
 	@Override
-	public void onCardAdded ( Card addedCard ) 
+	public void onCardAdded ( RegionType cardType ) 
 	{
 		try 
 		{
 			synchronized  ( lastArrived ) 
 			{
-				lastArrived.putMessage ( new GUIPlayerNotificationMessage ( "onCardAdded" , addedCard , null ) );
+				lastArrived.putMessage ( new GUIPlayerNotificationMessage ( "onCardAdded" , cardType , null ) );
 			}
 		} 
 		catch (RemoteException e) 
@@ -103,13 +104,13 @@ public class RMIGUIGameMapNotifier implements Runnable , PlayerObserver
 	}
 
 	@Override
-	public void onCardRemoved ( Card removedCard )
+	public void onCardRemoved ( RegionType cardType )
 	{
 		try 
 		{
 			synchronized  ( lastArrived ) 
 			{
-				lastArrived.putMessage ( new GUIPlayerNotificationMessage ( "onCardRemoved" , removedCard , null ) );
+				lastArrived.putMessage ( new GUIPlayerNotificationMessage ( "onCardRemoved" , cardType , null ) );
 			}
 		} 
 		catch (RemoteException e) 

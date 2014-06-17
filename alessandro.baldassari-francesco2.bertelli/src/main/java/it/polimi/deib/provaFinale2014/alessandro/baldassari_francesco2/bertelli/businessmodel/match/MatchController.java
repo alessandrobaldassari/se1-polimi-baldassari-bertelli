@@ -123,6 +123,7 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 			throw new IllegalArgumentException () ;
 	}
 	
+	/***/
 	public void addPlayerObserver ( PlayerObserver playerObserver , int clientHandlerUID ) 
 	{
 		for ( Player p : match.getPlayers () )
@@ -209,7 +210,7 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 		catch ( WorkflowException e ) 
 		{
 			System.out.println ( "MATCH_CONTROLLER - RUN : WORKFLOW_EXCEPTION GENERATED " + e.getMessage () ) ;
-			endMessage = PresentationMessages.UNEXPECTED_ERROR_MESSAGE ;
+			endMessage = PresentationMessages.UNEXPECTED_ERROR_MESSAGE + Utilities.CARRIAGE_RETURN + e.getMessage() ;
 		}
 		finally 
 		{
@@ -252,7 +253,7 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 		catch ( SingletonElementAlreadyGeneratedException e ) 
 		{
 			System.out.println ( "MATCH_CONTROLLER - CREATING PHASE : SINGLETON_ELEMENT_ALREADY_GENERATED_EXCETPION" ) ;
-			throw new WorkflowException () ;
+			throw new WorkflowException ( PresentationMessages.UNEXPECTED_ERROR_MESSAGE ) ;
 		}
 	}
 	
@@ -292,7 +293,7 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 			}
 			catch ( WrongMatchStateMethodCallException e ) 
 			{
-				throw new WorkflowException () ;
+				throw new WorkflowException ( PresentationMessages.UNEXPECTED_ERROR_MESSAGE ) ;
 			}			
 		}
 		System.out.println ( "GAME CONTROLLER : WAIT FOR PLAYER PHASE - FINE" ) ;
@@ -523,6 +524,7 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : FINE " ) ;
 	}
 	
+	/***/
 	private void turnationPhase () throws WorkflowException 
 	{
 		TurnationPhaseManager turnationPhaseManager ;
@@ -573,6 +575,7 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	private void matchFinishingProcedure ( String msg ) 
 	{
 		for ( Player currentPlayer : match.getPlayers () )
+			if ( currentPlayer.isSuspended() == false )
 			currentPlayer.matchEndNotification ( msg ) ;
 	}
 	

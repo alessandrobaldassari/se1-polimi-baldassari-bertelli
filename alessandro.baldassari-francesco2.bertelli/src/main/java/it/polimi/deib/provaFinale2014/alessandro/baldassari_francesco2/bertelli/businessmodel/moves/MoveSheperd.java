@@ -104,7 +104,7 @@ public class MoveSheperd extends GameMove
 			} 
 			catch ( TooFewMoneyException e ) 
 			{
-				throw new MoveNotAllowedException ( "Too few money" ) ;
+				throw new MoveNotAllowedException ( "Too few money to move there!" ) ;
 			}
 			catch ( NoMoreFenceOfThisTypeException e1 ) 
 			{

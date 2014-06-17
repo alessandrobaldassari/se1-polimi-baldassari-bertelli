@@ -152,12 +152,13 @@ public class OvineChooseView extends ObservableFrameworkedWithGridBagLayoutDialo
 	}
 	
 	/***/
-	public static PositionableElementType showDialog ( Iterable < PositionableElementType > toShowTypes ) 
+	public static PositionableElementType showDialog ( Iterable < PositionableElementType > toNotShowTypes ) 
 	{
 		OvineChooseView ovineChooseView ;
 		AtomicReference < PositionableElementType > move ;
 		move = new AtomicReference < PositionableElementType > ( null ) ;
 		ovineChooseView = new OvineChooseView ( new DefaultOvineChooseViewObserver(move) ) ;
+		ovineChooseView.obscureOvines ( toNotShowTypes );
 		GraphicsUtilities.showUnshowWindow ( ovineChooseView , false , true ) ;
 		synchronized ( move ) 
 		{
@@ -266,8 +267,8 @@ class OvineListPanel extends FrameworkedWithGridBagLayoutPanel
 	{
 		for ( PositionableElementType p : toNotShow )
 		{
-			imagePanels.get(p).setEnabled(false);
-			selectors.get(p).setEnabled(false); 
+			imagePanels.get ( p ).setEnabled(false);
+			selectors.get ( p ).setEnabled(false); 
 		}
 	}
 	

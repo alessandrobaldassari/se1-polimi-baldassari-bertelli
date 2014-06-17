@@ -3,6 +3,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import java.util.Collection;
 import java.util.LinkedList;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.GameConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.BlackSheep;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
@@ -18,20 +19,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  */
 public class BreakDown extends GameMove
 {
-
-	/**
-	 * Minimum value a dice launch must return in order for a Sheperd to be payed
-	 * during this BreakDown process.
-	 * It's a business rule.
-	 */
-	public static final int MINIMUM_POINTS_TO_BE_PAYED = 5 ;
-	
-	/**
-	 * The amount of money a Sheperd will be payed for his silence during this
-	 * BreakDown process.
-	 * It's a business rule.
-	 */
-	public static final int AMOUNT_TO_PAY_FOR_SILENCE = 2 ;
 	
 	/**
 	 * The Sheperd who wants to do this BreakDown. 
@@ -103,10 +90,10 @@ public class BreakDown extends GameMove
 			try 
 			{
 				// pago per il silenzio
-				breaker.getOwner().pay ( adjacentPlayers.size () * AMOUNT_TO_PAY_FOR_SILENCE ) ;
+				breaker.getOwner().pay ( adjacentPlayers.size () * GameConstants.AMOUNT_TO_PAY_FOR_SILENCE ) ;
 				// ogni testimone precedentemente selezionato riceve la somma
 				for ( Player player : adjacentPlayers )
-					player.receiveMoney ( AMOUNT_TO_PAY_FOR_SILENCE );
+					player.receiveMoney ( GameConstants.AMOUNT_TO_PAY_FOR_SILENCE );
 				// effettivo abbattimento dell'animale
 				animalToBreak.getPosition ().removeAnimal ( animalToBreak ) ;
 				animalToBreak.moveTo ( null ) ;
@@ -145,7 +132,7 @@ public class BreakDown extends GameMove
 	private void adjacentPlayersDiceLaunching ( Collection < Player > adjacentPlayers ) 
 	{
 		for ( Player player : adjacentPlayers )
-			if ( player.launchDice () < MINIMUM_POINTS_TO_BE_PAYED )
+			if ( player.launchDice () < GameConstants.MINIMUM_POINTS_TO_BE_PAYED )
 				adjacentPlayers.remove ( player ) ;
 	}
 	

@@ -204,10 +204,7 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 	{
 		session = new MatchLauncherSession ( this , guiServer ) ;
 		connectionLoosingController.addObserver ( session.getMatchController () ) ;
-		Thread t ;
-		
-	SheeplandServerApp.getInstance().executeRunnable ( session.getMatchController () ) ;
-		
+		SheeplandServerApp.getInstance().executeRunnable ( session.getMatchController() ); 
 	}
 	
 	/**

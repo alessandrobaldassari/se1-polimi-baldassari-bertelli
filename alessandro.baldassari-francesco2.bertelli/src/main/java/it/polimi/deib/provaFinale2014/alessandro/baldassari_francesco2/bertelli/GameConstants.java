@@ -54,6 +54,25 @@ public final class GameConstants
 	/***/
 	public static final int NUMBER_OF_REGION_TYPE = 7 ;
 	
+	/**
+	 * Minimum value a dice launch must return in order for a Sheperd to be payed
+	 * during this BreakDown process.
+	 * It's a business rule.
+	 */
+	public static final int MINIMUM_POINTS_TO_BE_PAYED = 5 ;
+	
+	/**
+	 * The amount of money a Sheperd will be payed for his silence during this
+	 * BreakDown process.
+	 * It's a business rule.
+	 */
+	public static final int AMOUNT_TO_PAY_FOR_SILENCE = 2 ;
+	
+	/**
+	 * The number of turns after a Lamb should become a Ram or a Sheep. 
+	 */
+	public static final int NUMBER_OF_TURN_AFTER_THOSE_A_LAMB_EVOLVE = 2 ;
+	
 	/***/
 	private GameConstants () {}
 	

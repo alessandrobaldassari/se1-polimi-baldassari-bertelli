@@ -15,7 +15,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.AlreadyInFinalPhaseException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.MatchState;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveNotAllowedException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.factory.MoveExecutor;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.executor.MoveExecutor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelection;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.CharacterDoesntMoveException;
@@ -102,7 +102,7 @@ class TurnationPhaseManager implements TurnNumberClock
 				}
 				// if all the Users left the game, the Match will finish.
 				if ( match.getNumberOfPlayers () == 0 )
-					throw new WorkflowException () ;
+					throw new WorkflowException ( "Too few players to continue !" ) ;
 				for ( Player currentPlayer : match.getPlayers() )
 				{		
 					if ( currentPlayer.isSuspended () == false )
@@ -113,9 +113,10 @@ class TurnationPhaseManager implements TurnNumberClock
 							break ;
 						try
 						{
-							moveFactory = moveFactoryGenerator ( currentPlayer ) ;
+							moveFactory = generateMoveExecAndChooseSheperd ( currentPlayer ) ;
 							for ( moveIndex = 0 ; moveIndex < GameConstants.NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ )
 							{	
+								playersGenericNotification ( "Carissimo, per questo turno è la tua mossa # " + moveIndex ) ;
 								selector = new MoveSelector ( moveFactory.getAssociatedSheperd () , generateCardPriceMap ( moveFactory.getAssociatedSheperd () ) ) ;
 								try 
 								{
@@ -140,7 +141,7 @@ class TurnationPhaseManager implements TurnNumberClock
 								{
 									// the user tried to do an invalid move; give him another chance
 									System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - ERRORE DURANTE L'ESECUZIONE DELLA MOSSA." ) ;									
-									currentPlayer.genericNotification ( "Non puoi fare questa mossa, peccato, hai perso una occasione !" ) ;
+									currentPlayer.genericNotification ( "Non puoi fare questa mossa, peccato, hai perso una occasione !\n" + e.getMessage() ) ;
 								} 
 							}
 						}
@@ -160,8 +161,10 @@ class TurnationPhaseManager implements TurnNumberClock
 				}
 				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PRIMA DELLA FASE DI MARKET." ) ;															
 				marketManager = new MarketPhaseManager ( match.getPlayers() ) ;
+				if ( match.getNumberOfPlayers () == 0 )
+					throw new WorkflowException ( "Too few players to continue !" ) ;
 				marketManager.marketPhase();
-				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - DOPO LA FASE DI MARKET." ) ;															
+				System.out.println ( "MATCH_CONTROLLER - TURNATION PHASE - DOPO LA FASE DI MARKET." ) ;															
 				try 
 				{
 					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - IL LUPO PROVA A SCAPPARE " ) ;															
@@ -272,14 +275,14 @@ class TurnationPhaseManager implements TurnNumberClock
 	
 	/**
 	 * Helper method that allows the System to choose a Sheperd for a Player's turn ( eventually aking him who ),
-	 * and then create a MoveFactory for this User to play.
+	 * and then create a MoveExecutor for this User to play.
 	 * 
-	 * @param currentPlayer the player for who a MoveFactory has to be built.
-	 * @return the created GameMoveFactory
+	 * @param currentPlayer the player for who a MoveExecutor has to be built.
+	 * @return the created MoveExecutor
 	 * @throws TimeoutException if the currentPlayer has to choose between some Sheperds and
 	 * 	       does not answer before a timeout.
 	 */
-	private MoveExecutor moveFactoryGenerator ( Player currentPlayer ) throws TimeoutException 
+	private MoveExecutor generateMoveExecAndChooseSheperd ( Player currentPlayer ) throws TimeoutException 
 	{
 		MoveExecutor res ;
 		Sheperd choosenSheperd ;
@@ -303,6 +306,7 @@ class TurnationPhaseManager implements TurnNumberClock
 		return res ;
 	}
 	
+	/***/
 	private void playersGenericNotification ( String msg )
 	{
 		for ( Player p : match.getPlayers() )

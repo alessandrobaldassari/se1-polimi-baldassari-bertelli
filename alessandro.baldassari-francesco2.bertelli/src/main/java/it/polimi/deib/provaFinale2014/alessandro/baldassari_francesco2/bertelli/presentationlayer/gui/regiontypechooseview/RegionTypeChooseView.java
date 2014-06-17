@@ -9,6 +9,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.InputView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.ObservableFrameworkedWithGridBagLayoutDialog;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.WithBackgroundImagePanel;
 
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -119,7 +120,6 @@ public class RegionTypeChooseView extends ObservableFrameworkedWithGridBagLayout
 		/**
 		 * AS THE SUPER'S ONE. 
 		 */
-		@Override
 		public void run () 
 		{
 			Couple < RegionType , Integer > res ;
@@ -155,7 +155,6 @@ public class RegionTypeChooseView extends ObservableFrameworkedWithGridBagLayout
 		/**
 		 * AS THE SUPER'S ONE. 
 		 */
-		@Override
 		public void run () 
 		{
 			try 
@@ -200,8 +199,8 @@ public class RegionTypeChooseView extends ObservableFrameworkedWithGridBagLayout
 		ArrayList < Couple < RegionType , Integer > > in ;
 		Couple < RegionType , Integer > x ;
 		in = new ArrayList < Couple < RegionType , Integer > > () ;
-		in.add ( new Couple <> ( RegionType.CULTIVABLE , 0 ) ) ;
-		in.add ( new Couple <> ( RegionType.FOREST , 3 ) ) ;
+		in.add ( new Couple < RegionType , Integer > ( RegionType.CULTIVABLE , 0 ) ) ;
+		in.add ( new Couple < RegionType , Integer > ( RegionType.FOREST , 3 ) ) ;
 		x = RegionTypeChooseView.showDialog ( in , 1 )  ;
 		System.out.println ( x ) ;
 	}
@@ -216,7 +215,7 @@ class RegionTypeViewPanel extends FrameworkedWithGridBagLayoutPanel
 	private Couple < RegionType , Integer > selected ;
 	
 	/***/
-	private List < JPanel > imagePanels ;
+	private List < WithBackgroundImagePanel > imagePanels ;
 
 	/***/
 	private List < JRadioButton > selectors ;
@@ -235,13 +234,16 @@ class RegionTypeViewPanel extends FrameworkedWithGridBagLayoutPanel
 	protected void createComponents () 
 	{
 		selected = null ;
-		imagePanels = new ArrayList < JPanel > () ;
+		imagePanels = new ArrayList < WithBackgroundImagePanel > () ;
 		selectors = new ArrayList < JRadioButton > () ;
 		buttonGroup = new ButtonGroup () ;
 	}
 
 	@Override
-	protected void manageLayout () {}
+	protected void manageLayout () 
+	{
+		setOpaque ( false ) ;
+	}
 
 	@Override
 	protected void bindListeners () {}
@@ -252,14 +254,14 @@ class RegionTypeViewPanel extends FrameworkedWithGridBagLayoutPanel
 	public void setData ( Iterable < Couple < RegionType , Integer > > inData )
 	{
 		Insets insets ;
-		JPanel panel ;
+		WithBackgroundImagePanel panel ;
 		JRadioButton r ;
 		int i ;
 		insets = new Insets(5,5,5,5) ;
 		i = 0 ;
 		for ( Couple < RegionType , Integer > c : inData )
 		{
-			panel = new JPanel () ;
+			panel = new WithBackgroundImagePanel () ;
 			r = new JRadioButton ( c.getFirstObject() + " [ " + c.getSecondObject() + " danari ]" ) ;
 			imagePanels.add(panel);
 			selectors.add(r);
@@ -269,6 +271,9 @@ class RegionTypeViewPanel extends FrameworkedWithGridBagLayoutPanel
 			r.setHorizontalAlignment ( SwingConstants.CENTER ) ;
 			add ( panel ) ;
 			add ( r ) ;
+			r.setOpaque(false); 
+			panel.setOpaque(false);
+			panel.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCardImage ( c.getFirstObject() ) ) ;
 			i ++ ;
 		}
 		repaint () ;
@@ -280,6 +285,7 @@ class RegionTypeViewPanel extends FrameworkedWithGridBagLayoutPanel
 		return selected ;
 	}
 	
+	/***/
 	private class SelectorItemListener implements ItemListener 
 	{
 		

@@ -103,13 +103,13 @@ public class PlayerInfoView extends FrameworkedWithGridBagLayoutPanel implements
 	}
 
 	@Override
-	public void onMoneyReserveChanged ( int newAmount , boolean cause ) 
+	public void onMoneyReserveChanged ( Integer newAmount , Boolean cause ) 
 	{
 		moneyLabel.setText ( "I tuoi risparmi : " + newAmount ) ;
 	}
 
 	@Override
-	public void onCardsChanged ( RegionType cardType , int numberOfCardOfThisTypeNow ) 
+	public void onCardsChanged ( RegionType cardType , Integer numberOfCardOfThisTypeNow ) 
 	{
 		( ( TitledBorder ) cardsPanel.get ( cardType ).getBorder () ).setTitle ( "Ne ho " + numberOfCardOfThisTypeNow ) ;
 	}
