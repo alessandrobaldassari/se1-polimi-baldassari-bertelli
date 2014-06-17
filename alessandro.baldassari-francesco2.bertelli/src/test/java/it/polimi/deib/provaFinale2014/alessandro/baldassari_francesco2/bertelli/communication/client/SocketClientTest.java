@@ -24,7 +24,7 @@ public class SocketClientTest {
 	ProtocolResponser protocolResponser;
 	SocketClient socketClient;
 	DummySocketServer dummySocketServer;
-	
+	/*
 	@Before
 	public void setUp() throws Exception {
 		protocolResponser = new ProtocolResponser();
@@ -32,6 +32,7 @@ public class SocketClientTest {
 		dummySocketServer = new DummySocketServer();
 	}
 
+	
 	@Test
 	public void directTechnicalConnect() {
 		dummySocketServer.start();
@@ -44,6 +45,7 @@ public class SocketClientTest {
 		assertTrue(true);
 		
 	}
+	*/
 }
 
 class ProtocolResponser implements CommunicationProtocolResponser{
