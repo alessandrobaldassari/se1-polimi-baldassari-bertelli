@@ -3,10 +3,10 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.ServerEnvironment;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandServerApp;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.TimeConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.MatchState;
@@ -82,8 +82,8 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 		resumeConnectionServer = new BackendResumeConnectionServer ( connectionLoosingController ) ;
 		inFunction = false ;
 		session = null ;
-		SheeplandServerApp.getInstance().executeRunnable ( resumeConnectionServer ) ;
-		SheeplandServerApp.getInstance().executeRunnable ( guiServer ) ;
+		Executors.newSingleThreadExecutor().execute( resumeConnectionServer ) ;
+		Executors.newSingleThreadExecutor().execute ( guiServer ) ;
 	}
 	
 	/**
@@ -108,8 +108,8 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 	{
 		ClientHandler < ? > newClientHandler = null ;
 		String name ;
-		SheeplandServerApp.getInstance().executeRunnable ( socketServer ) ;
-		SheeplandServerApp.getInstance().executeRunnable ( rmiServer ) ;
+		Executors.newSingleThreadExecutor().execute ( socketServer ) ;
+		Executors.newSingleThreadExecutor().execute ( rmiServer ) ;
 		inFunction = true ;
 		name = null ;
 		System.out.println ( "MASTER SERVER : INIZIO FUNZIONAMENTO" ) ;
@@ -204,7 +204,7 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 	{
 		session = new MatchLauncherSession ( this , guiServer ) ;
 		connectionLoosingController.addObserver ( session.getMatchController () ) ;
-		SheeplandServerApp.getInstance().executeRunnable ( session.getMatchController() ); 
+		Executors.newSingleThreadExecutor().execute ( session.getMatchController() ) ; 
 	}
 	
 	/**

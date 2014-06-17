@@ -4,11 +4,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.PlayerObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.UIDGenerator;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observable;
 
 import java.io.Serializable;
 import java.rmi.AlreadyBoundException;
@@ -20,7 +17,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class RMIGUIMapServer implements Runnable , GameMapObserver , Serializable
@@ -33,9 +29,7 @@ public class RMIGUIMapServer implements Runnable , GameMapObserver , Serializabl
 	private static Registry myRegistry ;
 
 	private List < GUIGameMapNotificationMessage > messages ;
-	
-	private Executor exec ;
-	
+		
 	private Map < String , RMIGUIGameMapNotifier > notifiers ;
 	
 	public RMIGUIMapServer () throws RemoteException 
@@ -49,7 +43,6 @@ public class RMIGUIMapServer implements Runnable , GameMapObserver , Serializabl
 		messages = new Vector <GUIGameMapNotificationMessage> () ;
 		notifiers = new LinkedHashMap < String , RMIGUIGameMapNotifier > () ;
 		System.out.println ( "RMI_GUI_MAP_SERVER - : REGISTRY LOCATED : " + myRegistry ) ;
-		exec = Executors.newCachedThreadPool () ;
 	}
 	
 	public String addClient () 
@@ -75,7 +68,7 @@ public class RMIGUIMapServer implements Runnable , GameMapObserver , Serializabl
 			myRegistry.bind ( res , stub ) ;
 			System.out.println ( "RMI_REQUEST_ACCEPT_SERVER - ADD_PLAYER : BROKER BOUND." ) ;
 			notifiers.put ( res , new RMIGUIGameMapNotifier ( messages , broker ) ) ;
-			exec.execute ( notifiers.get ( res ) ) ;
+			Executors.newSingleThreadExecutor().execute ( notifiers.get ( res ) ) ;
 		}
 		catch ( RemoteException r ) 
 		{
@@ -131,6 +124,4 @@ public class RMIGUIMapServer implements Runnable , GameMapObserver , Serializabl
 		messages.add ( messages.size () , m ) ;
 	}
 	
-	
-
 }

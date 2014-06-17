@@ -5,7 +5,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
@@ -38,11 +37,6 @@ public class NetworkCommunicantPlayer extends Player
 	private WriteOnceProperty < Boolean > methodCompleted ;
 	
 	/**
-	 * An ExecutorService object to execute threads.
-	 */
-	private transient ExecutorService executorService ;
-	
-	/**
 	 * A timer object used to manage the situation where a Client does not answer to a request in a given time. 
 	 */
 	private transient Timer requestTimeoutTimer ;
@@ -64,7 +58,6 @@ public class NetworkCommunicantPlayer extends Player
 		{
 			this.clientHandler = clientHandler;
 			this.connectionLoosingManager = connectionLoosingManager ;
-			executorService = Executors.newCachedThreadPool () ;
 		}
 		else 
 			throw new IllegalArgumentException();
@@ -85,7 +78,7 @@ public class NetworkCommunicantPlayer extends Player
 		Future < NamedColor > f ;
 		createAndLaunchRequestTimetoutTimer () ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = executorService.submit ( new Callable < NamedColor > () 
+		f = Executors.newSingleThreadExecutor().submit ( new Callable < NamedColor > () 
 		{
 			@Override
 			public NamedColor call () throws IOException 
@@ -141,7 +134,7 @@ public class NetworkCommunicantPlayer extends Player
 		Future < Sheperd > f ;
 		createAndLaunchRequestTimetoutTimer () ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = executorService.submit ( new Callable < Sheperd > () 
+		f = Executors.newSingleThreadExecutor().submit ( new Callable < Sheperd > () 
 		{
 			@Override
 			public Sheperd call () throws IOException
@@ -196,7 +189,7 @@ public class NetworkCommunicantPlayer extends Player
 		Future < MoveSelection > f ;
 		createAndLaunchRequestTimetoutTimer () ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = executorService.submit ( new Callable < MoveSelection > () 
+		f = Executors.newSingleThreadExecutor().submit ( new Callable < MoveSelection > () 
 		{
 			@Override
 			public MoveSelection call () throws IOException 
@@ -251,7 +244,7 @@ public class NetworkCommunicantPlayer extends Player
 		createAndLaunchRequestTimetoutTimer () ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
 		System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling - SUBMITTING FUTURE" ) ;
-		executorService.submit ( new Runnable () 
+		Executors.newSingleThreadExecutor().submit ( new Runnable () 
 		{
 			@Override
 			public void run ()  
@@ -322,7 +315,7 @@ public class NetworkCommunicantPlayer extends Player
 		Future < Iterable < SellableCard > > f ;
 		createAndLaunchRequestTimetoutTimer () ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = executorService.submit ( new Callable < Iterable < SellableCard > > () 
+		f = Executors.newSingleThreadExecutor().submit ( new Callable < Iterable < SellableCard > > () 
 		{
 			@Override
 			public Iterable < SellableCard > call () throws IOException
@@ -394,7 +387,7 @@ public class NetworkCommunicantPlayer extends Player
 		Future < Road > f ;
 		createAndLaunchRequestTimetoutTimer () ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = executorService.submit ( new Callable < Road > () 
+		f = Executors.newSingleThreadExecutor().submit ( new Callable < Road > () 
 		{
 			@Override
 			public Road call () throws IOException 

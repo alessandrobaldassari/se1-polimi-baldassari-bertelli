@@ -16,13 +16,17 @@ public class AdultOvine extends Ovine
 	 */
 	private AdultOvineType type ;
 	
-	/***/
+	/**
+	 * @param name the name of this AdultOvine.
+	 * @param type the type ( sex ) of this AdultOvine, Sheep XOR Ram.
+	 */
 	protected AdultOvine ( String name , AdultOvineType type ) 
 	{
 		this ( type == AdultOvineType.RAM ? PositionableElementType.RAM : PositionableElementType.SHEEP , name , type ) ;
 	}
 	
 	/**
+	 * @param positionableElementType the PositionableElementType of this AdultOvine.
 	 * @param name the name of this AdultOvine.
 	 * @param type the type ( sex ) of this AdultOvine, Sheep XOR Ram.
 	 * @throws IllegalArgumentException if the type parameter is null.
@@ -202,6 +206,7 @@ public class AdultOvine extends Ovine
 	public class CanNotMateWithHimException extends MatingException 
 	{
 
+		/***/
 		protected CanNotMateWithHimException ( AdultOvine firstPartner , AdultOvine secondPartner ) 
 		{
 			super ( firstPartner , secondPartner ) ;
@@ -215,6 +220,7 @@ public class AdultOvine extends Ovine
 	public class MateNotSuccesfullException extends MatingException 
 	{
 		
+		/***/
 		protected MateNotSuccesfullException ( AdultOvine firstPartner , AdultOvine secondPartner ) 
 		{
 			super ( firstPartner , secondPartner ) ;

@@ -99,6 +99,9 @@ public class AnimalFactory implements Serializable
 	
 	/**
 	 * This method generate a new AdultOvine, given  its type and name.
+	 * 
+	 * @param name the name of the new Ovine.
+	 * @param type the AdultOvineType of the new Ovine
 	 * @throws IllegalArgumentException if the name or the type parameter is null.
 	 */
 	public Ovine newAdultOvine ( String name , AdultOvineType type ) 
@@ -169,7 +172,7 @@ public class AnimalFactory implements Serializable
 	 * this AnimalFactory is associated with if not already generated.
 	 * 
 	 * @throws BlackSheepAlreadyGeneratedException if the BlackSheep Singleton instance 
-	 * for the Match this AnimalFactory is associated with has already been generated. 
+	 * 		   for the Match this AnimalFactory is associated with has already been generated. 
 	 */
 	public Ovine newBlackSheep () throws BlackSheepAlreadyGeneratedException 
 	{

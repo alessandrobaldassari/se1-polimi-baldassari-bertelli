@@ -6,7 +6,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 /**
  * This class implements a MatchIdentifier for the Match managed by this GameController  
  */
-class MatchIdentifier implements Identifiable < Match > 
+public class MatchIdentifier implements Identifiable < Match > 
 {
 
 	private static UIDGenerator uidGenerator ;

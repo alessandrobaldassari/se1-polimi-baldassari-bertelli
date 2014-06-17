@@ -91,7 +91,10 @@ public abstract class GameMapElement extends WithReflectionAbstractObservable < 
 		return res ;
 		
 	}
-	
+
+	/**
+	 *  
+	 */
 	protected final void notifyAddElement ( GameMapElementType whereType , int whereId , PositionableElementType whoType , int whoId ) 
 	{
 		try 

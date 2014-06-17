@@ -8,12 +8,7 @@ public class SheeplandServerApp
 
 	private static SheeplandServerApp instance ;
 	
-	private ExecutorService executorService ;
-	
-	private SheeplandServerApp ()
-	{
-		executorService = Executors.newCachedThreadPool () ;
-	}
+	private SheeplandServerApp (){}
 	
 	public synchronized static SheeplandServerApp getInstance () 
 	{
@@ -22,7 +17,8 @@ public class SheeplandServerApp
 		return instance ;
 	}
 	
-	public void executeRunnable ( Runnable runnable ) 
+	/*
+	public void executeRunnable ( Runnable runnable , boolean canWait ) 
 	{
 		executorService.execute ( runnable ) ;
 	}
@@ -31,5 +27,5 @@ public class SheeplandServerApp
 	{
 		executorService.shutdown () ;
 	}
-	
+	*/
 }

@@ -24,7 +24,12 @@ public class Wolf extends Animal
 	}
 	
 	/**
-	 *  
+	 * Method that simulates the Wolf Escaping.
+	 * W.R.T. this Wolf tries to escape, and if he succeeds in it, eat ( if possible ) an
+	 * animal of the Region where he arrived.
+	 * 
+	 * @throws CharacterDoesntMoveException if this Wold does not move ( an Exception but it is not 
+	 *         a real error ).
 	 */
 	public void escape () throws CharacterDoesntMoveException
 	{

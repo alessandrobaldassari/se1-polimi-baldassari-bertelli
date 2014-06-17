@@ -197,9 +197,7 @@ public class Bank implements Serializable
 	{
 		int res ;
 		if ( cards.get ( regionType ).isEmpty () == false )
-		{
 			res = cards.get ( regionType ).peek ().getInitialPrice () ;
-		}
 		else
 			throw new NoMoreCardOfThisTypeException ( regionType ) ;
 		return res ;
