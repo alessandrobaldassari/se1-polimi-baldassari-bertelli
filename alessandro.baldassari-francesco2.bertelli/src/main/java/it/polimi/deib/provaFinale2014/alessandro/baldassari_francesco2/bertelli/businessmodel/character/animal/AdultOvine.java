@@ -16,16 +16,17 @@ public class AdultOvine extends Ovine
 	 */
 	private AdultOvineType type ;
 	
-	/**
-	 * @param name the name of this AdultOvine.
-	 * @type the type ( sex ) of this AdultOvine, Sheep XOR Ram.
-	 * @throws IllegalArgumentException if the type parameter is null.
-	 */
+	/***/
 	protected AdultOvine ( String name , AdultOvineType type ) 
 	{
 		this ( type == AdultOvineType.RAM ? PositionableElementType.RAM : PositionableElementType.SHEEP , name , type ) ;
 	}
 	
+	/**
+	 * @param name the name of this AdultOvine.
+	 * @param type the type ( sex ) of this AdultOvine, Sheep XOR Ram.
+	 * @throws IllegalArgumentException if the type parameter is null.
+	 */
 	protected AdultOvine ( PositionableElementType positionableElementType , String name , AdultOvineType type )
 	{
 		super ( positionableElementType , name ) ;
@@ -88,6 +89,9 @@ public class AdultOvine extends Ovine
 		return res ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public boolean equals ( Object obj ) 
 	{

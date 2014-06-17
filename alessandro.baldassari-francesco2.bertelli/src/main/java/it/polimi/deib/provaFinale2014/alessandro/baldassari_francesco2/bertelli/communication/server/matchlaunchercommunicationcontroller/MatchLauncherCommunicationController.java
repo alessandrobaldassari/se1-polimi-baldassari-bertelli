@@ -153,6 +153,7 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 			}
 			catch ( WrongMatchStateMethodCallException e )
 			{
+				System.out.println ( "MATCH_LAUNCHER_COMMUNICATION_CONTROLLER - RUN : WrongMatchStateMethodCallException GENERATED" ) ;
 				// may be the Game Controller is late, give this Player another change to enter.
 				if ( e.getActualState () == MatchState.CREATED ) 
 				{
@@ -203,7 +204,9 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 	{
 		session = new MatchLauncherSession ( this , guiServer ) ;
 		connectionLoosingController.addObserver ( session.getMatchController () ) ;
-		SheeplandServerApp.getInstance().executeRunnable ( session.getMatchController () ) ;
+		Thread t ;
+		
+	SheeplandServerApp.getInstance().executeRunnable ( session.getMatchController () ) ;
 		
 	}
 	

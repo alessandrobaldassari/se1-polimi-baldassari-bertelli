@@ -253,7 +253,10 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	protected void manageLayout () {}
+	protected void manageLayout () 
+	{
+		setOpaque ( false ) ;
+	}
 
 	/**
 	 * AS THE SUPER'S ONE. 
@@ -285,6 +288,8 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 			selectors.add ( new JRadioButton () ) ;
 		for ( i = 0 ; i < colors.size() ; i ++ )
 		{
+			colorPanels.get ( i ).setOpaque ( false ) ;
+			selectors.get ( i ).setOpaque(false); 
 			layoutComponent ( colorPanels.get ( i ) , i , 1 , 1 , 0.7 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 			layoutComponent ( selectors.get ( i ) , i , 2 , 1 , 0.3 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
 			try 

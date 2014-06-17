@@ -188,7 +188,7 @@ public abstract class Client extends Thread implements Terminable
 				m = read () ;
 				System.out.println ( "CLIENT - RUN : MESSAGE RECEIVED : " + m.getOperation() ) ; 
 				inParams = CollectionsUtilities.newListFromIterable ( m.getParameters () ) ;
-				System.out.println ( "CLIENT : PARAMETERS LOADED." ) ;
+				System.out.println ( "CLIENT : PARAMETERS LOADED + " + m.getParameters () ) ;
 				outParams.clear () ;
 				switch ( m.getOperation() ) 
 				{

@@ -11,7 +11,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.BlackSheepAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.WolfAlreadyGeneratedException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb.LambEvolver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.LambEvolver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Ovine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapFactory;
@@ -176,6 +176,8 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	 */
 	public void addPlayer ( Player newPlayer ) throws WrongMatchStateMethodCallException
 	{
+		//while ( match == null ) ;
+		System.out.println ( "MATCH_CONTROLLER - ADD_PLAYER : match = " + match ) ;
 		if ( match.getMatchState () == Match.MatchState.WAIT_FOR_PLAYERS )
 			tempBlockingQueue.offer ( newPlayer ) ;
 		else
@@ -204,9 +206,9 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 			resultsCalculationPhase () ;
 			endMessage = PresentationMessages.BYE_MESSAGE ;
 		}
-		catch (WorkflowException e) 
+		catch ( WorkflowException e ) 
 		{
-			System.out.println ( "MATCH_CONTROLLER - RUN : WORKFLOW_EXCEPTION GENERATED" ) ;
+			System.out.println ( "MATCH_CONTROLLER - RUN : WORKFLOW_EXCEPTION GENERATED " + e.getMessage () ) ;
 			endMessage = PresentationMessages.UNEXPECTED_ERROR_MESSAGE ;
 		}
 		finally 
@@ -228,16 +230,24 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 		Bank bank;
 		try 
 		{
+			System.out.println ( "MATCH_CONTROLLER - CREATING_PHASE : BEGIN" ) ;
 			matchIdentifier = MatchIdentifier.newInstance () ;
+			System.out.println ( "MATCH_CONTROLLER - CREATING_PHASE : MATCH IDENTIFIER CREATED" ) ;
 			animalsFactory = AnimalFactory.newAnimalFactory ( matchIdentifier ) ;
 			lambEvolver = new LambEvolverImpl ( animalsFactory ) ;
+			System.out.println ( "MATCH_CONTROLLER - CREATING_PHASE : LAMB EVOLVER CREATED" ) ;
 			gameMap = GameMapFactory.getInstance().newInstance ( matchIdentifier ) ;
+			System.out.println ( "MATCH_CONTROLLER - CREATING_PHASE : GAME MAP CREATED" ) ;
 			bank = BankFactory.getInstance().newInstance ( matchIdentifier ) ;
+			System.out.println ( "MATCH_CONTROLLER - CREATING_PHASE : BEFORE CREATING MATCH" ) ;
 			match = new Match ( gameMap , bank ) ;		
+			System.out.println ( "MATCH_CONTROLLER - CREATING_PHASE : MATCH CREATED" ) ;
 			match.setMatchState ( MatchState.WAIT_FOR_PLAYERS ) ;
+			System.out.println ( "MATCH_CONTROLLER - CREATING_PHASE : BEFORE ADDING MAP_OBSERVERS" ) ;			
 			for ( GameMapObserver g : mapObservers )
 				match.getGameMap().addObserver ( g ) ;
 			timer.schedule ( new WaitingPlayersTimerTask () , TimeConstants.MATCH_CONTROLLER_TIMER_TIME ) ;
+			System.out.println ( "MATCH_CONTROLLER - CREATING_PHASE : END" ) ;
 		} 
 		catch ( SingletonElementAlreadyGeneratedException e ) 
 		{

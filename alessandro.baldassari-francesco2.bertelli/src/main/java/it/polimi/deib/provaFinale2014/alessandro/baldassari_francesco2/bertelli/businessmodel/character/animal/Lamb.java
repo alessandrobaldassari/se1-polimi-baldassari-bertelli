@@ -102,13 +102,4 @@ public class Lamb extends Ovine
 		return res ;
 	}
 	
-	// INNER INTERFACES
-	
-	public interface LambEvolver 
-	{
-		
-		public void evolve ( Lamb lamb ) ;
-		
-	}
-	
 }

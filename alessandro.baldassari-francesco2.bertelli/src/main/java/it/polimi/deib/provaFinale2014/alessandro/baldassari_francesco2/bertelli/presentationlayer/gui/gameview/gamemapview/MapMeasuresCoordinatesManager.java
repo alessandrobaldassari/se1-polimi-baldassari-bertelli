@@ -32,6 +32,8 @@ public class MapMeasuresCoordinatesManager
 	/***/
 	int ROADS_RADIUS = 25 ;
 		
+	int ANIMAL_RADIUS = 20 ;
+	
 	/***/
 	private Map < Integer , Polygon > regionsCoordinates ;
 	
@@ -39,10 +41,10 @@ public class MapMeasuresCoordinatesManager
 	private Map < Integer , Ellipse2D > roadsCoordinates ;
 
 	/***/
-	private Map < Integer , Map < PositionableElementType , Shape > > animalsInRegions ;
+	private Map < Integer , Map < PositionableElementType , Ellipse2D > > animalsInRegions ;
 
 	/***/
-	private Map < Integer , PositionableElementType > objectsInRoads ;
+	private Map < Integer , Couple < PositionableElementType , Ellipse2D > > objectsInRoads ;
 	
 	/***/
 	private PositionableElementCoordinatesManager positionableElementsManager ;
@@ -54,20 +56,20 @@ public class MapMeasuresCoordinatesManager
 	{
 		InputStream regionsI ;
 		InputStream roadsI ;
+		InputStream animalsI ;
 		int i ;
 		try 
 		{
 			this.positionableElementsManager = positionableElementManager ;
 			regionsI = Files.newInputStream ( Paths.get ( FilePaths.REGIONS_COORDINATES_PATH ) , StandardOpenOption.READ ) ;
 			roadsI = Files.newInputStream ( Paths.get ( FilePaths.ROADS_COORDINATES_PATH ) , StandardOpenOption.READ ) ;
+			animalsI = Files.newInputStream ( Paths.get ( FilePaths.REGIONS_ANIMALS_PATH ) , StandardOpenOption.READ ) ;
 			regionsCoordinates = readRegionsCoordinates ( regionsI ) ;
 			regionsI.close () ;
 			roadsCoordinates = readRoadsCoordinates ( roadsI ) ;
 			roadsI.close () ;
-			animalsInRegions = new HashMap < Integer , Map < PositionableElementType , Shape > > ( GameConstants.NUMBER_OF_REGIONS ) ;
-			for ( i = 1 ; i <= GameConstants.NUMBER_OF_REGIONS ; i ++ )
-				animalsInRegions.put ( i , new LinkedHashMap < PositionableElementType , Shape > () ) ;
-			objectsInRoads = new HashMap < Integer , PositionableElementType > ( GameConstants.NUMBER_OF_ROADS ) ;
+			animalsInRegions = readAnimalsCoordinates ( animalsI ) ;
+			objectsInRoads = new HashMap < Integer , Couple < PositionableElementType , Ellipse2D > > ( GameConstants.NUMBER_OF_ROADS ) ;
 			for ( i = 1 ; i <= GameConstants.NUMBER_OF_ROADS ; i ++ )
 				objectsInRoads.put ( i , null ) ;
 		}
@@ -109,7 +111,7 @@ public class MapMeasuresCoordinatesManager
 		Scanner s ;
 		Ellipse2D e ;
 		String rawEntry ;
-		res = new HashMap < Integer , Ellipse2D > ( 42 ) ;
+		res = new HashMap < Integer , Ellipse2D > ( GameConstants.NUMBER_OF_ROADS ) ;
 		s = new Scanner ( in ) ;
 		while ( s.hasNextLine () )
 		{
@@ -122,12 +124,43 @@ public class MapMeasuresCoordinatesManager
 		return res ;
 	} 
 	
+	/***/
+	private Map  < Integer , Map < PositionableElementType , Ellipse2D > > readAnimalsCoordinates ( InputStream in ) 
+	{
+		String [] data ;
+		Scanner s ;
+		String rawEntry ;
+		Map  < Integer , Map < PositionableElementType , Ellipse2D > > res ;
+		Map < PositionableElementType , Ellipse2D > m ;
+		res = new HashMap  < Integer , Map < PositionableElementType , Ellipse2D > > ( GameConstants.NUMBER_OF_REGIONS ) ;
+		s = new Scanner ( in ) ;
+		while ( s.hasNextLine () )
+		{
+			rawEntry = s.nextLine () ;
+			data = rawEntry.split ( Utilities.CSV_FILE_FIELD_DELIMITER ) ;
+			m = new HashMap < PositionableElementType , Ellipse2D > () ;
+			res.put ( Integer.parseInt ( data [0] ) , m ) ;
+			m.put ( PositionableElementType.STANDARD_ADULT_OVINE , new Ellipse2D.Float ( Integer.parseInt ( data [ 1 ] ) , Integer.parseInt ( data [ 2 ] ) , ANIMAL_RADIUS * 2 , ANIMAL_RADIUS * 2 ) ) ;
+			m.put ( PositionableElementType.BLACK_SHEEP , new Ellipse2D.Float ( Integer.parseInt ( data [ 3 ] ) , Integer.parseInt ( data [ 4 ] ) , ANIMAL_RADIUS * 2 , ANIMAL_RADIUS * 2 ) ) ;
+			m.put ( PositionableElementType.WOLF , new Ellipse2D.Float ( Integer.parseInt ( data [ 5 ] ) , Integer.parseInt ( data [ 6 ] ) , ANIMAL_RADIUS * 2 , ANIMAL_RADIUS * 2 ) ) ;
+		}
+		s.close();
+		return res ;
+	}
+	
+	/***/
+	public Map < PositionableElementType , Ellipse2D > getRegionData ( Integer regionUID ) 
+	{
+		return animalsInRegions.get ( regionUID ) ;
+	}
+	
 	/**
 	 * @param
 	 * @param 
 	 */
 	public void scale ( float xFactor , float yFactor ) 
 	{
+		Map < PositionableElementType , Ellipse2D > m ;
 		int i ;
 		for ( Polygon p : regionsCoordinates.values() )
 			for ( i = 0 ; i < p.npoints ; i ++ )
@@ -137,6 +170,20 @@ public class MapMeasuresCoordinatesManager
 			}
 		for ( Ellipse2D p : roadsCoordinates.values () )
 			p.setFrame ( p.getX () * xFactor , p.getY () * yFactor , p.getWidth () * xFactor , p.getHeight () * yFactor ) ;
+		for ( Integer r : animalsInRegions.keySet() )
+		{
+			m = animalsInRegions.get ( r ) ;
+			for ( Ellipse2D e : m.values () )
+				e.setFrame ( e.getX () * xFactor , e.getY () * yFactor , e.getWidth () * xFactor , e.getHeight () * yFactor ) ;
+		}
+		for ( Integer r : objectsInRoads.keySet() )
+		{
+			if ( objectsInRoads.get (r) != null )
+			{
+				Ellipse2D e = objectsInRoads.get ( r ).getSecondObject () ;
+				e.setFrame ( e.getX () * xFactor , e.getY () * yFactor , e.getWidth () * xFactor , e.getHeight () * yFactor ) ;
+			}
+		}
 		ROADS_RADIUS = (int) (ROADS_RADIUS * xFactor) ;
 	}
 		
@@ -195,7 +242,7 @@ public class MapMeasuresCoordinatesManager
 		return res ;
 	}
 	
-	/***/
+	/**
 	public Collection < Integer > getAnimalsId ( int x , int y ) 
 	{
 		Map < PositionableElementType , Collection < Integer > > animalsIds ;
@@ -217,45 +264,6 @@ public class MapMeasuresCoordinatesManager
 		else
 			res = new LinkedList < Integer > () ;
 		return res ;
-	}
-	
-	private PositionableElementType findType ( int regionUID , int x , int y )
-	{
-		Map < PositionableElementType , Shape > elementsInRegion ;
-		PositionableElementType res ;
-		elementsInRegion = animalsInRegions.get ( regionUID ) ;
-		res = null ;
-		for ( PositionableElementType t : elementsInRegion.keySet () )
-			if ( elementsInRegion.get ( t ).contains ( x , y ) )
-			{
-				res = t ;
-				break ;
-			}
-		return res ;
-	}
-	
-	/***/
-	public void resetRegionData ( int regionUID ) 
-	{
-		animalsInRegions.get ( regionUID ).clear () ;
-	}
-	
-	/***/
-	public void updateAnimalsInRegionsMap ( int regionId , PositionableElementType t , Shape loc ) 
-	{
-		animalsInRegions.get ( regionId ).put ( t , loc ) ;
-	}
-	
-	/***/
-	public void resetRoadData ( int roadUID ) 
-	{
-		objectsInRoads.put ( roadUID , null ) ;
-	}
-	
-	/***/
-	public void updateObjectInRoadsMap ( int roadId , PositionableElementType t ) 
-	{
-		objectsInRoads.put ( roadId , t ) ;
-	}
+	}**/
 	
 }

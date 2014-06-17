@@ -16,6 +16,8 @@ public enum PositionableElementType
 	
 	YELLOW_SHEPERD ,
 	
+	STANDARD_ADULT_OVINE ,
+	
 	WOLF ,
 
 	LAMB ,
@@ -34,6 +36,21 @@ public enum PositionableElementType
 				res = true ;
 			else
 				res = false ;
+		else
+			res = false ;
+		return res ;
+	}
+	
+	public static boolean isStandardAdultOvine ( PositionableElementType p ) 
+	{
+		boolean res ;
+		if ( p != null )
+		{
+			if ( p == LAMB || p == SHEEP || p == RAM )
+				res = true ;
+			else
+				res = false ;
+		}
 		else
 			res = false ;
 		return res ;

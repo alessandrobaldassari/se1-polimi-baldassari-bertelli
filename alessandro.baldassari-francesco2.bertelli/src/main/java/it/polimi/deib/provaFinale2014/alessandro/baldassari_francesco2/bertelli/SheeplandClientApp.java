@@ -1,5 +1,8 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 
 public class SheeplandClientApp 
 {
@@ -8,9 +11,12 @@ public class SheeplandClientApp
 	
 	private ImagesHolder imagesHolder ;
 	
+	private ExecutorService executorService ;
+	
 	private SheeplandClientApp () 
 	{
 		imagesHolder = new ImagesHolder () ;
+		executorService = Executors.newCachedThreadPool () ;
 	}
 	
 	public synchronized static SheeplandClientApp getInstance () 
@@ -23,6 +29,11 @@ public class SheeplandClientApp
 	public ImagesHolder getImagesHolder () 
 	{
 		return imagesHolder ;
+	}
+
+	public void executeRunnable ( Runnable r ) 
+	{
+		executorService.execute ( r ) ;
 	}
 	
 }

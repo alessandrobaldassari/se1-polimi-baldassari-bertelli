@@ -60,6 +60,11 @@ public class RMIGUIMapClient implements Runnable
 		this.gameMapObserver = g ;
 	}
 	
+	public void setPlayerObserver ( PlayerObserver playerObserver ) 
+	{
+		this.playerObserver = playerObserver ;
+	}
+	
 	public void connect ( ViewPresenter viewPresenter ) throws IOException 
 	{
 		Registry registry ;

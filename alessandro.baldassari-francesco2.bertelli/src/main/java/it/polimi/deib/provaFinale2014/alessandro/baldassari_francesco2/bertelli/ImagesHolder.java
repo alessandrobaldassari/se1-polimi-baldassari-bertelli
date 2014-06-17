@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMoveType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
 
@@ -24,6 +25,8 @@ public class ImagesHolder
 	
 	private BufferedImage diceImage ;
 	
+	private Map < GameMoveType , BufferedImage > moveImages ;
+	
 	private Map < RegionType , BufferedImage > cardsImages ;
 	
 	private Map < Integer , BufferedImage > regionImages ;
@@ -36,6 +39,7 @@ public class ImagesHolder
 	
 	public ImagesHolder ()
 	{
+		moveImages = new HashMap < GameMoveType , BufferedImage > ( GameMoveType.values().length ) ;
 		cardsImages = new HashMap < RegionType , BufferedImage > ( GameConstants.NUMBER_OF_REGION_TYPE - 1 ) ;
 		regionImages = new HashMap < Integer , BufferedImage > ( GameConstants.NUMBER_OF_REGIONS ) ;
 		roadImages = new HashMap < Integer , BufferedImage > ( GameConstants.NUMBER_OF_ROADS ) ;
@@ -55,6 +59,11 @@ public class ImagesHolder
 			backgroundImage = GraphicsUtilities.getImage ( FilePaths.BACKGROUND_IMAGE_PATH ) ;
 			mapImage = GraphicsUtilities.getImage ( FilePaths.MAP_IMAGE_PATH ) ;
 			diceImage = GraphicsUtilities.getImage ( FilePaths.DICE_IMAGE_PATH ) ;
+			for ( GameMoveType g : GameMoveType.values () )
+			{
+				im = GraphicsUtilities.getImage ( g.getHumanName() + ".jpg" ) ;
+				moveImages.put ( g , im ) ;
+			}
 			for ( RegionType r : RegionType.values () )
 				if ( r != RegionType.SHEEPSBURG )
 				{
@@ -116,7 +125,7 @@ public class ImagesHolder
 	{
 		return backgroundImage ;
 	}
-
+	
 	public Image getMapImage ( boolean transparent ) 
 	{
 		Image res ;
@@ -132,6 +141,11 @@ public class ImagesHolder
 		return diceImage ;
 	}
 
+	public Image getMoveImage ( GameMoveType g ) 
+	{
+		return moveImages.get(g);
+	}
+	
 	public Image getCardImage ( RegionType r ) 
 	{
 		return cardsImages.get(r);
@@ -155,11 +169,6 @@ public class ImagesHolder
 		else
 			res = normalPositionableImages.get ( key ) ;
 		return res ;
-	}
-	
-	public void zoomMapViewImages ( float xFactor , float yFactor ) 
-	{
-		
 	}
 	
 }

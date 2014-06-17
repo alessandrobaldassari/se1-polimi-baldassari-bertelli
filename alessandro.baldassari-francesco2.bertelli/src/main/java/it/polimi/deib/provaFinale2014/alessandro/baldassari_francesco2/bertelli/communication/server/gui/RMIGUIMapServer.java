@@ -36,7 +36,7 @@ public class RMIGUIMapServer implements Runnable , GameMapObserver , Serializabl
 	
 	private Executor exec ;
 	
-	private Map < String , GUIClientNotifier > notifiers ;
+	private Map < String , RMIGUIGameMapNotifier > notifiers ;
 	
 	public RMIGUIMapServer () throws RemoteException 
 	{
@@ -47,7 +47,7 @@ public class RMIGUIMapServer implements Runnable , GameMapObserver , Serializabl
 		}
 		uidGen = new UIDGenerator ( 0 ) ;
 		messages = new Vector <GUIGameMapNotificationMessage> () ;
-		notifiers = new LinkedHashMap < String , GUIClientNotifier > () ;
+		notifiers = new LinkedHashMap < String , RMIGUIGameMapNotifier > () ;
 		System.out.println ( "RMI_GUI_MAP_SERVER - : REGISTRY LOCATED : " + myRegistry ) ;
 		exec = Executors.newCachedThreadPool () ;
 	}
@@ -74,7 +74,7 @@ public class RMIGUIMapServer implements Runnable , GameMapObserver , Serializabl
 			// bind the broker and make it available to name services.
 			myRegistry.bind ( res , stub ) ;
 			System.out.println ( "RMI_REQUEST_ACCEPT_SERVER - ADD_PLAYER : BROKER BOUND." ) ;
-			notifiers.put ( res , new GUIClientNotifier ( broker ) ) ;
+			notifiers.put ( res , new RMIGUIGameMapNotifier ( messages , broker ) ) ;
 			exec.execute ( notifiers.get ( res ) ) ;
 		}
 		catch ( RemoteException r ) 
@@ -131,115 +131,6 @@ public class RMIGUIMapServer implements Runnable , GameMapObserver , Serializabl
 		messages.add ( messages.size () , m ) ;
 	}
 	
-	/***/
-	private class GUIClientNotifier implements Runnable , PlayerObserver
-	{
-
-		/***/
-		private RMIGUIClientBroker lastArrived ;
-		
-		/***/
-		public GUIClientNotifier ( RMIGUIClientBroker lastArrived ) 
-		{
-			this.lastArrived = lastArrived ;
-		}
-		
-		/***/
-		@Override
-		public void run () 
-		{
-			GUIGameMapNotificationMessage nextMessage ;
-			int i ;
-			System.out.println ( "SOCKET_GUI_MAP_SERVER - CLIENT SPECIFIC NOTIFIER START" ) ;
-			i = 0 ;
-			while ( true )
-			{
-				if ( i < messages.size () )
-				{
-					
-					nextMessage = messages.get(i) ;
-					System.out.println ( "SOCKET_GUI_MAP_SERVER - MESSAGE RETRIEVED" ) ;
-					try 
-					{
-						synchronized  ( lastArrived ) 
-						{
-							lastArrived.putMessage ( nextMessage ) ;							
-						}
-						System.out.println ( "SOCKET_GUI_MAP_SERVER - MESSAGE NOTIFIED" ) ;
-					} 
-					catch (RemoteException e) 
-					{
-						e.printStackTrace();
-					}
-					i ++ ;
-				}
-			}
-		}
-
-		@Override
-		public void onPay(Integer paymentAmount, Integer moneyYouHaveNow) 
-		{
-			try 
-			{
-				synchronized  ( lastArrived ) 
-				{
-					lastArrived.putMessage ( new GUIPlayerNotificationMessage ( "onPay" , paymentAmount , moneyYouHaveNow ) );
-				}
-			} 
-			catch (RemoteException e) 
-			{
-				e.printStackTrace();
-			}
-		}
-
-		@Override
-		public void onGetPayed ( Integer paymentAmount, Integer moneyYouHaveNow ) 
-		{
-			try 
-			{
-				synchronized  ( lastArrived ) 
-				{
-					lastArrived.putMessage ( new GUIPlayerNotificationMessage ( "onGetPayed" , paymentAmount , moneyYouHaveNow ) );
-				}
-			} 
-			catch (RemoteException e) 
-			{
-				e.printStackTrace();
-			}	
-		}
-
-		@Override
-		public void onCardAdded ( Card addedCard ) 
-		{
-			try 
-			{
-				synchronized  ( lastArrived ) 
-				{
-					lastArrived.putMessage ( new GUIPlayerNotificationMessage ( "onCardAdded" , addedCard , null ) );
-				}
-			} 
-			catch (RemoteException e) 
-			{
-				e.printStackTrace();
-			}	
-		}
-
-		@Override
-		public void onCardRemoved ( Card removedCard )
-		{
-			try 
-			{
-				synchronized  ( lastArrived ) 
-				{
-					lastArrived.putMessage ( new GUIPlayerNotificationMessage ( "onCardRemoved" , removedCard , null ) );
-				}
-			} 
-			catch (RemoteException e) 
-			{
-				e.printStackTrace();
-			}				
-		}
-		
-	}
+	
 
 }

@@ -1,4 +1,15 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.movechooseview;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.ovinechooseview;
+
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.FrameworkedWithGridBagLayoutPanel;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.InputView;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.ObservableFrameworkedWithGridBagLayoutDialog;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.WithBackgroundImagePanel;
 
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -14,38 +25,28 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMoveType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.FrameworkedWithGridBagLayoutPanel;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.InputView;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.ObservableFrameworkedWithGridBagLayoutDialog;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.WithBackgroundImagePanel;
-
-public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog < MoveChooseViewObserver >
+public class OvineChooseView extends ObservableFrameworkedWithGridBagLayoutDialog < OvineChooseViewObserver >
 {
+
 
 	/***/
 	private InputView view ;
 	
 	/***/
-	private MoveListPanel moveListPanel ;
+	private OvineListPanel moveListPanel ;
 	
 	/**
 	 * @param observer an Observer for this MoveChooseView to notity of the events.
 	 */
-	public MoveChooseView ( DefaultMoveChooseViewObserver observer ) 
+	public OvineChooseView ( OvineChooseViewObserver observer ) 
 	{ 
 		super ( ( Frame ) null , PresentationMessages.APP_NAME , true ) ;
 		addObserver ( observer ) ;
 	}
 	
-	public void obscureMoves ( Iterable < GameMoveType > m ) 
+	public void obscureOvines ( Iterable < PositionableElementType > m ) 
 	{
-		moveListPanel.obscureMoves ( m ) ;
+		moveListPanel.obscureOvines( m ) ;
 	}
 	
 	/**
@@ -55,7 +56,7 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 	protected void createComponents () 
 	{
 		view = new InputView () ;
-		moveListPanel = new MoveListPanel () ;
+		moveListPanel = new OvineListPanel () ;
 	}
 
 	/**
@@ -74,6 +75,7 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
  		setSize ( GraphicsUtilities.getVGAResolution () ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
 		view.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getBackgroundImage() );
+		view.setTitle ( "Seleziona l'ovine che vuoi scegliere : " );
 	}
 
 	/**
@@ -108,12 +110,12 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 		@Override
 		public void run () 
 		{
-			GameMoveType res ;
+			PositionableElementType res ;
 			res = moveListPanel.getSelectedMove () ;
 			if ( res != null )
 				try 
 				{
-					notifyObservers ( "onMoveChoosed" , moveListPanel.getSelectedMove () );
+					notifyObservers ( "onOvineTypeChoosed" , res );
 				}
 				catch (MethodInvocationException e) 
 				{
@@ -139,7 +141,7 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 		{
 			try 
 			{
-				notifyObservers ( "onDoNotWantChooseMove" );
+				notifyObservers ( "onDoNotWantToChooseAnOvineType" );
 			}
 			catch (MethodInvocationException e) 
 			{
@@ -150,13 +152,13 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 	}
 	
 	/***/
-	public static GameMoveType showDialog () 
+	public static PositionableElementType showDialog ( Iterable < PositionableElementType > toShowTypes ) 
 	{
-		MoveChooseView moveChooseView ;
-		AtomicReference < GameMoveType > move ;
-		move = new AtomicReference < GameMoveType > ( null ) ;
-		moveChooseView = new MoveChooseView ( new DefaultMoveChooseViewObserver(move) ) ;
-		GraphicsUtilities.showUnshowWindow ( moveChooseView , false , true ) ;
+		OvineChooseView ovineChooseView ;
+		AtomicReference < PositionableElementType > move ;
+		move = new AtomicReference < PositionableElementType > ( null ) ;
+		ovineChooseView = new OvineChooseView ( new DefaultOvineChooseViewObserver(move) ) ;
+		GraphicsUtilities.showUnshowWindow ( ovineChooseView , false , true ) ;
 		synchronized ( move ) 
 		{
 			while ( move.get() == null )
@@ -169,37 +171,30 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 					e.printStackTrace();
 				}
 		}
-		GraphicsUtilities.showUnshowWindow ( moveChooseView , false , false ) ;
+		GraphicsUtilities.showUnshowWindow ( ovineChooseView , false , false ) ;
 		return move.get() ;
-	}
-	
-	public static void main ( String [] args ) 
-	{
-		GameMoveType x ;
-		x = MoveChooseView.showDialog () ;
-		System.out.println ( x ) ;
 	}
 	
 }
 
 /***/
-class MoveListPanel extends FrameworkedWithGridBagLayoutPanel 
+class OvineListPanel extends FrameworkedWithGridBagLayoutPanel 
 {
 	
 	/***/
-	private GameMoveType selected ;
+	private PositionableElementType selected ;
 	
 	/***/
-	private Map < GameMoveType , WithBackgroundImagePanel > imagePanels ;
+	private Map < PositionableElementType , WithBackgroundImagePanel > imagePanels ;
 
 	/***/
-	private Map < GameMoveType , JRadioButton > selectors ;
+	private Map < PositionableElementType , JRadioButton > selectors ;
 		
 	/***/
 	private ButtonGroup buttonGroup ;	
 	
 	/***/
-	public MoveListPanel () 
+	public OvineListPanel () 
 	{
 		super () ;
 	}
@@ -211,12 +206,14 @@ class MoveListPanel extends FrameworkedWithGridBagLayoutPanel
 	protected void createComponents () 
 	{
 		selected = null ;
-		imagePanels = new HashMap < GameMoveType , WithBackgroundImagePanel > ( GameMoveType.values().length ) ;
-		for ( GameMoveType g : GameMoveType.values () )
-			imagePanels.put ( g ,new WithBackgroundImagePanel () ) ;
-		selectors = new HashMap < GameMoveType , JRadioButton > ( imagePanels.size() ) ;
-		for ( GameMoveType g : GameMoveType.values () )
-			selectors.put ( g , new JRadioButton () ) ;
+		imagePanels = new HashMap < PositionableElementType , WithBackgroundImagePanel > ( 3 ) ;
+		imagePanels.put ( PositionableElementType.RAM , new WithBackgroundImagePanel () ) ;
+		imagePanels.put ( PositionableElementType.SHEEP , new WithBackgroundImagePanel () ) ;
+		imagePanels.put ( PositionableElementType.LAMB , new WithBackgroundImagePanel () ) ;
+		selectors = new HashMap < PositionableElementType , JRadioButton > ( 3 ) ;
+		selectors.put ( PositionableElementType.RAM , new JRadioButton () ) ;
+		selectors.put ( PositionableElementType.SHEEP , new JRadioButton () ) ;
+		selectors.put ( PositionableElementType.LAMB , new JRadioButton () ) ;		
 		buttonGroup = new ButtonGroup () ;
 	}
 
@@ -224,25 +221,23 @@ class MoveListPanel extends FrameworkedWithGridBagLayoutPanel
 	@Override
 	protected void manageLayout () 
 	{
-		GameMoveType [] moveTypes ;
 		WithBackgroundImagePanel panel ;
 		JRadioButton r ;
 		Insets insets ;
-		moveTypes = GameMoveType.values();
 		insets = new Insets ( 5 , 5 , 5 , 5 ) ;
 		int i ;
 		setOpaque ( false ) ;
 		i = 0 ;
-		for ( GameMoveType g : moveTypes )
+		for ( PositionableElementType p : imagePanels.keySet() )
 		{
-			panel = imagePanels.get(g);
-			r = selectors.get(g);
+			panel = imagePanels.get( p );
+			r = selectors.get ( p );
 			layoutComponent ( panel , i , 1 , 1 , 1 , 1 , 1 , 5 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 			layoutComponent ( r , i , 2 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
-			r.setText ( moveTypes [ i ].name () ) ;
+			r.setText ( p.name () ) ;
 			r.setOpaque ( false ) ;
 			r.setHorizontalAlignment ( SwingConstants.CENTER ) ;
-			panel.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getMoveImage ( moveTypes [ i ] ) );
+			panel.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( p , false ) );
 			panel.setOpaque ( false ) ;
 			i ++ ;
 		}
@@ -252,11 +247,8 @@ class MoveListPanel extends FrameworkedWithGridBagLayoutPanel
 	@Override
 	protected void bindListeners () 
 	{
-		GameMoveType [] moveTypes ;
-		int i ;
-		moveTypes = GameMoveType.values () ;
-		for ( GameMoveType g : moveTypes )
-			selectors .get ( g ).addItemListener ( new SelectorListener ( g ) ) ;
+		for ( PositionableElementType p : selectors.keySet() )
+			selectors.get ( p ).addItemListener ( new SelectorListener ( p ) ) ;
 	}
 
 	@Override
@@ -270,19 +262,19 @@ class MoveListPanel extends FrameworkedWithGridBagLayoutPanel
 			buttonGroup.add ( r ) ;
 	}
 
-	public void obscureMoves ( Iterable < GameMoveType > m ) 
+	public void obscureOvines ( Iterable < PositionableElementType > toNotShow ) 
 	{
-		for ( GameMoveType g : m )
+		for ( PositionableElementType p : toNotShow )
 		{
-			imagePanels.get(g).setEnabled(false);
-			selectors.get(g).setEnabled(false); 
+			imagePanels.get(p).setEnabled(false);
+			selectors.get(p).setEnabled(false); 
 		}
 	}
 	
 	/**
 	 * Returns the move selected in this View. 
 	 */
-	public GameMoveType getSelectedMove () 
+	public PositionableElementType getSelectedMove () 
 	{
 		return selected ;
 	}
@@ -292,10 +284,10 @@ class MoveListPanel extends FrameworkedWithGridBagLayoutPanel
 	{
 
 		/***/
-		private GameMoveType gameMove ;
+		private PositionableElementType gameMove ;
 		
 		/***/
-		public SelectorListener ( GameMoveType gameMove )
+		public SelectorListener ( PositionableElementType gameMove )
 		{
 			this.gameMove = gameMove ;
 		}

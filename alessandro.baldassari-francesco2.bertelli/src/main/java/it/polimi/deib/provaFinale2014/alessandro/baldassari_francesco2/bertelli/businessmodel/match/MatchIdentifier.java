@@ -24,7 +24,7 @@ class MatchIdentifier implements Identifiable < Match >
 		this.uid = uid ;
 	}
 	
-	public static MatchIdentifier newInstance () 
+	public synchronized static MatchIdentifier newInstance () 
 	{
 		if ( uidGenerator == null )
 			uidGenerator = new UIDGenerator ( 0L ) ;

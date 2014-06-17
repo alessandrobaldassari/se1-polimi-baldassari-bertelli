@@ -22,7 +22,7 @@ public class BlackSheep extends AdultOvine
 	}
 
 	/**
-	 * @throws BlackSheepDoesntMoveException  
+	 * @throws CharacterDoesntMoveException if this BlackSheep does not move.  
 	 */
 	public void escape () throws CharacterDoesntMoveException 
 	{	
@@ -57,6 +57,9 @@ public class BlackSheep extends AdultOvine
 			throw new CharacterDoesntMoveException ( this ) ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public boolean equals ( Object obj ) 
 	{

@@ -11,15 +11,16 @@ import javax.swing.JFrame;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.PlayerObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.NotificationContainer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.NotificationPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.GameMapViewInputMode;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.GameMapViewObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.GameMapViewPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.playerinfoview.PlayerInfoView;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.playerinfoview.PlayerInfoViewModel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.Observable;
 
 /**
  * This class is a JFrame wrapper for the GameView. 
@@ -57,20 +58,27 @@ public class GameView extends JFrame implements NotificationContainer
 	} 
 
 	/***/
-	public void setGameMapViewObserver ( GameMapViewObserver observer ) 
-	{
-		gameViewPanel.setGameMapViewObserver ( observer ) ;
-	}
-	
 	public GameMapObserver getGameMapObserver () 
 	{
 		return gameViewPanel.getGameMapObserver();
 	}
 	
 	/***/
-	public void setInputMode ( GameMapViewInputMode mode ) 
+	public PlayerObserver getPlayerObserver () 
 	{
-		gameViewPanel.setInputMode ( mode ) ;
+		return gameViewPanel.getPlayerObserver () ;
+	}
+	
+	/***/
+	public void setGameMapViewObserver ( GameMapViewObserver observer ) 
+	{
+		gameViewPanel.setGameMapViewObserver ( observer ) ;
+	}
+	
+	/***/
+	public void setInputMode ( GameMapViewInputMode mode , Iterable < Integer > uidOfSelectableElements ) 
+	{
+		gameViewPanel.setInputMode ( mode , uidOfSelectableElements ) ;
 	}
 
 	/***/
@@ -78,19 +86,13 @@ public class GameView extends JFrame implements NotificationContainer
 	{
 		return gameViewPanel.getInputMode () ;
 	}
-	
-	/***/
-	public void beginHighlightVisualization ( Iterable < Integer > toShowElems ) 
-	{
-		gameViewPanel.beginHighlightVisualization ( toShowElems ) ;
-	}
-	
+
 	public static void main ( String [] args ) 
 	{
 		GameView g ;
 		g = new GameView () ;
 		g.setExtendedState ( GameView.MAXIMIZED_BOTH );
-		g.setInputMode ( GameMapViewInputMode.ROADS ) ;
+		g.setInputMode ( GameMapViewInputMode.ROADS , null ) ;
 		g.setVisible ( true ) ;
 	}
 	
@@ -103,6 +105,8 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 {
 
 	// ATTRIBUTES
+	
+	private PlayerInfoViewModel model ;
 	
 	/**
 	 * A PlayersCardView to manage the Cards a User owns. 
@@ -119,7 +123,9 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	 */
 	private NotificationPanel notificationArea ;
 	
-	/***/
+	/**
+	 * 
+	 */
 	private Image backgroundImage ;
 	
 	// METHODS
@@ -136,6 +142,7 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	@Override
 	protected void createComponents () 
 	{
+		model = new PlayerInfoViewModel () ;
 		playersCardPanel = new PlayerInfoView () ;
 		mapPanel = new GameMapViewPanel () ;
 		notificationArea = new NotificationPanel();
@@ -162,7 +169,7 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	@Override
 	protected void bindListeners () 
 	{
-		
+		model.addObserver(playersCardPanel); 
 	}
 
 	/**
@@ -195,10 +202,9 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	}
 
 	/***/
-	/***/
-	protected void setInputMode ( GameMapViewInputMode mode ) 
+	protected void setInputMode ( GameMapViewInputMode mode , Iterable < Integer > uidOfSelectableElements ) 
 	{
-		mapPanel.setCurrentInputMode ( mode ) ;
+		mapPanel.setCurrentInputMode ( mode , uidOfSelectableElements ) ;
 	}
 	
 	/***/
@@ -218,15 +224,15 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	}
 	
 	/***/
-	public void setGameMapViewObserver ( GameMapViewObserver observer )
+	protected PlayerObserver getPlayerObserver () 
 	{
-		mapPanel.addObserver ( observer ) ;
+		return model;
 	}
 	
 	/***/
-	public void beginHighlightVisualization ( Iterable < Integer > toShowElems ) 
+	public void setGameMapViewObserver ( GameMapViewObserver observer )
 	{
-		mapPanel.beginHighlightVisualization ( toShowElems ) ;
+		mapPanel.addObserver ( observer ) ;
 	}
 	
 }

@@ -1,11 +1,7 @@
-Row format :
-
-< road uid > , < road number > , < first border region uid > , < second border region uid > , < ajacent road uid >*
-
 1,3,2,3,6,7
 2,2,1,2,4,5
 3,1,3,7,7,10,
-4,3,1,5,2,5,8,12,
+4,3,1,5,2,5,8,12
 5,4,2,5,2,6,4,9
 6,6,2,6,1,7,5,9
 7,2,3,6,1,6,10,3

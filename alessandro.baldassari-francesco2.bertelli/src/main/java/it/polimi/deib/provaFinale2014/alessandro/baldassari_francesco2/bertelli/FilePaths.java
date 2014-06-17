@@ -24,6 +24,9 @@ public final class FilePaths
 	/***/
 	public static final String ROADS_COORDINATES_PATH = "roadsCentralPoints.csv" ;	
 	
+	/***/
+	public static final String REGIONS_ANIMALS_PATH = "regionsAnimalsPoints.csv" ;
+ 	
 	// IMAGE FILES
 	
 	/***/
