@@ -2,8 +2,6 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import static org.junit.Assert.assertTrue;
 
-import java.awt.Color;
-
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.LambEvolver;
@@ -27,7 +25,7 @@ public class MoveFactoryTest {
 	@Before
 	public void setUp () 
 	{
-		sh = new Sheperd("p", new NamedColor ( 2550 , 0 , 0 , "red" ) , new DummyPlayer ( "q" ));
+		sh = new Sheperd("p", new NamedColor ( 255 , 0 , 0 , "red" ) , new DummyPlayer ( "q" ));
 		tnc = new DummytTNC();
 		mf = new MoveExecutor( sh , tnc , new DummyLambEvolver() ) ; 
 	}

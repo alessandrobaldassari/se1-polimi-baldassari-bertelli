@@ -7,8 +7,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.BlackSheepAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.WolfAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
@@ -23,22 +23,14 @@ public class AnimalFactoryTest
 	@Before
 	public void setUp ()
 	{
-		Identifiable < Match > id ;
-		int i ;
-		i = 0 ;
-		do
+		try 
 		{
-			try 
-			{
-				id = new DummyMatchIdentifier ( i ) ;
-				af = AnimalFactory.newAnimalFactory ( id ) ;
-			} 
-			catch (SingletonElementAlreadyGeneratedException e) 
-			{
-				i ++ ;
-			}
+			af = AnimalFactory.newAnimalFactory ( MatchIdentifier.newInstance() ) ;
+		} 
+		catch (SingletonElementAlreadyGeneratedException e) 
+		{
+			e.printStackTrace();
 		}
-		while ( af == null ) ;
 	}
 	
 	@Test

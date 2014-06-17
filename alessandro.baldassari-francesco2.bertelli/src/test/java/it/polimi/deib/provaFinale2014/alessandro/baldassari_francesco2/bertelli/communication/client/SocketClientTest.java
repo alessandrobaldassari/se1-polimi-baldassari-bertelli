@@ -44,31 +44,6 @@ public class SocketClientTest {
 		assertTrue(true);
 		
 	}
-	
-	@Test
-	public void read(){
-		dummySocketServer.start();
-		try {
-			socketClient.read();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		assertTrue(true);
-		
-	}
-	
-	@Test 
-	public void write(){
-		try {
-			socketClient.write(Message.newInstance(GameProtocolMessage.UID_NOTIFICATION, (Iterable <Serializable>) new ArrayList<Serializable>()));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		assertTrue(true);
-	}
-
 }
 
 class ProtocolResponser implements CommunicationProtocolResponser{

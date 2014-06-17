@@ -82,7 +82,7 @@ public class RoadTest
 	@Test
 	public void setGetElementContained () 
 	{
-		Sheperd p = new Sheperd ( "" , new NamedColor ( 2550 , 0 , 0 , "red" ), new DummyPlayer ( "" ) ) ;
+		Sheperd p = new Sheperd ( "" , new NamedColor ( 255 , 0 , 0 , "red" ), new DummyPlayer ( "" ) ) ;
 		r = new Road ( 3 , 4 , r1 , r2 ) ;
 		assertTrue ( r.getElementContained() == null ) ;
 		r.setElementContained ( p ) ;

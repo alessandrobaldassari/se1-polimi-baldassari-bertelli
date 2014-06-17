@@ -60,10 +60,6 @@ public class Mate extends GameMove
 	public Mate ( TurnNumberClock clockSource , LambEvolver lambEvolver , Sheperd theOneWhoWantsTheMate , Region whereMate ) throws MoveNotAllowedException 
 	{
 		List < AdultOvine > adults ;
-		System.out.println ( "clock : " + clockSource ) ;
-		System.out.println ( "lamb : " + lambEvolver ) ;
-		System.out.println ( "sh : " + theOneWhoWantsTheMate ) ;
-		System.out.println ( "where : " + whereMate  ) ;
 		if ( clockSource != null && lambEvolver != null && theOneWhoWantsTheMate != null && whereMate != null ) 
 		{
 			if ( MapUtilities.areAdjacents( theOneWhoWantsTheMate.getPosition () , whereMate ) )

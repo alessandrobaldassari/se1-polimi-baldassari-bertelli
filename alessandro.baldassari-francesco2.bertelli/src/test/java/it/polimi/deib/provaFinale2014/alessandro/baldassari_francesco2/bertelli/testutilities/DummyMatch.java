@@ -12,6 +12,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
@@ -42,13 +43,11 @@ public class DummyMatch
 	{
 		Identifiable < Match > matchIdentifier ;
 		GameMap gameMap ;
-		int ind ;
-		ind = 0 ;
 		do 
 		{
 			try 
 			{
-				matchIdentifier = new DummyMatchIdentifier ( ind ) ;
+				matchIdentifier = MatchIdentifier.newInstance();
 				gameMap = GameMapFactory.getInstance ().newInstance ( matchIdentifier ) ;
 				animalFactory = AnimalFactory.newAnimalFactory ( matchIdentifier ) ;
 				bank = BankFactory.getInstance().newInstance ( matchIdentifier ) ;	
@@ -56,7 +55,6 @@ public class DummyMatch
 			} 
 			catch ( SingletonElementAlreadyGeneratedException e ) 
 			{
-				ind ++ ;
 			} 
 		}
 		while ( bank == null ) ;
@@ -70,9 +68,9 @@ public class DummyMatch
 		players.add( new DummyPlayer ( "P1" ) ) ;
 		players.add ( new DummyPlayer ( "P2" ) ) ;
 		players.add ( new DummyPlayer ( "P3" ) ) ;
-		sheperds.add ( new Sheperd ( "3" , new NamedColor ( 2550 , 0 , 0 , "red" ) , players.get (0) ) ) ;
-		sheperds.add ( new Sheperd ( "1" , new NamedColor ( 2550 , 0 , 0 , "red" ) , players.get (1) ) ) ;
-		sheperds.add ( new Sheperd ( "2" , new NamedColor ( 2550 , 0 , 0 , "red" ) , players.get (2) ) ) ; 
+		sheperds.add ( new Sheperd ( "3" , new NamedColor ( 255 , 0 , 0 , "red" ) , players.get (0) ) ) ;
+		sheperds.add ( new Sheperd ( "1" , new NamedColor ( 255 , 0 , 0 , "red" ) , players.get (1) ) ) ;
+		sheperds.add ( new Sheperd ( "2" , new NamedColor ( 255 , 0 , 0 , "red" ) , players.get (2) ) ) ; 
 		i = 0 ;
 		for ( Player p : players )
 		{

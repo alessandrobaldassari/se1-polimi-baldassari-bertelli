@@ -8,31 +8,33 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatchIdentifier;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 /*
  * This jUnit test tests PositionableElement class
  */
-public class PositionableElementTest {
+public class PositionableElementTest 
+{
 	
 	/*
 	 * Declaring all the variables needed for the setup phase of the test
 	 */
-	static AdultOvine sheep;
-	static AnimalFactory animalFactory ;
-	static GameMap map;
-	static Identifiable < Match > dummyMatchIdentifier;
+	 AdultOvine sheep;
+	 AnimalFactory animalFactory ;
+	 GameMap map;
+	 Identifiable < Match > dummyMatchIdentifier;
 	
 	/*
 	 * Building the test environment
 	 */
-	@BeforeClass
-	public static void setUpBeforeClass()
+	@Before
+	public void setUpBeforeClass()
 	{
 		int i ;
 		i = 0 ;
@@ -41,7 +43,7 @@ public class PositionableElementTest {
 		{
 			try 
 			{
-				dummyMatchIdentifier = new DummyMatchIdentifier ( i );
+				dummyMatchIdentifier = MatchIdentifier.newInstance();
 				animalFactory = AnimalFactory.newAnimalFactory(dummyMatchIdentifier);
 				map = GameMapFactory.getInstance().newInstance(dummyMatchIdentifier);
 				sheep = (AdultOvine) animalFactory.newAdultOvine("Sheep", AdultOvineType.SHEEP);

@@ -8,11 +8,11 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatchIdentifier;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 /*
@@ -21,20 +21,20 @@ import org.junit.Test;
 public class LambTest 
 {
 
-	static AdultOvine ram;
-	static AdultOvine sheep;
-	static AnimalFactory animalFactory ;
-	static DummyMatchIdentifier dummyMatchIdentifier;
-	static Lamb lamb;
+	AdultOvine ram;
+	AdultOvine sheep;
+	AnimalFactory animalFactory ;
+	Identifiable < Match > dummyMatchIdentifier;
+	Lamb lamb;
 	
 	
 	/*
 	 * Setting up the environment for the test
 	 */
-	@BeforeClass
-	public static void setUpBeforeClass()
+	@Before
+	public void setUp()
 	{
-		dummyMatchIdentifier = new DummyMatchIdentifier ( 0 );
+		dummyMatchIdentifier = MatchIdentifier.newInstance();
 		try {
 			animalFactory = AnimalFactory.newAnimalFactory(dummyMatchIdentifier);
 		} catch (SingletonElementAlreadyGeneratedException e) {
@@ -56,8 +56,9 @@ public class LambTest
 	 * Testing getBirthTurn() method
 	 */
 	@Test
-	public void getBirthTurn(){
-		assertTrue ( lamb.getBirthTurn() == 0);
+	public void getBirthTurn()
+	{
+		assertTrue ( lamb.getBirthTurn() == 4);
 	}
 	
 	/*

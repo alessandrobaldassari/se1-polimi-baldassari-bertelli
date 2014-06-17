@@ -86,7 +86,7 @@ public class GraphicsUtilitiesTest
 	public void getImage1 () throws IOException 
 	{
 		BufferedImage i ;
-		i = GraphicsUtilities.getImage ( "sheepland_fence.jpg" ) ;
+		i = GraphicsUtilities.getImage ( "sheepland_map.jpg" ) ;
 		assertTrue ( i != null ) ;
 	}
 	

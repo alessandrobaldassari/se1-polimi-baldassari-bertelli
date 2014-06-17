@@ -76,10 +76,8 @@ public class GameMapFactory extends WithFactorySupportObject < Match > implement
 	 */
 	public synchronized static GameMapFactory getInstance () 
 	{
-		System.out.println ( "GAME_MAP_FACTORY - INIZIO" ) ;
 		if ( instance == null )
 			instance = new GameMapFactory () ;
-		System.out.println ( "GAME_MAP_FACTORY - FINE" ) ;
 		return instance ;
 	}
 	

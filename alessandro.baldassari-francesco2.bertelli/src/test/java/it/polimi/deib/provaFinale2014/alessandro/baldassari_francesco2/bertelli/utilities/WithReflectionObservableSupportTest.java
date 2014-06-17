@@ -86,28 +86,13 @@ public class WithReflectionObservableSupportTest
 	}
 	
 	@Test ( expected = MethodInvocationException.class )
-	public void notifyObservers2 () throws NoSuchMethodException 
+	public void notifyObservers2 () throws MethodInvocationException 
 	{
 		DummyObserver o ; 
 		o = new DummyObserver () ;
 		w.addObserver ( o ) ;
-		try {
+		
 			w.notifyObservers ( "nonExistingMethod" , new Object () ) ;
-		}
-		
-		catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-		catch (MethodInvocationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 	
 }

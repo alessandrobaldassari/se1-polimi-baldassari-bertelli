@@ -5,7 +5,9 @@ import static org.junit.Assert.*;
 import java.util.LinkedList;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatchIdentifier;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchIdentifier;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
 import org.junit.Before;
@@ -14,15 +16,16 @@ import org.junit.Test;
 public class CardFactoryTest {
 
 	CardFactory cardFactory;
-	DummyMatchIdentifier dummyMatchIdentifier;
+	Identifiable<Match> dummyMatchIdentifier;
 	LinkedList <Card> initialCards;
 	LinkedList <SellableCard> sellableCards;
 	byte cultivable, desert, hill, forest, lacustrine, mountain;
 	
 	
 	@Before
-	public void setUp() throws Exception {
-		dummyMatchIdentifier = new DummyMatchIdentifier(1);
+	public void setUp() throws Exception 
+	{
+		dummyMatchIdentifier = MatchIdentifier.newInstance();
 	}
 
 	@Test (expected = IllegalArgumentException.class)

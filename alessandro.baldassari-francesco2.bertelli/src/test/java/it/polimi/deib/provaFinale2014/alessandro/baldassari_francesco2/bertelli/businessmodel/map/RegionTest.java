@@ -13,11 +13,11 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Wolf;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.NoRoadWithThisNumberException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceAlreadyPlacedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
@@ -84,10 +84,10 @@ public class RegionTest {
 	
 	@Test
 	public void addAnimal(){
-		LinkedList <Animal> animals = new LinkedList<Animal>();
+		List <Animal> animals ;
 		region.addAnimal(sheep);
 		assertTrue(region.getContainedAnimals().iterator().next().equals(sheep));
-		animals = (LinkedList<Animal>) region.getContainedAnimals();
+		animals = CollectionsUtilities.newListFromIterable ( region.getContainedAnimals( ));
 		assertTrue(animals.size() == 1);
 	}
 	
@@ -105,7 +105,7 @@ public class RegionTest {
 		{
 			try 
 			{
-				w = AnimalFactory.newAnimalFactory ( new DummyMatchIdentifier ( i ) ).newWolf();
+				w = AnimalFactory.newAnimalFactory ( MatchIdentifier.newInstance() ).newWolf();
 			} 
 			catch (WolfAlreadyGeneratedException e) 
 			{} 
@@ -127,10 +127,10 @@ public class RegionTest {
 	@Test
 	public void getContainedAnimal()
 	{
-		LinkedList <Animal> animals = new LinkedList<Animal>();
+		List <Animal> animals ;
 		region.addAnimal(sheep);
 		assertTrue(region.getContainedAnimals().iterator().next().equals(sheep));
-		animals = (LinkedList<Animal>) region.getContainedAnimals();
+		animals = CollectionsUtilities.newListFromIterable( region.getContainedAnimals() );
 		assertTrue(animals.size() == 1);
 	}
 	

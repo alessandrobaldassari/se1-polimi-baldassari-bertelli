@@ -5,7 +5,9 @@ import static org.junit.Assert.*;
 import java.util.LinkedList;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatchIdentifier;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchIdentifier;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
 import org.junit.Before;
@@ -14,12 +16,12 @@ import org.junit.Test;
 public class GameMapFactoryTest {
 
 	GameMap gameMap;
-	DummyMatchIdentifier requesterDummyMatchIdentifier;
+	Identifiable<Match> requesterDummyMatchIdentifier;
 	LinkedList<Region> regions;
 	LinkedList<Road> roads;
 	@Before
 	public void setUp() throws Exception {
-		requesterDummyMatchIdentifier = new DummyMatchIdentifier(1);
+		requesterDummyMatchIdentifier = MatchIdentifier.newInstance();
 		
 	}
 

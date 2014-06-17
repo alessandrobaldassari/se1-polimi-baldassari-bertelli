@@ -2,9 +2,9 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import static org.junit.Assert.*;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.MatchState;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 
 import java.lang.reflect.Constructor;
@@ -24,7 +24,7 @@ public class WrongMatchStateMethodCallExceptionTest {
 	public void setUp(){
 		try 
 		{
-			i = new DummyMatchIdentifier ( 0 ) ;
+			i = MatchIdentifier.newInstance();
 			c = WrongMatchStateMethodCallException.class.getDeclaredConstructor ( MatchState.class ) ;
 			c.setAccessible ( true ) ;
 			exception = c.newInstance ( MatchState.WAIT_FOR_PLAYERS) ;
