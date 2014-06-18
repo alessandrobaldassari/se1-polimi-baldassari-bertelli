@@ -1,8 +1,8 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepting;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandlerConnector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.RMIClientHandler;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunchercommunicationcontroller.MatchAdderCommunicationController;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlauncherserver.MatchPlayerAdder;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.net.RMIObjectUnbinder;
 
@@ -74,7 +74,7 @@ class RMIRequestAcceptServerImpl extends RequestAccepterServer implements RMIReq
 	 * @throws IllegalArgumentException if the localhostAddress parameter is null or the registryPort
 	 *         parameter is < 0
 	 */
-	protected RMIRequestAcceptServerImpl ( MatchAdderCommunicationController matchAdderCommunicationController , String localhostAddress , int registryPort ) throws RemoteException 
+	protected RMIRequestAcceptServerImpl ( MatchPlayerAdder matchAdderCommunicationController , String localhostAddress , int registryPort ) throws RemoteException 
 	{
 		super ( matchAdderCommunicationController ) ;
 		if ( localhostAddress != null && registryPort >= 0 )

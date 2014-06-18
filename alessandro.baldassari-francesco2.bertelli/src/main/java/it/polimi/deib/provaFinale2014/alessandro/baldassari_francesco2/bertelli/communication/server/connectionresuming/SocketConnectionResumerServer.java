@@ -1,4 +1,4 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.connectionresuming;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -11,15 +11,16 @@ import java.util.concurrent.Executors;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.ServerEnvironment;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandlerConnector;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosing.SuspendedClientHandlerBuffer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 
-public class SocketResumeConnectionServer extends ResumeConnectionServer < Socket > 
+public class SocketConnectionResumerServer extends ConnectionResumerServer < Socket > 
 {
 
 	/***/
-	public SocketResumeConnectionServer ( ConnectionLoosingController c ) throws IOException 
+	public SocketConnectionResumerServer ( SuspendedClientHandlerBuffer suspendedClientHandlerBuffer )  
 	{
-		super ( c ) ;
+		super ( suspendedClientHandlerBuffer ) ;
 		
 	}
 	

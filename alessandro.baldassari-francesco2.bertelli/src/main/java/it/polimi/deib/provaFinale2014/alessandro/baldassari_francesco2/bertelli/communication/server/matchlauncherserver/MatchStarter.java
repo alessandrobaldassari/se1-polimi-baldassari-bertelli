@@ -1,4 +1,4 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunchercommunicationcontroller;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlauncherserver;
 
 /**
  * Communication interface between a generic Initial Network Controller and a Game Controller.
@@ -6,7 +6,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
  * of the Game, so the Initial Network Controller can know when the Phase Start is finished ( and
  * also why ) and act as a consequence. 
  */
-public interface MatchStartCommunicationController 
+public interface MatchStarter 
 {
 
 	/**

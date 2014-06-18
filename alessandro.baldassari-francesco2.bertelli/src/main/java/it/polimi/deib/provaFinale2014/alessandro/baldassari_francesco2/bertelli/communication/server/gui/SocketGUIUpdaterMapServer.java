@@ -1,13 +1,12 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElementType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.message.GUIGameMapNotificationMessage;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 /***/
-public class SocketGUIMapServer implements Runnable , GameMapObserver , Serializable
+public class SocketGUIUpdaterMapServer extends GUIUpdaterServer
 {
 
 	/***/
@@ -44,7 +43,7 @@ public class SocketGUIMapServer implements Runnable , GameMapObserver , Serializ
 	private Executor executor ;
 	
 	/***/
-	public SocketGUIMapServer () throws IOException 
+	public SocketGUIUpdaterMapServer () throws IOException 
 	{
 		lastPortEmitted ++ ;
 		port = lastPortEmitted ;

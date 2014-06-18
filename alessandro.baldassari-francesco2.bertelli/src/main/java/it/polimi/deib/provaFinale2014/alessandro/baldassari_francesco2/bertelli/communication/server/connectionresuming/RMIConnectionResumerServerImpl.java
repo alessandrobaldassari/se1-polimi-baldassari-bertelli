@@ -1,9 +1,10 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.connectionresuming;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandlerConnector;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIClientBroker;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIClientBrokerImpl;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosing.SuspendedClientHandlerBuffer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepting.RMIClientBroker;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepting.RMIClientBrokerImpl;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 
 import java.io.IOException;
@@ -16,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /***/
-public class RMIResumerConnectionServerImpl extends ResumeConnectionServer < RMIClientBroker > implements RMIResumerConnectionServer 
+public class RMIConnectionResumerServerImpl extends ConnectionResumerServer < RMIClientBroker > implements RMIConnectionResumerServer 
 {
 
 	/***/
@@ -32,9 +33,9 @@ public class RMIResumerConnectionServerImpl extends ResumeConnectionServer < RMI
 	private Map < Integer , String > newNames ;
 	
 	/***/
-	public RMIResumerConnectionServerImpl ( ConnectionLoosingController c ) throws RemoteException 
+	public RMIConnectionResumerServerImpl ( SuspendedClientHandlerBuffer suspendedClientHandlerBuffer )  
 	{
-		super ( c ) ;
+		super ( suspendedClientHandlerBuffer ) ;
 		newNames = new HashMap < Integer , String > () ; 
 	}
 	
@@ -60,7 +61,10 @@ public class RMIResumerConnectionServerImpl extends ResumeConnectionServer < RMI
 				lastNoEmitted ++ ;
 				stub = (RMIClientBroker) UnicastRemoteObject.exportObject ( req.getSecondObject () , 0 ) ;
 				registry.bind ( NAME + lastNoEmitted , stub );
-				newNames.put ( req.getFirstObject() , NAME + lastNoEmitted ) ;
+				synchronized ( newNames )
+				{
+					newNames.put ( req.getFirstObject() , NAME + lastNoEmitted ) ;
+				}
 				handler.rebind ( new ClientHandlerConnector < RMIClientBroker > ( req.getSecondObject() ) ) ;
 				handler.sendResumeSucceedNotification () ;
 			}
@@ -79,7 +83,7 @@ public class RMIResumerConnectionServerImpl extends ResumeConnectionServer < RMI
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void resumeMe ( int uid ) 
+	public synchronized void resumeMe ( int uid ) 
 	{
 		RMIClientBroker newBrok ;
 		newBrok = new RMIClientBrokerImpl () ;

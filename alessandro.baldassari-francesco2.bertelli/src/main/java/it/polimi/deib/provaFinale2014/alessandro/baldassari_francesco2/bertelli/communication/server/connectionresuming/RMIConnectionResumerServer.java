@@ -1,9 +1,9 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.connectionresuming;
 
 import java.rmi.Remote;
 
 /***/
-public interface RMIResumerConnectionServer extends Remote 
+public interface RMIConnectionResumerServer extends Remote 
 {
 
 	/***/

@@ -25,8 +25,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.NetworkCommunicantPlayer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.PlayerObserver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ConnectionLoosingController.ConnectionLoosingManagerObserver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunchercommunicationcontroller.MatchStartCommunicationController;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosing.ConnectionLoosingManagerObserver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlauncherserver.MatchStarter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
@@ -68,7 +68,7 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	 * match is finished ( either well or bad ) and this GameController is ready to continue his
 	 * lifecycle alone. 
 	 */
-	private final MatchStartCommunicationController matchStartCommunicationController ;
+	private final MatchStarter matchStartCommunicationController ;
 	
 	/**
 	 * The match that this GameController will manage. 
@@ -110,7 +110,7 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	 * @param matchStartCommunicationController the value for the matchStartCommunicationController field.
 	 * @throws IllegalArgumentException if the parameter passed is null.
 	 */
-	public MatchController ( MatchStartCommunicationController matchStartCommunicationController , Iterable < GameMapObserver > mapObservers ) 
+	public MatchController ( MatchStarter matchStartCommunicationController , Iterable < GameMapObserver > mapObservers ) 
 	{
 		if ( matchStartCommunicationController != null && mapObservers != null )
 		{

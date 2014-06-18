@@ -1,14 +1,15 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.connectionresuming;
 
 import java.io.IOException ;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosing.SuspendedClientHandlerBuffer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 
 /***/
-public abstract class ResumeConnectionServer < T > implements Runnable
+public abstract class ConnectionResumerServer < T > implements Runnable
 {
 	
 	/***/
@@ -18,15 +19,27 @@ public abstract class ResumeConnectionServer < T > implements Runnable
 	private BlockingQueue < Couple < Integer , T > > requests ;
 
 	/***/
-	private ConnectionLoosingController connectionLoosingController ;
+	private SuspendedClientHandlerBuffer suspendedClientHandlerBuffer ;
 	
 	/***/
-	public ResumeConnectionServer ( ConnectionLoosingController connectionLoosingController ) 
+	public ConnectionResumerServer ( SuspendedClientHandlerBuffer suspendedClientHandlerBuffer ) 
 	{
+		this.suspendedClientHandlerBuffer = suspendedClientHandlerBuffer ;
 		on = false ;
 		requests = new LinkedBlockingQueue < Couple < Integer , T > > () ;
-		this.connectionLoosingController = connectionLoosingController ;
 	} 
+	
+	/***/
+	public static ConnectionResumerServer < ? > newSocketServer ( SuspendedClientHandlerBuffer suspendedClientHandlerBuffer ) 
+	{
+		return new SocketConnectionResumerServer ( suspendedClientHandlerBuffer ) ;
+ 	}
+	
+	/***/
+	public static ConnectionResumerServer < ? > newRMIServer (  SuspendedClientHandlerBuffer suspendedClientHandlerBuffer ) 
+	{
+		return new RMIConnectionResumerServerImpl(suspendedClientHandlerBuffer);
+	}
 	
 	/***/
 	public abstract void connect () throws IOException ;
@@ -35,7 +48,7 @@ public abstract class ResumeConnectionServer < T > implements Runnable
 	protected ClientHandler < T > getHandler ( Integer key ) 
 	{
 		ClientHandler res ;
-		res = connectionLoosingController.getClientHandler ( key ) ;
+		res = suspendedClientHandlerBuffer.getClientHandler ( key ) ;
 		return res ;
 	}
 	

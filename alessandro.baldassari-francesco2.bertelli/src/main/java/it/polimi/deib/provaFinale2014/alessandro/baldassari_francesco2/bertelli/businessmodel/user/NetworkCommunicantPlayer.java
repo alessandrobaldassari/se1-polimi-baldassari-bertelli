@@ -5,17 +5,19 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.TimeConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelection;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ConnectionLoosingController;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosing.ConnectionLoosingManager;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.PropertyNotSetYetException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOnceProperty;
@@ -44,20 +46,23 @@ public class NetworkCommunicantPlayer extends Player
 	/**
 	 * An object used when communication fails ( a Client does not answer ).
 	 */
-	private transient ConnectionLoosingController connectionLoosingManager ;
+	private transient ConnectionLoosingManager connectionLoosingManager ;
+	
+	private ExecutorService executorService ;
 	
 	/**
 	 * @param name the name of this Player
 	 * @param clientHandler the value for the ClientHandler property.
 	 * @throws IllegalArgumentException if the clientHandler parameter is null.
 	 */
-	public NetworkCommunicantPlayer ( String name , ClientHandler < ? > clientHandler , ConnectionLoosingController connectionLoosingManager ) 
+	public NetworkCommunicantPlayer ( String name , ClientHandler < ? > clientHandler , ConnectionLoosingManager connectionLoosingManager ) 
 	{
 		super ( name ) ;
 		if ( clientHandler != null && connectionLoosingManager != null )
 		{
 			this.clientHandler = clientHandler;
 			this.connectionLoosingManager = connectionLoosingManager ;
+			executorService = Executors.newCachedThreadPool () ;
 		}
 		else 
 			throw new IllegalArgumentException();
@@ -78,7 +83,7 @@ public class NetworkCommunicantPlayer extends Player
 		Future < NamedColor > f ;
 		createAndLaunchRequestTimetoutTimer () ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = Executors.newSingleThreadExecutor().submit ( new Callable < NamedColor > () 
+		f = executorService.submit ( new Callable < NamedColor > () 
 		{
 			@Override
 			public NamedColor call () throws IOException 
@@ -128,13 +133,69 @@ public class NetworkCommunicantPlayer extends Player
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
+	public Road chooseInitialRoadForASheperd ( final Iterable < Road > availableRoads ) throws TimeoutException
+	{
+		Road res  ;
+		Future < Road > f ;
+		createAndLaunchRequestTimetoutTimer () ;
+		methodCompleted = new WriteOnceProperty < Boolean > () ;
+		f = executorService.submit ( new Callable < Road > () 
+		{
+			@Override
+			public Road call () throws IOException 
+			{
+				Road res ;
+				res = clientHandler.chooseInitialRoadForSheperd ( availableRoads ) ;
+				setMethodCompleted () ;
+				return res ;
+			}  
+		} ) ;
+		waitForMethodCompletedSet () ;
+		try 
+		{
+			if ( methodCompleted.getValue() == true )
+			{	
+				requestTimeoutTimer.cancel();
+				res = f.get () ;
+			}
+			else
+			{
+				if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
+					throw new TimeoutException () ;
+				else
+					res = chooseInitialRoadForASheperd(availableRoads);
+			}
+		}
+		catch ( PropertyNotSetYetException e ) 
+		{
+			throw new RuntimeException ( e ) ;
+		} 
+		catch (InterruptedException e) 
+		{
+			throw new RuntimeException ( e ) ;
+		}
+		catch ( ExecutionException e ) 
+		{
+			if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
+				throw new TimeoutException () ;
+			else
+				res = chooseInitialRoadForASheperd(availableRoads);
+		}
+		return res ;
+	}
+
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
 	public Sheperd chooseSheperdForATurn ( final Iterable < Sheperd > sheperds ) throws TimeoutException
 	{
 		Sheperd res  ;
 		Future < Sheperd > f ;
 		createAndLaunchRequestTimetoutTimer () ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = Executors.newSingleThreadExecutor().submit ( new Callable < Sheperd > () 
+		f = executorService.submit ( new Callable < Sheperd > () 
 		{
 			@Override
 			public Sheperd call () throws IOException
@@ -189,7 +250,7 @@ public class NetworkCommunicantPlayer extends Player
 		Future < MoveSelection > f ;
 		createAndLaunchRequestTimetoutTimer () ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = Executors.newSingleThreadExecutor().submit ( new Callable < MoveSelection > () 
+		f = executorService.submit ( new Callable < MoveSelection > () 
 		{
 			@Override
 			public MoveSelection call () throws IOException 
@@ -244,7 +305,7 @@ public class NetworkCommunicantPlayer extends Player
 		createAndLaunchRequestTimetoutTimer () ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
 		System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling - SUBMITTING FUTURE" ) ;
-		Executors.newSingleThreadExecutor().submit ( new Runnable () 
+		executorService.submit ( new Runnable () 
 		{
 			@Override
 			public void run ()  
@@ -315,7 +376,7 @@ public class NetworkCommunicantPlayer extends Player
 		Future < Iterable < SellableCard > > f ;
 		createAndLaunchRequestTimetoutTimer () ;
 		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = Executors.newSingleThreadExecutor().submit ( new Callable < Iterable < SellableCard > > () 
+		f = executorService.submit ( new Callable < Iterable < SellableCard > > () 
 		{
 			@Override
 			public Iterable < SellableCard > call () throws IOException
@@ -378,67 +439,12 @@ public class NetworkCommunicantPlayer extends Player
 	}
 
 	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public Road chooseInitialRoadForASheperd ( final Iterable < Road > availableRoads ) throws TimeoutException
-	{
-		Road res  ;
-		Future < Road > f ;
-		createAndLaunchRequestTimetoutTimer () ;
-		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = Executors.newSingleThreadExecutor().submit ( new Callable < Road > () 
-		{
-			@Override
-			public Road call () throws IOException 
-			{
-				Road res ;
-				res = clientHandler.chooseInitialRoadForSheperd ( availableRoads ) ;
-				setMethodCompleted () ;
-				return res ;
-			}  
-		} ) ;
-		waitForMethodCompletedSet () ;
-		try 
-		{
-			if ( methodCompleted.getValue() == true )
-			{	
-				requestTimeoutTimer.cancel();
-				res = f.get () ;
-			}
-			else
-			{
-				if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
-					throw new TimeoutException () ;
-				else
-					res = chooseInitialRoadForASheperd(availableRoads);
-			}
-		}
-		catch ( PropertyNotSetYetException e ) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (InterruptedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch ( ExecutionException e ) 
-		{
-			if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
-				throw new TimeoutException () ;
-			else
-				res = chooseInitialRoadForASheperd(availableRoads);
-		}
-		return res ;
-	}
-
-	/**
 	 * Set up the requestTimeoutTimer field before a communication session. 
 	 */
 	private void createAndLaunchRequestTimetoutTimer () 
 	{
 		requestTimeoutTimer = new Timer () ;
-		requestTimeoutTimer.schedule ( new TimeoutExpirationTimerTask () , ConnectionLoosingController.WAITING_TIME ) ;
+		requestTimeoutTimer.schedule ( new TimeoutExpirationTimerTask () , TimeConstants.CONNECTION_LOOSING_SERVER_WAITING_TIME ) ;
 	}
 	
 	/**

@@ -1,11 +1,11 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunchercommunicationcontroller;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlauncherserver;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 
 /**
  * This interface describes a component that accept request to add Players in a Match. 
  */
-public interface MatchAdderCommunicationController 
+public interface MatchPlayerAdder 
 {
 
 	/**

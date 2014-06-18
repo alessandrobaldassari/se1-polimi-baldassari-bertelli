@@ -1,5 +1,6 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosing;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.TimeConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Suspendable;
@@ -14,7 +15,7 @@ import java.util.Map;
  * this sense, ClientHandlers ( and in particular Players, where ClientHandlers are contained ) submit 
  * themselves to this component that will be used by the Servers that will try to re-establish connection. 
  */
-public class ConnectionLoosingControllerImpl implements ConnectionLoosingController
+public class ConnectionLoosingServer implements ConnectionLoosingManager , SuspendedClientHandlerBuffer , Runnable
 {
 
 	/**
@@ -29,7 +30,7 @@ public class ConnectionLoosingControllerImpl implements ConnectionLoosingControl
 	private WithReflectionObservableSupport < ConnectionLoosingManagerObserver > support ;
 	
 	/***/
-	public ConnectionLoosingControllerImpl () 
+	public ConnectionLoosingServer () 
 	{
 		super () ;
 		support = new WithReflectionObservableSupport < ConnectionLoosingManagerObserver > () ;
@@ -43,7 +44,7 @@ public class ConnectionLoosingControllerImpl implements ConnectionLoosingControl
 	 * @return the value associated with the clientHandlerUID if it exists, null if the parameter is
 	 *         unknown w.r.t this Controller.
 	 */
-	public ClientHandler < ? > getClientHandler ( int clientHandlerUID ) 
+	public synchronized ClientHandler < ? > getClientHandler ( Integer clientHandlerUID ) 
 	{
 		return suspendedhandlers.get ( clientHandlerUID ) ;
 	}
@@ -70,7 +71,7 @@ public class ConnectionLoosingControllerImpl implements ConnectionLoosingControl
 	 * AS THE SUPER'S ONE.
 	 */
 	@Override
-	public boolean manageConnectionLoosing ( Suspendable looser , ClientHandler < ? > connector , boolean pingAlreadyTested ) 
+	public synchronized boolean manageConnectionLoosing ( Suspendable looser , ClientHandler < ? > connector , boolean pingAlreadyTested ) 
 	{
 		boolean res ;
 		if ( looser.isSuspended () == false )
@@ -79,7 +80,7 @@ public class ConnectionLoosingControllerImpl implements ConnectionLoosingControl
 			{
 				support.notifyObservers( "onBeginSuspensionControl" , looser ) ;
 				if ( ! pingAlreadyTested )
-					Thread.sleep ( SUSPENSION_TIME ) ;
+					Thread.sleep ( TimeConstants.CONNECTION_LOOSING_SERVER_SUSPENSION_TIME ) ;
 				looser.suspend();
 				res = false ;
 				suspendedhandlers.put ( connector.getUID() , connector ) ;
@@ -124,6 +125,22 @@ public class ConnectionLoosingControllerImpl implements ConnectionLoosingControl
 		else
 			throw new IllegalArgumentException () ;
 		return res ;
+	}
+
+	@Override
+	public void run () 
+	{
+		while ( true )
+		{
+			try 
+			{
+				Thread.sleep(60000);
+			}
+			catch (InterruptedException e) 
+			{
+				e.printStackTrace();
+			}
+		}
 	}
 
 }

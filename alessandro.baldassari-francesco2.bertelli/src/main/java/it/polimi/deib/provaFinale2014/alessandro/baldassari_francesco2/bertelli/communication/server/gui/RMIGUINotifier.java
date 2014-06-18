@@ -3,12 +3,14 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Card;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.PlayerObserver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.message.GUIGameMapNotificationMessage;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.message.GUIPlayerNotificationMessage;
 
 import java.rmi.RemoteException;
 import java.util.List;
 
 /***/
-public class RMIGUIGameMapNotifier implements Runnable , PlayerObserver
+public class RMIGUINotifier implements Runnable , PlayerObserver
 {
 
 	/***/
@@ -17,7 +19,7 @@ public class RMIGUIGameMapNotifier implements Runnable , PlayerObserver
 	private List < GUIGameMapNotificationMessage > messages ;
 	
 	/***/
-	public RMIGUIGameMapNotifier ( List < GUIGameMapNotificationMessage > messages , RMIGUIClientBroker lastArrived ) 
+	public RMIGUINotifier ( List < GUIGameMapNotificationMessage > messages , RMIGUIClientBroker lastArrived ) 
 	{
 		this.messages = messages ;
 		this.lastArrived = lastArrived ;

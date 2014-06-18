@@ -1,9 +1,9 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepting;
 
 import java.io.IOException;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunchercommunicationcontroller.MatchAdderCommunicationController;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlauncherserver.MatchPlayerAdder;
 
 /**
  * This class represents a front end request accepter server, a component whose function is
@@ -16,7 +16,7 @@ public abstract class RequestAccepterServer implements Runnable
 	/**
 	 * The object used by this Server to communicate that a new Client has come 
 	 */
-	private final MatchAdderCommunicationController matchAdderCommunicationController ;
+	private final MatchPlayerAdder matchAdderCommunicationController ;
 	
 	/**
 	 * A boolean flag indicating if this Server is on. 
@@ -27,7 +27,7 @@ public abstract class RequestAccepterServer implements Runnable
 	 * @param matchAdderCommunicationController the value for the matchAdderCommunicationController field.
 	 * @throws IllegalArgumentException if the matchAdderCommunicationController parameter is null. 
 	 */
-	protected RequestAccepterServer ( MatchAdderCommunicationController matchAdderCommunicationController )
+	protected RequestAccepterServer ( MatchPlayerAdder matchAdderCommunicationController )
 	{
 		if ( matchAdderCommunicationController != null )
 		{
@@ -45,7 +45,7 @@ public abstract class RequestAccepterServer implements Runnable
 	 * @return the created Server.
 	 * @throws IOException if something goes wrong with the creation of the object.
 	 */
-	public static RequestAccepterServer newSocketServer ( MatchAdderCommunicationController matchAdderCommunicationController ) throws IOException 
+	public static RequestAccepterServer newSocketServer ( MatchPlayerAdder matchAdderCommunicationController ) throws IOException 
 	{
 		return new SocketRequestAcceptServer ( matchAdderCommunicationController ) ;
 	}
@@ -59,7 +59,7 @@ public abstract class RequestAccepterServer implements Runnable
 	 * @return the created Server.
 	 * @throws IOException if something goes wrong with the creation of the object.
 	 */
-	public static RequestAccepterServer newRMIServer ( MatchAdderCommunicationController matchAdderCommunicationController , String localhostAddress , int registryPort ) throws IOException
+	public static RequestAccepterServer newRMIServer ( MatchPlayerAdder matchAdderCommunicationController , String localhostAddress , int registryPort ) throws IOException
 	{
 		return new RMIRequestAcceptServerImpl ( matchAdderCommunicationController , localhostAddress , registryPort ) ;
 	}
@@ -90,7 +90,7 @@ public abstract class RequestAccepterServer implements Runnable
 	 * Subclasses have to define this method in order to implement their strategy to accept
 	 * inbound requests. 
 	 */
-	public abstract void acceptRequest () ;
+	protected abstract void acceptRequest () ;
 	
 	/**
 	 * Gives subclasses a change to pass a created ClientHandler to the MatchAdderCommunicationController

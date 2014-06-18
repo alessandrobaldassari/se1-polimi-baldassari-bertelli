@@ -1,7 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.NetworkCommunicationController;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.NetworkCommunicationControllerSingleton;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.JSheeplandServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
 import java.io.IOException;
@@ -28,13 +27,13 @@ public final class ServerMainClass
 	public static void main ( String [] args ) 
 	{
 		ExecutorService threadExecutor ;
-		NetworkCommunicationController networkCommunicationController ;
+		JSheeplandServer jSheeplandServer ;
 		threadExecutor = null ;
 		try 
 		{
 			threadExecutor = Executors.newSingleThreadExecutor () ;
-			networkCommunicationController = NetworkCommunicationControllerSingleton.getInstance () ; 
-			threadExecutor.submit ( networkCommunicationController ) ;
+			jSheeplandServer = JSheeplandServer.getInstance () ; 
+			threadExecutor.submit ( jSheeplandServer ) ;
 		}
 		catch ( IOException e ) 
 		{

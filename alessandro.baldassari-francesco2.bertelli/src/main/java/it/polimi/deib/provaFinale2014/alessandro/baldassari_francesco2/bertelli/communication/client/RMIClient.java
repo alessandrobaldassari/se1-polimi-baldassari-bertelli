@@ -1,10 +1,10 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.connectionresuming.RMIConnectionResumerServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.Message;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.RMIResumerConnectionServer;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIClientBroker;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIRequestAcceptServer;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RMIClientBroker.AnotherCommandYetRunningException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepting.RMIClientBroker;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepting.RMIRequestAcceptServer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepting.RMIClientBroker.AnotherCommandYetRunningException;
 
 import java.io.IOException;
 import java.rmi.NotBoundException;
@@ -76,7 +76,7 @@ public class RMIClient extends Client
 	@Override
 	public void resumeConnectionConnect () throws IOException
 	{
-		RMIResumerConnectionServer s ;
+		RMIConnectionResumerServer s ;
 		RMIClientBroker br ;
 		Registry registry ;
 		String res ;
@@ -85,7 +85,7 @@ public class RMIClient extends Client
 		{
 			System.out.println ( "RMI CLIENT - TRY RESUME CONNECTION : BEGIN" ) ;		
 			System.out.println ( "RMI CLIENT - TRY RESUME CONNECTION :" ) ;	
-			s = ( RMIResumerConnectionServer ) registry.lookup ( RMIResumerConnectionServer.LOGICAL_SERVER_NAME ) ;
+			s = ( RMIConnectionResumerServer ) registry.lookup ( RMIConnectionResumerServer.LOGICAL_SERVER_NAME ) ;
 			s.resumeMe ( getUID () ) ;
 			while ( s.areYouReadyForMe ( getUID () ) == null ) ;
 			res = s.areYouReadyForMe ( getUID () ) ;

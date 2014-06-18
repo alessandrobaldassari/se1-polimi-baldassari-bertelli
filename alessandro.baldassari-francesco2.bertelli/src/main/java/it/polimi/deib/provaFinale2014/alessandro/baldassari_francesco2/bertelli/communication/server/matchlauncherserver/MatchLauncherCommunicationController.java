@@ -1,24 +1,24 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunchercommunicationcontroller;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlauncherserver;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.rmi.RemoteException;
+import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.ServerEnvironment;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.TimeConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchController;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.MatchState;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.NetworkCommunicantPlayer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.PlayerWantsToExitGameException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.NetworkCommunicationController;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.RMIGUIMapServer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.RMIGUIUpdaterServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.BackendResumeConnectionServer;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ConnectionLoosingController;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosingcontroller.ConnectionLoosingControllerImpl;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver.RequestAccepterServer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosing.ConnectionLoosingManager;
 
 /**
  * This class is the MasterServer, the core component of the Server part of the System
@@ -26,77 +26,46 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * It is the one that sums all the inbound connections, bounds them to the GameController
  * instances and manages also the situation where just one Player wants to play ( and cannot ). 
  */
-public class MatchLauncherCommunicationController implements NetworkCommunicationController , MatchAdderCommunicationController , MatchStartCommunicationController , Serializable
+public class MatchLauncherCommunicationController implements MatchPlayerAdder , Runnable , MatchStarter , Serializable
 {
-		
-	/**
-	 * An instance of this class to implement the Singleton pattern. 
-	 */
-	private static MatchLauncherCommunicationController instance ;
-	
-	/**
-	 * A SocketServer object to intercept inbound socket connections.
-	 */
-	private transient RequestAccepterServer socketServer ;
-	
-	/**
-	 * A RMIServer object to intercept inbound RMI connections. 
-	 */
-	private transient RequestAccepterServer rmiServer ;
-	
-	/**
-	 * A component associated with the current MatchController to manage eventually connection loosing. 
-	 */
-	private transient ConnectionLoosingController connectionLoosingController ;
-	
-	/***/
-	private transient BackendResumeConnectionServer resumeConnectionServer ;
-	
-	/**
-	 * A Server to manage the gui messages with the client, one for all sessions.
-	 */
-	private transient RMIGUIMapServer guiServer ;
 	
 	/**
 	 * The queue the technical networks input servers will use to add players requests. 
 	 */
 	private final BlockingQueue < ClientHandler < ? > > queue;
+
+	/***/
+	private ConnectionLoosingManager connectionLoosingManager ;
+
+	/**
+	 * The GameController object associated to the Match that is currently starting. 
+	 */
+	private MatchController currentMatchController ;
+	
+	/**
+	 * A Server to manage the gui messages with the client.
+	 */
+	private transient RMIGUIUpdaterServer currentGuiServer ;
+	
+	/***/
+	private MatchLauncherSession session ;
 	
 	/**
 	 * A flag indicating if this MasterServer is on or not.
 	 */
 	private boolean inFunction ;
 	
-	private MatchLauncherSession session ;
-	
 	/**
 	 * @throws IOException if something goes wrong with the creation of the member objects. 
 	 */
-	protected MatchLauncherCommunicationController () throws IOException  
+	public MatchLauncherCommunicationController ( ConnectionLoosingManager connectionLoosingManager ) throws IOException  
 	{
-		socketServer = RequestAccepterServer.newSocketServer ( this ) ; 
-		rmiServer = RequestAccepterServer.newRMIServer ( this , ServerEnvironment.getInstance ().getLocalhostIPAddress () , ServerEnvironment.RMI_REQUEST_ACCEPT_SERVER_PORT ) ; 
-		guiServer = new RMIGUIMapServer () ;
+		this.connectionLoosingManager = connectionLoosingManager ;
 		queue = new LinkedBlockingQueue < ClientHandler < ? > > () ; 
-		connectionLoosingController = new ConnectionLoosingControllerImpl () ;
-		resumeConnectionServer = new BackendResumeConnectionServer ( connectionLoosingController ) ;
-		inFunction = false ;
 		session = null ;
-		Executors.newSingleThreadExecutor().execute( resumeConnectionServer ) ;
-		Executors.newSingleThreadExecutor().execute ( guiServer ) ;
-	}
-	
-	/**
-	 * Singleton method for this class
-	 * 
-	 * @return the only existing of this class.
-	 * @throws IOException if an instance can not be created.
-	 */
-	public static synchronized MatchLauncherCommunicationController getInstance () throws IOException
-	{
-		if ( instance == null )
-			instance = new MatchLauncherCommunicationController () ;
-		return instance ;
+		currentMatchController = null ;
+		currentGuiServer = null ;
+		inFunction = false ;
 	}
 	
 	/**
@@ -108,8 +77,6 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 	{
 		ClientHandler < ? > newClientHandler = null ;
 		String name ;
-		Executors.newSingleThreadExecutor().execute ( socketServer ) ;
-		Executors.newSingleThreadExecutor().execute ( rmiServer ) ;
 		inFunction = true ;
 		name = null ;
 		System.out.println ( "MASTER SERVER : INIZIO FUNZIONAMENTO" ) ;
@@ -124,7 +91,7 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 					System.out.println ( "MASTER SERVER : CLIENT ACCETTATO" ) ;
 					// se è il primo giocatore, avvia una nuova partita
 					if ( session == null )
-						createAndLaunchNewGameController () ;
+						initializeNewSession () ;
 					System.out.println ( "MASTER SERVER : CHIEDENDO NOME AL CLIENT" ) ;
 					// chiedi il nome
 					name = newClientHandler.requestName () ;
@@ -147,7 +114,7 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 					newClientHandler.notifyNameChoose ( true , "Nome ammesso." ) ;
 					System.out.println ( "CLIENT DI NOME " + name + " NOTIFICATO CHE IL SUO NOME E' CORRETTO" ) ;
 					System.out.println ( "MASTER SERVER : PLAYER DI NOME " + name + "AGGIUNTO ALLA PARTITA" ) ;
-					session.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler , connectionLoosingController ) ) ;					
+					currentMatchController.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler , connectionLoosingManager ) ) ;					
 					notifyAll () ;
 				} 
 			}
@@ -159,8 +126,8 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 				{
 					try 
 					{
-						Thread.sleep ( TimeConstants.MATCH_LAUNCHER_COMMUNICATION_CONTROLLER_WAITING_TIME ) ;
-						session.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler , connectionLoosingController ) ) ;
+						Thread.sleep ( TimeConstants.MATCH_LAUNCHER_SERVER_WAITING_TIME ) ;
+						currentMatchController.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler , connectionLoosingManager ) ) ;
 					} 
 					catch ( InterruptedException e1 ) 
 					{
@@ -200,11 +167,24 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 	/**
 	 * Helper method that creates a new GameController and starts it. 
 	 */
-	private void createAndLaunchNewGameController () 
+	private void initializeNewSession () 
 	{
-		session = new MatchLauncherSession ( this , guiServer ) ;
-		connectionLoosingController.addObserver ( session.getMatchController () ) ;
-		Executors.newSingleThreadExecutor().execute ( session.getMatchController() ) ; 
+		// to move if we want to break down the executor at the end.
+		Executor fixedExecutor ;
+		try 
+		{
+			currentGuiServer = new RMIGUIUpdaterServer () ;
+			currentMatchController = new MatchController ( this , Collections. <GameMapObserver>singleton( currentGuiServer ) ) ;
+			session = new MatchLauncherSession () ;
+			fixedExecutor = Executors.newFixedThreadPool ( 2 ) ;
+			connectionLoosingManager.addObserver ( currentMatchController ) ;
+			fixedExecutor.execute ( currentMatchController ) ;
+			fixedExecutor.execute ( currentGuiServer ) ;
+		}
+		catch (RemoteException e) 
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -259,8 +239,8 @@ public class MatchLauncherCommunicationController implements NetworkCommunicatio
 			try 
 			{
 				c.uidNotification () ;
-				guiHandler = guiServer.addClient () ;
-				session.addPlayerObserver ( guiServer.getPlayerObserver ( guiHandler  ) , c.getUID() );
+				guiHandler = currentGuiServer.addClient () ;
+				currentMatchController.addPlayerObserver ( currentGuiServer.getPlayerObserver ( guiHandler  ) , c.getUID() );
 				c.sendGuiConnectorNotification ( guiHandler ) ;
 				c.notifyMatchStart();
 			}

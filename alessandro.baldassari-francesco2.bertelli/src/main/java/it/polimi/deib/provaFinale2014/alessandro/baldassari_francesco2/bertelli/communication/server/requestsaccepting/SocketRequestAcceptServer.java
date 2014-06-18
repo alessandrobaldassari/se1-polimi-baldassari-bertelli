@@ -1,10 +1,10 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepterserver;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepting;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.ServerEnvironment;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandlerConnector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.SocketClientHandler;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunchercommunicationcontroller.MatchAdderCommunicationController;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlauncherserver.MatchPlayerAdder;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -28,7 +28,7 @@ public class SocketRequestAcceptServer extends RequestAccepterServer
 	/**
 	 * @param matchAdderCommunicationController the matchAdderCommunicationController field value.
 	 */
-	protected SocketRequestAcceptServer ( MatchAdderCommunicationController matchAdderCommunicationController ) throws IOException 
+	protected SocketRequestAcceptServer ( MatchPlayerAdder matchAdderCommunicationController ) throws IOException 
 	{
 		super ( matchAdderCommunicationController ) ;
 		serverSocket = new ServerSocket ( ServerEnvironment.SOCKET_REQUEST_ACCEPT_SERVER_TCP_PORT  ) ;
