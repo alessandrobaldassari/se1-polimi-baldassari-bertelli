@@ -1,6 +1,4 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.executor;
-
-import java.io.Serializable;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.LambEvolver;
@@ -10,17 +8,10 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.TurnNumberClock;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.BreakDown;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.BuyCard;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMoveType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.Mate;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveNotAllowedException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveSheep;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveSheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 
 /***/
-public class MoveExecutor implements Serializable
+public class MoveExecutor 
 {
 
 	/***/
@@ -80,7 +71,7 @@ public class MoveExecutor implements Serializable
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new MoveNotAllowedException ( "" ) ;
 		else 
-			if ( lastMove == null || lastMove != GameMoveType.BREAK_DOWN )
+			if ( lastMove != GameMoveType.BREAK_DOWN )
 			{
 				new BreakDown ( sheperd , animalToBreak ).execute ( match ) ;
 				numberOfMovesDone ++ ;
@@ -96,7 +87,7 @@ public class MoveExecutor implements Serializable
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new MoveNotAllowedException ( "" ) ; 
 		else 
-			if ( lastMove == null || lastMove != GameMoveType.BUY_CARD )
+			if ( lastMove != GameMoveType.BUY_CARD )
 			{
 				new BuyCard ( sheperd , buyingCardType ).execute ( match ) ;
 				numberOfMovesDone ++ ;
@@ -112,7 +103,7 @@ public class MoveExecutor implements Serializable
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new MoveNotAllowedException ( "THE " ) ; 
 		else  
-			if ( lastMove == null || lastMove != GameMoveType.BUY_CARD )
+			if ( lastMove != GameMoveType.MATE )
 			{
 				new Mate ( clockSource , lambEvolver , sheperd , whereMate ).execute ( match ); 
 				numberOfMovesDone ++ ;
@@ -128,11 +119,11 @@ public class MoveExecutor implements Serializable
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new MoveNotAllowedException ( "" ) ; 
 		else  
-			if ( lastMove == null || lastMove != GameMoveType.BUY_CARD )
+			if ( lastMove != GameMoveType.MOVE_SHEEP )
 			{
 				new MoveSheep ( sheperd , movingOvine , ovineDestinationRegion ).execute ( match ) ;
 				numberOfMovesDone ++ ;
-				lastMove = GameMoveType.MATE ;
+				lastMove = GameMoveType.MOVE_SHEEP ;
 			}
 			else
 				throw new MoveNotAllowedException ( "Can not do two equals moves sequentially." ) ; 
@@ -144,6 +135,7 @@ public class MoveExecutor implements Serializable
 		new MoveSheperd ( sheperd , roadWhereGo ).execute ( match ); 
 		sheperdMoved = true ;
 		numberOfMovesDone ++ ;
+		lastMove = GameMoveType.MOVE_SHEPERD ;
 	}
 	
 }

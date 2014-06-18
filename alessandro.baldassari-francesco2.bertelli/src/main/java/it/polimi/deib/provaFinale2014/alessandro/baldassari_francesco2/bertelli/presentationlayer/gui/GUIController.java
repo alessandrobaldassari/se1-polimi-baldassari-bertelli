@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -42,6 +41,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.threading.ThreadUtilities;
 
@@ -245,8 +245,10 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		return res ;
 	}
 	
-	/***/
-	private MoveSelection breakDownMoveManagement ( GameMap gameMap , MoveSelector selector ) 
+	/**
+	 * @throws MoveNotAllowedException 
+	 * @throws WrongStateMethodCallException */
+	private MoveSelection breakDownMoveManagement ( GameMap gameMap , MoveSelector selector ) throws MoveNotAllowedException, WrongStateMethodCallException 
 	{
 		Set < PositionableElementType > set ;
 		MoveSelection res = null ;
@@ -255,7 +257,9 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		Region region ;
 		Animal animal ;
 		set = new HashSet < PositionableElementType > () ;
-		rightIndexes = rightIndexes = findUIDSInNearRegions ( selector.getAssociatedSheperd().getPosition().getFirstBorderRegion() , selector.getAssociatedSheperd().getPosition().getSecondBorderRegion ())  ;
+		rightIndexes = new ArrayList < Integer > () ;
+		for ( Region r : selector.getAvailableRegionsForBreakdown () )
+			rightIndexes.add ( r.getUID() ) ;
 		if ( rightIndexes.size () > 0 )
 		{
 			// let the user choose where do the break down.
@@ -284,7 +288,10 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 						break ;
 					}
 				if ( animal != null )
-					res = selector.newBreakdown(animal);
+				{
+					selector.selectBreakdown(animal);
+					res = selector.getSelectedMove() ;
+				}
 				else
 					res = null ;
 			}
@@ -298,35 +305,20 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		return res ;
 	}
 	
-	/***/
-	private MoveSelection buyCardManagement ( MoveSelector selector ) 
+	/**
+	 * @throws MoveNotAllowedException 
+	 * @throws WrongStateMethodCallException */
+	private MoveSelection buyCardManagement ( MoveSelector selector ) throws MoveNotAllowedException, WrongStateMethodCallException 
 	{
 		MoveSelection res ;
-		Map < RegionType , Integer > bankSummary ;
 		Collection < Couple < RegionType , Integer > > allowedMoves ;
 		RegionType type ;
-		int userMoney ;
-		// prompt the User with a List of Regions to choose.
-		bankSummary = selector.getBankPriceCards();
-		allowedMoves = new ArrayList < Couple < RegionType , Integer > > () ;
-		// right prices fix !
-		userMoney = selector.getAssociatedSheperd ().getOwner ().getMoney () ;
-		for ( RegionType r : bankSummary.keySet() )
-			if ( bankSummary.get ( r ) <= userMoney )
-				allowedMoves.add ( new Couple < RegionType , Integer > ( r , 0 ) ) ;
-		type = RegionTypeChooseView.showDialog ( allowedMoves , userMoney ).getFirstObject () ; 
+		type = RegionTypeChooseView.showDialog ( selector.getAvailableRegionsForBuyCard() , selector.getAvailableMoney () ).getFirstObject () ; 
 		if ( type != null )
-			try 
-			{
-				res = selector.newBuyCard ( type ) ;
-			}
-			catch (MoveNotAllowedException e1) 
-			{
-				e1.printStackTrace();
-				generationNotification ( "Sorry, ma questa mossa non può avvenire!\n"+e1.getMessage () + "\nHai sprecato la mossa ! Beeeee !!!" ) ; 				
-				userWantsToChangeMove = false ;
-				res = null ;
-			}
+		{
+			selector.selectBuyCard ( type ) ;
+			res = selector.getSelectedMove();
+		}	
 		else
 		{
 			res = null ;
@@ -335,41 +327,17 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		return res ;
 	}
 	
-	/***/
-	private Collection < Integer > findUIDSInNearRegions ( Region r1 , Region r2 ) 
-	{
-		Collection < Integer > rightIndexes ;
-		boolean found ;
-		rightIndexes = new ArrayList < Integer > () ;
-		// take the uids
-		found = false ;
-		for ( Animal a : r1.getContainedAnimals())
-			if ( PositionableElementType.isStandardAdultOvine ( a.getPositionableElementType() ) )
-			{
-				found = true ;
-				break ;
-			}
-		if ( found )
-			rightIndexes.add ( r1.getUID () );
-		found = false ;
-		for ( Animal a : r2.getContainedAnimals())
-			if ( PositionableElementType.isStandardAdultOvine ( a.getPositionableElementType() ) )
-			{
-				found = true ;
-				break ;
-			}
-		if ( found )
-			rightIndexes.add ( r2.getUID() );
-		return rightIndexes ;
-	}
-	
-	/***/
-	private MoveSelection mateManagement ( GameMap gameMap , MoveSelector selector ) 
+	/**
+	 * @throws MoveNotAllowedException 
+	 * @throws WrongStateMethodCallException */
+	private MoveSelection mateManagement ( GameMap gameMap , MoveSelector selector ) throws MoveNotAllowedException, WrongStateMethodCallException 
 	{
 		Collection < Integer > rightIndexes ;
 		MoveSelection res ;
 		Region region ;
-		rightIndexes = findUIDSInNearRegions ( selector.getAssociatedSheperd().getPosition().getFirstBorderRegion() , selector.getAssociatedSheperd().getPosition().getSecondBorderRegion ())  ;
+		rightIndexes = new ArrayList < Integer > () ;
+		for ( Region r : selector.getAvailableRegionsForMate() )
+			rightIndexes.add ( r.getUID() ) ;
 		if ( rightIndexes.size () > 0 )
 		{
 			gameView.setInputMode ( GameMapViewInputMode.REGIONS , rightIndexes ) ;
@@ -380,16 +348,8 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 			if ( userWantsToChangeMove == false )		
 			{	
 				region = gameMap.getRegionByUID ( index.get () ) ;
-				try 
-				{
-					res = selector.newMate ( region ) ;
-				}
-				catch (MoveNotAllowedException e)
-				{
-					generationNotification ( "Sorry, ma questa mossa non può avvenire!\n"+e.getMessage () + "\n Hai sprecato la mossa!!!" ) ; 
-					userWantsToChangeMove = false ;
-					res = null ;
-				}		
+				selector.selectMate ( region ) ;
+				res = selector.getSelectedMove();
 			}
 			else
 				res = null ;
@@ -403,8 +363,10 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		return res ;
 	}
 	
-	/***/
-	private MoveSelection moveSheepManagement ( GameMap gameMap , MoveSelector selector ) 
+	/**
+	 * @throws MoveNotAllowedException 
+	 * @throws WrongStateMethodCallException */
+	private MoveSelection moveSheepManagement ( GameMap gameMap , MoveSelector selector ) throws MoveNotAllowedException, WrongStateMethodCallException 
 	{
 		Set < PositionableElementType > set ;
 		Collection < Integer > rightIndexes ;
@@ -413,7 +375,9 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		PositionableElementType p ;
 		Animal animal ;
 		set = new HashSet < PositionableElementType > () ;
-		rightIndexes = findUIDSInNearRegions ( selector.getAssociatedSheperd().getPosition().getFirstBorderRegion() , selector.getAssociatedSheperd().getPosition().getSecondBorderRegion ())  ;
+		rightIndexes = new ArrayList < Integer > () ;
+		for ( Region r : selector.getAvailableRegionsForMoveSheep() )
+			rightIndexes.add ( r.getUID() );
 		// if there are regions available for this move...
 		if ( rightIndexes.size() > 0 )
 		{
@@ -442,7 +406,10 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 						break ;
 					}
 				if ( animal != null )
-					res = selector.newBreakdown(animal);
+				{
+					selector.selectBreakdown(animal);
+					res = selector.getSelectedMove () ;
+				}
 				else
 					res = null ;
 			}
@@ -458,14 +425,16 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		return res ;
 	}
 	
-	/***/
-	private MoveSelection moveSheperdManagement ( GameMap gameMap , MoveSelector selector ) 
+	/**
+	 * @throws MoveNotAllowedException 
+	 * @throws WrongStateMethodCallException */
+	private MoveSelection moveSheperdManagement ( GameMap gameMap , MoveSelector selector ) throws MoveNotAllowedException, WrongStateMethodCallException 
 	{
 		Collection < Integer > rightIndexes ;
 		Road road ;
 		MoveSelection res ;
 		rightIndexes = new ArrayList < Integer > () ;
-		for ( Road r : gameMap.getFreeRoads () )
+		for ( Road r : selector.getAvailableRoadsForMoveSheperd() )
 			rightIndexes.add ( r.getUID() ) ;
 		index.set(null) ;
 		gameView.setInputMode ( GameMapViewInputMode.ROADS , rightIndexes ) ;
@@ -474,16 +443,8 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		if ( userWantsToChangeMove == false )
 		{
 			road = gameMap.getRoadByUID ( index.get () ) ;
-			try
-			{
-				res = selector.newMoveSheperd ( road ) ;
-			}
-			catch (MoveNotAllowedException e)
-			{
-				e.printStackTrace();
-				userWantsToChangeMove = false ;
-				res = null ;
-			}
+			selector.selectMoveSheperd ( road ) ;
+			res = selector.getSelectedMove();
 		}
 		else
 			res = null ;
@@ -510,6 +471,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 			System.out.println ( "GUI_CONTROLLER - DO_MOVE : MOVE RECEIVED = " + move ) ;
 			if ( move != null )
 			{
+				try {
 				switch ( move )
 				{
 					case BREAK_DOWN :
@@ -529,6 +491,17 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 					break ;
 					default :
 						throw new RuntimeException () ;
+				}
+				}
+				catch ( WrongStateMethodCallException w ) 
+				{
+					res = null ;
+					userWantsToChangeMove = true ;
+				}
+				catch (MoveNotAllowedException e) 
+				{
+					userWantsToChangeMove = false ;
+					res = null ;
 				}
 			}
 		}

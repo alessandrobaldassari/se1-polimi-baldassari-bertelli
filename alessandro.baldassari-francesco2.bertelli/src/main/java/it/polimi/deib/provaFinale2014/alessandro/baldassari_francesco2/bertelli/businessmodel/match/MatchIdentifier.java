@@ -9,7 +9,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class MatchIdentifier implements Identifiable < Match > 
 {
 
-	private static UIDGenerator uidGenerator ;
+	private static transient UIDGenerator uidGenerator ;
 	
 	/**
 	 * The unique identifier for this MatchIdentifier.

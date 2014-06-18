@@ -8,9 +8,9 @@ import java.util.concurrent.Executors;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.GameConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.CanNotMateWithHimException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.MateNotSuccesfullException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvineType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.BlackSheep;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb;
@@ -64,8 +64,8 @@ public class Mate extends GameMove
 		{
 			if ( MapUtilities.areAdjacents( theOneWhoWantsTheMate.getPosition () , whereMate ) )
 			{
-				adults = extractAdultOvines ( whereMate.getContainedAnimals () ) ;
-				if ( lookForAnOvine ( adults , AdultOvineType.RAM ) != null && lookForAnOvine ( adults , AdultOvineType.SHEEP ) != null )
+				adults = MapUtilities.extractAdultOvinesExceptBlackSheep ( whereMate.getContainedAnimals () ) ;
+				if ( MapUtilities.lookForAnOvine ( adults , AdultOvineType.RAM ) != null && MapUtilities.lookForAnOvine ( adults , AdultOvineType.SHEEP ) != null )
 				{
 					this.clockSource = clockSource ;
 					this.lambEvolver = lambEvolver ; 
@@ -111,13 +111,13 @@ public class Mate extends GameMove
 		AdultOvine sheep ;
 		if ( match != null )
 		{
-			adultOvines = extractAdultOvines ( whereMate.getContainedAnimals () ) ;
+			adultOvines = MapUtilities.extractAdultOvinesExceptBlackSheep ( whereMate.getContainedAnimals () ) ;
 			// look for a male
-			ram = lookForAnOvine ( adultOvines , AdultOvineType.RAM ) ;
+			ram = MapUtilities.lookForAnOvine ( adultOvines , AdultOvineType.RAM ) ;
 			if ( ram != null )
 			{
 				// look for a female
-				sheep = lookForAnOvine ( adultOvines , AdultOvineType.SHEEP ) ;
+				sheep = MapUtilities.lookForAnOvine ( adultOvines , AdultOvineType.SHEEP ) ;
 				if ( sheep != null )
 				{
 					try 
@@ -153,45 +153,33 @@ public class Mate extends GameMove
 		else throw new IllegalArgumentException () ;
 	}
 
-	
-	
-	/**
-	 * Extract from the src Collection the Animals which are AdultOvines
-	 * 
-	 * @param src the Collection where to perform the search.
-	 * @return a List containing all of the AdultOvines which are in the src parameter.
-	 */
-	private List < AdultOvine > extractAdultOvines ( Iterable < Animal > src ) 
+	/***/
+	public static boolean canMateDueToSexReasons ( Region region ) 
 	{
-		List < AdultOvine > res ;
-		res = new LinkedList < AdultOvine > () ;
-		for ( Animal animal : src )
-			if ( animal instanceof AdultOvine && ! ( animal instanceof BlackSheep ) )
-				res.add ( ( AdultOvine ) animal ) ;
+		List < AdultOvine > adultOvines ;
+		AdultOvine a ;
+		boolean res ;
+		if ( region != null )
+		{
+			adultOvines = MapUtilities.extractAdultOvinesExceptBlackSheep ( region.getContainedAnimals () ) ;
+			a = MapUtilities.lookForAnOvine ( adultOvines , AdultOvineType.RAM ) ;
+			if ( a != null )
+			{
+				a = MapUtilities.lookForAnOvine ( adultOvines , AdultOvineType.SHEEP ) ;
+				if ( a != null )
+					res = true ;
+				else
+					res = false ;
+			}
+			else
+				res = false ;
+		}
+		else
+			throw new IllegalArgumentException () ;
 		return res ;
 	}
 	
-	/**
-	 * Search for an AdultOvine of the parameter specified type in the src List, and if 
-	 * it exists, return it.
-	 * 
-	 * @param src the List where to perform the search.
-	 * @param type the type the returned AdultOvine must be.
-	 * @return the target AdultOvine, null if it can not exists in the src List.
-	 */
-	private AdultOvine lookForAnOvine ( List < AdultOvine > src , AdultOvineType type ) 
-	{
-		AdultOvine res ;
-		int i ;
-		res = null ;
-		i = 0 ;
-		while ( i < src.size() && src.get ( i ).getType () != type ) 
-		i ++ ;
-		if ( i < src.size () )
-			res = src.get ( i ) ;
-		return res ;
-	}
-
+	
 	/**
 	 * The object that will take care of the evolution of lambs, one per lamb. 
 	 */

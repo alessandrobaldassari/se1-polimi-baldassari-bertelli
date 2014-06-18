@@ -12,4 +12,10 @@ public class PlayerWantsToExitGameException extends Exception
 		super () ;
 	}
 	
+	/***/
+	public PlayerWantsToExitGameException ( String msg ) 
+	{
+		super ( msg ) ;
+	}
+	
 }

@@ -2,7 +2,6 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -25,7 +24,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * The implementation of the Singleton pattern ensures that just one instance of
  * this class exists in the whole Application.
  */
-public class GameMapFactory extends WithFactorySupportObject < Match > implements Serializable
+public class GameMapFactory extends WithFactorySupportObject < Match > 
 {
 	
 	/**

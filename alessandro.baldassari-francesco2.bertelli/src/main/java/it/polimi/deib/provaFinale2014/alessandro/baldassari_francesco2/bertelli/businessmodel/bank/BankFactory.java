@@ -1,6 +1,5 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -19,7 +18,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * This class implements the Factory pattern for the Bank object to control the creation of
  * Bank objects. 
  */
-public class BankFactory extends WithFactorySupportObject < Match > implements Serializable
+public class BankFactory extends WithFactorySupportObject < Match > 
 {
 
 	/**

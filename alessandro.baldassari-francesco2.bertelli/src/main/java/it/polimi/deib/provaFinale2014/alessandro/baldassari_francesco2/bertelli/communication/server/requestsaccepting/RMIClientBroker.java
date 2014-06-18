@@ -1,7 +1,8 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepting;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.Message;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.message.Message;
 
+import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -10,7 +11,7 @@ import java.rmi.RemoteException;
  * Because this is a shared object between these two actors, they can pass the messages they need to
  * exchange ( and the relative parameters ) using this object, so it offers methods for these reasons. 
  */
-public interface RMIClientBroker extends Remote
+public interface RMIClientBroker extends Remote , Serializable
 {
 	
 	/**
@@ -65,21 +66,6 @@ public interface RMIClientBroker extends Remote
 	 * @throws RemoteException if something goes wrong with the communication
 	 */
 	public abstract boolean isClientReady () throws RemoteException ;
-	
-	/**
-	 * Class that models the situation where someone tries to add a Command to this RMIClientBroker
-	 * while another is still being processed. 
-	 */
-	public class AnotherCommandYetRunningException extends Exception
-	{
-		
-		/***/
-		protected AnotherCommandYetRunningException () 
-		{
-			super () ;
-		}
-		
-	}
 	
 }
 

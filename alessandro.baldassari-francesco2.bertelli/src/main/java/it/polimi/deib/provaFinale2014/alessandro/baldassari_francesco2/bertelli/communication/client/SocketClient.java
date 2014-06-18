@@ -1,6 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.Message;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.message.Message;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -82,13 +82,16 @@ public class SocketClient extends Client
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	protected Message read () throws IOException 
+	protected synchronized Message read () throws IOException 
 	{
+		Object temp ;
 		Message res ;
 		try 
 		{
 			System.out.println ( "SOCKET_CLIENT - READ : WAITING FOR A MESSAGE." ) ; 			
-			res = (Message) ois.readObject () ;
+			temp = ois.readObject() ;
+			System.out.println ( "SOCKET_CLIENT - READ : RAW OBJECT READ : " + temp ) ;
+			res = ( Message ) temp ;
 			System.out.println ( "SOCKET_CLIENT - READ : MESSAGE READ." ) ; 			
 		}
 		catch (ClassNotFoundException e) 
@@ -102,9 +105,9 @@ public class SocketClient extends Client
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	protected void write ( Message m ) throws IOException 
+	protected synchronized void write ( Message m ) throws IOException 
 	{
-		System.out.println ( "SOCKET_CLIENT - WRITE : WRITING MESSAGE" ) ; 
+		System.out.println ( "SOCKET_CLIENT - WRITE : WRITING MESSAGE : " + m ) ; 
 		oos.writeObject ( m ) ;
 		oos.flush () ;
 		System.out.println ( "SOCKET_CLIENT - WRITE : MESSAGE WRITTEN" ) ;
@@ -114,7 +117,10 @@ public class SocketClient extends Client
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	protected void operationFinished () throws IOException {}
+	protected void operationFinished () throws IOException 
+	{
+		
+	}
 
 	/**
 	 * AS THE SUPER'S ONE. 

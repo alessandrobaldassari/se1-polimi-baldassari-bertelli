@@ -6,11 +6,14 @@ import java.rmi.RemoteException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/***/
 public class RMIGUIClientBrokerImpl implements RMIGUIClientBroker 
 {
 
+	/***/
 	private BlockingQueue < GUINotificationMessage > messages ;
 	
+	/***/
 	public RMIGUIClientBrokerImpl () 
 	{
 		messages = new LinkedBlockingQueue < GUINotificationMessage > () ;

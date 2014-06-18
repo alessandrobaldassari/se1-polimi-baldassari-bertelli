@@ -20,6 +20,30 @@ public class CollectionsUtilities
 	}
 	
 	/***/
+	public static < T > Collection < T > newCollectionFromArray ( T [] data ) 
+	{
+		Collection < T > res ;
+		res = new ArrayList < T > ( data.length ) ;
+		for ( T t : data )
+			res.add(t);
+		return res ;
+	}
+	
+	public static < T > int arrayLinearSearchPK ( T [] src , T key )
+	{
+		int res ;
+		int i ;
+		i = 0 ;
+		while ( i < src.length && ! src [ i ].equals ( key ) )
+			i ++ ;
+		if ( i == src.length )
+			res = - 1 ;
+		else
+			res = i ;
+		return res ;
+	}
+	
+	/***/
 	public static < T > Collection < T > newCollectionFromIterable ( Iterable < T > src ) 
 	{
 		Collection < T > res ;

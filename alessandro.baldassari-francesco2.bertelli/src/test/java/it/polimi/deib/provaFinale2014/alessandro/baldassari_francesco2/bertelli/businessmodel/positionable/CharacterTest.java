@@ -2,8 +2,8 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import static org.junit.Assert.*;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvineType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
@@ -33,8 +33,6 @@ public class CharacterTest {
 	@Before
 	public void setUpBeforeClass()
 	{
-		int i ;
-		i = 0 ;
 		do
 		{
 			try 
@@ -45,10 +43,7 @@ public class CharacterTest {
 				map = GameMapFactory.getInstance().newInstance(dummyMatchIdentifier);
 				sheep.moveTo(map.getRegionByType(RegionType.SHEEPSBURG).iterator().next());
 			}
-			catch (SingletonElementAlreadyGeneratedException e) 
-			{
-				i ++ ;
-			}
+			catch (SingletonElementAlreadyGeneratedException e) {}
 		}
 		while ( animalFactory == null ) ;
 	}

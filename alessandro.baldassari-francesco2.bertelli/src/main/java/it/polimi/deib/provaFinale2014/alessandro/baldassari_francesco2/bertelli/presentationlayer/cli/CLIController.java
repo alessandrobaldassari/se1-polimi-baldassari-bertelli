@@ -12,15 +12,18 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.BlackSheep;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Ovine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMoveType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveNotAllowedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelection;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.PlayerWantsToExitGameException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.NotSellableException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.SellingPriceNotSetException;
@@ -29,6 +32,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
 
 /**
@@ -238,47 +242,59 @@ public class CLIController extends ViewPresenter
 		boolean repeat ;
 		do
 		{
-			s = myName + " : \nTuoi soldi : " + f.getAssociatedSheperd().getOwner().getMoney() ;
+			s = myName + " : \nTuoi soldi : " + f.getAvailableMoney();
 			s = s + "Situazione della mappa di gioco" + Utilities.CARRIAGE_RETURN ;
 			s = s + m + Utilities.CARRIAGE_RETURN ;
 			writer.println ( s ) ;
 			s = PresentationMessages.DO_MOVE_MESSAGE + Utilities.CARRIAGE_RETURN ;
-			s = s + "1. Uccidere un ovino in una regione" + Utilities.CARRIAGE_RETURN ;
-			s = s + "2. Comperare una carta dalla banca" + Utilities.CARRIAGE_RETURN ;
-			s = s + "3. Fare una accoppiamento" + Utilities.CARRIAGE_RETURN ;
-			s = s + "4. Muovere una pecora." + Utilities.CARRIAGE_RETURN ;
-			s = s + "5. Muovere il pastore" + Utilities.CARRIAGE_RETURN ;
+			i = 1 ;
+			for ( GameMoveType g : GameMoveType.values() )
+			{
+				if ( f.isMoveAllowed ( g ) )
+					s = s + i + g.getHumanName () + Utilities.CARRIAGE_RETURN ;
+				i ++ ;
+			}
 			s = s + "-1. Esci da JSheepland" ;
 			i = GraphicsUtilities.checkedIntInputWithEscape ( 1 , 5 , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
 			if ( i != -1 )
 			{
-				switch ( i ) 
+				try 
 				{
-					case 1 :
-						res = killing ( f , m ) ;
-					break ;
-					case 2 :
-						res = buyCard ( f , m ) ;
-					break ;
-					case 3 :
-						res = mate ( f , m ) ;
-					break ;
-					case 4 :
-						res = moveOvine ( f , m ) ;
-					break ;
-					case 5 :
-						res = moveSheperd ( f , m ) ;
-					break ;
-					default :
-						res = null ;
-					break ;
+					switch ( i ) 
+					{
+						case 1 :
+							killing ( f , m ) ;
+						break ;
+						case 2 :
+							buyCard ( f , m ) ;
+						break ;
+						case 3 :
+							mate ( f , m ) ;
+						break ;
+						case 4 :
+							moveOvine ( f , m ) ;
+						break ;
+						case 5 :
+							moveSheperd ( f , m ) ;
+						break ;
+						default :
+							res = null ;
+						break ;
+					}
+					try 
+					{
+						res = f.getSelectedMove () ;
+						repeat = false ;
+					}
+					catch (WrongStateMethodCallException e) 
+					{
+						repeat = true ;
+						e.printStackTrace();
+					}
 				}
-				if ( res == null )
-					repeat = true ;
-				else
+				catch ( PlayerWantsToExitGameException p  )
 				{
-					repeat = false ;
-					f.setSelection(res); 
+					repeat = true ;
 				}
 			}
 			else
@@ -399,24 +415,19 @@ public class CLIController extends ViewPresenter
 	
 	/**
 	 * This method manages the killing action. 
+	 * @throws PlayerWantsToExitGameException 
 	 */
-	private MoveSelection killing ( MoveSelector f , GameMap m ) throws IOException 
+	private void killing ( MoveSelector f , GameMap m ) throws IOException, PlayerWantsToExitGameException  
 	{ 
 		List <Ovine> killableAnimals ;
 		String s ;
-		MoveSelection res ;
-		Region r1, r2;
 		killableAnimals = new LinkedList<Ovine>();
 		int j;
 		s = "Elenco degli ovini che puoi abbattere : " + Utilities.CARRIAGE_RETURN;
-		r1 = f.getAssociatedSheperd().getPosition().getFirstBorderRegion();
-		r2 = f.getAssociatedSheperd().getPosition().getSecondBorderRegion();
-		for ( Animal animal : r1.getContainedAnimals () )
-			if( animal instanceof Ovine )
-				killableAnimals.add ( ( Ovine ) animal ) ;
-		for ( Animal animal : r2.getContainedAnimals () )
-			if ( animal instanceof Ovine )
-				killableAnimals.add ( ( Ovine ) animal ) ;
+		for ( Region region : f.getAvailableRegionsForBreakdown () )
+			for ( Animal animal : region.getContainedAnimals() )
+				if( animal instanceof Ovine && ! ( animal instanceof BlackSheep ) )
+					killableAnimals.add ( ( Ovine ) animal ) ;
 		j=0;
 		for ( Ovine ovine : killableAnimals )
 		{
@@ -428,109 +439,95 @@ public class CLIController extends ViewPresenter
 		if ( j != -1 )
 			try 
 			{
-				res = f.newBreakdown(killableAnimals.get(j));
+				f.selectBreakdown ( killableAnimals.get ( j ) ) ;
 			} 
-			catch (Exception e1) 
+			catch (MoveNotAllowedException e1) 
 			{
 				writer.println ( PresentationMessages.MOVE_NOT_ALLOWED_MESSAGE + Utilities.CARRIAGE_RETURN + "Provane un'altra!" ) ;
-				res = null ;
 			}
 		else
-			res = null ;
-		return res ;
+			throw new PlayerWantsToExitGameException ( "" ) ;
 	}
 	
 	/**
 	 * This message  
+	 * @throws PlayerWantsToExitGameException 
 	 */
-	private MoveSelection buyCard ( MoveSelector f , GameMap m ) throws IOException 
+	private void buyCard ( MoveSelector f , GameMap m ) throws IOException, PlayerWantsToExitGameException 
 	{
-		List < RegionType > regs ;
 		String s ;
-		MoveSelection res ;
 		int i ;
 		s = "Quale carta vuoi comprare ( regione ) ?" + Utilities.CARRIAGE_RETURN ;
-		regs = new LinkedList < RegionType > ()  ;
 		i = 0 ;
-		for ( RegionType rt : f.getBankPriceCards ().keySet () ) 
+		for ( RegionType rt : f.getAvailableRegionsForBuyCard().keySet() ) 
 		{
-			s = s + i + ". " + rt + Utilities.CARRIAGE_RETURN ;
-			regs.add ( rt );
+			s = s + i + ". " + rt + " [ " + f.getAvailableRegionsForBuyCard().get ( rt ) + " denari ] " + Utilities.CARRIAGE_RETURN ;
 			i ++ ;
 		}	
 		s = s + "-1. Cambia mossa" + Utilities.CARRIAGE_RETURN ;
-		i = GraphicsUtilities.checkedIntInputWithEscape ( 0 , regs.size() - 1 , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader) ;
+		i = GraphicsUtilities.checkedIntInputWithEscape ( 0 , i , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader) ;
 		if ( i != -1 )
 			try 
 			{
-				res = f.newBuyCard ( regs.get ( i ) ) ;
+				f.selectBuyCard ( CollectionsUtilities.newListFromIterable ( f.getAvailableRegionsForBuyCard().keySet () ).get ( i ) ) ;
 			} 
 			catch (MoveNotAllowedException e1) 
 			{
 				writer.println ( PresentationMessages.INVALID_CHOOSE_MESSAGE + Utilities.CARRIAGE_RETURN + "Provane un'altra !" ) ;
-				res = null ;
 			}
 		else
-			res = null ;
-		return res ;
+			throw new PlayerWantsToExitGameException () ;
 	}
 
 	/**
 	 * This message manage the mate action. 
+	 * @throws PlayerWantsToExitGameException 
 	 */
-	private MoveSelection mate ( MoveSelector f , GameMap m ) throws IOException 
+	private void mate ( MoveSelector f , GameMap m ) throws IOException, PlayerWantsToExitGameException 
 	{
-		MoveSelection res ;
 		String s ;
 		int i ;
 		s = "Regioni dove puoi compire l'accoppiamento : " + Utilities.CARRIAGE_RETURN ;
-		s = s + "0 . " + f.getAssociatedSheperd().getPosition().getFirstBorderRegion() + Utilities.CARRIAGE_RETURN;
-		s = s + "1 . " + f.getAssociatedSheperd().getPosition().getSecondBorderRegion() + Utilities.CARRIAGE_RETURN;
+		i = 0 ;
+		for ( Region r : f.getAvailableRegionsForMate () )
+		{
+			s = s + i + " . " + r + Utilities.CARRIAGE_RETURN;
+			i ++ ;
+		}
 		s = s + "-1. Scegli un'altra mossa." ;
 		i = GraphicsUtilities.checkedIntInputWithEscape ( 0 , 1 , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ; 
 		if ( i != -1 )
 			try 
 			{
-				res = f.newMate ( i == 0 ? f.getAssociatedSheperd().getPosition().getFirstBorderRegion() : f.getAssociatedSheperd().getPosition().getSecondBorderRegion() ) ;
+				f.selectMate ( CollectionsUtilities.newListFromIterable ( f.getAvailableRegionsForMate() ).get ( i ) ) ;
 			}
 			catch ( MoveNotAllowedException e1 ) 
 			{
 				writer.println ( PresentationMessages.INVALID_CHOOSE_MESSAGE + Utilities.CARRIAGE_RETURN + "Provane un'altra !" ) ;
-				res = null ;
 			}
 		else
-			res = null ;
-		return res ;
+			throw new PlayerWantsToExitGameException();
 	}
 	
 	/**
 	 * This method manage the moveOvine action. 
+	 * @throws PlayerWantsToExitGameException 
 	 */
-	private MoveSelection moveOvine ( MoveSelector f , GameMap m ) throws IOException 
+	private void moveOvine ( MoveSelector f , GameMap m ) throws IOException, PlayerWantsToExitGameException 
 	{
 		List < Ovine > movableAnimals ;
-		Region selReg ;
-		MoveSelection res ;
-		Sheperd sh ;
-		Region r3 ;
-		Region r4;
 		String s ;
 		int i ;
 		movableAnimals = new LinkedList<Ovine>();
-		sh = f.getAssociatedSheperd () ;
 		s = "Elenco degli ovini che puoi spostare" + Utilities.CARRIAGE_RETURN ;
-		r3 = sh.getPosition().getFirstBorderRegion () ;
-		r4 = sh.getPosition().getSecondBorderRegion () ;
-		for ( Animal animal : r3.getContainedAnimals () )
-			if ( animal instanceof Ovine )
-				movableAnimals.add ( ( Ovine ) animal ) ;
-		for ( Animal animal : r4.getContainedAnimals () )
-			if ( animal instanceof Ovine )
-				movableAnimals.add ( ( Ovine ) animal ) ;
+		for ( Region r : f.getAvailableRegionsForMoveSheep () )
+			for ( Animal animal : r.getContainedAnimals() )
+				if ( animal instanceof Ovine )
+					movableAnimals.add ( ( Ovine ) animal ) ;
 		i = 0 ;
 		for ( Ovine ovine : movableAnimals )
 		{
-			s = s + i + ". " +ovine + Utilities.CARRIAGE_RETURN;
+			s = s + i + ". " + ovine + Utilities.CARRIAGE_RETURN;
 			i ++ ;
 		}
 		s = s + "Chi vuoi muovere ? " + Utilities.CARRIAGE_RETURN ;
@@ -539,48 +536,45 @@ public class CLIController extends ViewPresenter
 		if ( i != -1 )
 			try 
 			{
-				selReg =  CollectionsUtilities.contains ( sh.getPosition().getFirstBorderRegion ().getContainedAnimals (), movableAnimals.get ( i )) ? sh.getPosition().getSecondBorderRegion() : sh.getPosition().getFirstBorderRegion() ;
-				res = f.newMoveSheep(movableAnimals.get ( i ) , selReg );
+				f.selectMoveSheep ( movableAnimals.get ( i ) , movableAnimals.get ( i ).getPosition () );
 			} 
 			catch (MoveNotAllowedException e1) 
 			{
 				writer.println ( PresentationMessages.INVALID_CHOOSE_MESSAGE + Utilities.CARRIAGE_RETURN + "Provane un'altra !" ) ;
-				res = null ;
 			}
 		else
-			res = null ;
-		return res ;
+			throw new PlayerWantsToExitGameException () ;
 	}
 	
 	/**
 	 * This method manages the moveSheperd action. 
+	 * @throws PlayerWantsToExitGameException 
 	 */
-	private MoveSelection moveSheperd ( MoveSelector f , GameMap m ) throws IOException 
+	private void moveSheperd ( MoveSelector f , GameMap m ) throws IOException, PlayerWantsToExitGameException 
 	{
-		List < Road > l ;
 		String s ;
-		MoveSelection res ;
 		int i ;
-		l = CollectionsUtilities.newListFromIterable ( m.getFreeRoads () ) ;
 		s =  "Strade ok : " + Utilities.CARRIAGE_RETURN ;
-		for ( i = 0 ; i < l.size() ; i ++ )
-			s = s + i+1 + " : strada : " + l.get( i ) + Utilities.CARRIAGE_RETURN ;
-		s = s + "In quale strada vuoi andare ? " + Utilities.CARRIAGE_RETURN ;
+		i = 0 ;
+		for ( Road r : f.getAvailableRoadsForMoveSheperd () )
+		{
+			s = s + i + " : strada : " + r + Utilities.CARRIAGE_RETURN ;
+			i ++ ;
+		}
+			s = s + "In quale strada vuoi andare ? " + Utilities.CARRIAGE_RETURN ;
 		s = s + "-1. Altra mossa" ;
-		i = GraphicsUtilities.checkedIntInputWithEscape ( 1 , l.size() , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
+		i = GraphicsUtilities.checkedIntInputWithEscape ( 1 , i - 1 , -1 , -2 , s , PresentationMessages.INVALID_CHOOSE_MESSAGE , writer , reader ) ;
 		if ( i != -1 )
 			try
 			{
-				res = f.newMoveSheperd ( l.get( i - 1 ) ) ;
+				f.selectMoveSheperd ( CollectionsUtilities.newListFromIterable ( f.getAvailableRoadsForMoveSheperd() ).get ( i ) ) ;
 			}
 			catch (MoveNotAllowedException e) 
 			{
 				writer.println ( PresentationMessages.INVALID_CHOOSE_MESSAGE + Utilities.CARRIAGE_RETURN + "Provane un'altra !" ) ;
-				res = null ;
 			}
 		else
-			res = null ;
-		return res ;
+			throw new PlayerWantsToExitGameException();
 	}
 
 	@Override

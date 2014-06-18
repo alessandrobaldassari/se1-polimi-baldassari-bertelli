@@ -2,11 +2,14 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import java.io.Serializable;
 
+/***/
 public class GUIPlayerNotificationMessage extends GUINotificationMessage 
 {
 
+	/***/
 	private Serializable firstParam ;
 	
+	/***/
 	private Serializable secondParam ;
 	
 	public GUIPlayerNotificationMessage ( String actionAssociated , Serializable firstParam , Serializable secondParam ) 

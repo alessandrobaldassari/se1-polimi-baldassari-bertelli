@@ -14,8 +14,9 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.AlreadyInFinalPhaseException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.MatchState;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.Mate;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveExecutor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveNotAllowedException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.executor.MoveExecutor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelection;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.CharacterDoesntMoveException;
@@ -28,7 +29,10 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
@@ -50,6 +54,7 @@ class TurnationPhaseManager implements TurnNumberClock
 	 */
 	private int turnNumber ;
 	
+	/***/
 	public TurnationPhaseManager ( Match match , LambEvolver lambEvolver ) 
 	{
 		if ( match != null && lambEvolver != null )
@@ -63,10 +68,25 @@ class TurnationPhaseManager implements TurnNumberClock
 	}
 	
 	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public int getTurnNumber () throws WrongMatchStateMethodCallException
+	{
+		int res ;
+		if ( match.getMatchState () == MatchState.TURNATION )
+			res = turnNumber ;
+		else
+			throw new WrongMatchStateMethodCallException ( match.getMatchState () ) ;
+		return res ;
+	}
+	
+	/**
 	 * This methods implements the core phase of the Game, the time when every player
 	 * makes his moves.
 	 * It is implemented as a cycle, which, until the Game is finished asks every player
 	 * to do his moves, providing him the tools to do this. 
+	 * 
 	 * @throws WorkflowException if an unexpected message occurs. 
 	 */ 
 	public void turnationPhase () throws WorkflowException 
@@ -75,6 +95,7 @@ class TurnationPhaseManager implements TurnNumberClock
 		MoveSelector selector ;
 		MoveSelection selection ;
 		BlackSheep blackSheep ;
+		Sheperd choosenSheperd ;
 		Wolf wolf ;
 		MarketPhaseManager marketManager ;
 		byte moveIndex ;
@@ -113,11 +134,15 @@ class TurnationPhaseManager implements TurnNumberClock
 							break ;
 						try
 						{
-							moveFactory = generateMoveExecAndChooseSheperd ( currentPlayer ) ;
+							// break in two.
+							choosenSheperd = chooseSheperd ( currentPlayer ) ;
+							moveFactory = new MoveExecutor ( choosenSheperd , this , lambEvolver ) ;
+							selector = new MoveSelector ( moveFactory.getAssociatedSheperd () ) ;
 							for ( moveIndex = 0 ; moveIndex < GameConstants.NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ )
 							{	
+								fillMoveSelectorWithAvailableParameters ( selector , choosenSheperd ) ;
+								selector.setMovesAllowedDueToRuntimeRules();
 								playersGenericNotification ( "Carissimo, per questo turno è la tua mossa # " + moveIndex ) ;
-								selector = new MoveSelector ( moveFactory.getAssociatedSheperd () , generateCardPriceMap ( moveFactory.getAssociatedSheperd () ) ) ;
 								try 
 								{
 									System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - CHIEDENDO DI FARE UNA MOSSA " ) ;				
@@ -141,7 +166,7 @@ class TurnationPhaseManager implements TurnNumberClock
 								{
 									// the user tried to do an invalid move; give him another chance
 									System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - ERRORE DURANTE L'ESECUZIONE DELLA MOSSA." ) ;									
-									currentPlayer.genericNotification ( "Non puoi fare questa mossa, peccato, hai perso una occasione !\n" + e.getMessage() ) ;
+									currentPlayer.genericNotification ( "Mossa fallita!\n" + e.getMessage() ) ;
 								} 
 							}
 						}
@@ -188,6 +213,102 @@ class TurnationPhaseManager implements TurnNumberClock
 		}
 	}
 	
+	/**
+	 * Helper method that allows the System to choose a Sheperd for a Player's turn ( eventually aking him who ),
+	 * and then create a MoveExecutor for this User to play.
+	 * 
+	 * @param currentPlayer the player for who a MoveExecutor has to be built.
+	 * @return the created MoveExecutor
+	 * @throws TimeoutException if the currentPlayer has to choose between some Sheperds and
+	 * 	       does not answer before a timeout.
+	 */
+	private Sheperd chooseSheperd ( Player currentPlayer ) throws TimeoutException 
+	{
+		Sheperd choosenSheperd ;
+		System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR : INIZIO" ) ;
+		if ( match.getNumberOfPlayers () == 2 )
+		{
+			System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR - CHIDENDO AL PLAYER : " + currentPlayer.getName () + " DI SCEGLIERE UN PASTORE" ) ;					
+			choosenSheperd = currentPlayer.chooseSheperdForATurn ( currentPlayer.getSheperds () ) ;
+			for ( Sheperd s : currentPlayer.getSheperds() )
+				if ( s.getUID () == choosenSheperd.getUID () )
+				{
+					choosenSheperd = s ;
+					break ;
+				}
+			System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR - IL PLAYER : " + currentPlayer.getName () + " HA SCELTO IL PASTORE " + choosenSheperd.getName () ) ;									
+		}
+		else
+			choosenSheperd = CollectionsUtilities.newListFromIterable ( currentPlayer.getSheperds() ).get ( 0 ) ;
+		System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR : END" ) ;
+		return choosenSheperd ;
+	}
+	
+	/***/
+	private void fillMoveSelectorWithAvailableParameters ( MoveSelector moveSelector , Sheperd sh ) 
+	{
+		moveSelector.setAvailableMoney ( sh.getOwner().getMoney () ) ;
+		moveSelector.setAvailableRoadsForMoveSheperd ( findAvailableRoadsForMoveSheperd ( sh ) ) ;
+		moveSelector.setAvailableRegionsForMoveSheep ( findAvailableRegionsForMoveSheep ( sh ) ) ;
+		moveSelector.setAvailableRegionsForBuyCard ( findAvailableRegionsForBuyCard ( sh ) ) ;
+		moveSelector.setAvailableRegionsForMate ( findAvailableRegionsForMate ( sh ) ) ;
+		moveSelector.setAvailableRegionsForBreakdown ( findAvailableRegionsForBreakdown ( sh ) ) ;
+	}
+	
+	/***/
+	private Collection < Road > findAvailableRoadsForMoveSheperd ( Sheperd sh ) 
+	{
+		Collection < Road > res ;
+		if ( sh.getOwner().getMoney () >= 1 )
+			res = CollectionsUtilities.newCollectionFromIterable( match.getGameMap().getFreeRoads () ) ;
+		else
+		{
+			res = new LinkedList < Road > () ;
+			for ( Road road : sh.getPosition().getAdjacentRoads () )
+				if ( road.getElementContained () == null )
+					res.add ( road ) ;
+		}
+		return res ;
+	}
+	
+	/***/
+	private Collection < Region > findAvailableRegionsForMoveSheep ( Sheperd sh ) 
+	{
+		Collection < Region > res ;
+		res = new ArrayList < Region > ( 2 ) ;
+		if ( MapUtilities.ovineCount ( sh.getPosition().getFirstBorderRegion () ) > 0 )
+			res.add ( sh.getPosition().getFirstBorderRegion() ) ;
+		if ( MapUtilities.ovineCount ( sh.getPosition().getSecondBorderRegion() ) > 0 )
+			res.add ( sh.getPosition().getSecondBorderRegion() ) ;
+		return res ;
+	}
+	
+	/***/
+	private Map < RegionType , Integer > findAvailableRegionsForBuyCard ( Sheperd sh ) 
+	{
+		Map < RegionType , Integer > res ;
+		RegionType r ;
+		int price ;
+		res = new HashMap < Region.RegionType , Integer> ( 2 ) ;
+		try
+		{
+			r =  sh.getPosition().getFirstBorderRegion ().getType () ;
+			price = match.getBank().getPeekCardPrice ( r ) ;
+			if ( sh.getOwner().getMoney() >= price )
+				res.put ( r , price ) ;
+		} 
+		catch (NoMoreCardOfThisTypeException e) {}
+		try
+		{
+			r =  sh.getPosition().getSecondBorderRegion ().getType () ;
+			price = match.getBank().getPeekCardPrice ( r ) ;
+			if ( sh.getOwner().getMoney() >= price )
+				res.put ( r , price ) ;
+		} 
+		catch (NoMoreCardOfThisTypeException e) {}
+		return res ;
+	}
+	
 	/***/
 	private Map < RegionType , Integer > generateCardPriceMap ( Sheperd s ) 
 	{
@@ -207,20 +328,46 @@ class TurnationPhaseManager implements TurnNumberClock
 		return res ;
 	}
 	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public int getTurnNumber () throws WrongMatchStateMethodCallException
+	/***/
+	private Collection < Region > findAvailableRegionsForMate ( Sheperd sh ) 
 	{
-		int res ;
-		if ( match.getMatchState () == MatchState.TURNATION )
-			res = turnNumber ;
-		else
-			throw new WrongMatchStateMethodCallException ( match.getMatchState () ) ;
+		Collection < Region > res ;
+		Region r ;
+		res = new ArrayList < Region > ( 2 ) ;
+		r = sh.getPosition().getFirstBorderRegion() ;
+		if ( Mate.canMateDueToSexReasons ( r ) )
+			res.add(r);
+		r = sh.getPosition().getSecondBorderRegion() ;
+		if ( Mate.canMateDueToSexReasons ( r ) )
+			res.add(r);
 		return res ;
 	}
 	
+	/***/
+	private Collection < Region > findAvailableRegionsForBreakdown ( Sheperd sh ) 
+	{
+		Collection < Region > res ;
+		Iterable < Animal > i ;
+		Region r ;
+		Animal a ;
+		int c ;
+		res = new ArrayList < Region > ( 2 ) ;
+		r = sh.getPosition().getFirstBorderRegion();
+		c = MapUtilities.ovineCount ( r ) ;
+		if ( c >= 2 )
+			res.add(r);
+		else
+			if ( c == 1 && MapUtilities.extractAdultOvinesExceptBlackSheep ( r.getContainedAnimals () ).size() == 0 ) 
+				res.add(r) ;
+		r = sh.getPosition().getSecondBorderRegion();
+		c = MapUtilities.ovineCount ( r ) ;
+		if ( c >= 2 )
+			res.add(r);
+		else
+			if ( c == 1 && MapUtilities.extractAdultOvinesExceptBlackSheep ( r.getContainedAnimals () ).size() == 0 )
+				res.add(r);
+		return res;
+	}
 	
 	/**
 	 * This method effectively execute a Move selected by the User.
@@ -239,7 +386,7 @@ class TurnationPhaseManager implements TurnNumberClock
 		{	
 			case BREAK_DOWN :
 				mapUID =  ( ( Animal ) params.get(0) ).getPosition().getUID () ;
-				exec.executeBreakdown ( match , findAnimalByUID ( match.getGameMap().getRegionByUID ( mapUID ) , ( ( Animal ) params.get(0) ).getUID () ) ) ;
+				exec.executeBreakdown ( match , MapUtilities.findAnimalByUID ( match.getGameMap().getRegionByUID ( mapUID ) , ( ( Animal ) params.get(0) ).getUID () ) ) ;
 			break ;
 			case BUY_CARD :
 				exec.executeBuyCard ( match , (RegionType) params.get(0) ) ;
@@ -257,53 +404,6 @@ class TurnationPhaseManager implements TurnNumberClock
 				exec.executeMoveSheperd ( match, match.getGameMap ().getRoadByUID ( mapUID ) ); 
 			break ;
 		}
-	}
-	
-	/***/
-	private Animal findAnimalByUID ( Region location , int uid )
-	{
-		Animal res ;
-		res = null ;
-		for ( Animal a : location.getContainedAnimals () )
-			if ( a.getUID () == uid )
-			{
-				res = a ;
-				break ;
-			}
-		return res ;
-	}
-	
-	/**
-	 * Helper method that allows the System to choose a Sheperd for a Player's turn ( eventually aking him who ),
-	 * and then create a MoveExecutor for this User to play.
-	 * 
-	 * @param currentPlayer the player for who a MoveExecutor has to be built.
-	 * @return the created MoveExecutor
-	 * @throws TimeoutException if the currentPlayer has to choose between some Sheperds and
-	 * 	       does not answer before a timeout.
-	 */
-	private MoveExecutor generateMoveExecAndChooseSheperd ( Player currentPlayer ) throws TimeoutException 
-	{
-		MoveExecutor res ;
-		Sheperd choosenSheperd ;
-		System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR : INIZIO" ) ;
-		if ( match.getNumberOfPlayers () == 2 )
-		{
-			System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR - CHIDENDO AL PLAYER : " + currentPlayer.getName () + " DI SCEGLIERE UN PASTORE" ) ;					
-			choosenSheperd = currentPlayer.chooseSheperdForATurn ( currentPlayer.getSheperds () ) ;
-			for ( Sheperd s : currentPlayer.getSheperds() )
-				if ( s.getUID () == choosenSheperd.getUID () )
-				{
-					choosenSheperd = s ;
-					break ;
-				}
-			System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR - IL PLAYER : " + currentPlayer.getName () + " HA SCELTO IL PASTORE " + choosenSheperd.getName () ) ;									
-			res = MoveExecutor.newInstance ( choosenSheperd , this , lambEvolver ) ;
-		}
-		else
-			res = MoveExecutor.newInstance ( currentPlayer.getSheperds ().iterator ().next () , this , lambEvolver ) ;
-		System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR : END" ) ;
-		return res ;
 	}
 	
 	/***/

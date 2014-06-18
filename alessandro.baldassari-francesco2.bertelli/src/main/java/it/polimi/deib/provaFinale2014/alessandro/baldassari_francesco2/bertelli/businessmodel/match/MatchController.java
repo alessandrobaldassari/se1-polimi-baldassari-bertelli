@@ -6,7 +6,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank.Bank;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank.BankFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank.Bank.NoMoreCardOfThisTypeException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.AdultOvineType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvineType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.BlackSheepAlreadyGeneratedException;
@@ -26,7 +26,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.PlayerObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosing.ConnectionLoosingManagerObserver;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlauncherserver.MatchStarter;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunching.MatchStarter;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
@@ -60,7 +60,7 @@ import java.util.concurrent.TimeoutException;
  * The only true state variable of a GameController object is the GameMatch object;
  * so, every GameController, is potentially poolable.
  */
-public class MatchController implements Runnable , ConnectionLoosingManagerObserver , Serializable
+public class MatchController implements Runnable , ConnectionLoosingManagerObserver
 {
 	
 	/**
@@ -177,7 +177,6 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	 */
 	public void addPlayer ( Player newPlayer ) throws WrongMatchStateMethodCallException
 	{
-		//while ( match == null ) ;
 		System.out.println ( "MATCH_CONTROLLER - ADD_PLAYER : match = " + match ) ;
 		if ( match.getMatchState () == Match.MatchState.WAIT_FOR_PLAYERS )
 			tempBlockingQueue.offer ( newPlayer ) ;
@@ -279,7 +278,6 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 				{
 					System.out.println ( "GAME CONTROLLER : WAIT FOR PLAYERS PHASE - PLAYER ACCETTATO" ) ;
 					match.addPlayer ( newPlayer ) ;
-					playersGenericNotification ( "Un nuovo giocatore è arrivato, il suo nome è " + newPlayer.getName () ) ;
 					System.out.println ( "GAME CONTROLLER : WAIT FOR PLAYERS PHASE - PLAYER AGGIUNTO AL MATCH" ) ;
 					if ( match.getNumberOfPlayers () == GameConstants.MAX_NUMBER_OF_PLAYERS ) 
 					{
@@ -287,7 +285,6 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 						timer.cancel () ;
 						match.setMatchState ( MatchState.INITIALIZATION ) ;
 						matchStartCommunicationController.notifyFinishAddingPlayers () ;
-						// notify the user with the player abstract class. 
 					}
 				}
 			}

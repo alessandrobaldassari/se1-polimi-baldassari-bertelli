@@ -7,9 +7,9 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.PlayerWantsToExitGameException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.message.Message;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -26,12 +26,6 @@ public abstract class ClientHandler < T >
 {
 
 	private static int uidGenerator = 0 ;
-	
-	/**
-	 * Standard message to give to the User if the Match he was waiting for to start, will no begin. 
-	 */
-	public static final String MATCH_WILL_NOT_START_MESSAGE = "Sorry, but the game can not start now" ;
-
 	/***/
 	private final int UID ;
 	
@@ -111,7 +105,7 @@ public abstract class ClientHandler < T >
 		String res ;
 		Message m ;
 		System.out.println ( "CLIENT_HANDLER - REQUEST NAME : BEGIN." ) ;
-		m = Message.newInstance ( GameProtocolMessage.NAME_REQUESTING_REQUEST , Collections.EMPTY_LIST ) ;
+		m = Message.newInstance ( GameProtocolMessage.NAME_REQUESTING_REQUEST , Collections.<Serializable> emptyList() ) ;
 		write( m ) ;
 		System.out.println ( "CLIENT_HANDLER - REQUEST NAME : MESSAGE WRITTEN." ) ;
 		System.out.println ( "CLIENT_HANDLER - REQUEST NAME : WAITING FOR THE RESPONSE." ) ;
@@ -121,17 +115,12 @@ public abstract class ClientHandler < T >
 		{
 			System.out.println ( "CLIENT_HANDLER - REQUEST NAME : IN HEADER OK." ) ;
 			res = ( String ) CollectionsUtilities.newListFromIterable ( m.getParameters () ).get ( 0 ) ;
-			System.out.println ( "CLIENT_HANDLER - REQUEST NAME : IN PARAMETER OK." ) ;
+			System.out.println ( "CLIENT_HANDLER - REQUEST NAME : IN PARAMETER OK : " + res ) ;
 			if ( res == null )
 				throw new PlayerWantsToExitGameException () ;
-			else 
-				if ( res.compareToIgnoreCase ( Utilities.EMPTY_STRING ) == 0 )
-					throw new IOException ( "BAD_RESPONSE" ) ;
 		}
 		else
-		{
-			throw new IOException ( "BAD_RESPONSE" ) ;
-		}
+			throw new PlayerWantsToExitGameException ( "BAD_RESPONSE" ) ;
 		System.out.println ( "CLIENT_HANDLER - REQUEST NAME : END" ) ;
 		return res ;
 	}
@@ -387,7 +376,7 @@ public abstract class ClientHandler < T >
 	public void sendGuiConnectorNotification ( Serializable guiConnector ) throws IOException
 	{
 		Message m ;
-		m = Message.newInstance ( GameProtocolMessage.GUI_CONNECTOR_NOTIFICATION , Collections.<Serializable>singleton ( guiConnector ) ) ;
+		m = Message.newInstance ( GameProtocolMessage.GUI_CONNECTOR_NOTIFICATION , Collections.singleton ( guiConnector ) ) ;
 		write ( m ) ;
 	}
 	

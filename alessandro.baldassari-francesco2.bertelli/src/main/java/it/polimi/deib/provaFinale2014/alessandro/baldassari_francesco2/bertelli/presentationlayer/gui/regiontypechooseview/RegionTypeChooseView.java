@@ -17,11 +17,12 @@ import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.ButtonGroup;
-import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
 
@@ -104,7 +105,7 @@ public class RegionTypeChooseView extends ObservableFrameworkedWithGridBagLayout
 	}
 	
 	/***/
-	public void setData ( Iterable < Couple < RegionType , Integer > > inData )
+	public void setData ( Map < RegionType , Integer > inData )
 	{
 		regionTypeViewPanel.setData(inData); 
 	}
@@ -170,7 +171,7 @@ public class RegionTypeChooseView extends ObservableFrameworkedWithGridBagLayout
 	}
 	
 	/***/
-	public static Couple < RegionType , Integer > showDialog ( Iterable < Couple < RegionType , Integer > > inData , int moneyLimit ) 
+	public static Couple < RegionType , Integer > showDialog ( Map < RegionType , Integer > inData , int moneyLimit ) 
 	{
 		RegionTypeChooseView regionTypeChooseView ;
 		AtomicReference < Couple < RegionType , Integer > > move ;
@@ -196,11 +197,11 @@ public class RegionTypeChooseView extends ObservableFrameworkedWithGridBagLayout
 	
 	public static void main ( String [] args ) 
 	{
-		ArrayList < Couple < RegionType , Integer > > in ;
+		Map < RegionType , Integer >  in ;
 		Couple < RegionType , Integer > x ;
-		in = new ArrayList < Couple < RegionType , Integer > > () ;
-		in.add ( new Couple < RegionType , Integer > ( RegionType.CULTIVABLE , 0 ) ) ;
-		in.add ( new Couple < RegionType , Integer > ( RegionType.FOREST , 3 ) ) ;
+		in = new HashMap < RegionType , Integer > () ;
+		in.put ( RegionType.CULTIVABLE , 0 )  ;
+		in.put ( RegionType.FOREST , 3 ) ;
 		x = RegionTypeChooseView.showDialog ( in , 1 )  ;
 		System.out.println ( x ) ;
 	}
@@ -251,7 +252,7 @@ class RegionTypeViewPanel extends FrameworkedWithGridBagLayoutPanel
 	@Override
 	protected void injectComponents () {}
 	
-	public void setData ( Iterable < Couple < RegionType , Integer > > inData )
+	public void setData ( Map < RegionType , Integer > inData )
 	{
 		Insets insets ;
 		WithBackgroundImagePanel panel ;
@@ -259,13 +260,13 @@ class RegionTypeViewPanel extends FrameworkedWithGridBagLayoutPanel
 		int i ;
 		insets = new Insets(5,5,5,5) ;
 		i = 0 ;
-		for ( Couple < RegionType , Integer > c : inData )
+		for ( RegionType rt : inData.keySet() )
 		{
 			panel = new WithBackgroundImagePanel () ;
-			r = new JRadioButton ( c.getFirstObject() + " [ " + c.getSecondObject() + " danari ]" ) ;
+			r = new JRadioButton ( rt + " [ " + inData.get ( rt ) + " danari ]" ) ;
 			imagePanels.add(panel);
 			selectors.add(r);
-			r.addItemListener ( new SelectorItemListener ( c ) );
+			r.addItemListener ( new SelectorItemListener ( new Couple < RegionType , Integer > ( rt , inData.get(rt) ) ) ); 
 			layoutComponent ( panel , i , 0 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets) ;
 			layoutComponent ( r , i , 1 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets) ;
 			r.setHorizontalAlignment ( SwingConstants.CENTER ) ;
@@ -273,7 +274,7 @@ class RegionTypeViewPanel extends FrameworkedWithGridBagLayoutPanel
 			add ( r ) ;
 			r.setOpaque(false); 
 			panel.setOpaque(false);
-			panel.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCardImage ( c.getFirstObject() ) ) ;
+			panel.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCardImage ( rt ) ) ;
 			i ++ ;
 		}
 		repaint () ;

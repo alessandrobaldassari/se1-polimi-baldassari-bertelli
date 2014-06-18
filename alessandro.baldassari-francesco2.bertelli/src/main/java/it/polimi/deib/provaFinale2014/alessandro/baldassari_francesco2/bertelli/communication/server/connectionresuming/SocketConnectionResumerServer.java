@@ -14,6 +14,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosing.SuspendedClientHandlerBuffer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 
+/***/
 public class SocketConnectionResumerServer extends ConnectionResumerServer < Socket > 
 {
 
@@ -24,6 +25,7 @@ public class SocketConnectionResumerServer extends ConnectionResumerServer < Soc
 		
 	}
 	
+	/***/
 	@Override
 	public void connect () throws IOException 
 	{

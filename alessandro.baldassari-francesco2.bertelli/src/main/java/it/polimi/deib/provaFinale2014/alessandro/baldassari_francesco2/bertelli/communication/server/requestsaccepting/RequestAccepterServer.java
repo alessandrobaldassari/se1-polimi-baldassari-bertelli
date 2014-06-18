@@ -3,7 +3,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import java.io.IOException;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlauncherserver.MatchPlayerAdder;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunching.MatchPlayerAdder;
 
 /**
  * This class represents a front end request accepter server, a component whose function is
@@ -96,7 +96,7 @@ public abstract class RequestAccepterServer implements Runnable
 	 * Gives subclasses a change to pass a created ClientHandler to the MatchAdderCommunicationController
 	 * associated with this Server.
 	 */
-	protected void submitToMatchAdderCommunicationController ( ClientHandler clientHandler ) 
+	protected void submitToMatchAdderCommunicationController ( ClientHandler < ? > clientHandler ) 
 	{
 		matchAdderCommunicationController.addPlayer ( clientHandler ) ;
 	}

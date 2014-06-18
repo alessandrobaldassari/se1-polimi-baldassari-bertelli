@@ -1,16 +1,17 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.message.Message;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.net.Socket;
 
 /**
  * This class is a Socket implementation of the ClientHandler interface, so it manages the game
  * communication with a Client that uses the Socket technology as its data transfer method. 
  */
-public class SocketClientHandler extends ClientHandler < Socket > implements Serializable
+public class SocketClientHandler extends ClientHandler < Socket > 
 {
 
 	/**
@@ -44,8 +45,8 @@ public class SocketClientHandler extends ClientHandler < Socket > implements Ser
 	@Override
 	public void dispose () throws IOException  
 	{
-		oos.close () ;
 		ois.close () ;
+		oos.close () ;
 		getConnector().close () ;
 	}
 
@@ -53,7 +54,7 @@ public class SocketClientHandler extends ClientHandler < Socket > implements Ser
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	protected Message read () throws IOException 
+	protected synchronized Message read () throws IOException 
 	{
 		Message m ;
 		try 
@@ -71,10 +72,12 @@ public class SocketClientHandler extends ClientHandler < Socket > implements Ser
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void write ( Message m ) throws IOException
+	public synchronized void write ( Message m ) throws IOException
 	{
+		System.out.println ( "SOCKET_CLIENT_HANDLER - WRITE : DATA TO WRITE : " + m ) ;
 		oos.writeObject ( m ) ;
 		oos.flush () ;
+		System.out.println ( "SOCKET_CLIENT_HANDLER - WRITE : DATA WRITTEN " ) ;
 	}
 
 }

@@ -36,7 +36,7 @@ public class NetworkCommunicantPlayer extends Player
 	/**
 	 * A synchronization variable used to wait for the Client responses. 
 	 */
-	private WriteOnceProperty < Boolean > methodCompleted ;
+	private transient WriteOnceProperty < Boolean > methodCompleted ;
 	
 	/**
 	 * A timer object used to manage the situation where a Client does not answer to a request in a given time. 
@@ -48,7 +48,8 @@ public class NetworkCommunicantPlayer extends Player
 	 */
 	private transient ConnectionLoosingManager connectionLoosingManager ;
 	
-	private ExecutorService executorService ;
+	/***/
+	private transient ExecutorService executorService ;
 	
 	/**
 	 * @param name the name of this Player
@@ -73,41 +74,28 @@ public class NetworkCommunicantPlayer extends Player
 		return clientHandler ;
 	}
 	
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public NamedColor getColorForSheperd ( final Iterable < NamedColor > availableColors ) throws TimeoutException
+	/***/
+	private < T > T executeLater ( Callable < T > commandToExecute ) throws TimeoutException 
 	{
-		NamedColor res  ;
-		Future < NamedColor > f ;
+		T res ;
+		Future < T > future ; 
 		createAndLaunchRequestTimetoutTimer () ;
-		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = executorService.submit ( new Callable < NamedColor > () 
-		{
-			@Override
-			public NamedColor call () throws IOException 
-			{
-				NamedColor res ;
-				res = clientHandler.requestSheperdColor ( availableColors ) ;
-				setMethodCompleted();
-				return res ;
-			}  
-		} ) ;
+		methodCompleted = new WriteOnceProperty < Boolean > () ;	
+		future = Executors.newSingleThreadExecutor().submit ( commandToExecute ) ;
 		waitForMethodCompletedSet () ;
 		try 
 		{
 			if ( methodCompleted.getValue() == true )
 			{
 				requestTimeoutTimer.cancel () ;
-				res = f.get () ;
+				res = future.get () ;
 			}
 			else
 			{
-				if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
+				if ( connectionLoosingManager.manageConnectionLoosing ( NetworkCommunicantPlayer.this , clientHandler , true ) == false )
 					throw new TimeoutException () ;
 				else
-					res = getColorForSheperd ( availableColors );
+					res = executeLater ( commandToExecute ) ;
 			}
 		}
 		catch ( PropertyNotSetYetException e ) 
@@ -120,13 +108,60 @@ public class NetworkCommunicantPlayer extends Player
 		}
 		catch ( ExecutionException e ) 
 		{
-			if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
+			if ( connectionLoosingManager.manageConnectionLoosing ( NetworkCommunicantPlayer.this , clientHandler , true ) == false )
 				throw new TimeoutException () ;
 			else
-				res = getColorForSheperd ( availableColors );
+				res = executeLater ( commandToExecute ) ;
 		}
 		return res ;
-		
+	}
+	
+	/***/
+	private void executeNow ( Runnable commandToExecute ) throws TimeoutException 
+	{
+		createAndLaunchRequestTimetoutTimer () ;
+		methodCompleted = new WriteOnceProperty < Boolean > () ;
+		Executors.newSingleThreadExecutor().execute ( commandToExecute ) ;
+		waitForMethodCompletedSet () ;
+		try 
+		{
+			if ( methodCompleted.getValue () == false )
+			{
+				if ( connectionLoosingManager.manageConnectionLoosing ( NetworkCommunicantPlayer.this , clientHandler , true ) == false )
+					throw new TimeoutException () ;
+				else
+					executeNow(commandToExecute); 
+			}
+			else
+				requestTimeoutTimer.cancel ();
+		}
+		catch ( PropertyNotSetYetException e ) 
+		{
+			throw new RuntimeException ( e ) ;
+		}
+	}
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public NamedColor getColorForSheperd ( final Iterable < NamedColor > availableColors ) throws TimeoutException
+	{
+		Callable < NamedColor > commandToExecute ;
+		NamedColor res ;
+		commandToExecute =  new Callable < NamedColor > () 
+		{
+			@Override
+			public NamedColor call () throws IOException 
+			{
+				NamedColor res ;
+				res = clientHandler.requestSheperdColor ( availableColors ) ;
+				setMethodCompleted();
+				return res ;
+			}  
+		} ;
+		res = executeLater(commandToExecute);
+		return res ;
 	}
 
 	/**
@@ -135,11 +170,9 @@ public class NetworkCommunicantPlayer extends Player
 	@Override
 	public Road chooseInitialRoadForASheperd ( final Iterable < Road > availableRoads ) throws TimeoutException
 	{
+		Callable < Road > commandToExecute ;
 		Road res  ;
-		Future < Road > f ;
-		createAndLaunchRequestTimetoutTimer () ;
-		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = executorService.submit ( new Callable < Road > () 
+		commandToExecute = new Callable < Road > () 
 		{
 			@Override
 			public Road call () throws IOException 
@@ -149,41 +182,10 @@ public class NetworkCommunicantPlayer extends Player
 				setMethodCompleted () ;
 				return res ;
 			}  
-		} ) ;
-		waitForMethodCompletedSet () ;
-		try 
-		{
-			if ( methodCompleted.getValue() == true )
-			{	
-				requestTimeoutTimer.cancel();
-				res = f.get () ;
-			}
-			else
-			{
-				if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
-					throw new TimeoutException () ;
-				else
-					res = chooseInitialRoadForASheperd(availableRoads);
-			}
-		}
-		catch ( PropertyNotSetYetException e ) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (InterruptedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch ( ExecutionException e ) 
-		{
-			if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
-				throw new TimeoutException () ;
-			else
-				res = chooseInitialRoadForASheperd(availableRoads);
-		}
+		} ;
+		res = executeLater(commandToExecute);
 		return res ;
 	}
-
 	
 	/**
 	 * AS THE SUPER'S ONE. 
@@ -191,11 +193,9 @@ public class NetworkCommunicantPlayer extends Player
 	@Override
 	public Sheperd chooseSheperdForATurn ( final Iterable < Sheperd > sheperds ) throws TimeoutException
 	{
+		Callable < Sheperd > commandToExecute ;
 		Sheperd res  ;
-		Future < Sheperd > f ;
-		createAndLaunchRequestTimetoutTimer () ;
-		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = executorService.submit ( new Callable < Sheperd > () 
+		commandToExecute = new Callable < Sheperd > () 
 		{
 			@Override
 			public Sheperd call () throws IOException
@@ -205,38 +205,8 @@ public class NetworkCommunicantPlayer extends Player
 				setMethodCompleted () ;
 				return res ;
 			}  
-		} ) ;
-		waitForMethodCompletedSet () ;
-		try 
-		{
-			if ( methodCompleted.getValue() == true )
-			{
-				requestTimeoutTimer.cancel () ;
-				res = f.get () ;
-			}
-			else
-			{
-				if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
-					throw new TimeoutException () ;
-				else
-					res = chooseSheperdForATurn ( sheperds ) ;
-			}
-		}
-		catch ( PropertyNotSetYetException e ) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (InterruptedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch ( ExecutionException e ) 
-		{
-			if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
-				throw new TimeoutException () ;
-			else
-				res = chooseSheperdForATurn ( sheperds );
-		}
+		} ;
+		res = executeLater(commandToExecute);
 		return res ;
 	}
 
@@ -246,11 +216,9 @@ public class NetworkCommunicantPlayer extends Player
 	@Override
 	public MoveSelection doMove ( final MoveSelector moveFactory , final GameMap gameMap ) throws TimeoutException 
 	{
+		Callable < MoveSelection > commandToExecute ;
 		MoveSelection res  ;
-		Future < MoveSelection > f ;
-		createAndLaunchRequestTimetoutTimer () ;
-		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = executorService.submit ( new Callable < MoveSelection > () 
+		commandToExecute = new Callable < MoveSelection > () 
 		{
 			@Override
 			public MoveSelection call () throws IOException 
@@ -260,38 +228,8 @@ public class NetworkCommunicantPlayer extends Player
 				setMethodCompleted () ;
 				return res ;
 			}  
-		} ) ;
-		waitForMethodCompletedSet () ;
-		try 
-		{
-			if ( methodCompleted.getValue() == true )
-			{
-				res = f.get () ;
-				requestTimeoutTimer.cancel () ;
-			}
-			else
-			{
-				if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
-					throw new TimeoutException () ;
-				else
-					res = doMove ( moveFactory , gameMap ) ;
-			}
-		}
-		catch ( PropertyNotSetYetException e ) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (InterruptedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch ( ExecutionException e ) 
-		{
-			if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
-				throw new TimeoutException () ;
-			else
-				res = doMove ( moveFactory , gameMap ) ;
-		}
+		} ;
+		res = executeLater ( commandToExecute ) ;
 		return res ;
 	}
 
@@ -299,13 +237,10 @@ public class NetworkCommunicantPlayer extends Player
 	 * AS THE SUPER'S ONE.  
 	 */
 	@Override
-	public void chooseCardsEligibleForSelling () throws TimeoutException
+	protected void chooseCardsEligibleForSellingIfThereAreSellableCards () throws TimeoutException
 	{
-		System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling - INIZIO" ) ;
-		createAndLaunchRequestTimetoutTimer () ;
-		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling - SUBMITTING FUTURE" ) ;
-		executorService.submit ( new Runnable () 
+		Runnable commandToExecute ;
+		commandToExecute = new Runnable () 
 		{
 			@Override
 			public void run ()  
@@ -342,28 +277,9 @@ public class NetworkCommunicantPlayer extends Player
  					e.printStackTrace();
 				}
 			}  
-		} ) ;
-		System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling - BEFORE BARRIER" ) ;
-		waitForMethodCompletedSet () ;
-		System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling - AFTER BARRIER" ) ;
-		try 
-		{
-			if ( methodCompleted.getValue () == false )
-			{
-				if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
-					throw new TimeoutException () ;
-				else
-					chooseCardsEligibleForSelling();
-			}
-			else
-				requestTimeoutTimer.cancel ();
-		}
-		catch ( PropertyNotSetYetException e ) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling - END" ) ;
-	}
+		} ;
+		executeNow(commandToExecute);
+ 	}
 
 	
 	/**
@@ -372,11 +288,9 @@ public class NetworkCommunicantPlayer extends Player
 	@Override
 	public Iterable < SellableCard > chooseCardToBuy ( final Iterable<SellableCard > src ) throws TimeoutException 
 	{
+		Callable < Iterable < SellableCard > > commandToExecute ;
 		Iterable < SellableCard > res  ; 
-		Future < Iterable < SellableCard > > f ;
-		createAndLaunchRequestTimetoutTimer () ;
-		methodCompleted = new WriteOnceProperty < Boolean > () ;
-		f = executorService.submit ( new Callable < Iterable < SellableCard > > () 
+		commandToExecute = new Callable < Iterable < SellableCard > > () 
 		{
 			@Override
 			public Iterable < SellableCard > call () throws IOException
@@ -387,38 +301,8 @@ public class NetworkCommunicantPlayer extends Player
 				setMethodCompleted () ;
 				return res ;
 			}  
-		} ) ;
-		waitForMethodCompletedSet () ;
-		try 
-		{
-			if ( methodCompleted.getValue() == true )
-			{
-				requestTimeoutTimer.cancel () ;
-				res = f.get () ;
-			}
-			else
-			{
-				if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
-					throw new TimeoutException () ;
-				else
-					res = chooseCardToBuy ( src );
-			}
-		}
-		catch ( PropertyNotSetYetException e ) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (InterruptedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch ( ExecutionException e ) 
-		{
-			if ( connectionLoosingManager.manageConnectionLoosing ( this , clientHandler , true ) == false )
-				throw new TimeoutException () ;
-			else
-				res = chooseCardToBuy ( src );
-		}
+		} ;
+		res = executeLater ( commandToExecute ) ;
 		return res ;
 	}
 	

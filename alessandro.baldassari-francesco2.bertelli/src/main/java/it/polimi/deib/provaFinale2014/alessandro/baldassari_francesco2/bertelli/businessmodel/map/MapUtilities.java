@@ -1,7 +1,13 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvineType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.BlackSheep;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Ovine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Wolf;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
@@ -81,6 +87,68 @@ public final class MapUtilities
 		if ( result == null )
 			throw new WrongStateMethodCallException () ;
 		return result ;
+	}
+	
+	/**
+	 * Extract from the src Collection the Animals which are AdultOvines
+	 * 
+	 * @param src the Collection where to perform the search.
+	 * @return a List containing all of the AdultOvines which are in the src parameter.
+	 */
+	public static List < AdultOvine > extractAdultOvinesExceptBlackSheep ( Iterable < Animal > src ) 
+	{
+		List < AdultOvine > res ;
+		res = new LinkedList < AdultOvine > () ;
+		for ( Animal animal : src )
+			if ( animal instanceof AdultOvine && ! ( animal instanceof BlackSheep ) )
+				res.add ( ( AdultOvine ) animal ) ;
+		return res ;
+	}
+	
+	/**
+	 * Search for an AdultOvine of the parameter specified type in the src List, and if 
+	 * it exists, return it.
+	 * 
+	 * @param src the List where to perform the search.
+	 * @param type the type the returned AdultOvine must be.
+	 * @return the target AdultOvine, null if it can not exists in the src List.
+	 */
+	public static AdultOvine lookForAnOvine ( List < AdultOvine > src , AdultOvineType type ) 
+	{
+		AdultOvine res ;
+		int i ;
+		res = null ;
+		i = 0 ;
+		while ( i < src.size() && src.get ( i ).getType () != type ) 
+		i ++ ;
+		if ( i < src.size () )
+			res = src.get ( i ) ;
+		return res ;
+	}
+
+	
+	public static int ovineCount ( Region region ) 
+	{
+		int res ;
+		res = 0 ;
+		for ( Animal a : region.getContainedAnimals () )
+			if ( Ovine.class.isAssignableFrom ( a.getClass () ) )
+				res ++ ;
+		return res ;
+	}
+	
+	/***/
+	public static Animal findAnimalByUID ( Region location , int uid )
+	{
+		Animal res ;
+		res = null ;
+		for ( Animal a : location.getContainedAnimals () )
+			if ( a.getUID () == uid )
+			{
+				res = a ;
+				break ;
+			}
+		return res ;
 	}
 	
 }

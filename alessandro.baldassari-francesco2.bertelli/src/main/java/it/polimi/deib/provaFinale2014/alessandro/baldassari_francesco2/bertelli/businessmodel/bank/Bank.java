@@ -222,10 +222,10 @@ public class Bank implements Serializable
 			if ( cards.get ( regionType ).isEmpty () == false )
 			{ 
 				res = cards.get ( regionType ).peek () ;
-				if ( price != res.getInitialPrice () )
-					throw new CardPriceNotRightException ( price , res.getInitialPrice() ) ;
-				else
+				if ( price == res.getInitialPrice () )
 					cards.get ( regionType ).pop () ;
+				else
+					throw new CardPriceNotRightException ( price , res.getInitialPrice() ) ;
 			}
 			else
 				throw new NoMoreCardOfThisTypeException ( regionType ) ;

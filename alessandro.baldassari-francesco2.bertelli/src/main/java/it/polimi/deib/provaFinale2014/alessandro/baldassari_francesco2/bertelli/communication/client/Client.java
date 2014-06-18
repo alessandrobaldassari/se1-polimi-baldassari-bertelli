@@ -7,7 +7,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.GameProtocolMessage;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.Message;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.message.Message;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Terminable;
@@ -24,7 +24,7 @@ import java.util.List;
  * class where subclasses has the chance to implement their server-listening logic, server-sending-messages
  * logic and so on.
  */
-public abstract class Client extends Thread implements Terminable
+public abstract class Client implements Runnable , Terminable
 {
 	
 	private int uid ;
@@ -68,8 +68,11 @@ public abstract class Client extends Thread implements Terminable
 	 */
 	public void openConnection () throws IOException  
 	{
-		directTechnicalConnect () ;
-		technicallyOn = true ;
+		if ( technicallyOn == false )
+		{
+			directTechnicalConnect () ;
+			technicallyOn = true ;
+		}
 	}
 	
 	/**
@@ -141,18 +144,6 @@ public abstract class Client extends Thread implements Terminable
 	 * @throws IOException if something goes wrong during the execution.
 	 */
 	protected abstract void operationFinished () throws IOException ;
-	
-	/**
-	 * AS THE SUPER'S ONE.
-	 * This methods do things in order for this Thread to start only if the technicallyOn parameter
-	 * is true, so only if the openConnection method has been called before. 
-	 */
-	@Override
-	public void start () 
-	{
-		if ( technicallyOn )
-			super.start () ;
-	}
 		
 	/**
 	 * AS THE SUPER'S ONE.

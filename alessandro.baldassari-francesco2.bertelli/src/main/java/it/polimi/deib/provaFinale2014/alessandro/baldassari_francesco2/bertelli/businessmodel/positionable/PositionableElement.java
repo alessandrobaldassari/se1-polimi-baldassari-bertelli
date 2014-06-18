@@ -12,7 +12,7 @@ public abstract class PositionableElement < T extends GameMapElement > implement
 
 	// ATTRIBUTES
 	
-	private static int UIDGenerator = -1 ;
+	private static transient int UIDGenerator = -1 ;
 	
 	/***/
 	private final int uid ;

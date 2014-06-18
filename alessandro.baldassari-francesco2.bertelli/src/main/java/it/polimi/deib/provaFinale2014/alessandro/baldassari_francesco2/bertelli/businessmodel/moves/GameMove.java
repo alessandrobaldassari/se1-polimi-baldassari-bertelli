@@ -7,7 +7,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 /**
  * An instance of this class represents a Move that a Player can do during the Game. 
  */
-public abstract class GameMove implements Serializable
+public abstract class GameMove 
 {
 	
 	/***/

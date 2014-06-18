@@ -78,6 +78,13 @@ public class DummyPlayer extends Player
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	protected void chooseCardsEligibleForSellingIfThereAreSellableCards()
+			throws TimeoutException {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	
 	

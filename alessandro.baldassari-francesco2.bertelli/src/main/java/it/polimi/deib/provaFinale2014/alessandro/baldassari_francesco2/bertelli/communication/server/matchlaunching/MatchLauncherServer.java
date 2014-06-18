@@ -1,7 +1,6 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlauncherserver;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunching;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
@@ -19,6 +18,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.RMIGUIUpdaterServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosing.ConnectionLoosingManager;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 
 /**
  * This class is the MasterServer, the core component of the Server part of the System
@@ -26,7 +26,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  * It is the one that sums all the inbound connections, bounds them to the GameController
  * instances and manages also the situation where just one Player wants to play ( and cannot ). 
  */
-public class MatchLauncherCommunicationController implements MatchPlayerAdder , Runnable , MatchStarter , Serializable
+public class MatchLauncherServer implements MatchPlayerAdder , Runnable , MatchStarter 
 {
 	
 	/**
@@ -45,7 +45,7 @@ public class MatchLauncherCommunicationController implements MatchPlayerAdder , 
 	/**
 	 * A Server to manage the gui messages with the client.
 	 */
-	private transient RMIGUIUpdaterServer currentGuiServer ;
+	private RMIGUIUpdaterServer currentGuiServer ;
 	
 	/***/
 	private MatchLauncherSession session ;
@@ -58,7 +58,7 @@ public class MatchLauncherCommunicationController implements MatchPlayerAdder , 
 	/**
 	 * @throws IOException if something goes wrong with the creation of the member objects. 
 	 */
-	public MatchLauncherCommunicationController ( ConnectionLoosingManager connectionLoosingManager ) throws IOException  
+	public MatchLauncherServer ( ConnectionLoosingManager connectionLoosingManager ) throws IOException  
 	{
 		this.connectionLoosingManager = connectionLoosingManager ;
 		queue = new LinkedBlockingQueue < ClientHandler < ? > > () ; 
@@ -76,9 +76,7 @@ public class MatchLauncherCommunicationController implements MatchPlayerAdder , 
 	public void run () 
 	{
 		ClientHandler < ? > newClientHandler = null ;
-		String name ;
 		inFunction = true ;
-		name = null ;
 		System.out.println ( "MASTER SERVER : INIZIO FUNZIONAMENTO" ) ;
 		while  ( inFunction )
 		{
@@ -86,81 +84,95 @@ public class MatchLauncherCommunicationController implements MatchPlayerAdder , 
 			{
 				System.out.println ( "MASTER SERVER : ATTENDENDO CLIENT" ) ;
 				newClientHandler = queue.take () ;
+				System.out.println ( "MASTER SERVER : CLIENT ACCETTATO" ) ;
 				synchronized ( this )
 				{
-					System.out.println ( "MASTER SERVER : CLIENT ACCETTATO" ) ;
 					// se è il primo giocatore, avvia una nuova partita
 					if ( session == null )
 						initializeNewSession () ;
-					System.out.println ( "MASTER SERVER : CHIEDENDO NOME AL CLIENT" ) ;
-					// chiedi il nome
-					name = newClientHandler.requestName () ;
-					System.out.println ( "MASTER SERVER : NOME RICEVUTO DAL CLIENT, nome = " + name ) ;
-					// assicurati di prendere un nome corretto
-					while ( session.containsName ( name ) )
-					{
-						System.out.println ( "MASTER SERVER : NOME " + name + " GIA' IN USO" ) ;
-						System.out.println ( "MASTER SERVER : NOTIFICA AL CLIENT DI NOME + " + name + " NOME GIA' IN USO" ) ;
-						newClientHandler.notifyNameChoose ( false , "Nome già in uso." ) ;					
-						System.out.println ( "MASTER SERVER : CHIEDENDO NOME AL CLIENT" ) ;
-						name = newClientHandler.requestName () ;
-						System.out.println ( "MASTER SERVER : NOME RICEVUTO DAL CLIENT, nome = " + name ) ;
-					}
-					System.out.println ( "MASTER SERVER : NOME + " +name + " NON IN USO" ) ;
-					System.out.println ( "MASTER SERVER : AGGIUNGENDO PLAYER ALLA PARTITA DI NOME " + name ) ;
-					// registra il nuovo giocatore
-					session.addHandler ( newClientHandler ) ;
-					session.addName ( name ) ;
-					newClientHandler.notifyNameChoose ( true , "Nome ammesso." ) ;
-					System.out.println ( "CLIENT DI NOME " + name + " NOTIFICATO CHE IL SUO NOME E' CORRETTO" ) ;
-					System.out.println ( "MASTER SERVER : PLAYER DI NOME " + name + "AGGIUNTO ALLA PARTITA" ) ;
-					currentMatchController.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler , connectionLoosingManager ) ) ;					
-					notifyAll () ;
-				} 
+				}
+				addNewPlayer ( newClientHandler ) ;
+				// notify the others of the new ?
 			}
-			catch ( WrongMatchStateMethodCallException e )
-			{
-				System.out.println ( "MATCH_LAUNCHER_COMMUNICATION_CONTROLLER - RUN : WrongMatchStateMethodCallException GENERATED" ) ;
-				// may be the Game Controller is late, give this Player another change to enter.
-				if ( e.getActualState () == MatchState.CREATED ) 
-				{
-					try 
-					{
-						Thread.sleep ( TimeConstants.MATCH_LAUNCHER_SERVER_WAITING_TIME ) ;
-						currentMatchController.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler , connectionLoosingManager ) ) ;
-					} 
-					catch ( InterruptedException e1 ) 
-					{
-						System.out.println ( "MATCH_LAUNCHER_COMMUNICATION_CONTROLLER - RUN : INTERRUPTED BY " + Thread.currentThread() ) ;
-					}
-					catch ( WrongMatchStateMethodCallException e1 ) 
-					{
-						System.out.println ( "THE GAME CONTROLLER HAS TOO LOW SPEED, SOMETHING MAY BE KO." ) ;
-						throw new RuntimeException ( e1 ) ;
-					}
-					finally 
-					{
-						notifyAll () ;
-					}
-				}
-				else
-				{
-					System.out.println ( "UNEXPECTED FLOW, THIS SITUATION SHOULD NEVER HAPPEN." ) ;
-					throw new RuntimeException ( e ) ;
-				}
-			} 
-			catch ( IOException e ) 
-			{
-				System.out.println ( "MATCH_LAUNCHER_COMMUNICATION_CONTROLLER - RUN : IOEXCEPTION " + e.getMessage() ) ;	
-			} 
 			catch ( InterruptedException e ) 
 			{
 				System.out.println ( "MATCH_LAUNCHER_COMMUNICATION_CONTROLLER - RUN : INTERRUPTED BY " + Thread.currentThread() ) ;
 			} 
-			catch ( PlayerWantsToExitGameException e )
+		}
+	}
+	
+	/***/
+	private synchronized void addNewPlayer ( ClientHandler < ? > newClientHandler ) 
+	{
+		String name ;
+		name = null ;
+		try
+		{
+			System.out.println ( "MASTER SERVER : CHIEDENDO NOME AL CLIENT" ) ;
+			// chiedi il nome
+			name = newClientHandler.requestName () ;
+			System.out.println ( "MASTER SERVER : NOME RICEVUTO DAL CLIENT, nome = " + name ) ;
+			// assicurati di prendere un nome corretto
+			while ( name.trim ().isEmpty () || session.containsName ( name ) )
 			{
-				System.out.println ( "MATCH_LAUNCHER_COMUNICATION_CONTROLLER - RUN : PLAYER_WANTS_TO_EXIT_GAME_EXCEPTION" ) ;
+				System.out.println ( "MASTER SERVER : NOME " + name + " GIA' IN USO" ) ;
+				System.out.println ( "MASTER SERVER : NOTIFICA AL CLIENT DI NOME + " + name + " NOME GIA' IN USO" ) ;
+				newClientHandler.notifyNameChoose ( false , "Nome già in uso." ) ;					
+				System.out.println ( "MASTER SERVER : CHIEDENDO NOME AL CLIENT" ) ;
+				name = newClientHandler.requestName () ;
+				System.out.println ( "MASTER SERVER : NOME RICEVUTO DAL CLIENT, nome = " + name ) ;
 			}
+			System.out.println ( "MASTER SERVER : NOME + " +name + " NON IN USO" ) ;
+			System.out.println ( "MASTER SERVER : AGGIUNGENDO PLAYER ALLA PARTITA DI NOME " + name ) ;
+			// registra il nuovo giocatore
+			session.addHandler ( newClientHandler ) ;
+			session.addName ( name ) ;
+			newClientHandler.notifyNameChoose ( true , "Nome ammesso." ) ;
+			System.out.println ( "CLIENT DI NOME " + name + " NOTIFICATO CHE IL SUO NOME E' CORRETTO" ) ;
+			System.out.println ( "MASTER SERVER : PLAYER DI NOME " + name + "AGGIUNTO ALLA PARTITA" ) ;
+			currentMatchController.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler , connectionLoosingManager ) ) ;					
+			// notify other players of the new one.
+			notifyAll () ;
+		}
+		catch ( WrongMatchStateMethodCallException e )
+		{
+			System.out.println ( "MATCH_LAUNCHER_COMMUNICATION_CONTROLLER - RUN : WrongMatchStateMethodCallException GENERATED" ) ;
+			// may be the Game Controller is late, give this Player another change to enter.
+			if ( e.getActualState () == MatchState.CREATED ) 
+			{
+				try 
+				{
+					Thread.sleep ( TimeConstants.MATCH_LAUNCHER_SERVER_WAITING_TIME ) ;
+					currentMatchController.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler , connectionLoosingManager ) ) ;
+				} 
+				catch ( InterruptedException e1 ) 
+				{
+					System.out.println ( "MATCH_LAUNCHER_COMMUNICATION_CONTROLLER - RUN : INTERRUPTED BY " + Thread.currentThread() ) ;
+				}
+				catch ( WrongMatchStateMethodCallException e1 ) 
+				{
+					System.out.println ( "THE GAME CONTROLLER HAS TOO LOW SPEED, SOMETHING MAY BE KO." ) ;
+					throw new RuntimeException ( e1 ) ;
+				}
+				finally 
+				{
+					notifyAll () ;
+				}
+			}
+			else
+			{
+				// notify the user...
+				System.out.println ( "UNEXPECTED FLOW, THIS SITUATION SHOULD NEVER HAPPEN." ) ;
+				throw new RuntimeException ( e ) ;
+			}
+		} 
+		catch ( IOException e ) 
+		{
+			System.out.println ( "MATCH_LAUNCHER_COMMUNICATION_CONTROLLER - RUN : IOEXCEPTION " + e.getMessage() ) ;	
+		} 
+		catch ( PlayerWantsToExitGameException e )
+		{
+			System.out.println ( "MATCH_LAUNCHER_COMUNICATION_CONTROLLER - RUN : PLAYER_WANTS_TO_EXIT_GAME_EXCEPTION" ) ;
 		}
 	}
 	
@@ -191,7 +203,7 @@ public class MatchLauncherCommunicationController implements MatchPlayerAdder , 
 	 * AS THE SUPER'S ONE.
 	 */
 	@Override
-	public synchronized void addPlayer ( ClientHandler < ? > newClientHandler ) 
+	public void addPlayer ( ClientHandler < ? > newClientHandler ) 
 	{
 		try 
 		{
@@ -200,10 +212,6 @@ public class MatchLauncherCommunicationController implements MatchPlayerAdder , 
 		catch ( InterruptedException e ) 
 		{
 			System.out.println ( "MATCH_LAUNCHER_COMMUNICATION_CONTROLLER - ADD_PLAYER : THREAD " + Thread.currentThread() + " INTERRUPTED HERE" ) ;
-		}
-		finally 
-		{
-			notifyAll () ;
 		}
 	}
 	
@@ -217,14 +225,13 @@ public class MatchLauncherCommunicationController implements MatchPlayerAdder , 
 		for ( ClientHandler < ? > c : session.getClientHandlers () )
 			try 
 			{
-				c.notifyMatchWillNotStart ( ClientHandler.MATCH_WILL_NOT_START_MESSAGE ) ;
+				c.notifyMatchWillNotStart ( PresentationMessages.MATCH_WILL_NOT_START_MESSAGE ) ;
 			}
 			catch ( IOException e ) 
 			{
 				System.out.println ( "MATCH_LAUNCHER_COMMUNICATION_CONTROLLER - NOTIFY_FAIL_START_MATCH : IOEXCEPTION WITH THE CLIENT HANDLER " + c ) ;		
 			}
 		clearMatchEnvironment () ;
-		notifyAll () ;
 	}
 	
 	/**

@@ -1,16 +1,17 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.message;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.GameProtocolMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 
 import java.io.Serializable;
 import java.util.Collection;
 
-
+/***/
 public class Message implements Serializable 
 {
 
 	/***/
-	private static long IDS = 0 ;
+	private static transient long IDS = 0 ;
 	
 	/***/
 	private final long uid ;
@@ -59,6 +60,9 @@ public class Message implements Serializable
 		return params ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public String toString () 
 	{
@@ -67,6 +71,9 @@ public class Message implements Serializable
 		return res ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public boolean equals ( Object obj ) 
 	{

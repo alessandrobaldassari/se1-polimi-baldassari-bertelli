@@ -1,6 +1,8 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Vector;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElement;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
@@ -101,7 +103,11 @@ public class Road extends GameMapElement
 	void setAdjacentRoads ( Iterable < Road > adjacentRoads ) 
 	{
 		if ( CollectionsUtilities.contains ( adjacentRoads , this ) == false )
-			this.adjacentRoads = Collections.unmodifiableCollection ( CollectionsUtilities.newCollectionFromIterable ( adjacentRoads ) ) ;
+		{	
+			this.adjacentRoads = new Vector < Road > () ;
+			for ( Road r : adjacentRoads )
+				( ( Collection < Road > )this.adjacentRoads ).add ( r ) ;
+		}
 		else 
 			throw new IllegalArgumentException () ;
 	} 

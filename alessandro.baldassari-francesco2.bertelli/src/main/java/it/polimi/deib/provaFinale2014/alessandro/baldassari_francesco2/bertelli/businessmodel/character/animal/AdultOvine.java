@@ -127,22 +127,6 @@ public class AdultOvine extends Ovine
 		
 	}
 
-	// ENUMS
-	
-	/**
-	 * Models the type an AdultOvine can have:
-	 * 1. RAM : the male.
-	 * 2. SHEEP : the famale. 
-	 */
-	public enum AdultOvineType 
-	{
-		
-		RAM ,
-		
-		SHEEP 
-		
-	}
-	
 	// INNER CLASSES
 	 
 	// EXCEPTIONS

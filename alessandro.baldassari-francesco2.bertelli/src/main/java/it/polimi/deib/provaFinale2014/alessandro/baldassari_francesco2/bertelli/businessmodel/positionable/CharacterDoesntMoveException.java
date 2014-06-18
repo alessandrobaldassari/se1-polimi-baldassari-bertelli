@@ -10,13 +10,13 @@ public class CharacterDoesntMoveException extends Exception
 	/**
 	 * the Character involved in the Exception. 
 	 */
-	private Character character ;
+	private Character < ? > character ;
 	
 	/**
 	 * @param character the Character involved in the Exception.
 	 * @throws IllegalArgumentException if the character parameter is null 
 	 */
-	public CharacterDoesntMoveException ( Character character ) 
+	public CharacterDoesntMoveException ( Character < ? > character ) 
 	{
 		super () ;
 		if ( character != null )
@@ -30,7 +30,7 @@ public class CharacterDoesntMoveException extends Exception
 	 * 
 	 * @return the Character property.
 	 */
-	public Character getCharacter () 
+	public Character < ? > getCharacter () 
 	{
 		return character ;
 	}

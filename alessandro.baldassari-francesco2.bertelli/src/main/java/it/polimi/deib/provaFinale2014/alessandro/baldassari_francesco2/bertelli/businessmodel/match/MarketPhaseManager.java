@@ -51,7 +51,7 @@ class MarketPhaseManager
 			System.out.println ( "MARKET_PHASE_MANAGER - MARKET PHASE : ASKING THE PLAYERS WHICH CARDS THEY WANT TO SELL" ) ;
 			for ( Player currentPlayer : players )
 				if ( ! currentPlayer.isSuspended () )
-				currentPlayer.chooseCardsEligibleForSelling () ;
+					currentPlayer.chooseCardsEligibleForSelling () ;
 			System.out.println ( "MARKET_PHASE_MANAGER - MARKET PHASE : ASKING THE PLAYERS WHICH CARDS THEY WANT TO BUY" ) ;			
 			for ( Player currentPlayer : players )
 			{

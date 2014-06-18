@@ -1,6 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepting;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.Message;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.message.Message;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.UIDGenerator;
 
 import java.rmi.RemoteException;
@@ -16,12 +16,12 @@ public class RMIClientBrokerImpl implements RMIClientBroker
 	/**
 	 * The prefix of the name of every object of this class. 
 	 */
-	public static final String OBJECT_BASE_NAME = "RMI_CLIENT_BROKER_IMPL_#" ;
+	public static transient final String OBJECT_BASE_NAME = "RMI_CLIENT_BROKER_IMPL_#" ;
 	
 	/**
 	 * A UIDGenerator object to ensure every RMIClientBrokerImpl instance has a different name. 
 	 */
-	private static UIDGenerator uidGenerator ;
+	private static transient UIDGenerator uidGenerator ;
 	
 	/**
 	 * The RMI name of this RMIClientBroker. 

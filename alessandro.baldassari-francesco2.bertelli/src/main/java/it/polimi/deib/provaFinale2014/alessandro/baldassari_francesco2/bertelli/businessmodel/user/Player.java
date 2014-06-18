@@ -331,14 +331,21 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 	
 	/**
 	 * This methods is called by the system in the Market phase of the Game.
-	 * Here, the Player, has the opportunity to set the selling state and price of his SellableCards, if he wants
-	 * to sell some of his SellableCards to other Players.
+	 * Here, the Player, has the opportunity to set the selling state and price of his SellableCards ; if this Player
+	 * has some SellableCards chooseCardsEligibleForSellingIfThereAreSellableCards () will be called, and
+	 * subclasses will have a choice to choose some eligible cards.
 	 * It's important for subclasses to consider that this Class is stateful w.r.t. SellableCards; so if for example a Player
 	 * set a sellable for a given price at the turn t, and this Card is not sold at the same turn t, if the Player does not 
 	 * want to sell this Card anymore at the turn t+1, he has to explicitly make it not sellable ( or modify its price if he wants ), 
 	 * otherwise the system will consider the selling state the same as the turn t.
 	 */
-	public abstract void chooseCardsEligibleForSelling () throws TimeoutException ;
+	public void chooseCardsEligibleForSelling () throws TimeoutException 
+	{
+		if ( sellableCards.size () > 0 )
+			chooseCardsEligibleForSellingIfThereAreSellableCards () ;
+	}
+	
+	protected abstract void chooseCardsEligibleForSellingIfThereAreSellableCards () throws TimeoutException ;
 	
 	/**
 	 * Method called by the System during the Market phase of a Turn;

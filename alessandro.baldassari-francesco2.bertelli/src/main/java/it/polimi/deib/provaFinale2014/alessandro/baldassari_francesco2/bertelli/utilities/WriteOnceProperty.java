@@ -3,7 +3,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import java.io.Serializable;
 
 /***/
-public class WriteOnceProperty < T > implements Serializable
+public class WriteOnceProperty < T extends Serializable > implements Serializable
 {
 
 	/***/

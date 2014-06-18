@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.ServerEnvironment;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.connectionresuming.ConnectionResumerServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosing.ConnectionLoosingServer;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlauncherserver.MatchLauncherCommunicationController;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunching.MatchLauncherServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepting.RequestAccepterServer;
 
 /**
@@ -16,11 +16,13 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class JSheeplandServer implements Runnable 
 {
 	
-	/***/
+	/**
+	 * An instance of this class to implement the Singleton pattern.
+	 */
 	private static JSheeplandServer instance ;
 	
 	/***/
-	private MatchLauncherCommunicationController matchLauncherCommunicationController ; 
+	private MatchLauncherServer matchLauncherCommunicationController ; 
 
 	/**
 	 * A SocketServer object to intercept inbound socket connections.
@@ -57,7 +59,7 @@ public class JSheeplandServer implements Runnable
 		connectionLoosingServer = new ConnectionLoosingServer () ;
 		socketConnectionResumerServer = ConnectionResumerServer.newSocketServer ( connectionLoosingServer ) ;
 		rmiConnectionResumerServer = ConnectionResumerServer.newRMIServer ( connectionLoosingServer ) ;
-		matchLauncherCommunicationController = new MatchLauncherCommunicationController ( connectionLoosingServer ) ; 
+		matchLauncherCommunicationController = new MatchLauncherServer ( connectionLoosingServer ) ; 
 		socketServer = RequestAccepterServer.newSocketServer ( matchLauncherCommunicationController ) ; 
 		rmiServer = RequestAccepterServer.newRMIServer ( matchLauncherCommunicationController , ServerEnvironment.getInstance ().getLocalhostIPAddress () , ServerEnvironment.RMI_REQUEST_ACCEPT_SERVER_PORT ) ; 
 		fixedExecutorService = Executors.newFixedThreadPool ( 6 ) ;
