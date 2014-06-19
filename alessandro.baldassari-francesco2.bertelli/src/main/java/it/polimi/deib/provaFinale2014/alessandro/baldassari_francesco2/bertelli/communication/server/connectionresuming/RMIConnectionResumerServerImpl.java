@@ -1,11 +1,12 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.connectionresuming;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.ServerEnvironment;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandler;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.ClientHandlerConnector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosing.SuspendedClientHandlerBuffer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepting.RMIClientBroker;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepting.RMIClientBrokerImpl;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.Couple;
 
 import java.io.IOException;
 import java.rmi.AlreadyBoundException;
@@ -42,7 +43,7 @@ public class RMIConnectionResumerServerImpl extends ConnectionResumerServer < RM
 	@Override
 	public void connect () throws RemoteException 
 	{
-		registry = LocateRegistry.createRegistry ( PORT ) ;		
+		registry = LocateRegistry.createRegistry ( ServerEnvironment.RMI_CONNECTION_RESUMER_PORT ) ;		
 	}
 	
 	/**

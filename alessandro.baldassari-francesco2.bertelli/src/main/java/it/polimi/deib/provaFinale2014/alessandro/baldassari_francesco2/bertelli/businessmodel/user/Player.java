@@ -1,17 +1,20 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.card.Card;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.card.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelection;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MathUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Suspendable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionAbstractObservable;
 
 import java.io.Serializable;
@@ -88,6 +91,7 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 			throw new IllegalArgumentException () ;
 	}
 	
+	/***/
 	public void addCard ( SellableCard toAdd ) 
 	{
 		sellableCards.add(toAdd) ;
@@ -101,6 +105,7 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 		}
 	}
 	
+	/***/
 	public void removeCard ( SellableCard toRemove ) 
 	{
 		sellableCards.remove ( toRemove ) ;
@@ -147,7 +152,10 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 	public Iterable < Sheperd > getSheperds () 
 	{
 		Iterable < Sheperd > res ;
-		res = CollectionsUtilities.newIterableFromArray ( sheperds ) ;
+		if ( sheperds != null )
+			res = CollectionsUtilities.newIterableFromArray ( sheperds ) ;
+		else
+			res = null ;
 		return res ;
 	}
 	
@@ -159,25 +167,29 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 	 * @param amountToPay the amount of money to remove
 	 * @throws IllegalArgumentException if the parameter is < 0
 	 * @throws TooFewMoneyException if this Player has not enough money to pay, technically if the parameter is >= than the money attribyte.
+	 * @throws WrongStateMethodCallException 
 	 */
-	public int pay ( int amountToPay ) throws TooFewMoneyException  
+	public int pay ( int amountToPay ) throws TooFewMoneyException, WrongStateMethodCallException   
 	{
 		if ( amountToPay >= 0 )
 		{
-			if ( money >= amountToPay )
-			{
-				money = money - amountToPay ;
-				try 
+			if ( money != null )
+				if ( money >= amountToPay )
 				{
-					notifyObservers ( "onPay" , amountToPay , money );
+					money = money - amountToPay ;
+					try 
+					{
+						notifyObservers ( "onPay" , amountToPay , money );
+					}
+					catch (MethodInvocationException e) 
+					{
+						e.printStackTrace();
+					}
 				}
-				catch (MethodInvocationException e) 
-				{
-					e.printStackTrace();
-				}
-			}
+				else
+					throw new TooFewMoneyException () ;
 			else
-				throw new TooFewMoneyException () ;
+				throw new WrongStateMethodCallException () ;
 		}
 		else
 			throw new IllegalArgumentException () ;
@@ -217,10 +229,14 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 	 * Getter for the money property.
 	 * 
 	 * @return the money owned by this Player.
+	 * @throws WrongStateMethodCallException 
 	 */
-	public int getMoney () 
+	public int getMoney () throws WrongStateMethodCallException 
 	{
-		return money ;
+		if ( money != null )
+			return money ;
+		else
+			throw new WrongStateMethodCallException () ;
 	}
 	
 	/**
@@ -306,10 +322,15 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 	 */
 	public void initializeSheperds ( Sheperd [] sheperds ) throws WriteOncePropertyAlreadSetException
 	{
+		int i ;
 		if ( this.sheperds == null )
 		{
 			if ( sheperds != null )
-				this.sheperds = sheperds ;
+			{
+				this.sheperds = new Sheperd [ sheperds.length ] ;
+				for ( i = 0 ; i < sheperds.length ; i ++ )
+					this.sheperds [ i ] = sheperds [ i ] ;
+			}
 			else
 				throw new IllegalArgumentException () ;
 		}

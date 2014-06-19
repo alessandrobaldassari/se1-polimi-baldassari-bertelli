@@ -1,4 +1,4 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic;
 
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
@@ -15,7 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.Couple;
 
 /**
  * A class that offers an infrastructure to show multioptions choose views.

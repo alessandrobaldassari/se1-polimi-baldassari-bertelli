@@ -11,6 +11,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.TimeConstants;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.card.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelection;
@@ -22,6 +23,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.PropertyNotSetYetException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOnceProperty;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
 /***/
 public class NetworkCommunicantPlayer extends Player  
@@ -295,11 +297,18 @@ public class NetworkCommunicantPlayer extends Player
 			@Override
 			public Iterable < SellableCard > call () throws IOException
 			{
-				Iterable < SellableCard > res ;
-				System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling : " + src ) ;
-				res = clientHandler.chooseCardToBuy ( src , getMoney() ) ;
-				setMethodCompleted () ;
-				return res ;
+				try 
+				{
+					Iterable < SellableCard > res ;
+					System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling : " + src ) ;
+					res = clientHandler.chooseCardToBuy ( src , getMoney() ) ;
+					setMethodCompleted () ;
+					return res ;
+				} 
+				catch (WrongStateMethodCallException e) 
+				{
+					throw new IOException ( e ) ;
+				}
 			}  
 		} ;
 		res = executeLater ( commandToExecute ) ;

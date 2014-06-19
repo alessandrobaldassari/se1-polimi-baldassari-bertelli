@@ -13,7 +13,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import org.junit.Before;
 import org.junit.Test;
 
-public class MoveFactoryTest {
+public class MoveExecutorTest {
 
 	private MoveExecutor mf ;
 	

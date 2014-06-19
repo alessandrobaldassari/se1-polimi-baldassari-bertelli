@@ -12,6 +12,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player.TooFewMoneyException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
 /**
  * This class represents the BreakDown move: a Sheperd wants to kill an Animal in a 
@@ -64,6 +65,7 @@ public class BreakDown extends GameMove
 	 * the selected Players.
 	 * 
 	 * @param match the Match on which the action is performed.
+	 * @throws WrongStateMethodCallException 
 	 * @throws MotNotAllowedException if the breaker Player has not enough money 
 	 *         to pay all the selected Players
 	 *         
@@ -78,7 +80,7 @@ public class BreakDown extends GameMove
 	 *  1. TOO_FEW_MONEY_EXCEPTION_RAISED && breaker.money < # adjacent players * AMOUNT_TO_PAY_FOR_SILENCE.
 	 */
 	@Override
-	public void execute ( Match match ) throws MoveNotAllowedException 
+	public void execute ( Match match ) throws MoveNotAllowedException, WrongStateMethodCallException 
 	{
 		Collection < Player > adjacentPlayers ;
 		if ( match != null )

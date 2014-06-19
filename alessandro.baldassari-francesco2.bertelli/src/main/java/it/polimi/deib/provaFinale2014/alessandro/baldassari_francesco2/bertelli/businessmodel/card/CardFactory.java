@@ -1,13 +1,14 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.card;
 
 import java.util.Collection;
 import java.util.LinkedList;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.GameConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.FactorySupport;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.factory.FactorySupport;
 
 /**
  * This class is a Factory component for the Card entities.
@@ -21,18 +22,6 @@ public class CardFactory
 	 * The only instance for this class to implemement the Singleton pattern. 
 	 */
 	private static final CardFactory instance = new CardFactory () ;
-	
-	/**
-	 * The number of non initial Cards to be created for each Region. 
-	 * It's a business rule.
-	 */
-	public final int NUMBER_OF_NON_INITIAL_CARDS_PER_REGION_TYPE = 5 ;
-	
-	/**
-	 * The total number of initial cards.
-	 * It's a business rule. 
-	 */
-	public final int NUMBER_OF_INITIAL_CARD = 6 ;
 	
 	/**
 	 * An object needed to know and manage the Match objects that already created 
@@ -116,10 +105,10 @@ public class CardFactory
 			if ( factorySupportSellableCards.isAlreadyUser ( caller ) == false )
 			{
 				res = new LinkedList < SellableCard > () ;
-				counter = NUMBER_OF_INITIAL_CARD ;
+				counter = GameConstants.NUMBER_OF_INITIAL_CARD ;
 				for ( RegionType type : RegionType.values () )
 					if ( type != RegionType.SHEEPSBURG )
-						for ( index = NUMBER_OF_NON_INITIAL_CARDS_PER_REGION_TYPE-1 ; index >= 0 ; index -- )
+						for ( index =GameConstants.NUMBER_OF_NON_INITIAL_CARDS_PER_REGION_TYPE-1 ; index >= 0 ; index -- )
 						{
 							res.add ( new SellableCard ( type , counter , index ) ) ;
 							counter ++ ;

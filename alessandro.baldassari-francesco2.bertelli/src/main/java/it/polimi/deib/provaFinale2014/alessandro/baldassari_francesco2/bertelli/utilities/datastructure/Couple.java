@@ -1,4 +1,6 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure;
+
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
 import java.io.Serializable;
 
@@ -64,9 +66,13 @@ public class Couple < T , S > implements Serializable
 		String res ;
 		StringBuffer stringBuffer ;
 		stringBuffer = new StringBuffer () ;
-		stringBuffer.append( "Class : " + getClass ().getName () ) ;
-		stringBuffer.append ( "\nFirst Object : " + firstObject.toString () ) ;
-		stringBuffer.append ( "\nSecond Object : " + secondObject.toString () ) ;
+		stringBuffer.append( "Coule" ) ;
+		stringBuffer.append ( "First Object : " );
+		stringBuffer.append ( Utilities.CARRIAGE_RETURN ) ;
+		stringBuffer.append ( firstObject.toString () ) ;
+		stringBuffer.append ( "\nSecond Object : " );
+		stringBuffer.append ( Utilities.CARRIAGE_RETURN ) ;
+		stringBuffer.append( secondObject.toString () ) ;
 		res = stringBuffer.toString () ;
 		return res ;
 	}

@@ -23,10 +23,10 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WorkflowException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -244,19 +244,29 @@ class TurnationPhaseManager implements TurnNumberClock
 		return choosenSheperd ;
 	}
 	
-	/***/
-	private void fillMoveSelectorWithAvailableParameters ( MoveSelector moveSelector , Sheperd sh ) 
+	/**
+	 * @throws WorkflowException */
+	private void fillMoveSelectorWithAvailableParameters ( MoveSelector moveSelector , Sheperd sh ) throws WorkflowException 
 	{
-		moveSelector.setAvailableMoney ( sh.getOwner().getMoney () ) ;
-		moveSelector.setAvailableRoadsForMoveSheperd ( findAvailableRoadsForMoveSheperd ( sh ) ) ;
-		moveSelector.setAvailableRegionsForMoveSheep ( findAvailableRegionsForMoveSheep ( sh ) ) ;
-		moveSelector.setAvailableRegionsForBuyCard ( findAvailableRegionsForBuyCard ( sh ) ) ;
-		moveSelector.setAvailableRegionsForMate ( findAvailableRegionsForMate ( sh ) ) ;
-		moveSelector.setAvailableRegionsForBreakdown ( findAvailableRegionsForBreakdown ( sh ) ) ;
+		try 
+		{
+			moveSelector.setAvailableMoney ( sh.getOwner().getMoney () ) ;
+			moveSelector.setAvailableRoadsForMoveSheperd ( findAvailableRoadsForMoveSheperd ( sh ) ) ;
+			moveSelector.setAvailableRegionsForMoveSheep ( findAvailableRegionsForMoveSheep ( sh ) ) ;
+			moveSelector.setAvailableRegionsForBuyCard ( findAvailableRegionsForBuyCard ( sh ) ) ;
+			moveSelector.setAvailableRegionsForMate ( findAvailableRegionsForMate ( sh ) ) ;
+			moveSelector.setAvailableRegionsForBreakdown ( findAvailableRegionsForBreakdown ( sh ) ) ;
+		} 
+		catch ( WrongStateMethodCallException e ) 
+		{
+			throw new WorkflowException ( e , Utilities.EMPTY_STRING );
+		}
+		
 	}
 	
-	/***/
-	private Collection < Road > findAvailableRoadsForMoveSheperd ( Sheperd sh ) 
+	/**
+	 * @throws WrongStateMethodCallException */
+	private Collection < Road > findAvailableRoadsForMoveSheperd ( Sheperd sh ) throws WrongStateMethodCallException 
 	{
 		Collection < Road > res ;
 		if ( sh.getOwner().getMoney () >= 1 )
@@ -283,8 +293,9 @@ class TurnationPhaseManager implements TurnNumberClock
 		return res ;
 	}
 	
-	/***/
-	private Map < RegionType , Integer > findAvailableRegionsForBuyCard ( Sheperd sh ) 
+	/**
+	 * @throws WrongStateMethodCallException */
+	private Map < RegionType , Integer > findAvailableRegionsForBuyCard ( Sheperd sh ) throws WrongStateMethodCallException 
 	{
 		Map < RegionType , Integer > res ;
 		RegionType r ;
@@ -309,8 +320,9 @@ class TurnationPhaseManager implements TurnNumberClock
 		return res ;
 	}
 	
-	/***/
-	private Map < RegionType , Integer > generateCardPriceMap ( Sheperd s ) 
+	/**
+	 * @throws WrongStateMethodCallException */
+	private Map < RegionType , Integer > generateCardPriceMap ( Sheperd s ) throws WrongStateMethodCallException 
 	{
 		Map < RegionType , Integer > res ;
 		int price ;
@@ -376,8 +388,9 @@ class TurnationPhaseManager implements TurnNumberClock
 	 * @param selection a reference to the move the User has choosedn.
 	 * @param match the Match over which operate.
 	 * @throws MoveNotAllowedException if the execution of the move is not allowed ( probably due to business rules ).
+	 * @throws WrongStateMethodCallException 
 	 */
-	private void execMove ( MoveExecutor exec , MoveSelection selection , Match match ) throws MoveNotAllowedException
+	private void execMove ( MoveExecutor exec , MoveSelection selection , Match match ) throws MoveNotAllowedException, WrongStateMethodCallException
 	{
 		List < Serializable > params ;
 		params = CollectionsUtilities.newListFromIterable ( selection.getParams() ) ; 
@@ -403,6 +416,8 @@ class TurnationPhaseManager implements TurnNumberClock
 				mapUID = ( (Road) params.get (0 ) ).getUID () ;
 				exec.executeMoveSheperd ( match, match.getGameMap ().getRoadByUID ( mapUID ) ); 
 			break ;
+			default :
+				throw new MoveNotAllowedException ( "Scusa, ma questa mossa proprio non l'avevamo mai sentita..." ) ;
 		}
 	}
 	

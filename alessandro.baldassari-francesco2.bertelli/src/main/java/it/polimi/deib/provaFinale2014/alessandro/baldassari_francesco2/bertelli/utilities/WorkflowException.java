@@ -12,4 +12,9 @@ public class WorkflowException extends Exception
 		super ( message ) ;
 	}
 	
+	public WorkflowException ( Throwable cause , String message ) 
+	{
+		super ( message , cause ) ;
+	}
+	
 }

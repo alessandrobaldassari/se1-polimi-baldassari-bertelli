@@ -9,6 +9,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.TurnNumberClock;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
 /***/
 public class MoveExecutor 
@@ -65,8 +66,9 @@ public class MoveExecutor
 		return res ;
 	}
 	
-	/***/
-	public void executeBreakdown ( Match match , Animal animalToBreak ) throws MoveNotAllowedException
+	/**
+	 * @throws WrongStateMethodCallException */
+	public void executeBreakdown ( Match match , Animal animalToBreak ) throws MoveNotAllowedException, WrongStateMethodCallException
 	{
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new MoveNotAllowedException ( "" ) ;
@@ -81,8 +83,9 @@ public class MoveExecutor
 				throw new MoveNotAllowedException ( "Can not do two equals moves sequentially." ) ; 
 	} 
 	
-	/***/
-	public void executeBuyCard ( Match match , RegionType buyingCardType ) throws MoveNotAllowedException 
+	/**
+	 * @throws WrongStateMethodCallException */
+	public void executeBuyCard ( Match match , RegionType buyingCardType ) throws MoveNotAllowedException, WrongStateMethodCallException 
 	{
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new MoveNotAllowedException ( "" ) ; 
@@ -129,8 +132,9 @@ public class MoveExecutor
 				throw new MoveNotAllowedException ( "Can not do two equals moves sequentially." ) ; 
 		}
 	
-	/***/
-	public void executeMoveSheperd ( Match match , Road roadWhereGo ) throws MoveNotAllowedException 
+	/**
+	 * @throws WrongStateMethodCallException */
+	public void executeMoveSheperd ( Match match , Road roadWhereGo ) throws MoveNotAllowedException, WrongStateMethodCallException 
 	{
 		new MoveSheperd ( sheperd , roadWhereGo ).execute ( match ); 
 		sheperdMoved = true ;

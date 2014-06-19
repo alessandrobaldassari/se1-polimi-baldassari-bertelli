@@ -12,8 +12,9 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player.TooFewMoneyException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatch;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -119,6 +120,9 @@ private DummyMatch d ;
 		catch (MoveNotAllowedException e) 
 		{
 			assertTrue ( true ) ;
+		} 
+		catch (WrongStateMethodCallException e) {
+			fail () ;
 		}
 	}
 	
@@ -168,6 +172,9 @@ private DummyMatch d ;
 		catch (MoveNotAllowedException e) 
 		{
 			assertTrue ( true ) ;
+		} 
+		catch (WrongStateMethodCallException e) {
+			fail () ;
 		}
 	}
 	
@@ -211,6 +218,8 @@ private DummyMatch d ;
 				d.players.get(0).pay ( 4 ) ;
 			} catch (TooFewMoneyException e) {
 				fail () ;
+			} catch (WrongStateMethodCallException e) {
+				fail () ;
 			}
 			b = new BuyCard ( d.sheperds.get(0) , RegionType.LACUSTRINE ) ;
 			b.execute(d.match);
@@ -219,6 +228,8 @@ private DummyMatch d ;
 		catch (MoveNotAllowedException e) 
 		{
 			assertTrue ( true ) ;
+		} catch (WrongStateMethodCallException e) {
+			fail () ;
 		}
 	}
 	
@@ -273,6 +284,8 @@ private DummyMatch d ;
 		} 
 		catch (NoMoreCardOfThisTypeException e) 
 		{
+			fail () ;
+		} catch (WrongStateMethodCallException e) {
 			fail () ;
 		}
 	}

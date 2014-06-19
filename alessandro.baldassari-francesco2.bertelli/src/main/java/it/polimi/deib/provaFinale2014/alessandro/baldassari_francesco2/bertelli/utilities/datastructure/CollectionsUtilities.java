@@ -1,4 +1,4 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -103,6 +103,17 @@ public class CollectionsUtilities
 			pos2 = random.nextInt ( list.size () ) ;
 			swapElements ( list , pos1 , pos2 ) ;
 		}
+	}
+	
+	public static boolean compareIterable ( Iterable < ? > i1 , Iterable < ? > i2 ) 
+	{
+		Collection < ? > c1 ;
+		Collection < ? > c2 ;
+		boolean res ;
+		c1 = newCollectionFromIterable(i1);
+		c2 = newCollectionFromIterable(i2);
+		res = c1.containsAll ( c2 ) && c2.containsAll ( c1 ) ;
+		return res ;
 	}
 	
 	/***/

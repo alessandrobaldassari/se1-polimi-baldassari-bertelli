@@ -73,6 +73,18 @@ public final class GameConstants
 	 */
 	public static final int NUMBER_OF_TURN_AFTER_THOSE_A_LAMB_EVOLVE = 2 ;
 	
+	/**
+	 * The number of non initial Cards to be created for each Region. 
+	 * It's a business rule.
+	 */
+	public static final int NUMBER_OF_NON_INITIAL_CARDS_PER_REGION_TYPE = 5 ;
+	
+	/**
+	 * The total number of initial cards.
+	 * It's a business rule. 
+	 */
+	public static final int NUMBER_OF_INITIAL_CARD = 6 ;
+	
 	/***/
 	private GameConstants () {}
 	

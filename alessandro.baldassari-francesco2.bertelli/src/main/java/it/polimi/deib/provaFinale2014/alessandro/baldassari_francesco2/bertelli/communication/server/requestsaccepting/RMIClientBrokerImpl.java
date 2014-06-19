@@ -120,7 +120,7 @@ public class RMIClientBrokerImpl implements RMIClientBroker
 	@Override
 	public String toString () 
 	{
-		return "Class : RMIClientBrokerImpl" ;
+		return "RMIClientBrokerImpl" ;
 	}
 	
 }

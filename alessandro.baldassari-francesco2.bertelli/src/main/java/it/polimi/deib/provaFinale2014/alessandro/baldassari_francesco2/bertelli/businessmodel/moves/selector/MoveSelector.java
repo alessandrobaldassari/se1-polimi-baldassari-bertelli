@@ -16,10 +16,14 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveNotAllowedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
-/***/
+/**
+ * This class is the component that allows a User ( also a remote one ) to select a move during the game.
+ * It provides all the info the User needs to decide which moves he wants to do and encapsulates the logic
+ * that tells what moves a User can do and what moves can not do. 
+ */
 public class MoveSelector implements Serializable
 {
 
@@ -57,11 +61,10 @@ public class MoveSelector implements Serializable
 	private Collection < Region > availableRegionsForBreakdown ;
 	
 	/**
-	 * @param
-	 * @param
-	 * @param 
+	 * @param associatedSheperd the Sheperd the User has choosen for this turn.
+	 * @throws WrongStateMethodCallException 
 	 */
-	public MoveSelector ( Sheperd associatedSheperd ) 
+	public MoveSelector ( Sheperd associatedSheperd ) throws WrongStateMethodCallException 
 	{
 		if ( associatedSheperd != null )
 		{

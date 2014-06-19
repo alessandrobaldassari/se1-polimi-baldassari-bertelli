@@ -2,12 +2,13 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank.Bank.CardPriceNotRightException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank.Bank.NoMoreCardOfThisTypeException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.card.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player.TooFewMoneyException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
 /**
  * This class models the BuyCard action, which is the situation where a Player wants to 
@@ -58,6 +59,7 @@ public class BuyCard extends GameMove
 	 * @throws TooFewMoneyException if the buyer has not enough money to buy the wanted Card.
 	 * @throws CardPriceNotRightException if the buyer tries to buy a wrong price for the wanted Card.
 	 * @throws MoveNotAllowedException if the Player is not in a position from which he can buy the wanted Card.
+	 * @throws WrongStateMethodCallException 
 	 * 
 	 * @PRECONDITIONS:
 	 *  1. match != null
@@ -71,7 +73,7 @@ public class BuyCard extends GameMove
 	 *    
 	 */
 	@Override
-	public void execute ( Match match ) throws MoveNotAllowedException 
+	public void execute ( Match match ) throws MoveNotAllowedException, WrongStateMethodCallException 
 	{
 		SellableCard theCard ;
 		int price ;

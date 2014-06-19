@@ -1,4 +1,5 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.factory;
+
 
 /***/
 public class WithFactorySupportObject < T > 

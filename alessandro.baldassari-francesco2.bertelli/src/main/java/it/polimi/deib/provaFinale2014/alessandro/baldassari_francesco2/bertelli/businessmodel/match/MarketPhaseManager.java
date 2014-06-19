@@ -1,13 +1,15 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.card.SellableCard;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.card.SellableCard.NotSellableException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.card.SellableCard.SellingPriceNotSetException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player.TooFewMoneyException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.NotSellableException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard.SellingPriceNotSetException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WorkflowException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -41,7 +43,7 @@ class MarketPhaseManager
 	 * The code is straightforward and highly tighted with the business rules.
 	 * It uses some private helper methods. 
 	 */
-	public void marketPhase () 
+	public void marketPhase () throws WorkflowException
 	{
 		Collection < SellableCard > sellableCards ;
 		Iterable < SellableCard > receivedSellableCards ;
@@ -60,7 +62,7 @@ class MarketPhaseManager
 					amount = 0 ;
 					// generate a List containing all the Cards this Player can buy
 					sellableCards = generateGettableCardList ( currentPlayer ) ;
-					if ( sellableCards.size () > 0 )
+					if ( ! sellableCards.isEmpty () )
 					{
 						// ask the User which Cards he wants to buy
 						receivedSellableCards = currentPlayer.chooseCardToBuy ( sellableCards ) ;
@@ -92,6 +94,10 @@ class MarketPhaseManager
 				{
 					currentPlayer.genericNotification ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;					
 				}
+				catch (WrongStateMethodCallException e) 
+				{
+					throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
+				}
 			}
 		}
 		catch ( TimeoutException t ) 
@@ -102,9 +108,10 @@ class MarketPhaseManager
 	}
 	
 	/**
+	 * @throws WrongStateMethodCallException 
 	 * 
 	 */
-	private void transferCards ( Iterable < SellableCard > receivedSellableCards , Player buyer ) throws TooFewMoneyException, NotSellableException, SellingPriceNotSetException 
+	private void transferCards ( Iterable < SellableCard > receivedSellableCards , Player buyer ) throws TooFewMoneyException, NotSellableException, SellingPriceNotSetException, WrongStateMethodCallException 
 	{
 		for ( SellableCard s : receivedSellableCards )
 		{

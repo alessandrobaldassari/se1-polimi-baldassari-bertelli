@@ -12,6 +12,9 @@ public class ServerEnvironment
 	
 	public static final int SOCKET_RESUME_CONNECTION_SERVER_TCP_PORT = 3331 ;
 	
+	/***/
+	public static final int RMI_CONNECTION_RESUMER_PORT = 3332 ;
+	
 	public static final int RMI_GUI_MAP_SERVER_PORT = 7000 ;
 	
 	private static ServerEnvironment instance ;

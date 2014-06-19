@@ -1,20 +1,21 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.card.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelection;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.GameProtocolMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.message.Message;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Terminable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -144,7 +145,7 @@ public abstract class Client implements Runnable , Terminable
 	 * @throws IOException if something goes wrong during the execution.
 	 */
 	protected abstract void operationFinished () throws IOException ;
-		
+	
 	/**
 	 * AS THE SUPER'S ONE.
 	 * For every time the value of the technicallyOn attribute is true, it continues to call
@@ -155,7 +156,6 @@ public abstract class Client implements Runnable , Terminable
 	{
 		List < Serializable > inParams ;
 		List < Serializable > outParams ;
-		Iterable < NamedColor > colors ;
 		Iterable < SellableCard > cards ;
 		Iterable < Sheperd > sheperds ;
 		Iterable < Road > roads ;
@@ -163,7 +163,6 @@ public abstract class Client implements Runnable , Terminable
 		MoveSelection move ;
 		MoveSelector gf ;
 		GameMap gm ;
-		NamedColor n ;
 		Message m ;
 		String s ;
 		Sheperd sh ;
@@ -205,13 +204,7 @@ public abstract class Client implements Runnable , Terminable
 						dataPicker.onMatchWillNotStartNotification ( s ) ;
 					break ;
 					case SHEPERD_COLOR_REQUESTING_REQUEST:
-						colors = ( Iterable < NamedColor > ) inParams.get ( 0 ) ;
-						n = dataPicker.onSheperdColorRequest ( colors ) ;
-						outParams.clear();
-						outParams.add ( n ) ;
-						System.out.println ( n ) ;
-						m = Message.newInstance ( GameProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE , outParams ) ;
-						write ( m ) ;
+						write ( sheperdColorRequestingRequest ( inParams ) ) ;
 					break;
 					case SHEPERD_INIT_ROAD_REQUESTING_REQUEST :
 						roads = ( Iterable<Road> ) inParams.get ( 0 ) ;
@@ -261,6 +254,7 @@ public abstract class Client implements Runnable , Terminable
 					case GAME_CONCLUSION_NOTIFICATION :
 						s = ( String ) inParams.get ( 0 ) ;
 						dataPicker.generationNotification ( s ) ;
+					break ;
 					default :
 						throw new IOException ( "UNMANAGED_OPERATION" ) ;
 				}
@@ -287,6 +281,18 @@ public abstract class Client implements Runnable , Terminable
 				}
 			}
 		}
+	}
+	
+	private Message sheperdColorRequestingRequest ( List < Serializable > inParams ) throws IOException 
+	{
+		Iterable < NamedColor > colors ;
+		NamedColor n ;
+		Message m ;
+		colors = ( Iterable < NamedColor > ) inParams.get ( 0 ) ;
+		n = dataPicker.onSheperdColorRequest ( colors ) ;
+		System.out.println ( n ) ;
+		m = Message.newInstance ( GameProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE , Collections.<Serializable>singleton ( n ) ) ;
+		return m ;
 	}
 	
 }

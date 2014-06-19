@@ -6,7 +6,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player.TooFewMoneyException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.CollectionsUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
 /**
  * This class models the MoveSheperd Game Move.
@@ -60,6 +61,7 @@ public class MoveSheperd extends GameMove
 	 * 
 	 * @param match the Match object where to perform this action.
 	 * @throws MoveNotAllowedException if something goes wrong with the logic.
+	 * @throws WrongStateMethodCallException 
 	 * @throws RuntimeException if something goes wrong due to some architecture things.
 	 * 
 	 * @PRECONDITIONS :
@@ -71,7 +73,7 @@ public class MoveSheperd extends GameMove
 	 *  2. sheperd.whereWasBefore.content instanceof Fence.
 	 */
 	@Override
-	public void execute ( Match match ) throws MoveNotAllowedException  
+	public void execute ( Match match ) throws MoveNotAllowedException, WrongStateMethodCallException  
 	{
 		Road whereTheSheperdIsNow ;
 		whereTheSheperdIsNow = null ;

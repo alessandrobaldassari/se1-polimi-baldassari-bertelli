@@ -14,6 +14,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.card.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
@@ -25,7 +26,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelector;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.client.gui.RMIGUIMapClient;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
@@ -38,11 +38,11 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.ovinechooseview.OvineChooseView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.regiontypechooseview.RegionTypeChooseView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.sheperdcolorchooseview.SheperdColorChooseView;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphics.GraphicsUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.Couple;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.threading.ThreadUtilities;
 
 /**
@@ -260,7 +260,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		rightIndexes = new ArrayList < Integer > () ;
 		for ( Region r : selector.getAvailableRegionsForBreakdown () )
 			rightIndexes.add ( r.getUID() ) ;
-		if ( rightIndexes.size () > 0 )
+		if ( ! rightIndexes.isEmpty() )
 		{
 			// let the user choose where do the break down.
 			generationNotification ( "Scegli la regione dove perpetrare il misfatto ( tra quelle vicine al tuo pastore scelto )..." ) ;
@@ -338,7 +338,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		rightIndexes = new ArrayList < Integer > () ;
 		for ( Region r : selector.getAvailableRegionsForMate() )
 			rightIndexes.add ( r.getUID() ) ;
-		if ( rightIndexes.size () > 0 )
+		if ( ! rightIndexes.isEmpty() )
 		{
 			gameView.setInputMode ( GameMapViewInputMode.REGIONS , rightIndexes ) ;
 			generationNotification ( "Scegli la regione dove vuoi provare a far eseguire l'accoppiamento ( vicina a te )." );
@@ -379,7 +379,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		for ( Region r : selector.getAvailableRegionsForMoveSheep() )
 			rightIndexes.add ( r.getUID() );
 		// if there are regions available for this move...
-		if ( rightIndexes.size() > 0 )
+		if ( ! rightIndexes.isEmpty() )
 		{
 			gameView.setInputMode ( GameMapViewInputMode.REGIONS , rightIndexes ) ;
 			generationNotification ( "Scegli la regione da dove spostare l'ovino ( tra quelle vicine al pastore che hai scelto)." ) ;

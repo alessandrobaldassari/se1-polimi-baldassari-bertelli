@@ -11,6 +11,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player.TooFewMoneyException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatch;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
 public class MoveSheperdTest 
 {
@@ -115,7 +116,9 @@ public class MoveSheperdTest
 		}
 		catch (TooFewMoneyException e1) 
 		{
-			throw new RuntimeException ( e1 ) ;
+			fail () ;
+		} catch (WrongStateMethodCallException e) {
+		fail () ;
 		}
 		MoveSheperd m = null ;
 		try 
@@ -127,6 +130,10 @@ public class MoveSheperdTest
 		catch (MoveNotAllowedException e) 
 		{
 			assertTrue ( true ) ;
+		} 
+		catch (WrongStateMethodCallException e)
+		{
+			fail () ;
 		}
 	}
 	
@@ -166,6 +173,8 @@ public class MoveSheperdTest
 		}
 		catch (MoveNotAllowedException e) 
 		{
+			fail () ;
+		} catch (WrongStateMethodCallException e) {
 			fail () ;
 		}
 	}
