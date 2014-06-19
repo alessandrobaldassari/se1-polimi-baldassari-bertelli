@@ -1,17 +1,19 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.sheperdcolorchooseview;
 
+import java.awt.Component;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
@@ -24,7 +26,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.WithBackgroundImagePanel;
 
 import javax.swing.ButtonGroup;
-import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
 
@@ -79,7 +80,7 @@ public class SheperdColorChooseView extends ObservableFrameworkedWithGridBagLayo
 		setUndecorated(true); 
 		setSize ( GraphicsUtilities.getVGAResolution () ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
-		view.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getBackgroundImage () ) ;
+		view.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCoverImage(true) ) ; 
 	}
 
 	/**
@@ -106,9 +107,9 @@ public class SheperdColorChooseView extends ObservableFrameworkedWithGridBagLayo
 	 * 
 	 * @param colors the list of colors the User can choose in.
 	 */
-	public void setColors ( Iterable < NamedColor > colors ) 
+	public void setModel ( SheperColorChooserViewModel m ) 
 	{
-		colorsPanel.setColors ( colors ) ;
+		colorsPanel.setModel(m); 
 	}
 	
 	/**
@@ -174,7 +175,7 @@ public class SheperdColorChooseView extends ObservableFrameworkedWithGridBagLayo
 		AtomicReference < NamedColor > color ;
 		color = new AtomicReference < NamedColor > ( null ) ;
 		sheperdColorChooseView = new SheperdColorChooseView ( new DefaultSheperdColorChooseViewObserver ( color ) ) ;
-		sheperdColorChooseView.setColors ( inColors ) ;
+		sheperdColorChooseView.setModel ( new SheperColorChooserViewModel ( inColors ) ) ;
 		GraphicsUtilities.showUnshowWindow ( sheperdColorChooseView , false , true ) ;
 		synchronized ( color ) 
 		{
@@ -210,21 +211,12 @@ public class SheperdColorChooseView extends ObservableFrameworkedWithGridBagLayo
  */
 class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel 
 {
+		
+	/***/
+	private SheperColorChooserViewModel model ;
 	
-	/**
-	 * The color the user has selected. 
-	 */
-	private NamedColor selected ;
-	
-	/**
-	 * Panels to represent the Colors to the User. 
-	 */
-	private List < WithBackgroundImagePanel > colorPanels ;
-
-	/**
-	 * Buttons to allow the User to select a Color. 
-	 */
-	private List < JRadioButton > selectors ;
+	/***/
+	private Map < String , WithBackgroundImagePanel > imagePanels ;
 	
 	/**
 	 * Needed to ensure just one color is selected. 
@@ -232,7 +224,7 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 	private ButtonGroup buttonGroup ;
 	
 	/***/
-	public ColorsListPanel () 
+	public ColorsListPanel ( ) 
 	{
 		super () ;
 	}
@@ -243,9 +235,7 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 	@Override
 	protected void createComponents () 
 	{
-		selected = null ;
-		colorPanels = new LinkedList < WithBackgroundImagePanel > () ;
-		selectors = new LinkedList < JRadioButton > () ;
+		imagePanels = new HashMap<String, WithBackgroundImagePanel>();
 		buttonGroup = new ButtonGroup () ;
 	}
 	
@@ -270,46 +260,11 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 	@Override
 	protected void injectComponents () {}
 
-	/**
-	 * Fill this component with data, allowing it to effectively show something useful to the User.
-	 * 
-	 * @param in the colors the User can choose betweeen.
-	 */
-	public void setColors ( Iterable < NamedColor > in ) 
+	public void setModel (  SheperColorChooserViewModel model ) 
 	{
-		List < NamedColor > colors ;
-		Insets insets ;
-		int i ;
-		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
-		colors = CollectionsUtilities.newListFromIterable ( in ) ;
-		for ( NamedColor n : in )
-			colorPanels.add ( new WithBackgroundImagePanel () ) ;
-		for ( NamedColor n : in )
-			selectors.add ( new JRadioButton () ) ;
-		for ( i = 0 ; i < colors.size() ; i ++ )
-		{
-			colorPanels.get ( i ).setOpaque ( false ) ;
-			selectors.get ( i ).setOpaque(false); 
-			layoutComponent ( colorPanels.get ( i ) , i , 1 , 1 , 0.7 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
-			layoutComponent ( selectors.get ( i ) , i , 2 , 1 , 0.3 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
-			try 
-			{
-				colorPanels.get(i).setBackgroundImage ( GraphicsUtilities.getImage ( "sheepland_" + colors.get ( i ).getName().toLowerCase() + "_sheperd.png" ) );
-			}
-			catch (IOException e) 
-			{
-				e.printStackTrace();
-			}
-			selectors.get ( i ).addItemListener ( new SelectorListener ( colors.get ( i ) ) ) ;
-			selectors.get(i).setText ( colors.get ( i ).getName () ) ; 
-			selectors.get ( i ).setHorizontalAlignment ( SwingConstants.CENTER ) ;
-		}
-		for ( JPanel p : colorPanels )
-			add ( p ) ;
-		for ( JRadioButton r : selectors )
-			add ( r ) ;
-		for ( JRadioButton r : selectors )
-			buttonGroup.add ( r ) ;
+		this.model = model ;
+		setColors () ;
+		repaint () ;
 	}
 	
 	/**
@@ -317,20 +272,58 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 	 */
 	public NamedColor getSelectedColor () 
 	{
-		return selected ;
+		return model.getSelectedColor () ;
+	}
+	
+	/**
+	 * Fill this component with data, allowing it to effectively show something useful to the User.
+	 * 
+	 * @param in the colors the User can choose betweeen.
+	 */
+	public void setColors () 
+	{
+		WithBackgroundImagePanel p ;
+		JRadioButton r ;
+		Insets insets ;
+		NamedColor n ;
+		int i ;
+		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
+		for ( Component c : getComponents() )
+			remove ( c ) ;
+		for ( i = 0 ; i < model.getNumberOfColors () ; i ++ )
+		{
+			n = model.getColor ( i ) ;
+			p = new WithBackgroundImagePanel () ;
+			r = new JRadioButton () ;
+			p.setOpaque ( false ) ;
+			r.setOpaque(false); 
+			layoutComponent ( p , i , 1 , 1 , 0.7 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+			layoutComponent ( r , i , 2 , 1 , 0.3 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
+			p.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( PositionableElementType.getSheperdByColor ( n.getName () ) , true ) ) ;
+			r.addItemListener ( new SelectorListener ( i , p ) ) ;
+			r.setText ( n.getName () ) ; 
+			r.setHorizontalAlignment ( SwingConstants.CENTER ) ;
+			add ( p ) ;
+			add ( r ) ;
+			imagePanels.put ( n.getName() , p ) ;
+			buttonGroup.add ( r ) ;
+		}
 	}
 	
 	/***/
 	private class SelectorListener implements ItemListener 
 	{
 
-		/***/
-		private NamedColor associatedColor ;
+		private WithBackgroundImagePanel p ;
 		
 		/***/
-		public SelectorListener ( NamedColor associatedColor )
+		private int index ;
+		
+		/***/
+		public SelectorListener ( int index ,WithBackgroundImagePanel p )
 		{
-			this.associatedColor = associatedColor ;
+			this.index = index ;
+			this.p = p ;
 		}
 		
 		/**
@@ -339,7 +332,16 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 		@Override
 		public void itemStateChanged ( ItemEvent e ) 
 		{
-			selected = associatedColor ;
+			if ( model.getSelectedColor() != null )
+				imagePanels.get ( model.getSelectedColor().getName() ).
+				setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().
+				getPositionableImage ( PositionableElementType.
+				getSheperdByColor ( model.getSelectedColor().getName() ) , true ) );
+			model.setSelected ( index ) ;
+			p.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().
+			getPositionableImage ( PositionableElementType.getSheperdByColor 
+			( model.getColor ( index ).getName () ) , false )) ;
+			repaint () ;
 		}	
 		
 	}

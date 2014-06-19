@@ -85,6 +85,12 @@ public final class GameConstants
 	 */
 	public static final int NUMBER_OF_INITIAL_CARD = 6 ;
 	
+	/**
+	 * The amount of value the Sheperd has to pay if the Road where he wants to go is 
+	 * not adjacent to the Road where he is now. 
+	 */
+	public static final int MONEY_TO_PAY_IF_ROADS_NON_ADJACENT = 1 ;
+	
 	/***/
 	private GameConstants () {}
 	

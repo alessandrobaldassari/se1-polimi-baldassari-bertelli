@@ -166,6 +166,22 @@ public class MoveSelector implements Serializable
 		return availableRegionsForBreakdown ;
 	}
 	
+	public Iterable < GameMoveType > getAvailableMoves ()
+	{
+		Collection < GameMoveType > res ;
+		res = new ArrayList<GameMoveType> () ;
+		for ( GameMoveType g : GameMoveType.values () )
+			if ( isMoveAllowed(g) )
+				res.add(g);
+		return res ;
+	}
+	
+	public void updateSelection ( GameMoveType g ) 
+	{
+		lastSelectedIndex ++ ;
+		selectedMoves [ lastSelectedIndex ] = g ;
+	}
+	
 	/***/
 	public boolean isMoveAllowed ( GameMoveType g )
 	{
@@ -173,7 +189,6 @@ public class MoveSelector implements Serializable
 		boolean extCond ;
 		boolean shepCond ;
 		boolean twoCond ;
-		boolean dinCond ;
 		if ( g != null )
 		{
 			extCond = movesAllowedDueToRuntimeRules.get ( g ) ;
@@ -196,8 +211,6 @@ public class MoveSelector implements Serializable
 		{
 			if ( isMoveAllowed ( GameMoveType.BREAK_DOWN ) && availableRegionsForBreakdown.contains ( animalToBreak ) )
 			{
-				lastSelectedIndex ++ ;
-				selectedMoves [ lastSelectedIndex ] = GameMoveType.BREAK_DOWN ;
 				selection = new MoveSelection  ( GameMoveType.BREAK_DOWN , Collections.<Serializable>singleton ( animalToBreak ) ) ;
 			}
 			else
@@ -214,8 +227,6 @@ public class MoveSelector implements Serializable
 		{
 			if ( isMoveAllowed ( GameMoveType.BUY_CARD ) && availableRegionsForBuyCard.containsKey ( buyingCardType ) )
 			{
-				lastSelectedIndex ++ ;
-				selectedMoves [ lastSelectedIndex ] = GameMoveType.BUY_CARD ;
 				selection = new MoveSelection  ( GameMoveType.BUY_CARD , Collections.<Serializable>singleton ( buyingCardType ) ) ;
 				
 			}
@@ -233,8 +244,6 @@ public class MoveSelector implements Serializable
 		{
 			if ( isMoveAllowed ( GameMoveType.MATE ) && availableRegionsForMate.contains ( whereMate ) )
 			{
-				lastSelectedIndex ++ ;
-				selectedMoves [ lastSelectedIndex ] = GameMoveType.MATE ;
 				selection = new MoveSelection  ( GameMoveType.MATE , Collections.<Serializable>singleton ( whereMate ) ) ;
 				
 			}
@@ -258,8 +267,6 @@ public class MoveSelector implements Serializable
 				params = new ArrayList < Serializable > ( 2 ) ;
 				params.add ( movingOvine ) ;
 				params.add ( ovineDestinationRegion ) ;
-				lastSelectedIndex ++ ;
-				selectedMoves [ lastSelectedIndex ] = GameMoveType.MOVE_SHEEP ;
 				selection = new MoveSelection  ( GameMoveType.MOVE_SHEEP , params ) ;
 			}
 			else
@@ -276,8 +283,6 @@ public class MoveSelector implements Serializable
 		{
 			if ( isMoveAllowed ( GameMoveType.MOVE_SHEPERD ) && availableRoadsForMoveSheperd.contains ( roadWhereGo ) )
 			{
-				lastSelectedIndex ++ ;
-				selectedMoves [ lastSelectedIndex ] = GameMoveType.MOVE_SHEPERD ;
 				selection = new MoveSelection  ( GameMoveType.MOVE_SHEPERD , Collections.<Serializable>singleton ( roadWhereGo ) ) ;
 			}
 			else
@@ -297,5 +302,5 @@ public class MoveSelector implements Serializable
 			throw new WrongStateMethodCallException () ;
 		return res ;
 	}
-	
+		
 }

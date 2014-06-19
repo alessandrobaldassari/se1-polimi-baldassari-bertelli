@@ -10,6 +10,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player.TooFewMoneyException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatch;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WorkflowException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
@@ -55,6 +56,10 @@ public class MoveSheperdTest
 		catch (MoveNotAllowedException e) 
 		{
 			assertTrue ( m == null ) ;
+		} 
+		catch (WorkflowException e) 
+		{
+			e.printStackTrace();
 		}
 	}
 
@@ -87,6 +92,9 @@ public class MoveSheperdTest
 		catch (MoveNotAllowedException e) 
 		{
 			assertTrue ( m == null ) ;
+		} catch (WorkflowException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
@@ -130,11 +138,10 @@ public class MoveSheperdTest
 		catch (MoveNotAllowedException e) 
 		{
 			assertTrue ( true ) ;
+		} catch (WorkflowException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} 
-		catch (WrongStateMethodCallException e)
-		{
-			fail () ;
-		}
 	}
 	
 	/**
@@ -176,6 +183,9 @@ public class MoveSheperdTest
 			fail () ;
 		} catch (WrongStateMethodCallException e) {
 			fail () ;
+		} catch (WorkflowException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	

@@ -11,6 +11,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Wolf;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
 /**
  * This class contains some useful methods that operates over a GameMap and are useful algorithms 
@@ -34,6 +35,16 @@ public final class MapUtilities
 		border1 = road.getFirstBorderRegion () ;
 		border2 = road.getSecondBorderRegion () ;
 		res = border1.equals( target ) || border2.equals ( target ) ;
+		return res ;
+	}
+	
+	public static boolean areAdjacents ( Road r1 , Road r2 ) 
+	{
+		boolean res ;
+		if ( r1 != null && r2 != null )
+			res = CollectionsUtilities.contains( r1.getAdjacentRoads() , r2 ) ;
+		else
+			throw new IllegalArgumentException();
 		return res ;
 	}
 	

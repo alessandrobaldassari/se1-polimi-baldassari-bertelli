@@ -16,7 +16,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.CharacterDoesntMoveException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObjectIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
@@ -103,13 +103,13 @@ public class WolfTestOpen {
 	/*
 	 * Declaring a dummy MatchIdentifier to initialize animalFactory correctly
 	 */
-	public static class DummyMatchIdentifier implements Identifiable<Match>{
+	public static class DummyMatchIdentifier implements ObjectIdentifier<Match>{
 
 		public DummyMatchIdentifier() {
 			// TODO Auto-generated constructor stub
 		}
 
-		public boolean isEqualsTo(Identifiable<Match> otherObject) {
+		public boolean isEqualsTo(ObjectIdentifier<Match> otherObject) {
 			// TODO Auto-generated method stub
 			return true;
 		}

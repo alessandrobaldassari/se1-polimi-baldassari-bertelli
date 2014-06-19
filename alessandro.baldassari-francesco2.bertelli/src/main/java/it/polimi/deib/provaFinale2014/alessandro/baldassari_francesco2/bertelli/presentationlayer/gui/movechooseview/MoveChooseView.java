@@ -43,9 +43,9 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 		addObserver ( observer ) ;
 	}
 	
-	public void obscureMoves ( Iterable < GameMoveType > m ) 
+	public void setAvailableMoves ( Iterable < GameMoveType > availableMoves ) 
 	{
-		moveListPanel.obscureMoves ( m ) ;
+		moveListPanel.setAvailableMoves ( availableMoves ) ;
 	}
 	
 	/**
@@ -71,9 +71,10 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 		setAlwaysOnTop ( true ) ;	
 		view.setShowKo(false); 
 		setUndecorated(true);
- 		setSize ( GraphicsUtilities.getVGAResolution () ) ;
+ 		setSize ( GraphicsUtilities.getThreeFourthVgaResolution() ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
-		view.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getBackgroundImage() );
+		view.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCoverImage(true) ); 
+		view.setTitle ( PresentationMessages.DO_MOVE_MESSAGE ) ;
 	}
 
 	/**
@@ -150,12 +151,13 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 	}
 	
 	/***/
-	public static GameMoveType showDialog () 
+	public static GameMoveType showDialog ( Iterable < GameMoveType > availableMoves ) 
 	{
 		MoveChooseView moveChooseView ;
 		AtomicReference < GameMoveType > move ;
 		move = new AtomicReference < GameMoveType > ( null ) ;
 		moveChooseView = new MoveChooseView ( new DefaultMoveChooseViewObserver(move) ) ;
+		moveChooseView.setAvailableMoves(availableMoves); 
 		GraphicsUtilities.showUnshowWindow ( moveChooseView , false , true ) ;
 		synchronized ( move ) 
 		{
@@ -171,13 +173,6 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 		}
 		GraphicsUtilities.showUnshowWindow ( moveChooseView , false , false ) ;
 		return move.get() ;
-	}
-	
-	public static void main ( String [] args ) 
-	{
-		GameMoveType x ;
-		x = MoveChooseView.showDialog () ;
-		System.out.println ( x ) ;
 	}
 	
 }
@@ -242,7 +237,7 @@ class MoveListPanel extends FrameworkedWithGridBagLayoutPanel
 			r.setText ( moveTypes [ i ].name () ) ;
 			r.setOpaque ( false ) ;
 			r.setHorizontalAlignment ( SwingConstants.CENTER ) ;
-			panel.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getMoveImage ( moveTypes [ i ] ) );
+			panel.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getMoveImage ( moveTypes [ i ] , false ) );
 			panel.setOpaque ( false ) ;
 			i ++ ;
 		}
@@ -270,12 +265,18 @@ class MoveListPanel extends FrameworkedWithGridBagLayoutPanel
 			buttonGroup.add ( r ) ;
 	}
 
-	public void obscureMoves ( Iterable < GameMoveType > m ) 
+	/***/
+	public void setAvailableMoves ( Iterable < GameMoveType > availableMoves ) 
 	{
-		for ( GameMoveType g : m )
+		for ( GameMoveType g : GameMoveType.values () )
 		{
 			imagePanels.get(g).setEnabled(false);
 			selectors.get(g).setEnabled(false); 
+		}
+		for ( GameMoveType g : availableMoves )
+		{
+			imagePanels.get ( g ).setEnabled ( true ) ;
+			selectors.get ( g ).setEnabled ( true ) ; 
 		}
 	}
 	

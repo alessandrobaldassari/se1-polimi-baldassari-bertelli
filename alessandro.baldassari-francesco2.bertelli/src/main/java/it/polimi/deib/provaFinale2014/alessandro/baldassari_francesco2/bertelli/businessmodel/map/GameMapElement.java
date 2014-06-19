@@ -1,6 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionAbstractObservable;
@@ -11,7 +12,7 @@ import java.io.Serializable;
  * This class represent a generic element which composes the GameMapElement.
  * It is an immutable class, also if it is expectable that its subclasses will not.
  */
-public abstract class GameMapElement extends WithReflectionAbstractObservable < GameMapElementObserver > implements Serializable
+public abstract class GameMapElement extends WithReflectionAbstractObservable < GameMapElementObserver > implements Serializable , Identifiable
 {
 
 	// ATTRIBUTES
@@ -57,6 +58,7 @@ public abstract class GameMapElement extends WithReflectionAbstractObservable < 
 	/**
 	 * @return the uid property. 
 	 */
+	@Override
 	public int getUID () 
 	{
 		return uid ;

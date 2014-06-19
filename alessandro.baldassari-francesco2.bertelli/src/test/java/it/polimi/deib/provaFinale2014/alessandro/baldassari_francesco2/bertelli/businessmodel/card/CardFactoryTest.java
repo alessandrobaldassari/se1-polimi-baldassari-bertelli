@@ -10,7 +10,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchIdentifier;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObjectIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
 import org.junit.Before;
@@ -19,7 +19,7 @@ import org.junit.Test;
 public class CardFactoryTest {
 
 	CardFactory cardFactory;
-	Identifiable<Match> dummyMatchIdentifier;
+	ObjectIdentifier<Match> dummyMatchIdentifier;
 	LinkedList <Card> initialCards;
 	LinkedList <SellableCard> sellableCards;
 	byte cultivable, desert, hill, forest, lacustrine, mountain;

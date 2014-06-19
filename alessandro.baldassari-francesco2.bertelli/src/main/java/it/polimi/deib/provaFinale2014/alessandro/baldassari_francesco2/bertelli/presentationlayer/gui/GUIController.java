@@ -3,9 +3,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import java.awt.Window;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -41,7 +39,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.threading.ThreadUtilities;
 
@@ -120,6 +117,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	public String onNameRequest () 
 	{
 		String res ;
+		// prompt the User for a name.
 		res = LoginView.showDialog () ;
 		waitingView.setText ( PresentationMessages.NAME_VERIFICATION_MESSAGE ) ;
 		return res ;
@@ -189,14 +187,10 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	@Override
 	public Road chooseInitRoadForSheperd ( Iterable < Road > availableRoads ) throws IOException 
 	{
-		Collection < Integer > roadIndexes ;
 		Road res ;
-		roadIndexes = new LinkedList < Integer > () ;
-		for ( Road road : availableRoads )
-			roadIndexes.add ( road.getUID() ) ;
 		generationNotification ( PresentationMessages.CHOOSE_INITIAL_ROAD_FOR_A_SHEPERD_MESSAGE ) ;
 		index.set ( null ) ; 
-		gameView.setInputMode ( GameMapViewInputMode.ROADS , roadIndexes ) ;
+		gameView.setInputMode ( GameMapViewInputMode.ROADS , availableRoads ) ;
 		ThreadUtilities.waitForAtomicVariable ( index ) ;
 		gameView.setInputMode ( null , null ) ;
 		res = null ;
@@ -220,14 +214,10 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	@Override
 	public Sheperd onChooseSheperdForATurn ( Iterable < Sheperd > sheperds ) throws IOException
 	{
-		Collection < Integer > rightIndexes ;
 		Sheperd res ;
-		rightIndexes = new LinkedList < Integer > () ;
 		index.set(null); 
-		for ( Sheperd s : sheperds )
-			rightIndexes.add ( s.getUID () ) ;
 		generationNotification ( PresentationMessages.CHOOSE_SHEPERD_FOR_A_TURN_MESSAGE ) ;
-		gameView.setInputMode ( GameMapViewInputMode.SHEPERDS , rightIndexes ) ;
+		gameView.setInputMode ( GameMapViewInputMode.SHEPERDS , sheperds ) ;
 		ThreadUtilities.waitForAtomicVariable ( index ) ;
 		gameView.setInputMode ( null , null ) ;
 		res = null ;
@@ -246,212 +236,6 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	}
 	
 	/**
-	 * @throws MoveNotAllowedException 
-	 * @throws WrongStateMethodCallException */
-	private MoveSelection breakDownMoveManagement ( GameMap gameMap , MoveSelector selector ) throws MoveNotAllowedException, WrongStateMethodCallException 
-	{
-		Set < PositionableElementType > set ;
-		MoveSelection res = null ;
-		PositionableElementType p ;
-		Collection < Integer > rightIndexes ;
-		Region region ;
-		Animal animal ;
-		set = new HashSet < PositionableElementType > () ;
-		rightIndexes = new ArrayList < Integer > () ;
-		for ( Region r : selector.getAvailableRegionsForBreakdown () )
-			rightIndexes.add ( r.getUID() ) ;
-		if ( ! rightIndexes.isEmpty() )
-		{
-			// let the user choose where do the break down.
-			generationNotification ( "Scegli la regione dove perpetrare il misfatto ( tra quelle vicine al tuo pastore scelto )..." ) ;
-			gameView.setInputMode ( GameMapViewInputMode.REGIONS , rightIndexes ) ;
-			index.set ( null ) ;
-			ThreadUtilities.waitForAtomicVariable ( index ) ;
-			gameView.setInputMode(null,null);
-			if ( userWantsToChangeMove == false )
-			{	
-				region = gameMap.getRegionByUID ( index.get () ) ;
-				index.set ( null ) ;
-				set.add ( PositionableElementType.RAM ) ;
-				set.add ( PositionableElementType.SHEEP ) ;
-				set.add ( PositionableElementType.LAMB ) ;
-				for ( Animal a : region.getContainedAnimals () )
-					if ( set.contains ( a.getPositionableElementType() ) )
-						set.remove ( a.getPositionableElementType() ) ;
-				// gestire la finestra che visualizza gli ovini
-				p = OvineChooseView.showDialog ( set ) ;
-				animal = null ;
-				for ( Animal a : region.getContainedAnimals() )
-					if ( a.getPositionableElementType() == p )
-					{
-						animal = a ;
-						break ;
-					}
-				if ( animal != null )
-				{
-					selector.selectBreakdown(animal);
-					res = selector.getSelectedMove() ;
-				}
-				else
-					res = null ;
-			}
-		}
-		else
-		{
-			generationNotification( "Scusa, ma questa mossa non la puoi fare." ) ;
-			res = null ;
-			userWantsToChangeMove = true ;
-		}
-		return res ;
-	}
-	
-	/**
-	 * @throws MoveNotAllowedException 
-	 * @throws WrongStateMethodCallException */
-	private MoveSelection buyCardManagement ( MoveSelector selector ) throws MoveNotAllowedException, WrongStateMethodCallException 
-	{
-		MoveSelection res ;
-		Collection < Couple < RegionType , Integer > > allowedMoves ;
-		RegionType type ;
-		type = RegionTypeChooseView.showDialog ( selector.getAvailableRegionsForBuyCard() , selector.getAvailableMoney () ).getFirstObject () ; 
-		if ( type != null )
-		{
-			selector.selectBuyCard ( type ) ;
-			res = selector.getSelectedMove();
-		}	
-		else
-		{
-			res = null ;
-			userWantsToChangeMove = true ;
-		}
-		return res ;
-	}
-	
-	/**
-	 * @throws MoveNotAllowedException 
-	 * @throws WrongStateMethodCallException */
-	private MoveSelection mateManagement ( GameMap gameMap , MoveSelector selector ) throws MoveNotAllowedException, WrongStateMethodCallException 
-	{
-		Collection < Integer > rightIndexes ;
-		MoveSelection res ;
-		Region region ;
-		rightIndexes = new ArrayList < Integer > () ;
-		for ( Region r : selector.getAvailableRegionsForMate() )
-			rightIndexes.add ( r.getUID() ) ;
-		if ( ! rightIndexes.isEmpty() )
-		{
-			gameView.setInputMode ( GameMapViewInputMode.REGIONS , rightIndexes ) ;
-			generationNotification ( "Scegli la regione dove vuoi provare a far eseguire l'accoppiamento ( vicina a te )." );
-			index.set ( null ) ;
-			ThreadUtilities.waitForAtomicVariable ( index ) ;
-			gameView.setInputMode(null,null);
-			if ( userWantsToChangeMove == false )		
-			{	
-				region = gameMap.getRegionByUID ( index.get () ) ;
-				selector.selectMate ( region ) ;
-				res = selector.getSelectedMove();
-			}
-			else
-				res = null ;
-		}
-		else
-		{
-			generationNotification ( "Sorry, ma non ci sono regioni dove tu possa fare accoppiamento !\nScegli un'altra mossa" );
-			res = null ;
-			userWantsToChangeMove = true ;
-		}
-		return res ;
-	}
-	
-	/**
-	 * @throws MoveNotAllowedException 
-	 * @throws WrongStateMethodCallException */
-	private MoveSelection moveSheepManagement ( GameMap gameMap , MoveSelector selector ) throws MoveNotAllowedException, WrongStateMethodCallException 
-	{
-		Set < PositionableElementType > set ;
-		Collection < Integer > rightIndexes ;
-		Region region ;
-		MoveSelection res ;
-		PositionableElementType p ;
-		Animal animal ;
-		set = new HashSet < PositionableElementType > () ;
-		rightIndexes = new ArrayList < Integer > () ;
-		for ( Region r : selector.getAvailableRegionsForMoveSheep() )
-			rightIndexes.add ( r.getUID() );
-		// if there are regions available for this move...
-		if ( ! rightIndexes.isEmpty() )
-		{
-			gameView.setInputMode ( GameMapViewInputMode.REGIONS , rightIndexes ) ;
-			generationNotification ( "Scegli la regione da dove spostare l'ovino ( tra quelle vicine al pastore che hai scelto)." ) ;
-			index.set ( null ) ;
-			ThreadUtilities.waitForAtomicVariable ( index ) ;
-			if ( userWantsToChangeMove  == false )
-			{
-				region = gameMap.getRegionByUID ( index.get() ) ;
-				generationNotification ( "Ok, ora scegli un ovino da muovere ( all'interno della regione che hai scelto)." ) ;
-				region = gameMap.getRegionByUID ( index.get () ) ;
-				index.set ( null ) ;
-				set.add ( PositionableElementType.RAM ) ;
-				set.add ( PositionableElementType.SHEEP ) ;
-				set.add ( PositionableElementType.LAMB ) ;
-				for ( Animal a : region.getContainedAnimals () )
-					if ( set.contains ( a.getPositionableElementType() ) )
-						set.remove ( a.getPositionableElementType() ) ;
-				p = OvineChooseView.showDialog ( set ) ;
-				animal = null ;
-				for ( Animal a : region.getContainedAnimals() )
-					if ( a.getPositionableElementType() == p )
-					{
-						animal = a ;
-						break ;
-					}
-				if ( animal != null )
-				{
-					selector.selectBreakdown(animal);
-					res = selector.getSelectedMove () ;
-				}
-				else
-					res = null ;
-			}
-			else
-				res = null ;
-		}
-		else
-		{
-			generationNotification ( "Sorry, ma non ci sono regioni da cui tu possa spostare pecore !\nScegli un'altra mossa" );
-			res = null ;
-			userWantsToChangeMove = true ;
-		}
-		return res ;
-	}
-	
-	/**
-	 * @throws MoveNotAllowedException 
-	 * @throws WrongStateMethodCallException */
-	private MoveSelection moveSheperdManagement ( GameMap gameMap , MoveSelector selector ) throws MoveNotAllowedException, WrongStateMethodCallException 
-	{
-		Collection < Integer > rightIndexes ;
-		Road road ;
-		MoveSelection res ;
-		rightIndexes = new ArrayList < Integer > () ;
-		for ( Road r : selector.getAvailableRoadsForMoveSheperd() )
-			rightIndexes.add ( r.getUID() ) ;
-		index.set(null) ;
-		gameView.setInputMode ( GameMapViewInputMode.ROADS , rightIndexes ) ;
-		ThreadUtilities.waitForAtomicVariable ( index ) ;
-		gameView.setInputMode ( null ,null ) ;
-		if ( userWantsToChangeMove == false )
-		{
-			road = gameMap.getRoadByUID ( index.get () ) ;
-			selector.selectMoveSheperd ( road ) ;
-			res = selector.getSelectedMove();
-		}
-		else
-			res = null ;
-		return res ;
-	}
-	
-	/**
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
@@ -461,42 +245,36 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		GameMoveType move ;
 		// first ask the user what move he wants to do.
 		res = null ;
-		System.out.println ( "GUI_CONTROLLER - ON_DO_MOVE : INIZIO" ) ;
 		do
 		{
 			userWantsToChangeMove = false ;
 			move = null ;
 			// controlli a priori sulle mosse che si possono fare ?
-			move = MoveChooseView.showDialog () ;
-			System.out.println ( "GUI_CONTROLLER - DO_MOVE : MOVE RECEIVED = " + move ) ;
+			move = MoveChooseView.showDialog ( selector.getAvailableMoves () ) ;
 			if ( move != null )
 			{
-				try {
-				switch ( move )
+				try
 				{
-					case BREAK_DOWN :
-						res = breakDownMoveManagement ( gameMap , selector );
-					break ;
-					case BUY_CARD :
-						res = buyCardManagement ( selector ) ;
-					break ;
-					case MATE :
-						res = mateManagement ( gameMap , selector ) ;
-					break ;
-					case MOVE_SHEEP :
-						res = moveSheepManagement ( gameMap , selector ) ;
+					switch ( move )
+					{
+						case BREAK_DOWN :
+							res = breakDownMoveManagement ( gameMap , selector );
 						break ;
-					case MOVE_SHEPERD :
-						res = moveSheperdManagement ( gameMap , selector ) ;
-					break ;
-					default :
-						throw new RuntimeException () ;
-				}
-				}
-				catch ( WrongStateMethodCallException w ) 
-				{
-					res = null ;
-					userWantsToChangeMove = true ;
+						case BUY_CARD :
+							res = buyCardManagement ( selector ) ;
+						break ;
+						case MATE :
+							res = mateManagement ( gameMap , selector ) ;
+						break ;
+						case MOVE_SHEEP :
+							res = moveSheepManagement ( gameMap , selector ) ;
+							break ;
+						case MOVE_SHEPERD :
+							res = moveSheperdManagement ( gameMap , selector ) ;
+						break ;
+						default :
+							throw new MoveNotAllowedException ( Utilities.EMPTY_STRING ) ;
+					}
 				}
 				catch (MoveNotAllowedException e) 
 				{
@@ -507,6 +285,195 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		}
 		while ( userWantsToChangeMove == true ) ;
 		return res ;	
+	}
+	
+	/**
+	 * @throws MoveNotAllowedException 
+	 * @throws WrongStateMethodCallException */
+	private MoveSelection breakDownMoveManagement ( GameMap gameMap , MoveSelector selector ) throws MoveNotAllowedException 
+	{
+		Set < PositionableElementType > set ;
+		MoveSelection res = null ;
+		PositionableElementType p ;
+		Region region ;
+		Animal animal ;
+		
+			// let the user choose where do the break down.
+			generationNotification ( "Scegli la regione dove perpetrare il misfatto ( tra quelle vicine al tuo pastore scelto )..." ) ;
+			gameView.setInputMode ( GameMapViewInputMode.REGIONS , selector.getAvailableRegionsForBreakdown () ) ;
+			index.set ( null ) ;
+			ThreadUtilities.waitForAtomicVariable ( index ) ;
+			gameView.setInputMode(null,null);
+			if ( userWantsToChangeMove == false )
+			{	
+				region = gameMap.getRegionByUID ( index.get () ) ;
+				index.set ( null ) ;
+				set = generateAllowedSet ( region.getContainedAnimals() ) ;
+				p = OvineChooseView.showDialog ( set ) ;
+				animal = null ;
+				for ( Animal a : region.getContainedAnimals() )
+					if ( a.getPositionableElementType() == p )
+					{
+						animal = a ;
+						break ;
+					}
+				if ( animal != null )
+				{
+					selector.selectBreakdown(animal);
+					try 
+					{
+						res = selector.getSelectedMove() ;
+					}
+					catch (WrongStateMethodCallException e) {
+						res = null ;
+					}
+				}
+				else
+					res = null ;
+			}
+		
+		return res ;
+	}
+	
+	private Set < PositionableElementType > generateAllowedSet ( Iterable < Animal > toRemove ) 
+	{
+		Set < PositionableElementType > res ;
+		res = new LinkedHashSet<PositionableElementType>();
+		res.add ( PositionableElementType.RAM ) ;
+		res.add ( PositionableElementType.SHEEP ) ;
+		res.add ( PositionableElementType.LAMB ) ;
+		for ( Animal a : toRemove )
+			if ( res.contains ( a.getPositionableElementType() ) )
+				res.remove ( a.getPositionableElementType() ) ;
+		return res ;
+	}
+	
+	/**
+	 * @throws MoveNotAllowedException 
+	 */
+	private MoveSelection buyCardManagement ( MoveSelector selector ) throws MoveNotAllowedException 
+	{
+		MoveSelection res ;
+		RegionType type ;
+		type = RegionTypeChooseView.showDialog ( selector.getAvailableRegionsForBuyCard() , selector.getAvailableMoney () ).getFirstObject () ; 
+		if ( type != null )
+			try 
+			{
+				selector.selectBuyCard ( type ) ;
+				res = selector.getSelectedMove();
+			}
+			catch (WrongStateMethodCallException e) 
+			{
+				res = null ;
+			}
+		else
+		{
+			res = null ;
+			userWantsToChangeMove = true ;
+		}
+		return res ;
+	}
+	
+	/**
+	 * @throws MoveNotAllowedException 
+	 * @throws WrongStateMethodCallException */
+	private MoveSelection mateManagement ( GameMap gameMap , MoveSelector selector ) throws MoveNotAllowedException 
+	{
+		MoveSelection res ;
+		Region region ;
+		
+			gameView.setInputMode ( GameMapViewInputMode.REGIONS , selector.getAvailableRegionsForMate() ) ;
+			generationNotification ( "Scegli la regione dove vuoi provare a far eseguire l'accoppiamento ( vicina a te )." );
+			index.set ( null ) ;
+			ThreadUtilities.waitForAtomicVariable ( index ) ;
+			gameView.setInputMode(null,null);
+			if ( userWantsToChangeMove == false )		
+				try 
+				{
+					region = gameMap.getRegionByUID ( index.get () ) ;
+					selector.selectMate ( region ) ;
+					res = selector.getSelectedMove();
+				}
+				catch (WrongStateMethodCallException e) 
+				{
+					res = null ;
+				}
+			else
+				res = null ;
+		return res ;
+	}
+	
+	/**
+	 * @throws MoveNotAllowedException 
+	 * @throws WrongStateMethodCallException */
+	private MoveSelection moveSheepManagement ( GameMap gameMap , MoveSelector selector ) throws MoveNotAllowedException 
+	{
+		Set < PositionableElementType > set ;
+		Region region ;
+		MoveSelection res ;
+		PositionableElementType p ;
+		Animal animal ;
+		System.out.println ( "\n\n\n\n " + selector.getAvailableRegionsForMoveSheep () + "\n\n\n\n\\n" ) ;
+		gameView.setInputMode ( GameMapViewInputMode.REGIONS , selector.getAvailableRegionsForMoveSheep () ) ;
+		generationNotification ( "Scegli la regione da dove spostare l'ovino ( tra quelle vicine al pastore che hai scelto)." ) ;
+		index.set ( null ) ;
+		ThreadUtilities.waitForAtomicVariable ( index ) ;
+		if ( userWantsToChangeMove  == false )
+		{
+			region = gameMap.getRegionByUID ( index.get() ) ;
+			index.set ( null ) ;
+			set = generateAllowedSet ( region.getContainedAnimals() ) ;
+			p = OvineChooseView.showDialog ( set ) ;
+			animal = null ;
+			for ( Animal a : region.getContainedAnimals() )
+				if ( a.getPositionableElementType() == p )
+				{
+					animal = a ;
+					break ;
+				}
+			if ( animal != null )
+				try
+				{
+					selector.selectBreakdown(animal);
+					res = selector.getSelectedMove () ;
+				}
+				catch (WrongStateMethodCallException e) 
+				{
+					res = null ;
+				}
+			else
+				res = null ;
+		}
+		else
+				res = null ;
+		return res ;
+	}
+	
+	/**
+	 * @throws MoveNotAllowedException 
+	 * @throws WrongStateMethodCallException */
+	private MoveSelection moveSheperdManagement ( GameMap gameMap , MoveSelector selector ) throws MoveNotAllowedException 
+	{
+		Road road ;
+		MoveSelection res ;
+		index.set(null) ;
+		gameView.setInputMode ( GameMapViewInputMode.ROADS , selector.getAvailableRoadsForMoveSheperd() ) ;
+		ThreadUtilities.waitForAtomicVariable ( index ) ;
+		gameView.setInputMode ( null ,null ) ;
+		if ( userWantsToChangeMove == false )
+			try 
+			{
+				road = gameMap.getRoadByUID ( index.get () ) ;
+				selector.selectMoveSheperd ( road ) ;
+				res = selector.getSelectedMove();
+			}
+			catch (WrongStateMethodCallException e) 
+			{
+				res = null ;
+			}
+		else
+			res = null ;
+		return res ;
 	}
 	
 	/**

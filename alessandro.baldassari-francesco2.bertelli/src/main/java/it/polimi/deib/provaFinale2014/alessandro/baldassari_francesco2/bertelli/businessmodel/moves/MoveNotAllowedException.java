@@ -11,5 +11,10 @@ public class MoveNotAllowedException extends Exception
 	{
 		super ( message ) ;
 	}
+
+	public MoveNotAllowedException ( String message , Throwable cause ) 
+	{
+		super ( message , cause ) ;
+	}
 	
 }

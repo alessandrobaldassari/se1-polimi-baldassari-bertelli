@@ -2,10 +2,15 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.util.LinkedList;
+import java.util.List;
 
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.border.TitledBorder;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.DynamicResizingManager;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.FrameworkedWithGridBagLayoutPanel;
 
 /**
@@ -14,6 +19,11 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class NotificationPanel extends FrameworkedWithGridBagLayoutPanel
 {
 
+	/**
+	 * The scroll pane that will contain the notification area. 
+	 */
+	private JScrollPane scrollPane ;
+	
 	/**
 	 * The technical area where notifications will be shown. 
 	 */
@@ -31,6 +41,7 @@ public class NotificationPanel extends FrameworkedWithGridBagLayoutPanel
 	@Override
 	protected void createComponents () 
 	{
+		scrollPane = new JScrollPane () ;
 		notificationArea = new JTextArea () ;
 	}
 
@@ -42,9 +53,13 @@ public class NotificationPanel extends FrameworkedWithGridBagLayoutPanel
 	{
 		Insets insets ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
-		layoutComponent ( notificationArea , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+		layoutComponent ( scrollPane , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+		scrollPane.setViewportView ( notificationArea ) ;
+		scrollPane.setOpaque ( false ) ;
+		scrollPane.setBorder ( new TitledBorder ( "Whatsapp(ening)" ) );
 		notificationArea.setEditable(false) ;
 		notificationArea.setOpaque(false); 
+	
 		setOpaque ( false ) ;
 	}
 
@@ -52,7 +67,10 @@ public class NotificationPanel extends FrameworkedWithGridBagLayoutPanel
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	protected void bindListeners() {}
+	protected void bindListeners() 
+	{
+		notificationArea.addComponentListener ( new DynamicResizingManager ( scrollPane ) ) ;
+	}
 
 	/**
 	 * AS THE SUPER'S ONE. 
@@ -60,7 +78,7 @@ public class NotificationPanel extends FrameworkedWithGridBagLayoutPanel
 	@Override
 	protected void injectComponents() 
 	{
-		add ( notificationArea ) ;
+		add ( scrollPane ) ;
 	}
 
 	/**
@@ -83,4 +101,22 @@ public class NotificationPanel extends FrameworkedWithGridBagLayoutPanel
 		notificationArea.setText ( Utilities.EMPTY_STRING ) ;
 	}
 	
+}
+
+class NotificationViewModel 
+{
+
+	private List < String > notifications ;
+
+	public NotificationViewModel () 
+	{
+		notifications = new LinkedList < String > () ;
+	}
+	
+	public void addNotification ( String newNot )
+	{
+		if ( newNot != null )
+			notifications.add ( notifications.size () , newNot );
+	}
+ 	
 }

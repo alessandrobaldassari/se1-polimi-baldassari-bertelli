@@ -14,6 +14,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.AlreadyInFinalPhaseException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.MatchState;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMoveType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.Mate;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveExecutor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveNotAllowedException;
@@ -151,7 +152,7 @@ class TurnationPhaseManager implements TurnNumberClock
 									{
 										System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - MOSSA SCELTA " + selection.getSelectedType().toString() ) ;									
 										// effectively execute the move.
-										execMove ( moveFactory , selection, match ) ;
+										execMove ( moveFactory , selection, match , selector ) ;
 										System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " HA ESEGUITO LA MOSSA." ) ;									
 									}
 									else
@@ -389,8 +390,9 @@ class TurnationPhaseManager implements TurnNumberClock
 	 * @param match the Match over which operate.
 	 * @throws MoveNotAllowedException if the execution of the move is not allowed ( probably due to business rules ).
 	 * @throws WrongStateMethodCallException 
+	 * @throws WorkflowException 
 	 */
-	private void execMove ( MoveExecutor exec , MoveSelection selection , Match match ) throws MoveNotAllowedException, WrongStateMethodCallException
+	private void execMove ( MoveExecutor exec , MoveSelection selection , Match match , MoveSelector sel ) throws MoveNotAllowedException, WrongStateMethodCallException, WorkflowException
 	{
 		List < Serializable > params ;
 		params = CollectionsUtilities.newListFromIterable ( selection.getParams() ) ; 
@@ -400,21 +402,26 @@ class TurnationPhaseManager implements TurnNumberClock
 			case BREAK_DOWN :
 				mapUID =  ( ( Animal ) params.get(0) ).getPosition().getUID () ;
 				exec.executeBreakdown ( match , MapUtilities.findAnimalByUID ( match.getGameMap().getRegionByUID ( mapUID ) , ( ( Animal ) params.get(0) ).getUID () ) ) ;
+				sel.updateSelection(GameMoveType.BREAK_DOWN);
 			break ;
 			case BUY_CARD :
 				exec.executeBuyCard ( match , (RegionType) params.get(0) ) ;
+				sel.updateSelection(GameMoveType.BUY_CARD);
 			break ;
 			case MATE :
 				mapUID = ( ( Region ) params.get ( 0 ) ).getUID () ;
 				exec.executeMate ( match , match.getGameMap ().getRegionByUID ( mapUID ) ) ;
+				sel.updateSelection(GameMoveType.MATE);
 			break ;
 			case MOVE_SHEEP :
 				mapUID = ( ( Region ) params.get ( 1 ) ).getUID () ;
 				exec.executeMoveSheep ( match , ( Ovine ) params.get(0) , match.getGameMap ().getRegionByUID ( mapUID ) ); 
+				sel.updateSelection(GameMoveType.MOVE_SHEEP);
 			break ;
 			case MOVE_SHEPERD :
 				mapUID = ( (Road) params.get (0 ) ).getUID () ;
 				exec.executeMoveSheperd ( match, match.getGameMap ().getRoadByUID ( mapUID ) ); 
+				sel.updateSelection(GameMoveType.MOVE_SHEPERD);
 			break ;
 			default :
 				throw new MoveNotAllowedException ( "Scusa, ma questa mossa proprio non l'avevamo mai sentita..." ) ;

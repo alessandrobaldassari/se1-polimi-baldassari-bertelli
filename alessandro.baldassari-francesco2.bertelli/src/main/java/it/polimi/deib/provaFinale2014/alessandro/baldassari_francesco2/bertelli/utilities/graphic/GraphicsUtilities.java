@@ -5,7 +5,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import java.awt.AlphaComposite;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
@@ -18,7 +17,6 @@ import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
-import java.awt.image.RescaleOp;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +40,10 @@ public final class GraphicsUtilities
 	
 	/***/
 	private static Dimension vgaResolution ; 
+	
+	private static Dimension threeFourthVgaResolution ;
+	
+	private static Dimension halfVgaResolution ;
 	
 	// make it total.
 	/***/
@@ -108,6 +110,20 @@ public final class GraphicsUtilities
 		if ( vgaResolution == null )
 			vgaResolution = new Dimension ( 640 , 480 ) ;
 		return vgaResolution ;
+	}
+	
+	public static Dimension getThreeFourthVgaResolution () 
+	{
+		if ( threeFourthVgaResolution == null )
+			threeFourthVgaResolution = new Dimension ( 480 , 360 ) ;
+		return threeFourthVgaResolution;
+	}
+	
+	public static Dimension getHalfVGAResolution () 
+	{
+		if ( halfVgaResolution == null )
+			halfVgaResolution = new Dimension ( 320 , 240 ) ;
+		return halfVgaResolution ;
 	}
 	
 	/***/

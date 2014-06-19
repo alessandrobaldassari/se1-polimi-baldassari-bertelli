@@ -28,6 +28,30 @@ public enum PositionableElementType
 	
 	BLACK_SHEEP ;
 
+	public static PositionableElementType getSheperdByColor ( String color ) 
+	{
+		PositionableElementType res ;
+		if ( color != null )
+		{
+			if ( color.trim().compareToIgnoreCase ( "red" ) == 0 )
+				res = RED_SHEPERD ;
+			else
+				if ( color.trim ().compareToIgnoreCase ( "yellow" ) == 0 )
+					res = YELLOW_SHEPERD ;
+				else
+					if ( color.trim ().compareToIgnoreCase ( "blue" ) == 0 )
+						res = BLUE_SHEPERD ;
+					else
+						if ( color.trim().compareToIgnoreCase ( "green" ) == 0 )
+							res = GREEN_SHEPERD ;
+						else
+							res = null ;
+		}
+		else
+			throw new IllegalArgumentException () ;
+		return res ;
+	}
+	
 	public static boolean isSheperd ( PositionableElementType p )
 	{
 		boolean res ;

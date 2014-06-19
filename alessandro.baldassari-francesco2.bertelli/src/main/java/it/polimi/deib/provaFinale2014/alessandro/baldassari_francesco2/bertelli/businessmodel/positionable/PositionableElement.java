@@ -3,11 +3,12 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import java.io.Serializable;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElement;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 
 /**
  * This class models a generic element which can be positioned on the GameMap element. 
  */
-public abstract class PositionableElement < T extends GameMapElement > implements Serializable
+public abstract class PositionableElement < T extends GameMapElement > implements Serializable , Identifiable
 {
 
 	// ATTRIBUTES
@@ -45,6 +46,7 @@ public abstract class PositionableElement < T extends GameMapElement > implement
 			throw new IllegalArgumentException () ;
 	}
 	
+	@Override
 	public int getUID () 
 	{
 		return uid ;

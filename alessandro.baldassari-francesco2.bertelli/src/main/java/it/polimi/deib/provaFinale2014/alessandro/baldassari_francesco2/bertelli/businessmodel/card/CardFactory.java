@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.GameConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObjectIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.factory.FactorySupport;
 
@@ -62,7 +62,7 @@ public class CardFactory
 	 *         been called with the caller parameter as the parameter.
 	 * @throws IllegalArgumentException if the caller parameter is null
 	 */
-	public Iterable < Card > generatedInitialCards ( Identifiable < Match > caller ) throws SingletonElementAlreadyGeneratedException 
+	public Iterable < Card > generatedInitialCards ( ObjectIdentifier < Match > caller ) throws SingletonElementAlreadyGeneratedException 
 	{
 		Collection < Card > res ;
 		byte counter ; 
@@ -96,7 +96,7 @@ public class CardFactory
 	 *         been called with the caller parameter as the parameter.
 	 * @throws IllegalArgumentException if the caller parameter is null
 	 */
-	public Iterable < SellableCard > generatedSellableCards ( Identifiable < Match > caller ) throws SingletonElementAlreadyGeneratedException 
+	public Iterable < SellableCard > generatedSellableCards ( ObjectIdentifier < Match > caller ) throws SingletonElementAlreadyGeneratedException 
 	{
 		Collection < SellableCard > res ;
 		byte counter ;

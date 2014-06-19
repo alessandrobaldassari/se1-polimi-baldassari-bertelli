@@ -1,6 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.factory;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObjectIdentifier;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -11,26 +11,26 @@ public class FactorySupport < T > implements Serializable
 {
 
 	/***/
-	private Collection < Identifiable < T > > alreadyUsers ;
+	private Collection < ObjectIdentifier < T > > alreadyUsers ;
 	
 	/***/
 	public FactorySupport () 
 	{
-		alreadyUsers = new LinkedList < Identifiable < T > > () ;
+		alreadyUsers = new LinkedList < ObjectIdentifier < T > > () ;
 	}
 	
 	/***/
-	public void addUser ( Identifiable < T > newUser ) 
+	public void addUser ( ObjectIdentifier < T > newUser ) 
 	{
 		alreadyUsers.add ( newUser ) ;
 	} 
 	
 	/***/
-	public boolean isAlreadyUser ( Identifiable < T > key ) 
+	public boolean isAlreadyUser ( ObjectIdentifier < T > key ) 
 	{
 		boolean res ;
 		res = false ;
-		for ( Identifiable < T > identifiable : alreadyUsers )
+		for ( ObjectIdentifier < T > identifiable : alreadyUsers )
 			if ( key.isEqualsTo ( identifiable ) )
 			{
 				res = true;

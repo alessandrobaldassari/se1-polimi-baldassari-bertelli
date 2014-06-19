@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 /**
  * A core component of the whole system.
@@ -55,7 +56,7 @@ public class Match implements Serializable
 		{
 			this.gameMap = gameMap ;
 			this.bank = bank ;
-			players = new ArrayList < Player > () ;
+			players = new Vector < Player > () ;
 			state = MatchState.CREATED ;
 			inFinalPhase = false ;
 		}

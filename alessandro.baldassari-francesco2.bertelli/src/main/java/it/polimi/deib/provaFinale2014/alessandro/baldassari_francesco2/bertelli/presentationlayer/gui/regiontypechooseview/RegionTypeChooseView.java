@@ -80,7 +80,7 @@ public class RegionTypeChooseView extends ObservableFrameworkedWithGridBagLayout
 		setUndecorated(true);
  		setSize ( GraphicsUtilities.getVGAResolution () ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
-		inputView.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getBackgroundImage () ) ;
+		inputView.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCoverImage(true) ) ; 
 
 	}
 

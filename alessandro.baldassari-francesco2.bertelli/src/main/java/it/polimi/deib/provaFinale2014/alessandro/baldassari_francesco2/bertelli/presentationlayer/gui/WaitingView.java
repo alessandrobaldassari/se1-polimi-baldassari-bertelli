@@ -5,9 +5,8 @@ import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.Image;
 import java.awt.Insets;
-import java.io.IOException;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.FilePaths;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.GraphicsUtilities;
@@ -126,18 +125,10 @@ class WaitingViewPanel extends FrameworkedWithGridBagLayoutPanel
 	@Override
 	protected void createComponents () 
 	{
-		try 
-		{
-			textLabel = new JLabel () ;
-			notificationArea = new NotificationPanel();
-			p = new JProgressBar () ;
-			backgroundImage = GraphicsUtilities.getImage ( FilePaths.COVER_IMAGE_PATH ) ;
-		} 
-		catch ( IOException e ) 
-		{
-			e.printStackTrace();
-		}
-			
+		textLabel = new JLabel () ;
+		notificationArea = new NotificationPanel();
+		p = new JProgressBar () ;
+		backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getBackgroundImage ( true ) ;	
 	}
 
 	/**

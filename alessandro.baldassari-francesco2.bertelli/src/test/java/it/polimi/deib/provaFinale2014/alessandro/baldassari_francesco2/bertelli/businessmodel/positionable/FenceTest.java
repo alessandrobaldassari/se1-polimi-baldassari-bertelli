@@ -8,7 +8,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceAlreadyPlacedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObjectIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
 import org.junit.BeforeClass;
@@ -21,7 +21,7 @@ public class FenceTest
 	 * Initializing variables test built the test environment using some static variables to bypass some technical problems with animalFactory
 	 */
 	static GameMap map;
-	static Identifiable < Match > dummyMatchIdentifier;
+	static ObjectIdentifier < Match > dummyMatchIdentifier;
 	static Fence fenceNonFinal = new Fence(FenceType.NON_FINAL);
 	static Fence fenceFinal = new Fence(FenceType.FINAL);
 	

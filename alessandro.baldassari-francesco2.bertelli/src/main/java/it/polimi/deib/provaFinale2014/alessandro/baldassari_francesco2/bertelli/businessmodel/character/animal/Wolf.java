@@ -55,13 +55,17 @@ public class Wolf extends Animal
 				destRegion.addAnimal ( this ) ;
 				setPosition ( destRegion ) ;
 				// il lupo cerca di mangiare qualcuno
-				for ( Animal a : destRegion.getContainedAnimals () )
-					if ( ! ( a instanceof BlackSheep ) )
-					{
-						// mangia
-						a.getPosition().removeAnimal ( a ) ;
-						a.moveTo ( null ) ; 
-					}
+				synchronized (destRegion) 
+				{
+					for ( Animal a : destRegion.getContainedAnimals () )
+						if ( ! ( a instanceof BlackSheep ) )
+						{
+							// mangia
+							a.getPosition().removeAnimal ( a ) ;
+							a.moveTo ( null ) ; 
+						}	
+				}
+				
 			}
 			else
 				throw new CharacterDoesntMoveException ( this ) ;

@@ -1,7 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObjectIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.UIDGenerator;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.factory.FactorySupport;
@@ -72,7 +72,7 @@ public class AnimalFactory
 	 * @throws AnimalFactoryAlreadyGeneratedForThisMatchException if a Match which has 
 	 *         already called this method, calls it again.
 	 */
-	public static synchronized AnimalFactory newAnimalFactory ( Identifiable < Match > matchIdentifier ) throws SingletonElementAlreadyGeneratedException  
+	public static synchronized AnimalFactory newAnimalFactory ( ObjectIdentifier < Match > matchIdentifier ) throws SingletonElementAlreadyGeneratedException  
 	{
 		AnimalFactory res ; 
 		boolean alreadyCalled ;

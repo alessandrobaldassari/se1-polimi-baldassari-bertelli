@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.FilePaths;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObjectIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.Couple;
@@ -84,7 +84,7 @@ public class GameMapFactory extends WithFactorySupportObject < Match >
 	 * Factory method for the GameMap object 
 	 * @throws SingletonElementAlreadyGeneratedException if 
 	 */
-	public GameMap newInstance ( Identifiable < Match > requester ) throws SingletonElementAlreadyGeneratedException 
+	public GameMap newInstance ( ObjectIdentifier < Match > requester ) throws SingletonElementAlreadyGeneratedException 
 	{
 		GameMap res ;
 		if ( getFactorySupport().isAlreadyUser ( requester ) == false ) 

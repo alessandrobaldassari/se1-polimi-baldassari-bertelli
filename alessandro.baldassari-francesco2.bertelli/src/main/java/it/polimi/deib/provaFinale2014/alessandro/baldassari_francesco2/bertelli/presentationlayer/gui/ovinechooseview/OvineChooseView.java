@@ -74,7 +74,7 @@ public class OvineChooseView extends ObservableFrameworkedWithGridBagLayoutDialo
 		setUndecorated(true);
  		setSize ( GraphicsUtilities.getVGAResolution () ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
-		view.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getBackgroundImage() );
+		view.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCoverImage(true)) ; 
 		view.setTitle ( "Seleziona l'ovine che vuoi scegliere : " );
 	}
 

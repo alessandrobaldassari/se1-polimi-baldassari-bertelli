@@ -19,6 +19,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.GameMapViewPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.playerinfoview.PlayerInfoView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.playerinfoview.PlayerInfoViewModel;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.GraphicsUtilities;
 
@@ -76,7 +77,7 @@ public class GameView extends JFrame implements NotificationContainer
 	}
 	
 	/***/
-	public void setInputMode ( GameMapViewInputMode mode , Iterable < Integer > uidOfSelectableElements ) 
+	public void setInputMode ( GameMapViewInputMode mode , Iterable < ? extends Identifiable > uidOfSelectableElements ) 
 	{
 		gameViewPanel.setInputMode ( mode , uidOfSelectableElements ) ;
 	}
@@ -92,7 +93,7 @@ public class GameView extends JFrame implements NotificationContainer
 		GameView g ;
 		g = new GameView () ;
 		g.setExtendedState ( GameView.MAXIMIZED_BOTH );
-		g.setInputMode ( GameMapViewInputMode.ROADS , null ) ;
+		g.setInputMode ( GameMapViewInputMode.REGIONS , null ) ;
 		g.setVisible ( true ) ;
 	}
 	
@@ -146,7 +147,7 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 		playersCardPanel = new PlayerInfoView () ;
 		mapPanel = new GameMapViewPanel () ;
 		notificationArea = new NotificationPanel();
-		backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getCoverImage();
+		backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getBackgroundImage(true);
 	}
 
 	/**
@@ -157,8 +158,8 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	{
 		Insets insets ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
-		layoutComponent ( notificationArea , 0 , 0 , 1 , 0.125 , 1 , 1 , 0 , 0 , GridBagConstraints.VERTICAL , GridBagConstraints.WEST , insets ) ;
-		layoutComponent ( playersCardPanel , 0 , 1 , 1 , 0.875 , 1 , 1 , 0 , 0 , GridBagConstraints.VERTICAL , GridBagConstraints.WEST , insets ) ;
+		layoutComponent ( notificationArea , 0 , 0 , 1 , 0.25 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.WEST , insets ) ;
+		layoutComponent ( playersCardPanel , 0 , 1 , 1 , 0.75 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.WEST , insets ) ;
 		layoutComponent ( mapPanel , 1 , 0 , 5 , 1 , 2 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 		setOpaque ( false ) ;
 	}
@@ -202,7 +203,7 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	}
 
 	/***/
-	protected void setInputMode ( GameMapViewInputMode mode , Iterable < Integer > uidOfSelectableElements ) 
+	protected void setInputMode ( GameMapViewInputMode mode , Iterable < ? extends Identifiable > uidOfSelectableElements ) 
 	{
 		mapPanel.setCurrentInputMode ( mode , uidOfSelectableElements ) ;
 	}

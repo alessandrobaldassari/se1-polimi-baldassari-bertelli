@@ -9,6 +9,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.TurnNumberClock;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WorkflowException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
 /***/
@@ -84,8 +85,9 @@ public class MoveExecutor
 	} 
 	
 	/**
-	 * @throws WrongStateMethodCallException */
-	public void executeBuyCard ( Match match , RegionType buyingCardType ) throws MoveNotAllowedException, WrongStateMethodCallException 
+	 * @throws WrongStateMethodCallException 
+	 * @throws WorkflowException */
+	public void executeBuyCard ( Match match , RegionType buyingCardType ) throws MoveNotAllowedException, WrongStateMethodCallException, WorkflowException 
 	{
 		if ( numberOfMovesDone == 2 && sheperdMoved == false )
 			throw new MoveNotAllowedException ( "" ) ; 
@@ -133,8 +135,9 @@ public class MoveExecutor
 		}
 	
 	/**
-	 * @throws WrongStateMethodCallException */
-	public void executeMoveSheperd ( Match match , Road roadWhereGo ) throws MoveNotAllowedException, WrongStateMethodCallException 
+	 * @throws WrongStateMethodCallException 
+	 * @throws WorkflowException */
+	public void executeMoveSheperd ( Match match , Road roadWhereGo ) throws MoveNotAllowedException, WrongStateMethodCallException, WorkflowException 
 	{
 		new MoveSheperd ( sheperd , roadWhereGo ).execute ( match ); 
 		sheperdMoved = true ;

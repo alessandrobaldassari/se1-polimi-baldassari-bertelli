@@ -165,8 +165,8 @@ public class MapMeasuresCoordinatesManager
 		for ( Polygon p : regionsCoordinates.values() )
 			for ( i = 0 ; i < p.npoints ; i ++ )
 			{
-				p.xpoints [ i ] = Math.round ( p.xpoints [ i ] * xFactor ) ;
-				p.ypoints [ i ] = Math.round (p.ypoints [ i ] * yFactor) ;
+				p.xpoints [ i ] = ( int ) ( p.xpoints [ i ] * xFactor ) ;
+				p.ypoints [ i ] = ( int ) ( p.ypoints [ i ] * yFactor ) ;
 			}
 		for ( Ellipse2D p : roadsCoordinates.values () )
 			p.setFrame ( p.getX () * xFactor , p.getY () * yFactor , p.getWidth () * xFactor , p.getHeight () * yFactor ) ;

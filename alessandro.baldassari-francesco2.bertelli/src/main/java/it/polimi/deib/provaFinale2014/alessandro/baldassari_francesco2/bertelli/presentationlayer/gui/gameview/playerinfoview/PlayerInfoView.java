@@ -23,9 +23,7 @@ public class PlayerInfoView extends FrameworkedWithGridBagLayoutPanel implements
 {
 			
 	private Map < RegionType , WithBackgroundImagePanel > cardsPanel ;
-	
-	private JLabel titleLabel ;
-	
+		
 	private JLabel cardsLabel ;
 	
 	private JLabel moneyLabel ;
@@ -44,7 +42,6 @@ public class PlayerInfoView extends FrameworkedWithGridBagLayoutPanel implements
 	{
 		WithBackgroundImagePanel panel ;
 		cardsPanel = new HashMap < RegionType , WithBackgroundImagePanel > () ;
-		titleLabel = new JLabel () ;
 		cardsLabel = new JLabel () ;
 		moneyLabel = new JLabel () ;
 		for ( RegionType r : RegionType.allTheTypesExceptSheepsburg() )
@@ -65,21 +62,19 @@ public class PlayerInfoView extends FrameworkedWithGridBagLayoutPanel implements
 	{
 		List < RegionType > regionsList ;
 		Insets insets ;
-		int i ;
 		regionsList = CollectionsUtilities.newListFromIterable ( RegionType.allTheTypesExceptSheepsburg() ) ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
-		layoutComponent ( titleLabel , 0, 0 , 1 , 0.25 , 1 , 2 , 0 , 0 , GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER , insets ) ;
-		layoutComponent ( cardsLabel , 0, 1 , 1 , 0.25 , 1 , 2 , 0 , 0 , GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER , insets ) ;
+		layoutComponent ( cardsLabel , 0, 1 , 1 , 0.05 , 1 , 2 , 0 , 0 , GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER , insets ) ;
 		layoutComponent ( cardsPanel.get ( RegionType.CULTIVABLE ) , 0 , 2 , 1 , 0.3 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH, GridBagConstraints.CENTER , insets ) ;
 		layoutComponent ( cardsPanel.get ( RegionType.DESERT ) , 1 , 2 , 1 , 0.3 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH, GridBagConstraints.CENTER , insets ) ;			
 		layoutComponent ( cardsPanel.get ( RegionType.FOREST ) , 0 , 3 , 1 , 0.3 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH, GridBagConstraints.CENTER , insets ) ;			
 		layoutComponent ( cardsPanel.get ( RegionType.HILL ) , 1 , 3 , 1 , 0.3 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH, GridBagConstraints.CENTER , insets ) ;			
 		layoutComponent ( cardsPanel.get ( RegionType.LACUSTRINE ) , 0 , 4 , 1 , 0.3 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH, GridBagConstraints.CENTER , insets ) ;			
 		layoutComponent ( cardsPanel.get ( RegionType.MOUNTAIN ) , 1 ,4, 1 , 0.3 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH, GridBagConstraints.CENTER , insets ) ;			
-		layoutComponent ( moneyLabel , 0, 5 , 1 , 0.25 , 1 , 2 , 0 , 0 , GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER , insets ) ;
-		titleLabel.setText ( "La tua situazione di gioco" ) ;
+		layoutComponent ( moneyLabel , 0, 5 , 1 , 0.05 , 1 , 2 , 0 , 0 , GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER , insets ) ;
 		cardsLabel.setText ( "Le tue carte" ) ;
 		moneyLabel.setText ( "I tuoi risparmi : " ) ;
+		setBorder ( new TitledBorder ( "La tua situatizione" ) ) ;
 		setOpaque ( false ) ;
 	}
 
@@ -95,7 +90,6 @@ public class PlayerInfoView extends FrameworkedWithGridBagLayoutPanel implements
 	@Override
 	protected void injectComponents () 
 	{
-		add ( titleLabel ) ;
 		add ( cardsLabel ) ;
 		add ( moneyLabel ) ;
 		for ( RegionType r : cardsPanel.keySet () )

@@ -8,6 +8,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player.TooFewMoneyException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WorkflowException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
 /**
@@ -59,6 +61,7 @@ public class BuyCard extends GameMove
 	 * @throws TooFewMoneyException if the buyer has not enough money to buy the wanted Card.
 	 * @throws CardPriceNotRightException if the buyer tries to buy a wrong price for the wanted Card.
 	 * @throws MoveNotAllowedException if the Player is not in a position from which he can buy the wanted Card.
+	 * @throws WorkflowException 
 	 * @throws WrongStateMethodCallException 
 	 * 
 	 * @PRECONDITIONS:
@@ -73,7 +76,7 @@ public class BuyCard extends GameMove
 	 *    
 	 */
 	@Override
-	public void execute ( Match match ) throws MoveNotAllowedException, WrongStateMethodCallException 
+	public void execute ( Match match ) throws MoveNotAllowedException, WorkflowException, WrongStateMethodCallException 
 	{
 		SellableCard theCard ;
 		int price ;
@@ -95,7 +98,7 @@ public class BuyCard extends GameMove
 		} 
 		catch ( CardPriceNotRightException e ) 
 		{
-			throw new RuntimeException ( e ) ;
+			throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
 		}	
 	}
 	

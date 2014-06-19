@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchIdentifier;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObjectIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.factory.FactorySupport;
 
 /***/
@@ -29,7 +29,7 @@ public class FactorySupportTest
 	@Test
 	public void addUser () 
 	{
-		Identifiable < Match > id ;
+		ObjectIdentifier < Match > id ;
 		id = MatchIdentifier.newInstance();
 		factorySupport.addUser ( id ) ;
 		assertTrue ( factorySupport.isAlreadyUser ( id ) ) ;
@@ -38,8 +38,8 @@ public class FactorySupportTest
 	@Test
 	public void isAlreadyUser () 
 	{
-		Identifiable < Match > id1 ;
-		Identifiable < Match > id2 ;
+		ObjectIdentifier < Match > id1 ;
+		ObjectIdentifier < Match > id2 ;
 		id1 = MatchIdentifier.newInstance();
 		id2 = MatchIdentifier.newInstance();
 		factorySupport.addUser ( id1 ) ;

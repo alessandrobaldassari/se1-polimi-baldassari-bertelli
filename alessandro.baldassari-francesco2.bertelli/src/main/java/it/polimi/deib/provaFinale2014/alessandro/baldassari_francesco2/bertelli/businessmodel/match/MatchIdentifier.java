@@ -1,12 +1,12 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObjectIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.UIDGenerator;
 
 /**
  * This class implements a MatchIdentifier for the Match managed by this GameController  
  */
-public class MatchIdentifier implements Identifiable < Match > 
+public class MatchIdentifier implements ObjectIdentifier < Match > 
 {
 
 	private static transient UIDGenerator uidGenerator ;
@@ -48,7 +48,7 @@ public class MatchIdentifier implements Identifiable < Match >
 	 * @param otherObject the otherObject to compare this one.
 	 * @return true if this object is equals to the one passed by parameter, false else. 
 	 */
-	public boolean isEqualsTo ( Identifiable<Match> otherObject ) 
+	public boolean isEqualsTo ( ObjectIdentifier<Match> otherObject ) 
 	{
 		if ( otherObject instanceof MatchIdentifier )
 			return uid == ( ( MatchIdentifier ) otherObject).getUID () ;
