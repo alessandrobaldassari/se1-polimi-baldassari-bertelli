@@ -109,6 +109,10 @@ class Animator implements Runnable
 		System.out.println ( "ALGO_ANIMATOR - RUN : FINE" ) ;
 	}
 	
+	/**
+	 * @param start
+	 * @param end 
+	 */
 	private void animationCycle ( Ellipse2D start , Ellipse2D end ) 
 	{
 		//coordinatesManager.getRoadBorder ( removedOne.get )				
@@ -155,6 +159,9 @@ class Animator implements Runnable
 		}
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public void run () 
 	{

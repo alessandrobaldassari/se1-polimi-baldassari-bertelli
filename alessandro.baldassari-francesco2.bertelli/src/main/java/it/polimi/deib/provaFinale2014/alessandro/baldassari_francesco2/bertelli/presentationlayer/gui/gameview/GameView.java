@@ -51,11 +51,16 @@ public class GameView extends JFrame implements NotificationContainer
 		setExtendedState ( Frame.MAXIMIZED_BOTH ) ;
 	}
 
+	public void setPlayerName ( String playerName ) 
+	{
+		( ( PlayerInfoViewModel ) gameViewPanel.getPlayerObserver() ).setName ( playerName ) ;
+	}
+	
 	/***/
 	@Override
 	public void addNotification ( String notif ) 
 	{
-		gameViewPanel.addNotification(notif);
+		gameViewPanel.addNotification ( notif ) ;
 	} 
 
 	/***/

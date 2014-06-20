@@ -3,7 +3,6 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
@@ -12,7 +11,6 @@ import javax.swing.border.TitledBorder;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.WithBackgroundImagePanel;
 
@@ -22,10 +20,13 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class PlayerInfoView extends FrameworkedWithGridBagLayoutPanel implements PlayerInfoViewModelObserver
 {
 			
+	/***/
 	private Map < RegionType , WithBackgroundImagePanel > cardsPanel ;
 		
+	/***/
 	private JLabel cardsLabel ;
 	
+	/***/
 	private JLabel moneyLabel ;
 	
 	/***/
@@ -60,9 +61,7 @@ public class PlayerInfoView extends FrameworkedWithGridBagLayoutPanel implements
 	@Override
 	protected void manageLayout() 
 	{
-		List < RegionType > regionsList ;
 		Insets insets ;
-		regionsList = CollectionsUtilities.newListFromIterable ( RegionType.allTheTypesExceptSheepsburg() ) ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
 		layoutComponent ( cardsLabel , 0, 1 , 1 , 0.05 , 1 , 2 , 0 , 0 , GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER , insets ) ;
 		layoutComponent ( cardsPanel.get ( RegionType.CULTIVABLE ) , 0 , 2 , 1 , 0.3 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH, GridBagConstraints.CENTER , insets ) ;
@@ -74,7 +73,7 @@ public class PlayerInfoView extends FrameworkedWithGridBagLayoutPanel implements
 		layoutComponent ( moneyLabel , 0, 5 , 1 , 0.05 , 1 , 2 , 0 , 0 , GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER , insets ) ;
 		cardsLabel.setText ( "Le tue carte" ) ;
 		moneyLabel.setText ( "I tuoi risparmi : " ) ;
-		setBorder ( new TitledBorder ( "La tua situatizione" ) ) ;
+		setBorder ( new TitledBorder ( "La tua situazione" ) ) ;
 		setOpaque ( false ) ;
 	}
 
@@ -95,18 +94,30 @@ public class PlayerInfoView extends FrameworkedWithGridBagLayoutPanel implements
 		for ( RegionType r : cardsPanel.keySet () )
 			add ( cardsPanel.get ( r ) ) ;
 	}
-
-	@Override
-	public void onMoneyReserveChanged ( Integer newAmount , Boolean cause ) 
-	{
-		moneyLabel.setText ( "I tuoi risparmi : " + newAmount ) ;
-	}
-
+	
 	@Override
 	public void onCardsChanged ( RegionType cardType , Integer numberOfCardOfThisTypeNow ) 
 	{
 		( ( TitledBorder ) cardsPanel.get ( cardType ).getBorder () ).setTitle ( "Ne ho " + numberOfCardOfThisTypeNow ) ;
+		repaint () ;
 	}
-
+	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void onNameChanged ( String name ) 
+	{
+		( ( TitledBorder ) getBorder () ).setTitle ( name.concat ( ", la tua situazione" ) );
+		repaint () ;
+	}
+	
+	@Override
+	public void onMoneyReserveChanged ( Integer newAmount , Boolean cause ) 
+	{
+		moneyLabel.setText ( "I tuoi risparmi : " + newAmount ) ;
+		repaint () ;
+	}
+	
 }
 

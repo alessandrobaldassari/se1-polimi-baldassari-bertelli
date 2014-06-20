@@ -180,6 +180,7 @@ class TurnationPhaseManager implements TurnNumberClock
 						{
 							fillMoveSelectorWithAvailableParameters ( selector , choosenSheperd ) ;
 							selector.setMovesAllowedDueToRuntimeRules () ;
+							System.err.println ( choosenSheperd.getPosition() );
 							playersGenericNotification ( "Carissimo, per questo turno è la tua mossa # " + moveIndex ) ;
 							selection = currentPlayer.doMove ( selector , match.getGameMap () ) ;
 							if ( selection != null )

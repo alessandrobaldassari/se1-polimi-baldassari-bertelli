@@ -1,7 +1,14 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map;
 
 import static org.junit.Assert.*;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvineType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.WolfAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchIdentifier;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.Couple;
 
@@ -99,7 +106,46 @@ public class GameMapTest
 		freeRoads = (List<Road>) gameMap.getFreeRoads();
 		assertTrue(freeRoads.size() == 1);
 		assertTrue(freeRoads.get(0).getUID() == 1);
+	}
+	
+	@Test
+	public void observer () throws WolfAlreadyGeneratedException, SingletonElementAlreadyGeneratedException 
+	{
+		DummyMapObserver d = new DummyMapObserver() ;
+		gameMap.getRegionByUID (1).addAnimal ( AnimalFactory.newAnimalFactory(MatchIdentifier.newInstance()).newAdultOvine(AdultOvineType.RAM) ); 
+		gameMap.addObserver(d);
+		assertTrue ( d.n == 1 ) ;
+		Iterable < Animal > i = CollectionsUtilities.newCollectionFromIterable(gameMap.getRegionByUID(1).getContainedAnimals());
+		for ( Animal a : i )
+			gameMap.getRegionByUID(1).removeAnimal(a);
+		assertTrue ( d.n == 0 ) ;
+		gameMap.getRegionByUID(1).addAnimal ( AnimalFactory.newAnimalFactory(MatchIdentifier.newInstance()).newWolf() );
+		assertTrue ( d.n == 1 ) ;
+	}
+	
+	public class DummyMapObserver implements GameMapObserver 
+	{
+
+		public int n ;
+		
+		public DummyMapObserver() {
+			n = 0 ;
+		}
+		
+		@Override
+		public void onPositionableElementAdded(GameMapElementType whereType,
+				Integer whereId, PositionableElementType whoType, Integer whoId) {
+			n ++ ;
+		}
+
+		@Override
+		public void onPositionableElementRemoved(GameMapElementType whereType,
+				Integer whereId, PositionableElementType whoType, Integer whoId) {
+			n -- ;
+		}
+		
 		
 		
 	}
+	
 }

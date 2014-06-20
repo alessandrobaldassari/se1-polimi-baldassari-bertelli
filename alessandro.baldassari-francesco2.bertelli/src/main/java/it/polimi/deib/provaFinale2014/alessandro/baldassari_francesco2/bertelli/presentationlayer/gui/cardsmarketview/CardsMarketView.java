@@ -400,7 +400,7 @@ class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel
 		/***/
 		public SelectorListener ( SellableCard myCard )
 		{
-			this.myItem = myItem ;
+			this.myItem = myCard ;
 		}
 		
 		/***/

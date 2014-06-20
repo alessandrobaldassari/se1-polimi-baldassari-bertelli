@@ -65,7 +65,9 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	 */
 	private Window currentShownWindow ;
 	
-	/***/
+	/**
+	 * A Notifier object, used to communicate notifications to the User. 
+	 */
 	private Notifier notifier ;
 	
 	/**
@@ -77,7 +79,9 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	 * Boolean flag that indicates the User wants to change move. 
 	 */
 	private boolean userWantsToChangeMove ;
-			
+		
+	private String tempName ;
+	
 	/***/
 	public GUIController () 
 	{
@@ -88,6 +92,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		notifier = new Notifier () ;
 		index = new AtomicReference < Integer > ( null ) ;		
 		userWantsToChangeMove = false ;
+		tempName = null ;
 	}
 	/**
 	 * AS THE SUPER'S ONE. 
@@ -126,6 +131,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		// prompt the User for a name.
 		res = LoginView.showDialog () ;
 		waitingView.setText ( PresentationMessages.NAME_VERIFICATION_MESSAGE ) ;
+		this.tempName = res ;
 		return res ;
 	}
 	
@@ -140,6 +146,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		{
 			generationNotification ( PresentationMessages.NAME_ACCEPTED_MESSAGE + Utilities.CARRIAGE_RETURN + notes );
 			waitingView.setText ( PresentationMessages.WAITING_FOR_OTHER_PLAYERS_MESSAGE ) ;
+			gameView.setPlayerName(tempName); 
 		}
 		else
 			generationNotification ( PresentationMessages.NAME_REJECTED_MESSAGE + Utilities.CARRIAGE_RETURN + notes );
