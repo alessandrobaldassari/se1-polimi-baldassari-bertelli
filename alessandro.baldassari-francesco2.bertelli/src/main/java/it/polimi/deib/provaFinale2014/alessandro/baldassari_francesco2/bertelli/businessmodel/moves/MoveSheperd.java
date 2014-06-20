@@ -40,28 +40,23 @@ public class MoveSheperd extends GameMove
 	public MoveSheperd ( Sheperd sheperdToMove , Road roadWhereGo ) throws MoveNotAllowedException, WorkflowException 
 	{
 		if ( sheperdToMove != null && roadWhereGo != null )
-		{
-			if ( ! sheperdToMove.getPosition().equals ( roadWhereGo ) )
-				if ( roadWhereGo.getElementContained () == null )
-					try 
+			if ( ! sheperdToMove.getPosition().equals ( roadWhereGo ) && roadWhereGo.getElementContained () == null )
+				try 
+				{
+					if ( ! ( ! MapUtilities.areAdjacents ( sheperdToMove.getPosition () , roadWhereGo ) && sheperdToMove.getOwner().getMoney () < GameConstants.MONEY_TO_PAY_IF_ROADS_NON_ADJACENT ) )
 					{
-						if ( ! ( ! MapUtilities.areAdjacents ( sheperdToMove.getPosition () , roadWhereGo ) && sheperdToMove.getOwner().getMoney () < GameConstants.MONEY_TO_PAY_IF_ROADS_NON_ADJACENT ) )
-						{
-							this.sheperdToMove = sheperdToMove ;
-							this.roadWhereGo = roadWhereGo ;
-						}
-						else
-							throw new MoveNotAllowedException ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;
+						this.sheperdToMove = sheperdToMove ;
+						this.roadWhereGo = roadWhereGo ;
 					}
-					catch (WrongStateMethodCallException e) 
-					{
-						throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ; 
-					}
-				else
-					throw new MoveNotAllowedException ( " : road already occupied" ) ;
+					else
+						throw new MoveNotAllowedException ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;
+				}
+				catch (WrongStateMethodCallException e) 
+				{
+					throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ; 
+				}
 			else
-				throw new MoveNotAllowedException ( ": not a real move." ) ;
-		}
+				throw new MoveNotAllowedException ( PresentationMessages.MOVE_NOT_ALLOWED_MESSAGE ) ;
 		else
 			throw new IllegalArgumentException ( " : null parameters not allowed." ) ;
 	}
@@ -100,7 +95,7 @@ public class MoveSheperd extends GameMove
 					match.getBank ().receiveMoney ( GameConstants.MONEY_TO_PAY_IF_ROADS_NON_ADJACENT ) ;
 				}
 				// effectively move the sheperd
-				whereTheSheperdIsNow.setElementContained(null); 
+				whereTheSheperdIsNow.setElementContained ( null ) ; 
 				roadWhereGo.setElementContained ( sheperdToMove ) ;
 				sheperdToMove.moveTo ( roadWhereGo ) ;
 				// place a fence where the Sheperd was before.
@@ -108,25 +103,23 @@ public class MoveSheperd extends GameMove
 			} 
 			catch ( TooFewMoneyException e ) 
 			{
-				// The constructor should have detected this...
 				throw new WorkflowException ( e , PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;
 			}
+			catch (WrongStateMethodCallException e)
+			{
+				throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ; 
+			}	
 			catch ( NoMoreFenceOfThisTypeException e1 ) 
 			{
 				try
 				{
 					whereTheSheperdIsNow.setElementContained ( match.getBank ().getAFence ( FenceType.FINAL ) ) ;
 				} 
-				catch (NoMoreFenceOfThisTypeException e) 
+				catch ( NoMoreFenceOfThisTypeException e ) 
 				{
-					// In this situation the game should be finished already...
 					throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
 				}
-			} 
-			catch (WrongStateMethodCallException e)
-			{
-				throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ; 
-			}		
+			} 	
 		}
 		else
 			throw new IllegalArgumentException ( "The parameter match has to be not null." ) ;

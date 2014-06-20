@@ -301,6 +301,11 @@ public final class GraphicsUtilities
 		exec.execute ( runnable ) ;
 	}
 	
+	public static void disposeWindow ( final Window w ) 
+	{
+		SwingUtilities.invokeLater ( new Runnable () { public void run () { w.dispose(); } } ) ;
+	}
+	
 	private static class WindowShowerHiderRunnable implements Runnable 
 	{
 		

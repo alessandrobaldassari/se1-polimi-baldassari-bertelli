@@ -26,7 +26,7 @@ public class MoveExecutorTest {
 	{
 		sh = new Sheperd("p", new NamedColor ( 255 , 0 , 0 , "red" ) , new DummyPlayer ( "q" ));
 		tnc = new DummytTNC();
-		mf = new MoveExecutor( sh , tnc , new DummyLambEvolver() ) ; 
+		mf = MoveExecutor.newInstance( sh , tnc , new DummyLambEvolver() ) ; 
 	}
 	
 	@Test
@@ -39,7 +39,7 @@ public class MoveExecutorTest {
 	{
 
 		@Override
-		public int getTurnNumber() throws WrongMatchStateMethodCallException 
+		public int getTurnNumber() 
 		{
 			return 0;
 		}}

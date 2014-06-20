@@ -1,5 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +14,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Wolf;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
@@ -179,19 +182,7 @@ public final class MapUtilities
 		return res ;
 	}
 	
-	/***/
-	public static Identifiable lookForIdentifier ( Iterable < ? extends Identifiable > src, int key ) 
-	{
-		Identifiable res ;
-		res = null ;
-		for ( Identifiable i : src )
-			if ( i.getUID() == key )
-			{
-				res = i ;
-				break ;
-			}
-		return res ;
-	}
+	
 	
 	/***/
 	public static Animal lookForAType ( Iterable < Animal > src , PositionableElementType p )
@@ -205,6 +196,21 @@ public final class MapUtilities
 				break ;
 			}
 		return res ;
+	}
+	
+	/**
+	 * Retrieve all Players near adjacent to the breaker one.
+	 * 
+	 * @return a Collection containing all the Players adjacent to the breaker one.
+	 */
+	public static Collection < Player > retrieveAdjacentPlayers ( Road playerPosition ) 
+	{
+		Collection < Player > adjacentPlayers ;
+		adjacentPlayers = new LinkedList < Player > () ;
+		for ( Road road :playerPosition.getAdjacentRoads () )
+			if ( road.getElementContained () != null && road.getElementContained () instanceof Sheperd )
+				adjacentPlayers.add ( ( ( Sheperd ) road.getElementContained () ).getOwner() ) ;
+		return adjacentPlayers ;
 	}
 	
 	/***/

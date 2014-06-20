@@ -1,7 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.GameConstants;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank.Bank.NoMoreCardOfThisTypeException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.BlackSheep;
@@ -14,7 +13,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.AlreadyInFinalPhaseException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.MatchState;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMoveType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.Mate;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveExecutor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveNotAllowedException;
@@ -56,7 +54,11 @@ class TurnationPhaseManager implements TurnNumberClock
 	 */
 	private int turnNumber ;
 	
-	/***/
+	/**
+	 * @param match the Match upon which execute the operations.
+	 * @param lambEvolver a LambEvolver to manage eventually born Lambs. 
+	 * @throws IllegalArgumentException if the match or the lambEvolver parameter is null.
+	 */
 	public TurnationPhaseManager ( Match match , LambEvolver lambEvolver ) 
 	{
 		if ( match != null && lambEvolver != null )
@@ -73,13 +75,13 @@ class TurnationPhaseManager implements TurnNumberClock
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public int getTurnNumber () throws WrongMatchStateMethodCallException
+	public int getTurnNumber () 
 	{
 		int res ;
 		if ( match.getMatchState () == MatchState.TURNATION )
 			res = turnNumber ;
 		else
-			throw new WrongMatchStateMethodCallException ( match.getMatchState () ) ;
+			res = 0 ;
 		return res ;
 	}
 	
@@ -115,16 +117,14 @@ class TurnationPhaseManager implements TurnNumberClock
 				{
 					playersGenericNotification ( "La pecora nera non si muove !!!" );					
 				}
+				// let the Players play.
 				allPlayersTurn () ;
 				// if all the Users left the game, the Match will finish.
 				if ( match.getNumberOfPlayers () == 0 )
 					throw new WorkflowException ( "Too few players to continue !" ) ;
-				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PRIMA DELLA FASE DI MARKET." ) ;															
+				// manage the market phase.
 				marketManager = new MarketPhaseManager ( match.getPlayers() ) ;
-				if ( match.getNumberOfPlayers () == 0 )
-					throw new WorkflowException ( "Too few players to continue !" ) ;
 				marketManager.marketPhase();
-				System.out.println ( "MATCH_CONTROLLER - TURNATION PHASE - DOPO LA FASE DI MARKET." ) ;															
 				try 
 				{
 					wolf.escape () ;
@@ -134,6 +134,7 @@ class TurnationPhaseManager implements TurnNumberClock
 				{
 					playersGenericNotification ( "Il lupo non scappa !!!" );
 				}
+				// if the last iteration brought us to the final phase, the turnation phase has to finish
 				if ( match.isInFinalPhase () )
 					gamePlaying = false ;
 			}
@@ -146,7 +147,13 @@ class TurnationPhaseManager implements TurnNumberClock
 		}
 	}
 	
-	/***/
+	/**
+	 * This method manage a Players turn.
+	 * During a turn, each Player can do 3 moves.
+	 * If one is not corretct, it looses it.
+	 * 
+	 * @throws WorkflowException if a serious error occcurs so the match can not go away.
+	 */
 	private void allPlayersTurn () throws WorkflowException
 	{
 		MoveExecutor moveFactory ;
@@ -154,25 +161,25 @@ class TurnationPhaseManager implements TurnNumberClock
 		MoveSelection selection ;
 		Sheperd choosenSheperd ;
 		byte moveIndex ;
+		boolean breakPlayer ;
+		// for each Player
 		for ( Player currentPlayer : match.getPlayers() )
 		{		
-			if ( currentPlayer.isSuspended () == false )
-			{
-				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - TURNO DEL PLAYER : " + currentPlayer.getName () ) ;
-				// if the last iteration brought us to the final phase, the turnation phase has to finish
-				if ( match.isInFinalPhase () )
-					break ;
+			// if he is with us.
+			if ( ! currentPlayer.isSuspended () )			
 				try
 				{
-					// break in two.
+					// choose a sheperd for this Player.
 					choosenSheperd = chooseSheperd ( currentPlayer ) ;
-					moveFactory = new MoveExecutor ( choosenSheperd , this , lambEvolver ) ;
+					// generate a new MoveExecutor for this turn.
+					moveFactory = MoveExecutor.newInstance ( choosenSheperd , this , lambEvolver ) ;
 					selector = new MoveSelector ( moveFactory.getAssociatedSheperd () ) ;
-					for ( moveIndex = 0 ; moveIndex < GameConstants.NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ )
+					breakPlayer = false ;
+					for ( moveIndex = 0 ; moveIndex < GameConstants.NUMBER_OF_MOVES_PER_USER_PER_TURN && ! breakPlayer ; moveIndex ++ )
 						try 
 						{
 							fillMoveSelectorWithAvailableParameters ( selector , choosenSheperd ) ;
-							selector.setMovesAllowedDueToRuntimeRules();
+							selector.setMovesAllowedDueToRuntimeRules () ;
 							playersGenericNotification ( "Carissimo, per questo turno è la tua mossa # " + moveIndex ) ;
 							selection = currentPlayer.doMove ( selector , match.getGameMap () ) ;
 							if ( selection != null )
@@ -186,7 +193,7 @@ class TurnationPhaseManager implements TurnNumberClock
 								// if a user does not want to do any move, it means that he does not want to play anymore; remove him from the match...
 								match.removePlayer ( currentPlayer ) ;
 								playersGenericNotification ( "Ehy boys, " + currentPlayer.getName() + " ci ha lasciati..." + Utilities.CARRIAGE_RETURN + "Peggio per lui !" ) ;
-								break ;
+								breakPlayer = true ;
 							}
 						} 
 						catch ( MoveNotAllowedException e ) 
@@ -195,16 +202,11 @@ class TurnationPhaseManager implements TurnNumberClock
 							System.err.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - ERRORE DURANTE L'ESECUZIONE DELLA MOSSA." ) ;									
 							currentPlayer.genericNotification ( "Mossa fallita!\n" + e.getMessage() ) ;
 						}
-						catch (WrongStateMethodCallException e) 
-						{
-							e.printStackTrace();
-						} 
 				}
 				catch ( TimeoutException t ) 
 				{
 					playersGenericNotification ( "The game is going to continue without " + currentPlayer.getName() + Utilities.CARRIAGE_RETURN + "May be he will come back later..." );
 				}
-			}
 			if ( match.isInFinalPhase () == false && match.getBank().hasAFenceOfThisType ( FenceType.NON_FINAL ) == false )
 				try 
 				{
@@ -217,33 +219,25 @@ class TurnationPhaseManager implements TurnNumberClock
 	}
 	
 	/**
-	 * Helper method that allows the System to choose a Sheperd for a Player's turn ( eventually aking him who ),
-	 * and then create a MoveExecutor for this User to play.
+	 * Helper method that allows the System to choose a Sheperd for a Player's turn ( eventually asking him who ),
 	 * 
-	 * @param currentPlayer the player for who a MoveExecutor has to be built.
-	 * @return the created MoveExecutor
+	 * @param currentPlayer the player about who choose the Sheperd.
+	 * @return the choosen Sheperd
 	 * @throws TimeoutException if the currentPlayer has to choose between some Sheperds and
 	 * 	       does not answer before a timeout.
 	 */
 	private Sheperd chooseSheperd ( Player currentPlayer ) throws TimeoutException 
 	{
-		Sheperd choosenSheperd ;
 		System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR : INIZIO" ) ;
+		Sheperd choosenSheperd ;
 		if ( match.getNumberOfPlayers () == 2 )
 		{
-			System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR - CHIDENDO AL PLAYER : " + currentPlayer.getName () + " DI SCEGLIERE UN PASTORE" ) ;					
 			choosenSheperd = currentPlayer.chooseSheperdForATurn ( currentPlayer.getSheperds () ) ;
-			for ( Sheperd s : currentPlayer.getSheperds() )
-				if ( s.getUID () == choosenSheperd.getUID () )
-				{
-					choosenSheperd = s ;
-					break ;
-				}
-			System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR - IL PLAYER : " + currentPlayer.getName () + " HA SCELTO IL PASTORE " + choosenSheperd.getName () ) ;									
+			choosenSheperd = Utilities.lookForIdentifier ( currentPlayer.getSheperds() , choosenSheperd.getUID () ) ;
 		}
-		else
+		else	// the only Sheperd he has.
 			choosenSheperd = CollectionsUtilities.newListFromIterable ( currentPlayer.getSheperds() ).get ( 0 ) ;
-		System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR : END" ) ;
+		System.out.println ( "GAME CONTROLLER - MOVE FACTORY GENERATOR : END\nRETURN : " + choosenSheperd ) ;
 		return choosenSheperd ;
 	}
 	
@@ -269,18 +263,26 @@ class TurnationPhaseManager implements TurnNumberClock
 	}
 	
 	/**
-	 * @throws WrongStateMethodCallException */
-	private Collection < Road > findAvailableRoadsForMoveSheperd ( Sheperd sh ) throws WrongStateMethodCallException 
+	 * @throws WorkflowException 
+	 */
+	private Collection < Road > findAvailableRoadsForMoveSheperd ( Sheperd sh ) throws WorkflowException  
 	{
 		Collection < Road > res ;
-		if ( sh.getOwner().getMoney () >= 1 )
-			res = CollectionsUtilities.newCollectionFromIterable( match.getGameMap().getFreeRoads () ) ;
-		else
+		try 
 		{
-			res = new LinkedList < Road > () ;
-			for ( Road road : sh.getPosition().getAdjacentRoads () )
-				if ( road.getElementContained () == null )
-					res.add ( road ) ;
+			if ( sh.getOwner().getMoney () >= 1 )
+				res = CollectionsUtilities.newCollectionFromIterable( match.getGameMap().getFreeRoads () ) ;
+			else
+			{
+				res = new LinkedList < Road > () ;
+				for ( Road road : sh.getPosition().getAdjacentRoads () )
+					if ( road.getElementContained () == null )
+						res.add ( road ) ;
+			}
+		} 
+		catch (WrongStateMethodCallException e) 
+		{
+			throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
 		}
 		return res ;
 	}
@@ -298,48 +300,36 @@ class TurnationPhaseManager implements TurnNumberClock
 	}
 	
 	/**
-	 * @throws WrongStateMethodCallException */
-	private Map < RegionType , Integer > findAvailableRegionsForBuyCard ( Sheperd sh ) throws WrongStateMethodCallException 
+	 * @throws WorkflowException 
+	 */
+	private Map < RegionType , Integer > findAvailableRegionsForBuyCard ( Sheperd sh ) throws WorkflowException  
 	{
 		Map < RegionType , Integer > res ;
 		RegionType r ;
 		int price ;
-		res = new HashMap < Region.RegionType , Integer> ( 2 ) ;
 		try
 		{
-			r =  sh.getPosition().getFirstBorderRegion ().getType () ;
-			price = match.getBank().getPeekCardPrice ( r ) ;
-			if ( sh.getOwner().getMoney() >= price )
-				res.put ( r , price ) ;
-		} 
-		catch (NoMoreCardOfThisTypeException e) {}
-		try
-		{
-			r =  sh.getPosition().getSecondBorderRegion ().getType () ;
-			price = match.getBank().getPeekCardPrice ( r ) ;
-			if ( sh.getOwner().getMoney() >= price )
-				res.put ( r , price ) ;
-		} 
-		catch (NoMoreCardOfThisTypeException e) {}
-		return res ;
-	}
-	
-	/**
-	 * @throws WrongStateMethodCallException */
-	private Map < RegionType , Integer > generateCardPriceMap ( Sheperd s ) throws WrongStateMethodCallException 
-	{
-		Map < RegionType , Integer > res ;
-		int price ;
-		res = new HashMap < RegionType , Integer > () ;
-		for ( RegionType rt : RegionType.allTheTypesExceptSheepsburg() )
-		{
-			try 
+			res = new HashMap < Region.RegionType , Integer> ( 2 ) ;
+			try
 			{
-				price = match.getBank().getPeekCardPrice ( rt ) ;
-				if ( s.getOwner ().getMoney () >= price && ( s.getPosition().getFirstBorderRegion().getType () == rt || s.getPosition().getSecondBorderRegion().getType() == rt ) )
-					res.put ( rt , price ) ;
-			}
+				r =  sh.getPosition().getFirstBorderRegion ().getType () ;
+				price = match.getBank().getPeekCardPrice ( r ) ;
+				if ( sh.getOwner().getMoney() >= price )
+					res.put ( r , price ) ;
+			} 
 			catch (NoMoreCardOfThisTypeException e) {}
+			try
+			{
+				r =  sh.getPosition().getSecondBorderRegion ().getType () ;
+				price = match.getBank().getPeekCardPrice ( r ) ;
+				if ( sh.getOwner().getMoney() >= price )
+					res.put ( r , price ) ;
+			} 
+			catch (NoMoreCardOfThisTypeException e) {}
+			}
+		catch (WrongStateMethodCallException e) 
+		{
+			throw new WorkflowException ( e ,Utilities.EMPTY_STRING ) ;
 		}
 		return res ;
 	}
@@ -393,39 +383,46 @@ class TurnationPhaseManager implements TurnNumberClock
 	 * @throws WrongStateMethodCallException 
 	 * @throws WorkflowException 
 	 */
-	private void execMove ( MoveExecutor exec , MoveSelection selection , Match match , MoveSelector sel ) throws MoveNotAllowedException, WrongStateMethodCallException, WorkflowException
+	private void execMove ( MoveExecutor exec , MoveSelection selection , Match match , MoveSelector sel ) throws MoveNotAllowedException, WorkflowException
 	{
 		List < Serializable > params ;
 		params = CollectionsUtilities.newListFromIterable ( selection.getParams() ) ; 
 		int mapUID ;
-		switch ( selection.getSelectedType() )
-		{	
-			case BREAK_DOWN :
-				mapUID =  ( ( Animal ) params.get(0) ).getPosition().getUID () ;
-				exec.executeBreakdown ( match , MapUtilities.findAnimalByUID ( match.getGameMap().getRegionByUID ( mapUID ) , ( ( Animal ) params.get(0) ).getUID () ) ) ;
-				sel.updateSelection(GameMoveType.BREAK_DOWN);
-			break ;
-			case BUY_CARD :
-				exec.executeBuyCard ( match , (RegionType) params.get(0) ) ;
-				sel.updateSelection(GameMoveType.BUY_CARD);
-			break ;
-			case MATE :
-				mapUID = ( ( Region ) params.get ( 0 ) ).getUID () ;
-				exec.executeMate ( match , match.getGameMap ().getRegionByUID ( mapUID ) ) ;
-				sel.updateSelection(GameMoveType.MATE);
-			break ;
-			case MOVE_SHEEP :
-				mapUID = ( ( Region ) params.get ( 1 ) ).getUID () ;
-				exec.executeMoveSheep ( match , ( Ovine ) MapUtilities.findAnimalByUID ( ( ( Ovine ) params.get(0) ).getPosition() , ( ( Ovine ) params.get(0) ).getUID() ) , match.getGameMap ().getRegionByUID ( mapUID ) ); 
-				sel.updateSelection(GameMoveType.MOVE_SHEEP);
-			break ;
-			case MOVE_SHEPERD :
-				mapUID = ( ( Road ) params.get (0 ) ).getUID () ;
-				exec.executeMoveSheperd ( match, match.getGameMap ().getRoadByUID ( mapUID ) ); 
-				sel.updateSelection(GameMoveType.MOVE_SHEPERD);
-			break ;
-			default :
-				throw new MoveNotAllowedException ( "Scusa, ma questa mossa proprio non l'avevamo mai sentita..." ) ;
+		try 
+		{
+			switch ( selection.getSelectedType() )
+			{	
+				case BREAK_DOWN :
+					mapUID =  ( ( Animal ) params.get(0) ).getPosition().getUID () ;
+					exec.executeBreakdown ( match , MapUtilities.findAnimalByUID ( match.getGameMap().getRegionByUID ( mapUID ) , ( ( Animal ) params.get(0) ).getUID () ) ) ;
+					break ;
+				case BUY_CARD :
+					exec.executeBuyCard ( match , ( RegionType ) params.get(0) ) ;
+				break ;
+				case MATE :
+					mapUID = ( ( Region ) params.get ( 0 ) ).getUID () ;
+					exec.executeMate ( match , match.getGameMap ().getRegionByUID ( mapUID ) ) ;
+				break ;
+				case MOVE_SHEEP :
+					mapUID = ( ( Region ) params.get ( 1 ) ).getUID () ;
+					exec.executeMoveSheep ( match , ( Ovine ) MapUtilities.findAnimalByUID ( ( ( Ovine ) params.get(0) ).getPosition() , ( ( Ovine ) params.get(0) ).getUID() ) , match.getGameMap ().getRegionByUID ( mapUID ) ); 
+				break ;
+				case MOVE_SHEPERD :
+					mapUID = ( ( Road ) params.get ( 0 ) ).getUID () ;
+					exec.executeMoveSheperd ( match, match.getGameMap ().getRoadByUID ( mapUID ) ); 
+				break ;
+				default :
+					throw new MoveNotAllowedException ( "Scusa, ma questa mossa proprio non l'avevamo mai sentita..." ) ;
+			}
+		}
+		catch ( MoveNotAllowedException m )
+		{
+			throw new MoveNotAllowedException ( Utilities.EMPTY_STRING , m ) ;
+		}
+		finally 
+		{
+			if ( selection.getSelectedType() != null )
+				sel.updateSelection ( selection.getSelectedType () ) ;
 		}
 		System.out.println ( "TURNATION_PHASE_MANAGER - execMove : END" ) ;
 	}

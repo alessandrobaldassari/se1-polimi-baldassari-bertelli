@@ -9,10 +9,15 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.TurnNumberClock;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WorkflowException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
-/***/
+/**
+ * A component that executes GameMove.
+ * It also does minimal controls over which Moves are executed.
+ * It is intended to manage just one Player turn ( create one of this object for each turn of a Player ). 
+ */
 public class MoveExecutor 
 {
 
@@ -34,14 +39,13 @@ public class MoveExecutor
 	/***/
 	private Sheperd sheperd ;
 	
-	/***/
-	public Sheperd getAssociatedSheperd ()
-	{
-		return sheperd;
-	}
-	
-	/***/ 
-	public MoveExecutor ( Sheperd sheperd , TurnNumberClock clockSource , LambEvolver lambEvolver ) 
+	/**
+	 * @param
+	 * @param
+	 * @param
+	 * @throws {@link IllegalArgumentException} 
+	 */ 
+	protected MoveExecutor ( Sheperd sheperd , TurnNumberClock clockSource , LambEvolver lambEvolver ) 
 	{
 		if ( sheperd != null && clockSource != null && lambEvolver != null )
 		{
@@ -50,7 +54,7 @@ public class MoveExecutor
 			this.lambEvolver = lambEvolver ;
 			lastMove = null ;
 			numberOfMovesDone = 0 ;
-			sheperdMoved = true ;
+			sheperdMoved = false ;
 		}
 		else
 			throw new IllegalArgumentException () ;
@@ -68,81 +72,98 @@ public class MoveExecutor
 	}
 	
 	/**
-	 * @throws WrongStateMethodCallException */
-	public void executeBreakdown ( Match match , Animal animalToBreak ) throws MoveNotAllowedException, WrongStateMethodCallException
+	 * Getter method for the sheperd property. 
+	 */
+	public Sheperd getAssociatedSheperd ()
 	{
-		if ( numberOfMovesDone == 2 && sheperdMoved == false )
-			throw new MoveNotAllowedException ( "" ) ;
-		else 
-			if ( lastMove != GameMoveType.BREAK_DOWN )
+		return sheperd;
+	}
+	
+	/**
+	 * @throws {@link WorkflowException } 
+	 * @throws {@link MoveNotAllowedException } 
+	 */
+	public void executeBreakdown ( Match match , Animal animalToBreak ) throws MoveNotAllowedException, WorkflowException
+	{
+		if ( match != null && animalToBreak != null )
+			if ( numberOfMovesDone < 3 && ! ( numberOfMovesDone == 2 && sheperdMoved == false ) && lastMove != GameMoveType.BREAK_DOWN )
 			{
-				new BreakDown ( sheperd , animalToBreak ).execute ( match ) ;
 				numberOfMovesDone ++ ;
 				lastMove = GameMoveType.BREAK_DOWN ;
+				new BreakDown ( sheperd , animalToBreak ).execute ( match ) ;
 			}
 			else
-				throw new MoveNotAllowedException ( "Can not do two equals moves sequentially." ) ; 
+				throw new MoveNotAllowedException ( PresentationMessages.MOVE_NOT_ALLOWED_MESSAGE ) ;
+		else
+			throw new IllegalArgumentException () ;
 	} 
 	
 	/**
-	 * @throws WrongStateMethodCallException 
-	 * @throws WorkflowException */
-	public void executeBuyCard ( Match match , RegionType buyingCardType ) throws MoveNotAllowedException, WrongStateMethodCallException, WorkflowException 
+	 * @throws WorkflowException 
+	 */
+	public void executeBuyCard ( Match match , RegionType buyingCardType ) throws MoveNotAllowedException, WorkflowException 
 	{
-		if ( numberOfMovesDone == 2 && sheperdMoved == false )
-			throw new MoveNotAllowedException ( "" ) ; 
-		else 
-			if ( lastMove != GameMoveType.BUY_CARD )
-			{
-				new BuyCard ( sheperd , buyingCardType ).execute ( match ) ;
-				numberOfMovesDone ++ ;
-				lastMove = GameMoveType.BUY_CARD ;
-			}
-			else
-				throw new MoveNotAllowedException ( "Can not do two equals moves sequentially." ) ; 
+		if ( numberOfMovesDone < 3 && ! ( numberOfMovesDone == 2 && sheperdMoved == false ) && lastMove != GameMoveType.BUY_CARD  )
+		{
+			numberOfMovesDone ++ ;
+			lastMove = GameMoveType.BUY_CARD ;
+			new BuyCard ( sheperd , buyingCardType ).execute ( match ) ;
+		}
+		else
+			throw new MoveNotAllowedException ( PresentationMessages.MOVE_NOT_ALLOWED_MESSAGE ) ; 
 	}
 	
-	/***/
-	public void executeMate ( Match match , Region whereMate ) throws MoveNotAllowedException  
+	/**
+	 * @param match
+	 * @param whereMate
+	 * @throws WorkflowException 
+	 * @throws {@link MoveNotAllowedException}  
+	 */
+	public void executeMate ( Match match , Region whereMate ) throws MoveNotAllowedException, WorkflowException  
 	{
-		if ( numberOfMovesDone == 2 && sheperdMoved == false )
-			throw new MoveNotAllowedException ( "THE " ) ; 
-		else  
-			if ( lastMove != GameMoveType.MATE )
+		if ( match != null && whereMate != null )
+			if ( numberOfMovesDone < 3 && ! ( numberOfMovesDone == 2 && sheperdMoved == false ) && lastMove != GameMoveType.MATE )
 			{
-				new Mate ( clockSource , lambEvolver , sheperd , whereMate ).execute ( match ); 
-				numberOfMovesDone ++ ;
+				numberOfMovesDone ++ ; 
 				lastMove = GameMoveType.MATE ;
+				new Mate ( clockSource , lambEvolver , sheperd , whereMate ).execute ( match ); 
 			}
 			else
-				throw new MoveNotAllowedException ( "Can not do two equals moves sequentially." ) ; 
+				throw new MoveNotAllowedException ( PresentationMessages.MOVE_NOT_ALLOWED_MESSAGE ) ; 
+		else
+			throw new IllegalArgumentException () ;
 	}
 	
 	/***/
 	public void executeMoveSheep ( Match match , Ovine movingOvine , Region ovineDestinationRegion ) throws MoveNotAllowedException 
 	{
-		if ( numberOfMovesDone == 2 && sheperdMoved == false )
-			throw new MoveNotAllowedException ( "" ) ; 
-		else  
-			if ( lastMove != GameMoveType.MOVE_SHEEP )
-			{
-				new MoveSheep ( sheperd , movingOvine , ovineDestinationRegion ).execute ( match ) ;
-				numberOfMovesDone ++ ;
-				lastMove = GameMoveType.MOVE_SHEEP ;
-			}
-			else
-				throw new MoveNotAllowedException ( "Can not do two equals moves sequentially." ) ; 
+		if ( numberOfMovesDone < 3 && ! ( numberOfMovesDone == 2 && sheperdMoved == false ) &&  lastMove != GameMoveType.MOVE_SHEEP )
+		{
+			numberOfMovesDone ++ ;
+			lastMove = GameMoveType.MOVE_SHEEP ;
+			new MoveSheep ( sheperd , movingOvine , ovineDestinationRegion ).execute ( match ) ;	
+		}
+		else
+			throw new MoveNotAllowedException ( "Can not do two equals moves sequentially." ) ; 
 		}
 	
 	/**
 	 * @throws WrongStateMethodCallException 
-	 * @throws WorkflowException */
-	public void executeMoveSheperd ( Match match , Road roadWhereGo ) throws MoveNotAllowedException, WrongStateMethodCallException, WorkflowException 
+	 */
+	public void executeMoveSheperd ( Match match , Road roadWhereGo ) throws MoveNotAllowedException, WorkflowException 
 	{
-		new MoveSheperd ( sheperd , roadWhereGo ).execute ( match ); 
-		sheperdMoved = true ;
-		numberOfMovesDone ++ ;
-		lastMove = GameMoveType.MOVE_SHEPERD ;
+		if  ( match != null && roadWhereGo != null )
+			if ( numberOfMovesDone < 3 )
+			{
+				numberOfMovesDone ++ ;
+				lastMove = GameMoveType.MOVE_SHEPERD ;
+				sheperdMoved = true ;
+				new MoveSheperd ( sheperd , roadWhereGo ).execute ( match ); 
+			}
+			else
+				throw new MoveNotAllowedException ( PresentationMessages.MOVE_NOT_ALLOWED_MESSAGE ) ;
+		else
+			throw new IllegalArgumentException () ;
 	}
 	
 }

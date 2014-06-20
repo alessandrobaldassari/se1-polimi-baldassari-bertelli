@@ -1,7 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves;
 
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.GameConstants;
@@ -17,6 +16,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.TurnNumberClock;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WorkflowException;
 
 /**
  * This class models the Mate move.
@@ -80,77 +81,11 @@ public class Mate extends GameMove
 	}
 	
 	/**
-	 * The effective-algorithm method for this move.
-	 * It verifies if all the conditions for this mate to happen are verified.
-	 * If so, it tries the Mate; if it go well, it adds the born Lamb to the Region
-	 * where the process took place.
+	 * This method  
 	 * 
-	 * @param match the Match on which the action is performed.
-	 * @throws MoveNotAllowedException if something goes wrong.
-	 * 
-	 * @PRECONDITIONS
-	 *  1. match != null
-	 * @EXCEPTIONALS_POSTCONDITIONS 
-	 *  1. MoveNotAllowedException && there not exist a Ram in the whereMate Region.
-	 *  2. MoveNotAllowedException && there not exist a Sheep in the whereMate Region
-	 *  3. MoveNotAllowedException and the mate has failed.
-	 *  @POSTCONDITIONS
-	 *  1. the whereMate contains a new Lamb
+	 * @param region
+	 * @return
 	 */
-	@Override
-	public void execute ( Match match ) throws MoveNotAllowedException 
-	{
-		Runnable lambGrowerLookerRunnable ;
-		Executor runnableExec ;
-		Lamb lamb ;
-		List < AdultOvine > adultOvines ;
-		AdultOvine ram ;
-		AdultOvine sheep ;
-		if ( match != null )
-		{
-			adultOvines = MapUtilities.extractAdultOvinesExceptBlackSheep ( whereMate.getContainedAnimals () ) ;
-			// look for a male
-			ram = MapUtilities.lookForAnOvine ( adultOvines , AdultOvineType.RAM ) ;
-			if ( ram != null )
-			{
-				// look for a female
-				sheep = MapUtilities.lookForAnOvine ( adultOvines , AdultOvineType.SHEEP ) ;
-				if ( sheep != null )
-				{
-					try 
-					{
-						// do the mate
-						lamb = sheep.mate ( ram , clockSource.getTurnNumber () ) ;
-						whereMate.addAnimal ( lamb ) ;
-						lamb.moveTo ( whereMate );
-						// launch some stuff to mangage the evolution of the born Lamb.
-						runnableExec = Executors.newSingleThreadExecutor () ;	
-						lambGrowerLookerRunnable = new LambGrowerLookerRunnable ( clockSource , lamb , lambEvolver ) ;
-						runnableExec.execute ( lambGrowerLookerRunnable ) ;
-					} 
-					catch ( CanNotMateWithHimException e ) 
-					{
-						throw new RuntimeException ( e ) ;
-					} 
-					catch ( MateNotSuccesfullException e ) 
-					{
-						// some type of notification ...
-					} 
-					catch ( WrongMatchStateMethodCallException e ) 
-					{
-						// someone called me but it's not the right time.
-					}
-				}
-				else
-					throw new MoveNotAllowedException ( "No female to mate!" ) ;
-			}
-			else
-				throw new MoveNotAllowedException ( "No male to mate!" ) ;
-		}
-		else throw new IllegalArgumentException () ;
-	}
-
-	/***/
 	public static boolean canMateDueToSexReasons ( Region region ) 
 	{
 		List < AdultOvine > adultOvines ;
@@ -176,6 +111,69 @@ public class Mate extends GameMove
 		return res ;
 	}
 	
+	/**
+	 * The effective-algorithm method for this move.
+	 * It verifies if all the conditions for this mate to happen are verified.
+	 * If so, it tries the Mate; if it go well, it adds the born Lamb to the Region
+	 * where the process took place.
+	 * 
+	 * @param match the Match on which the action is performed.
+	 * @throws MoveNotAllowedException if something goes wrong.
+	 * @throws WorkflowException 
+	 * 
+	 * @PRECONDITIONS
+	 *  1. match != null
+	 * @EXCEPTIONALS_POSTCONDITIONS 
+	 *  1. MoveNotAllowedException && there not exist a Ram in the whereMate Region.
+	 *  2. MoveNotAllowedException && there not exist a Sheep in the whereMate Region
+	 *  3. MoveNotAllowedException and the mate has failed.
+	 *  @POSTCONDITIONS
+	 *  1. the whereMate contains a new Lamb
+	 */
+	@Override
+	public void execute ( Match match ) throws MoveNotAllowedException, WorkflowException 
+	{
+		Runnable lambGrowerLookerRunnable ;
+		Lamb lamb ;
+		List < AdultOvine > adultOvines ;
+		AdultOvine ram ;
+		AdultOvine sheep ;
+		if ( match != null )
+		{
+			adultOvines = MapUtilities.extractAdultOvinesExceptBlackSheep ( whereMate.getContainedAnimals () ) ;
+			// look for a male
+			ram = MapUtilities.lookForAnOvine ( adultOvines , AdultOvineType.RAM ) ;
+			if ( ram != null )
+			{
+				// look for a female
+				sheep = MapUtilities.lookForAnOvine ( adultOvines , AdultOvineType.SHEEP ) ;
+				if ( sheep != null )
+					try 
+					{
+						// do the mate
+						lamb = sheep.mate ( ram , clockSource.getTurnNumber () ) ;
+						whereMate.addAnimal ( lamb ) ;
+						lamb.moveTo ( whereMate ); 
+						// launch some stuff to manage the evolution of the born Lamb.
+						lambGrowerLookerRunnable = new LambGrowerLookerRunnable ( clockSource , lamb , lambEvolver ) ;
+						Executors.newSingleThreadExecutor().execute ( lambGrowerLookerRunnable ) ;
+					} 
+					catch ( CanNotMateWithHimException e ) 
+					{
+						throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
+					} 
+					catch ( MateNotSuccesfullException e ) 
+					{
+						// some type of notification ...
+					} 
+				else
+					throw new MoveNotAllowedException ( "No female to mate!" ) ;
+			}
+			else
+				throw new MoveNotAllowedException ( "No male to mate!" ) ;
+		}
+		else throw new IllegalArgumentException () ;
+	}
 	
 	/**
 	 * The object that will take care of the evolution of lambs, one per lamb. 
@@ -199,20 +197,12 @@ public class Mate extends GameMove
 		public LambGrowerLookerRunnable ( TurnNumberClock turnNumberClock , Lamb lambToEvolve , LambEvolver lambEvolver ) 
 		{
 			if ( turnNumberClock != null && lambToEvolve != null && lambEvolver != null )
-			{
-				try 
-				{
-					this.turnNumberClock = turnNumberClock ;
-					this.lambToEvolve = lambToEvolve ;
-					this.lambEvolver = lambEvolver ;
-					initTurn = turnNumberClock.getTurnNumber () ;
-				} 
-				catch (WrongMatchStateMethodCallException e) 
-				{
-					e.printStackTrace();
-					throw new RuntimeException () ;
-				}
-			}
+			{	
+				this.turnNumberClock = turnNumberClock ;
+				this.lambToEvolve = lambToEvolve ;
+				this.lambEvolver = lambEvolver ;
+				initTurn = turnNumberClock.getTurnNumber () ;
+			}	
 			else
 				throw new IllegalArgumentException () ;
 		}
@@ -225,24 +215,17 @@ public class Mate extends GameMove
 		{
 			int currentTurn ;
 			boolean finished = false ;
-			try 
+			while ( finished == false )
 			{
-				while ( finished == false )
+				currentTurn = turnNumberClock.getTurnNumber () ;
+				if ( currentTurn - initTurn == GameConstants.NUMBER_OF_TURN_AFTER_THOSE_A_LAMB_EVOLVE )
 				{
-					currentTurn = turnNumberClock.getTurnNumber () ;
-					if ( currentTurn - initTurn == GameConstants.NUMBER_OF_TURN_AFTER_THOSE_A_LAMB_EVOLVE )
-					{
-						lambEvolver.evolve ( lambToEvolve ) ;
-						finished = true ;
-					}
+					lambEvolver.evolve ( lambToEvolve ) ;
+					finished = true ;
 				}
 			}
-			catch ( WrongMatchStateMethodCallException e) 
-			{
-				e.printStackTrace();
-				throw new RuntimeException ( e ) ;
-			}
 		}
+		
 	}
 	
 }

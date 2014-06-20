@@ -106,18 +106,31 @@ public class MoveSelector implements Serializable
 		movesAllowedDueToRuntimeRules.put ( GameMoveType.MOVE_SHEPERD , availableRoadsForMoveSheperd.size() > 0 ) ;
 	}
 	
+	/**
+	 * Setter method for the availableMoney field.
+	 * 
+	 * @param availableMoney the value for the availableMoney field.
+	 */
 	public void setAvailableMoney ( int availableMoney )
 	{
 		this.availableMoney = availableMoney ;
 	}
 	
-	/***/
+	/**
+	 * Getter for the availableMoney field.
+	 * 
+	 * @return the availableMoney field.
+	 */
 	public int getAvailableMoney () 
 	{
 		return availableMoney ;
 	}
 	
-	/***/
+	/**
+	 * Getter method for the associatedSheperd field.
+	 * 
+	 * @return the associatedSheperd field.
+	 */
 	public Sheperd getAssociatedSheperd () 
 	{
 		return associatedSheperd ;
@@ -193,6 +206,7 @@ public class MoveSelector implements Serializable
 		return res ;
 	}
 	
+	/***/
 	public void updateSelection ( GameMoveType g ) 
 	{
 		lastSelectedIndex ++ ;
@@ -206,25 +220,20 @@ public class MoveSelector implements Serializable
 		boolean extCond ;
 		boolean shepCond ;
 		boolean twoCond ;
-		boolean twoConsCond ;
 		if ( g != null )
 		{
 			extCond = movesAllowedDueToRuntimeRules.get ( g ) ;
 			if ( lastSelectedIndex > -1 )
 			{
 				shepCond = ( lastSelectedIndex == 1 && CollectionsUtilities.arrayLinearSearchPK ( selectedMoves , GameMoveType.MOVE_SHEPERD )  == -1 ) ; 
-				twoCond = ( ( selectedMoves [ 0 ] == g && selectedMoves [ 1 ] == g ) 
-					|| ( selectedMoves [ 1 ] == g && selectedMoves [ 2 ] == g ) ||
-					( selectedMoves [ 0 ] == g && selectedMoves [ 2 ] == g && selectedMoves [ 1 ] != GameMoveType.MOVE_SHEPERD ) )  ;
-				twoConsCond = selectedMoves [ lastSelectedIndex ] == g ;
+				twoCond = ( lastSelectedIndex == 0 && selectedMoves [ 0 ] == g ) || ( lastSelectedIndex == 1 && selectedMoves [ 1 ] == g ) ;
 			}
 			else
 			{
 				shepCond = false ;
 				twoCond = false ;
-				twoConsCond = false ;
 			}
-			res = extCond && ! ( shepCond || twoCond || twoConsCond ) ;
+			res = extCond && ! ( shepCond || twoCond ) ;
 		}
 		else
 			throw new IllegalArgumentException() ;

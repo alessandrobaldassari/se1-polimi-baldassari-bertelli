@@ -76,30 +76,37 @@ public class BuyCard extends GameMove
 	 *    
 	 */
 	@Override
-	public void execute ( Match match ) throws MoveNotAllowedException, WorkflowException, WrongStateMethodCallException 
+	public void execute ( Match match ) throws MoveNotAllowedException, WorkflowException 
 	{
 		SellableCard theCard ;
 		int price ;
-		try 
-		{
-			price = match.getBank().getPeekCardPrice ( buyingCardType ) ;
-			buyer.getOwner ().pay ( price ) ;
-			theCard = match.getBank ().sellACard ( price , buyingCardType ) ;
-			theCard.setOwner ( buyer.getOwner () ) ; 
-			buyer.getOwner().addCard ( theCard ) ;
-		} 
-		catch ( NoMoreCardOfThisTypeException e ) 
-		{
-			throw new MoveNotAllowedException ( "BREAK_DOWN - EXECUTE : NO MORE CARD OF THIS TYPE." ) ;
-		} 
-		catch ( TooFewMoneyException e ) 
-		{
-			throw new MoveNotAllowedException ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;
-		} 
-		catch ( CardPriceNotRightException e ) 
-		{
-			throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
-		}	
+		if ( match != null )
+			try 
+			{
+				price = match.getBank().getPeekCardPrice ( buyingCardType ) ;
+				buyer.getOwner ().pay ( price ) ;
+				theCard = match.getBank ().sellACard ( price , buyingCardType ) ;
+				theCard.setOwner ( buyer.getOwner () ) ; 
+				buyer.getOwner().addCard ( theCard ) ;
+			} 
+			catch ( NoMoreCardOfThisTypeException e ) 
+			{
+				throw new MoveNotAllowedException ( "BREAK_DOWN - EXECUTE : NO MORE CARD OF THIS TYPE." ) ;
+			} 
+			catch ( TooFewMoneyException e ) 
+			{
+				throw new MoveNotAllowedException ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;
+			} 
+			catch ( CardPriceNotRightException e ) 
+			{
+				throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
+			}
+			catch (WrongStateMethodCallException e) 
+			{
+				throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
+			}	
+		else
+			throw new IllegalArgumentException () ;
 	}
 	
 }

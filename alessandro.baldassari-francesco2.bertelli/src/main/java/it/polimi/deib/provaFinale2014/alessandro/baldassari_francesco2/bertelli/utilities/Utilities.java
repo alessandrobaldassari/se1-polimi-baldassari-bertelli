@@ -48,6 +48,20 @@ public class Utilities
 	}
 	
 	/***/
+	public static < T extends Identifiable > T lookForIdentifier ( Iterable < T > src, int key ) 
+	{
+		T res ;
+		res = null ;
+		for ( T i : src )
+			if ( i.getUID() == key )
+			{
+				res = i ;
+				break ;
+			}
+		return res ;
+	}
+	
+	/***/
 	public static String fromBackslashnStringToBrHtmlString ( String backslashnString ) 
 	{
 		String [] lines ;

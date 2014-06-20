@@ -122,9 +122,7 @@ private DummyMatch d ;
 		{
 			assertTrue ( true ) ;
 		} 
-		catch (WrongStateMethodCallException e) {
-			fail () ;
-		} catch (WorkflowException e) {
+		catch (WorkflowException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -177,9 +175,7 @@ private DummyMatch d ;
 		{
 			assertTrue ( true ) ;
 		} 
-		catch (WrongStateMethodCallException e) {
-			fail () ;
-		} catch (WorkflowException e) {
+		catch (WorkflowException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -235,9 +231,8 @@ private DummyMatch d ;
 		catch (MoveNotAllowedException e) 
 		{
 			assertTrue ( true ) ;
-		} catch (WrongStateMethodCallException e) {
-			fail () ;
-		} catch (WorkflowException e) {
+		} 
+		catch (WorkflowException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

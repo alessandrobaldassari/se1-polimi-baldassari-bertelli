@@ -6,12 +6,15 @@ import java.util.LinkedList;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.GameConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.BlackSheep;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.MapUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player.TooFewMoneyException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WorkflowException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
 /**
@@ -65,7 +68,7 @@ public class BreakDown extends GameMove
 	 * the selected Players.
 	 * 
 	 * @param match the Match on which the action is performed.
-	 * @throws WrongStateMethodCallException 
+	 * @throws WorkflowException 
 	 * @throws MotNotAllowedException if the breaker Player has not enough money 
 	 *         to pay all the selected Players
 	 *         
@@ -80,13 +83,13 @@ public class BreakDown extends GameMove
 	 *  1. TOO_FEW_MONEY_EXCEPTION_RAISED && breaker.money < # adjacent players * AMOUNT_TO_PAY_FOR_SILENCE.
 	 */
 	@Override
-	public void execute ( Match match ) throws MoveNotAllowedException, WrongStateMethodCallException 
+	public void execute ( Match match ) throws MoveNotAllowedException, WorkflowException 
 	{
 		Collection < Player > adjacentPlayers ;
 		if ( match != null )
 		{
 			// trovo coloro che potrei dover pagare per il silenzio
-			adjacentPlayers = retrieveAdjacentPlayers () ;
+			adjacentPlayers = MapUtilities.retrieveAdjacentPlayers ( breaker.getPosition() ) ;
 			// i potenziali testimoni lanciano il dado
 			adjacentPlayersDiceLaunching ( adjacentPlayers ) ;
 			try 
@@ -95,7 +98,7 @@ public class BreakDown extends GameMove
 				breaker.getOwner().pay ( adjacentPlayers.size () * GameConstants.AMOUNT_TO_PAY_FOR_SILENCE ) ;
 				// ogni testimone precedentemente selezionato riceve la somma
 				for ( Player player : adjacentPlayers )
-					player.receiveMoney ( GameConstants.AMOUNT_TO_PAY_FOR_SILENCE );
+					player.receiveMoney ( GameConstants.AMOUNT_TO_PAY_FOR_SILENCE ) ;
 				// effettivo abbattimento dell'animale
 				animalToBreak.getPosition ().removeAnimal ( animalToBreak ) ;
 				animalToBreak.moveTo ( null ) ;
@@ -103,26 +106,17 @@ public class BreakDown extends GameMove
 			catch ( TooFewMoneyException e ) 
 			{
 				throw new MoveNotAllowedException ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;
+			} 
+			catch ( WrongStateMethodCallException e ) 
+			{
+				throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
 			}
 		}
 		else
 			throw new IllegalArgumentException ( "BREAK_DOWN - EXECUTE : The match parameter can not be null." ) ;
 	}
 
-	/**
-	 * Retrieve all Players near adjacent to the breaker one.
-	 * 
-	 * @return a Collection containing all the Players adjacent to the breaker one.
-	 */
-	private Collection < Player > retrieveAdjacentPlayers () 
-	{
-		Collection < Player > adjacentPlayers ;
-		adjacentPlayers = new LinkedList < Player > () ;
-		for ( Road road : breaker.getPosition().getAdjacentRoads () )
-			if ( road.getElementContained () != null && road.getElementContained () instanceof Sheperd )
-				adjacentPlayers.add ( ( ( Sheperd ) road.getElementContained () ).getOwner() ) ;
-		return adjacentPlayers ;
-	}
+	
 
 	/**
 	 * Ask every adjacent Player ( adjacent to the Breaker ) to launch a dice to see

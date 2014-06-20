@@ -91,18 +91,28 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 			throw new IllegalArgumentException () ;
 	}
 	
-	/***/
+	/**
+	 * Add a Card to this Player
+	 * 
+	 * @param toAdd the Card to add to this Player.
+	 * @throws {@link IllegalArgumentException }
+	 */
 	public void addCard ( SellableCard toAdd ) 
 	{
-		sellableCards.add(toAdd) ;
-		try 
+		if ( toAdd != null )
 		{
-			notifyObservers ( "onCardAdded" , toAdd.getRegionType() ) ;
+			sellableCards.add(toAdd) ;
+			try 
+			{
+				notifyObservers ( "onCardAdded" , toAdd.getRegionType() ) ;
+			}
+			catch (MethodInvocationException e) 
+			{
+				e.printStackTrace();
+			}
 		}
-		catch (MethodInvocationException e) 
-		{
-			e.printStackTrace();
-		}
+		else
+			throw new IllegalArgumentException () ;
 	}
 	
 	/***/

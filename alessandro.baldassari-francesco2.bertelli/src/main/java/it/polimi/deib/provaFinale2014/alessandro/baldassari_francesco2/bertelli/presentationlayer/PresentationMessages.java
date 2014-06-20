@@ -81,6 +81,26 @@ public final class PresentationMessages
 	public static final String DO_MOVE_MESSAGE = "Scegli una mossa da effettuare!" ;
 	
 	/**
+	 * The message to show to the User when he wants to do a BreakDown move. 
+	 */
+	public static final String BREAKDOW_MESSAGE = "Scegli la regione dove perpetrare il misfatto ( tra quelle vicine al tuo pastore scelto )..." ; 
+	
+	/**
+	 * The message to show to the User when he wants to do a Mate move. 
+	 */
+	public static final String MATE_MESSAGE = "Scegli la regione dove suggerire un accoppiamento ( tra quelle vicine al tuo pastore scelto ) ..." ;
+	
+	/**
+	 * The message to show to the user when he wants to do a MoveOvine move. 
+	 */
+	public static final String MOVE_SHEEP_MESSAGE = "Scegli la regione DA dove muovere l'ovino ( quella di partenza ! ), tra quelle vicine al pastore che hai scelto " ;
+	
+	/**
+	 * The message to show to the User when he wants to do a MoveSheperd move. 
+	 */
+	public static final String MOVE_SHEPERD_MESSAGE = "Scegli la strada DOVE mettere il pastore ( tra quelle libere ! )" ;
+	
+	/**
 	 * The message to display when the User did a move and this move has gone well. 
 	 */
 	public static final String MOVE_SUCCEED_MESSAGE = "Mossa riuscita perfettamente!" ;
@@ -89,6 +109,16 @@ public final class PresentationMessages
 	 * The message to display when the User try to do a not allowed move. 
 	 */
 	public static final String MOVE_NOT_ALLOWED_MESSAGE = "Sorry, ma non puoi fare questa mossa!" ;
+	
+	/**
+	 * The message to display during the first phase of the Market. 
+	 */
+	public static final String CHOOSE_CARDS_ELIGIBLE_FOR_SELLING_MESSAGE = "Scegli le carte che vuoi vendere" ;
+	
+	/**
+	 * The message to display during second phase of the Market. 
+	 */
+	public static final String CHOOSE_CARDS_TO_BUY_MESSAGE = "Scegli le carte che vuoi comprare" ;
 	
 	/**
 	 * The message to display when a Player tries to execute an action but does not have enough money to do it. 

@@ -81,6 +81,7 @@ public class RegionTypeChooseView extends ObservableFrameworkedWithGridBagLayout
  		setSize ( GraphicsUtilities.getVGAResolution () ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
 		inputView.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCoverImage(true) ) ; 
+		inputView.setTitle ( "Scegli il tipo di regione : " ) ;
 
 	}
 

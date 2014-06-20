@@ -45,6 +45,7 @@ public class WaitingView extends JDialog implements NotificationContainer
 	{
 		waitingPanel.setText ( text ) ;
 		repaint () ;
+		waitingPanel.requestFocus () ;
 	}
 	
 	/**

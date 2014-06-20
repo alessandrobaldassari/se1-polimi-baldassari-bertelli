@@ -59,7 +59,6 @@ public class NotificationPanel extends FrameworkedWithGridBagLayoutPanel
 		scrollPane.setBorder ( new TitledBorder ( "Whatsapp(ening)" ) );
 		notificationArea.setEditable(false) ;
 		notificationArea.setOpaque(false); 
-	
 		setOpaque ( false ) ;
 	}
 
@@ -91,6 +90,7 @@ public class NotificationPanel extends FrameworkedWithGridBagLayoutPanel
 		notificationArea.append ( Utilities.CARRIAGE_RETURN ) ;
 		notificationArea.append ( notification ) ;
 		repaint () ;
+		notificationArea.requestFocus () ;
 	}
 	
 	/**
@@ -99,6 +99,7 @@ public class NotificationPanel extends FrameworkedWithGridBagLayoutPanel
 	public void clearNotifications () 
 	{
 		notificationArea.setText ( Utilities.EMPTY_STRING ) ;
+		notificationArea.requestFocus () ;
 	}
 	
 }
