@@ -18,4 +18,11 @@ public class NamedColorTest {
 		assertTrue(namedColor.getName() == "Red");
 	}
 
+	@Test
+	public void String () 
+	{
+		namedColor = new NamedColor ( 0 , 0 , 0 , "Black" ) ;
+		assertTrue ( namedColor.toString()!=null ) ;
+	}
+	
 }

@@ -24,4 +24,10 @@ public class SheperdTest
 		assertTrue ( s.getOwner().equals ( p ) ) ;
 	}
 	
+	@Test
+	public void toStringT () 
+	{
+		assertTrue ( new Sheperd ( "x" , new NamedColor ( 255 , 0 , 0 , "red" ) , new DummyPlayer ( "" ) ).toString() != null ) ;
+	}
+	
 }

@@ -99,7 +99,7 @@ public abstract class PositionableElement < T extends GameMapElement > implement
 		String res ;
 		res = "Character.\n" ;
 		res = res + "Type : " + positionableElementType + "\n" ;
-		res = res + "Position : " + position.getGameMapElementType() + "\n" ;
+			res = res + "Position : " + ( position != null ? position.getGameMapElementType () : " unset" )+ "\n" ;
 		return res ;
 	}
 	

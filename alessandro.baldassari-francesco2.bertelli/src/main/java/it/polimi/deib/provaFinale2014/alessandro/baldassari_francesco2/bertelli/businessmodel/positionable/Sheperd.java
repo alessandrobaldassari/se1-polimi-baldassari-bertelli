@@ -41,27 +41,13 @@ public class Sheperd extends Character < Road >
 		{
 			this.color = color ;
 			this.owner = owner ;
-			associateColorAndType () ; 
+			setElementType ( PositionableElementType.associateColorAndType ( color ) );
 		}
 		else
 			throw new IllegalArgumentException () ;
 	}
 	
-	/***/
-	private final void associateColorAndType ()
-	{
-		if ( color.getName ().compareToIgnoreCase( "RED" ) == 0 )
-			setElementType ( PositionableElementType.RED_SHEPERD  ) ;
-		else
-			if ( color.getName ().compareToIgnoreCase ( "BLUE" ) == 0 )
-				setElementType ( PositionableElementType.BLUE_SHEPERD ) ;
-			else
-				if ( color.getName ().compareToIgnoreCase ( "YELLOW" ) == 0 )
-					setElementType ( PositionableElementType.YELLOW_SHEPERD ) ;
-				else
-					if ( color.getName ().compareToIgnoreCase ( "GREEN" ) == 0 )
-						setElementType ( PositionableElementType.GREEN_SHEPERD ) ;
-	}
+	
 	
 	/**
 	 * Getter for the owner property.

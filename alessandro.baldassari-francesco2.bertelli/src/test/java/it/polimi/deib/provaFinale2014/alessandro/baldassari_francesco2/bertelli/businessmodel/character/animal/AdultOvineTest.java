@@ -2,6 +2,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import static org.junit.Assert.*;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine;
@@ -10,6 +11,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchIdentifier;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
 /*
@@ -17,35 +19,28 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  */
 public class AdultOvineTest {
 	
-	/*
-	 * Initializing variables test built the test environment using some static variables to bypass some technical problems with animalFactory
-	 */
-	static AdultOvine ram;
-	static AdultOvine sheep;
-	private static AnimalFactory animalFactory ;
-	Lamb lamb = null;
+
+	 AdultOvine ram;
+	 AdultOvine sheep;
+	 static AnimalFactory animalFactory ;
+	Lamb lamb ;
 	
-	/*
-	 * Executing some code using a trick to initialize animalFactory correctly
-	 */
-	static 
+	@Before
+	public void setUp ()
 	{
-		int i ;
-		i = 0 ;
-		do
+		try
 		{
-			try
-			{
-				animalFactory = AnimalFactory.newAnimalFactory ( MatchIdentifier.newInstance() ) ;
-				ram = (AdultOvine) animalFactory.newAdultOvine("ram", AdultOvineType.RAM);
-				sheep = (AdultOvine) animalFactory.newAdultOvine("Sheep", AdultOvineType.SHEEP);
-			}
-			catch (SingletonElementAlreadyGeneratedException e) 
-			{
-				i ++ ;
-			}
+			animalFactory = AnimalFactory.newAnimalFactory ( MatchIdentifier.newInstance() ) ;
+			ram = (AdultOvine) animalFactory.newAdultOvine("ram", AdultOvineType.RAM);
+			sheep = (AdultOvine) animalFactory.newAdultOvine("Sheep", AdultOvineType.SHEEP);
 		}
-		while ( animalFactory == null ) ;
+		catch (SingletonElementAlreadyGeneratedException e) {}
+	}
+
+	@Test ( expected = IllegalArgumentException.class )
+	public void ctorExc () 
+	{
+		new AdultOvine ( PositionableElementType.RAM , "ciao" , null ) ;
 	}
 	
 	/*
@@ -56,6 +51,20 @@ public class AdultOvineTest {
 	{
 		assertTrue(ram.getType() == AdultOvineType.RAM);
 		assertTrue(sheep.getType() == AdultOvineType.SHEEP);
+	}
+	
+	@Test
+	public void toStringTest () 
+	{
+		assertTrue ( ram.toString() != null ) ;
+		assertTrue ( ! ram.toString().isEmpty() ) ;
+	}
+	
+	@Test
+	public void equals () 
+	{
+		assertTrue ( ram.equals(ram) );
+		assertFalse ( ram.equals(sheep) ) ;
 	}
 	
 	/*
@@ -82,6 +91,24 @@ public class AdultOvineTest {
 		catch ( MateNotSuccesfullException m )
 		{
 			assertTrue ( lamb == null ) ;
+		}
+	}
+	
+	@Test 
+	public void mateExc ()
+	{
+		try 
+		{
+			ram.mate ( sheep , 0 ) ;
+		}
+		catch (CanNotMateWithHimException e) 
+		{
+			fail () ;
+		} 
+		catch (MateNotSuccesfullException e) 
+		{
+			assertTrue ( e.getFirstPartner().equals(ram) ) ;
+			assertTrue ( e.getSecondPartner().equals(sheep) ) ;
 		}
 	}
 	
