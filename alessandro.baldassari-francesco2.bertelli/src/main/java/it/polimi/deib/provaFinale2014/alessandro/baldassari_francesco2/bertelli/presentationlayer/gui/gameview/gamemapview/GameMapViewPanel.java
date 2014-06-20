@@ -5,6 +5,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.message.GUIGameMapNotificationMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
@@ -13,6 +14,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.ObservableFrameworkedWithGridBagLayoutPanel;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
@@ -29,6 +31,10 @@ import java.awt.geom.RectangularShape;
 import java.awt.image.BufferedImage;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -70,7 +76,7 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 	 * A component to manage the coordinates of the Map and the Objects on the Map. 
 	 */
 	private MapMeasuresCoordinatesManager coordinatesManager ;
-		
+	
 	/**
 	 * The input mode this GameView is, null if none. 
 	 */
@@ -82,13 +88,16 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 	private Iterable < ? extends Identifiable > uidOfSelectableElements ;
 	
 	/***/
+	private Animator animator ;
+	
+	/***/
 	private Point tlc ;
 	
 	/***/
-	private int xZoomMult ;
+	private float xZoomMult ;
 	
 	/***/
-	private int yZoomMult ;
+	private float yZoomMult ;
 	
 	// METHODS
 	
@@ -111,9 +120,11 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 		coordinatesManager = new MapMeasuresCoordinatesManager ( positionableElementsManager ) ;
 		currentInputMode = null ;
 		uidOfSelectableElements = null ;
+		animator = new Animator () ;
 		tlc = new Point ( 0 , 0 ) ;
 		xZoomMult = 1 ;
 		yZoomMult = 1 ;
+		animator.start();
 	}
 
 	/**
@@ -155,8 +166,7 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 	 */
 	public void onPositionableElementAdded ( GameMapElementType whereType , Integer whereId , PositionableElementType whoType , Integer whoId ) 
 	{
-		positionableElementsManager.addElement(whereType, whereId, whoType, whoId);
-		repaint () ;
+		animator.addAddMessage ( new GUIGameMapNotificationMessage ( "ADD" , whereType , whereId , whoType , whoId ) );
 	}
 
 	/**
@@ -164,10 +174,9 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 	 */
 	public void onPositionableElementRemoved(GameMapElementType whereType , Integer whereId , PositionableElementType whoType , Integer whoId) 
 	{
-		positionableElementsManager.removeElement ( whereType , whereId , whoType , whoId ) ;
-		repaint () ;
+		animator.addRemoveMessage ( new GUIGameMapNotificationMessage ( "REMOVE" , whereType , whereId , whoType , whoId ) );
 	}
-
+	
 	/**
 	 * Set the current input mode for this MapViewPanel 
 	 * 
@@ -191,6 +200,232 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 	
 	// INNER CLASSES
 	
+	class Animator 
+	{
+
+		private BlockingQueue < GUIGameMapNotificationMessage > queue ;
+	
+		private GUIGameMapNotificationMessage addedOne ;
+		
+		private GUIGameMapNotificationMessage removedOne ;
+	
+		private String expected ;
+
+		private AtomicBoolean inAnimation ;
+		
+		private BufferedImage toDraw ;
+		
+		private Ellipse2D whereDraw ;
+		
+		public Animator () 
+		{
+			queue = new LinkedBlockingQueue < GUIGameMapNotificationMessage > () ;
+			addedOne = null ;
+			removedOne = null ;
+			expected = "REMOVE" ;
+			inAnimation = new AtomicBoolean ( false ) ;
+			toDraw = null ;
+			whereDraw = null ;
+		}
+
+		public void addAddMessage (  GUIGameMapNotificationMessage m ) 
+		{
+			queue.offer(m);
+		}
+		
+		public void addRemoveMessage ( GUIGameMapNotificationMessage m ) 
+		{
+			queue.offer(m);
+		}
+		
+		public boolean isInAnimation () 
+		{
+			return inAnimation.get () ;
+		}
+		
+		public BufferedImage getToDraw () 
+		{
+			return toDraw ;
+		}
+		
+		public Ellipse2D getWhereDraw () 
+		{
+			return whereDraw ;
+		}
+		
+		public void start () 
+		{
+			Executors.newSingleThreadExecutor().execute ( new Worker () ) ;
+		}
+		
+		private class Worker implements Runnable 
+		{
+
+			public Worker () {}
+			
+			@Override
+			public void run () 
+			{
+				while ( true )
+				{
+					GUIGameMapNotificationMessage nextM ;
+					synchronized ( inAnimation )
+					{
+						while ( inAnimation.get() )
+							try 
+							{
+								inAnimation.wait () ;
+							}
+							catch (InterruptedException e) {}
+					}
+					try 
+					{
+						System.out.println ( "ANIMATOR - RUN : WAITING FOR A MESSAGE." ) ;
+						nextM = queue.take () ;
+						System.out.println ( "ANIMATOR - RUN : MESSAGE TAKEN : " + nextM ) ;
+						// if an element is removed may be an animation is starting
+						if ( nextM.getActionAssociated ().compareToIgnoreCase ( "ADD" ) == 0 )
+						{
+							// if the flow is ok
+							if ( expected.compareToIgnoreCase ( "ADD" ) == 0 )
+							{
+								// if this is the dest position, start the animation.
+								if ( removedOne != null && removedOne.getWhoType() == nextM.getWhoType() && removedOne.getWhoId() == nextM.getWhoId() )
+								{
+									addedOne = nextM ;
+									System.out.println ( "WORKER - RUN : BEFORE LAUCHING AND ANIMATION." ) ;
+									new AlgoAnimator().animate();
+								}
+								else // may be there is a problem, print the data.
+								{
+									// do not loss any data
+									if ( removedOne != null )
+									{
+										positionableElementsManager.removeElement (  nextM.getWhereType() , nextM.getWhereId() , nextM.getWhoType() , nextM.getWhereId () ) ;
+										repaint () ;
+									}
+									positionableElementsManager.addElement ( nextM.getWhereType() , nextM.getWhereId() , nextM.getWhoType() , nextM.getWhoId () ) ;
+									repaint () ;
+								}
+							}
+							else	// not in animation context, draw.
+							{
+								positionableElementsManager.addElement ( nextM.getWhereType() , nextM.getWhereId() , nextM.getWhoType() , nextM.getWhoId () ) ;
+								repaint () ;
+							}	
+						}
+						else
+						{
+							if ( nextM.getActionAssociated ().compareToIgnoreCase ( "REMOVE" ) == 0 )
+							{
+								positionableElementsManager.removeElement (  nextM.getWhereType() , nextM.getWhereId() , nextM.getWhoType() , nextM.getWhoId () ) ;
+								repaint () ;
+								if ( expected.compareToIgnoreCase ( "REMOVE" ) == 0 ) // if the flow is ok.
+								{
+									removedOne = nextM ;
+									expected = "ADD" ;
+								}
+							}
+							else
+							{
+								// error, log.
+							}
+						}
+					}
+					catch (InterruptedException e) 
+					{
+						System.err.println ( e ) ;
+					}
+				}
+			}	
+			
+		}
+		
+		private class AlgoAnimator  
+		{
+		
+			public void animate () 
+			{
+				Ellipse2D start ;
+				Ellipse2D end ;
+				System.out.println ( "ALGO_ANIMATOR - RUN : INIZIO" ) ;
+				// first, determines if a Sheperd or an Animal is moving, then act as a consequence.
+				if ( removedOne.getWhereType() == GameMapElementType.REGION )
+				{
+					start = coordinatesManager.getRegionData ( removedOne.getWhereId() ).get ( removedOne.getWhoType () ) ;
+					end = coordinatesManager.getRegionData ( addedOne.getWhereId () ).get ( removedOne.getWhoType() ) ;
+				}
+				else
+				{
+					start = coordinatesManager.getRoadBorder ( removedOne.getWhereId() ) ;
+					end = coordinatesManager.getRoadBorder ( addedOne.getWhereId() ) ;
+				}
+				animationCycle(start, end);
+				// the commit the last message to the manager to update data.
+				positionableElementsManager.addElement ( addedOne.getWhereType() , addedOne.getWhereId() , addedOne.getWhoType() , addedOne.getWhereId () ) ;
+				// reset the state variables.
+				addedOne = null ;
+				removedOne = null ;
+				repaint () ;
+				// re-activate the other thread.
+				synchronized ( inAnimation ) 
+				{
+					inAnimation.set(false) ;
+					inAnimation.notifyAll () ;
+				}
+				System.out.println ( "ALGO_ANIMATOR - RUN : FINE" ) ;
+			}
+			
+			private void animationCycle ( Ellipse2D start , Ellipse2D end ) 
+			{
+				//coordinatesManager.getRoadBorder ( removedOne.get )				
+				Ellipse2D current ;
+				int distanceX ;
+				int distanceY ;
+				int dx ;
+				int dy ;
+				int numberOfMoves = 10 ;
+				int pauseTime ;
+				int i ;
+				// set the pause time that will determine the speed - in millisecond.
+				pauseTime = 1000 ;				
+				// retrieve the image.
+				toDraw = SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( removedOne.getWhoType () , false ) ;
+				// now perform the moving ; start from the start point.
+				current = new Ellipse2D.Double( start.getX() , start.getY() , start.getWidth() , start.getHeight() ) ;
+				whereDraw = current ;
+				// determine the lenght of one move
+				distanceX = Math.abs ( ( int ) ( start.getCenterX() - end.getCenterX() ) ) ;
+				distanceY = Math.abs ( ( int ) ( start.getCenterY() - end.getCenterY () ) ) ;
+				// determine the little move.
+				dx = ( int ) ( distanceX / numberOfMoves ) ;
+				dy = ( int ) ( distanceY / numberOfMoves ) ;
+				// determine the sign of the little move
+				if ( end.getX () < start.getX() )
+					dx = -dx ;
+				if ( end.getY() < start.getY() )
+					dy = -dy ;
+				// for each move
+				inAnimation.set ( true ) ;
+				for ( i = 0 ; i < numberOfMoves ; i ++ )
+				{
+					current.setFrame ( current.getX () + dx , current.getY () + dy , current.getWidth() , current.getHeight() ) ;
+					repaint () ;
+					try 
+					{
+						Thread.sleep ( pauseTime ) ;
+					}
+					catch (InterruptedException e) 
+					{
+						e.printStackTrace();
+					}
+				}
+			}
+			
+		}
+				
+	}
+	
 	/**
 	 * The class that effectively draw the GameMap on the screen. 
 	 */
@@ -199,16 +434,25 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 		
 		// ATTRIBUTES
 		
+		private Dimension fixedSize ;
+		
+		/***/
+		private Dimension preferredSize ;
+		
 		// METHODS
 		
 		/***/
 		public DrawingPanel () 
 		{
 			super () ;
+			Image bI ;
 			setDoubleBuffered ( true ) ;
 			setLayout ( null ) ;
 			setOpaque ( false );
 			addMouseListener ( new ClickManager () );
+			bI = SheeplandClientApp.getInstance().getImagesHolder().getMapImage(false);
+			fixedSize = new Dimension ( bI.getWidth(this),bI.getHeight(this) ) ; 
+			preferredSize = new Dimension ( bI.getWidth(this),bI.getHeight(this) ) ; 
 		}
 		
 		/**
@@ -232,6 +476,19 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 			drawRegionsHighlighted ( g ) ;
 			// road highlight effects
 			drawRoadHighlighted ( g ) ;
+			// animations
+			drawAnimation ( g ) ;
+		}
+		
+		/***/
+		private void drawAnimation ( Graphics g ) 
+		{
+			Rectangle r ;
+			if ( animator.isInAnimation () )
+			{
+				r = scaleCoordinates ( ( int ) animator.getWhereDraw().getX() , ( int ) animator.getWhereDraw().getY() , ( int ) animator.getWhereDraw().getWidth() , ( int ) animator.getWhereDraw().getHeight() ) ;
+				g.drawImage ( animator.getToDraw() , r.x , r.y , r.width , r.height , this ) ;
+			}
 		}
 		
 		/***/
@@ -239,10 +496,16 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 		{
 			Image backgroundImage ;
 			Rectangle r ;
-			backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getMapImage ( currentInputMode == null ) ;	
+			backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getMapImage ( currentInputMode == null ) ;
 			// draw the map
-			r = scaleCoordinates ( 0 , 0 , backgroundImage.getWidth ( this ) , backgroundImage.getHeight ( this ) ) ;
+			r = scaleCoordinates ( 0 , 0 , fixedSize.width , fixedSize.height ) ;
 			g.drawImage ( backgroundImage , r.x , r.y , r.width , r.height , this );
+			System.out.println ( "X = " + tlc.x + "\nY = " + tlc.y ) ;
+			System.out.println ( "W = " + r.width + "\nH = " + r.height );
+			preferredSize.width = r.width ;
+			preferredSize.height = r.height ;
+			setPreferredSize(preferredSize);
+			revalidate () ;
 		}
 
 		/***/
@@ -346,16 +609,14 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 		/***/
 		private Point generateTopLeftCorner () 
 		{
-			Image backgroundImage ;
 			Point res ;
 			res = new Point ( 0 , 0 ) ;
-			backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getMapImage ( false ) ;
-			res = new Point ( 0 , 0 ) ;
 			// consider the Map may not fill the entire space offered by this panel.
-			if ( backgroundImage.getWidth ( this ) < getWidth () ) 
-				res.x = ( getWidth () - backgroundImage.getWidth ( this ) ) / 2 ;
-			if ( backgroundImage.getHeight ( this ) < getHeight () )
-				res.y = ( getHeight () - backgroundImage.getHeight ( this ) ) / 2 ;
+			System.out.println ( fixedSize.width ) ;
+			if ( fixedSize.width * xZoomMult < getWidth () ) 
+				res.x = (int) (( getWidth () - fixedSize.width * xZoomMult ) / 2) ;
+			if ( fixedSize.height * yZoomMult < getHeight () )
+				res.y = (int) (( getHeight () - fixedSize.height * yZoomMult ) / 2) ;
 			return res ;
 		}
 		
@@ -368,10 +629,10 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 			res = new Rectangle () ;
 			dx = tlc.x ;
 			dy = tlc.y ;
-			res.x = ( x + dx ) * xZoomMult ;
-			res.y = ( y + dy ) * yZoomMult ;
-			res.width = w * xZoomMult ;
-			res.height = h * yZoomMult ;
+			res.x = (int) (( x + dx ) * xZoomMult) ;
+			res.y = (int) (( y + dy ) * yZoomMult) ;
+			res.width = (int) (w * xZoomMult) ;
+			res.height = (int) (h * yZoomMult) ;
 			return res ;
 		}
 		
@@ -384,10 +645,10 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 			res = new Rectangle() ;
 			dx = tlc.x ;
 			dy = tlc.y ;
-			res.x = ( x / xZoomMult ) - dx ;
-			res.y = ( y / yZoomMult ) - dy ;
-			res.width = w / xZoomMult ;
-			res.height = h / yZoomMult ;
+			res.x = (int) (( x / xZoomMult ) - dx) ;
+			res.y = (int) (( y / yZoomMult ) - dy) ;
+			res.width = (int) (w / xZoomMult) ;
+			res.height = (int) (h / yZoomMult) ;
 			return res ;
 		}
 		
@@ -399,8 +660,11 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 		 */
 		public void zoom ( float xFactor , float yFactor ) 
 		{
-			coordinatesManager.scale ( xFactor , yFactor ) ; 
-		    repaint () ;
+			System.out.println ( "DRAWING_PANEL - ZOOM : BEGINS" ) ;
+			xZoomMult =  xZoomMult * xFactor;
+			yZoomMult = yZoomMult * yFactor ;
+			repaint () ;
+			System.out.println ( "DRAWING_PANEL - ZOOM : END" ) ;
 		}
 		
 		/**
@@ -470,6 +734,7 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 						case SHEPERDS :
 							System.out.println ( "CLICK_MANAGER : SHEPERD." ) ;
 							uid = coordinatesManager.getSheperdId ( r.x , r.y ) ;
+							System.out.println ( "CLICK_MANAGER : SHEPERD, UID = " +uid ) ;
 							if ( uid != null )
 								methodName = "onSheperdSelected" ;
 						break ;
@@ -645,8 +910,6 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 			public void actionPerformed ( ActionEvent e ) 
 			{
 				drawingPanel.zoom ( 0.5f , 0.5f ) ;
-				xZoomMult *= 0.5f ;
-				yZoomMult *= 0.5f ;
 			}
 			
 		}
@@ -671,8 +934,6 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 			public void actionPerformed ( ActionEvent e ) 
 			{
 				drawingPanel.zoom ( 2f , 2f ) ;	
-				xZoomMult *= 2f ;
-				yZoomMult *= 2f ;
 			}
 					
 		}

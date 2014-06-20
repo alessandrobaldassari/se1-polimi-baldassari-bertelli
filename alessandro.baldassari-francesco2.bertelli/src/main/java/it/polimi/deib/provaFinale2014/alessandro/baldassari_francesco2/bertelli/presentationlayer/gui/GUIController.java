@@ -3,7 +3,6 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import java.awt.Window;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -14,7 +13,9 @@ import javax.swing.SwingUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.card.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Ovine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.MapUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
@@ -36,6 +37,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.ovinechooseview.OvineChooseView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.regiontypechooseview.RegionTypeChooseView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.sheperdcolorchooseview.SheperdColorChooseView;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
@@ -81,8 +83,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		waitingView = new WaitingView () ;
 		gameView = new GameView () ;
 		currentShownWindow = null ;
-		index = new AtomicReference < Integer > () ;		
-		index.set ( null ) ;
+		index = new AtomicReference < Integer > ( null ) ;		
 		userWantsToChangeMove = false ;
 	}
 	/**
@@ -172,12 +173,12 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	@Override
 	public NamedColor onSheperdColorRequest ( Iterable < NamedColor > availableColors ) 
 	{
-		System.out.println ( "GUI_CONTROLLER - ON_SHEPERD_COLOR_REQUEST : INIZIO" ) ;
+		System.out.println ( "GUI_CONTROLLER - ON_SHEPERD_COLOR_REQUEST : INIZIO\nPARAMETERS :\n\tAVAILABLE_COLORS : " + availableColors ) ;
 		NamedColor res ;
 		generationNotification ( PresentationMessages.CHOOSE_COLOR_FOR_SHEPERD_MESSAGE ) ;
 		res = SheperdColorChooseView.showDialog ( availableColors ) ;
 		generationNotification ( "Colore scelto : " + res ) ;
-		System.out.println ( "GUI_CONTROLLER - ON_SHEPERD_COLOR_REQUEST : FINE" ) ;
+		System.out.println ( "GUI_CONTROLLER - ON_SHEPERD_COLOR_REQUEST : FINE\nRETURN : " + res ) ;
 		return res ;
 	}
 	
@@ -188,18 +189,10 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	public Road chooseInitRoadForSheperd ( Iterable < Road > availableRoads ) throws IOException 
 	{
 		Road res ;
-		generationNotification ( PresentationMessages.CHOOSE_INITIAL_ROAD_FOR_A_SHEPERD_MESSAGE ) ;
-		index.set ( null ) ; 
-		gameView.setInputMode ( GameMapViewInputMode.ROADS , availableRoads ) ;
-		ThreadUtilities.waitForAtomicVariable ( index ) ;
-		gameView.setInputMode ( null , null ) ;
 		res = null ;
-		for ( Road road : availableRoads )
-			if ( road.getUID () == index.get () )
-			{
-				res = road ;
-				break ;
-			}
+		generationNotification ( PresentationMessages.CHOOSE_INITIAL_ROAD_FOR_A_SHEPERD_MESSAGE ) ;
+		inputFromMapProcedure ( GameMapViewInputMode.ROADS , availableRoads ) ;
+		res = ( Road ) MapUtilities.lookForIdentifier ( availableRoads , index.get() ) ;
 		index.set(null); 
 		generationNotification ( "Strada scelta correttamente!" ) ;
 		System.out.println ( "GUI-CONTROLLER - CHOOSE_INIT_ROAD_FOR_SHEPERD : " + res ) ;
@@ -215,23 +208,20 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	public Sheperd onChooseSheperdForATurn ( Iterable < Sheperd > sheperds ) throws IOException
 	{
 		Sheperd res ;
-		index.set(null); 
+		System.out.println ( "GUI_CONTROLLER - ON_CHOOSE_SHEPERD_FOR_A_TURN : INIZIO\nPARAMETERS:\n\t sheperd : " + sheperds ) ;
+		for ( Sheperd s : sheperds )
+			System.out.println ( s.getUID() ) ;
 		generationNotification ( PresentationMessages.CHOOSE_SHEPERD_FOR_A_TURN_MESSAGE ) ;
-		gameView.setInputMode ( GameMapViewInputMode.SHEPERDS , sheperds ) ;
-		ThreadUtilities.waitForAtomicVariable ( index ) ;
-		gameView.setInputMode ( null , null ) ;
-		res = null ;
-		for ( Sheperd sheperd : sheperds )
-			if ( sheperd.getUID () == index.get () )
-			{
-				res = sheperd ;
-				break ;
-			}
+		inputFromMapProcedure ( GameMapViewInputMode.SHEPERDS , sheperds ) ;
+		res = (Sheperd) MapUtilities.lookForIdentifier ( sheperds , index.get() ) ;
 		index.set ( null ) ;
 		generationNotification ( "Ok, per questo turno usi sempre lui !!!" ) ;
 		System.out.println ( "GUI-CONTROLLER - CHOOSE_SHEPERD_FOR_A_TURN : " + res ) ;
 		if ( res == null )
 			throw new IOException () ;
+		else
+			generationNotification ( "Ben fatto!" );
+		System.out.println ( "GUI_CONTROLLER - ON_CHOOSE_SHEPERD_FOR_A_TURN : FINE\nRETURN : " + res ) ;
 		return res ;
 	}
 	
@@ -243,44 +233,38 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	{
 		MoveSelection res ;
 		GameMoveType move ;
-		// first ask the user what move he wants to do.
 		res = null ;
 		do
 		{
 			userWantsToChangeMove = false ;
-			move = null ;
-			// controlli a priori sulle mosse che si possono fare ?
 			move = MoveChooseView.showDialog ( selector.getAvailableMoves () ) ;
-			if ( move != null )
+			try
 			{
-				try
+				switch ( move )
 				{
-					switch ( move )
-					{
-						case BREAK_DOWN :
-							res = breakDownMoveManagement ( gameMap , selector );
-						break ;
-						case BUY_CARD :
-							res = buyCardManagement ( selector ) ;
-						break ;
-						case MATE :
-							res = mateManagement ( gameMap , selector ) ;
-						break ;
-						case MOVE_SHEEP :
-							res = moveSheepManagement ( gameMap , selector ) ;
-							break ;
-						case MOVE_SHEPERD :
-							res = moveSheperdManagement ( gameMap , selector ) ;
-						break ;
-						default :
-							throw new MoveNotAllowedException ( Utilities.EMPTY_STRING ) ;
-					}
+					case BREAK_DOWN :
+						res = breakDownMoveManagement ( gameMap , selector );
+					break ;
+					case BUY_CARD :
+						res = buyCardManagement ( selector ) ;
+					break ;
+					case MATE :
+						res = mateManagement ( gameMap , selector ) ;
+					break ;
+					case MOVE_SHEEP :
+						res = moveSheepManagement ( gameMap , selector ) ;
+					break ;
+					case MOVE_SHEPERD :
+						res = moveSheperdManagement ( gameMap , selector ) ;
+					break ;
+					default :
+						throw new MoveNotAllowedException ( Utilities.EMPTY_STRING ) ;
 				}
-				catch (MoveNotAllowedException e) 
-				{
-					userWantsToChangeMove = false ;
-					res = null ;
-				}
+			}
+			catch (MoveNotAllowedException e) 
+			{
+				userWantsToChangeMove = false ;
+				res = null ;
 			}
 		}
 		while ( userWantsToChangeMove == true ) ;
@@ -289,7 +273,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	
 	/**
 	 * @throws MoveNotAllowedException 
-	 * @throws WrongStateMethodCallException */
+	 */
 	private MoveSelection breakDownMoveManagement ( GameMap gameMap , MoveSelector selector ) throws MoveNotAllowedException 
 	{
 		Set < PositionableElementType > set ;
@@ -297,54 +281,29 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		PositionableElementType p ;
 		Region region ;
 		Animal animal ;
-		
-			// let the user choose where do the break down.
-			generationNotification ( "Scegli la regione dove perpetrare il misfatto ( tra quelle vicine al tuo pastore scelto )..." ) ;
-			gameView.setInputMode ( GameMapViewInputMode.REGIONS , selector.getAvailableRegionsForBreakdown () ) ;
+		// let the user choose where do the break down.
+		generationNotification ( "Scegli la regione dove perpetrare il misfatto ( tra quelle vicine al tuo pastore scelto )..." ) ;
+		inputFromMapProcedure ( GameMapViewInputMode.REGIONS , selector.getAvailableRegionsForBreakdown () ) ;
+		if ( userWantsToChangeMove == false )
+		{	
+			region = gameMap.getRegionByUID ( index.get () ) ;
 			index.set ( null ) ;
-			ThreadUtilities.waitForAtomicVariable ( index ) ;
-			gameView.setInputMode(null,null);
-			if ( userWantsToChangeMove == false )
-			{	
-				region = gameMap.getRegionByUID ( index.get () ) ;
-				index.set ( null ) ;
-				set = generateAllowedSet ( region.getContainedAnimals() ) ;
-				p = OvineChooseView.showDialog ( set ) ;
-				animal = null ;
-				for ( Animal a : region.getContainedAnimals() )
-					if ( a.getPositionableElementType() == p )
-					{
-						animal = a ;
-						break ;
-					}
-				if ( animal != null )
+			set = MapUtilities.generateAllowedSet ( region.getContainedAnimals() ) ;
+			p = OvineChooseView.showDialog ( set ) ;
+			animal = MapUtilities.lookForAType ( region.getContainedAnimals() , p ) ;
+			if ( animal != null )
+				try 
 				{
 					selector.selectBreakdown(animal);
-					try 
-					{
-						res = selector.getSelectedMove() ;
-					}
-					catch (WrongStateMethodCallException e) {
-						res = null ;
-					}
+					res = selector.getSelectedMove() ;
 				}
-				else
+				catch (WrongStateMethodCallException e) 
+				{
 					res = null ;
-			}
-		
-		return res ;
-	}
-	
-	private Set < PositionableElementType > generateAllowedSet ( Iterable < Animal > toRemove ) 
-	{
-		Set < PositionableElementType > res ;
-		res = new LinkedHashSet<PositionableElementType>();
-		res.add ( PositionableElementType.RAM ) ;
-		res.add ( PositionableElementType.SHEEP ) ;
-		res.add ( PositionableElementType.LAMB ) ;
-		for ( Animal a : toRemove )
-			if ( res.contains ( a.getPositionableElementType() ) )
-				res.remove ( a.getPositionableElementType() ) ;
+				}
+			else
+				res = null ;
+		}
 		return res ;
 	}
 	
@@ -376,30 +335,26 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	
 	/**
 	 * @throws MoveNotAllowedException 
-	 * @throws WrongStateMethodCallException */
+	 */
 	private MoveSelection mateManagement ( GameMap gameMap , MoveSelector selector ) throws MoveNotAllowedException 
 	{
 		MoveSelection res ;
 		Region region ;
-		
-			gameView.setInputMode ( GameMapViewInputMode.REGIONS , selector.getAvailableRegionsForMate() ) ;
-			generationNotification ( "Scegli la regione dove vuoi provare a far eseguire l'accoppiamento ( vicina a te )." );
-			index.set ( null ) ;
-			ThreadUtilities.waitForAtomicVariable ( index ) ;
-			gameView.setInputMode(null,null);
-			if ( userWantsToChangeMove == false )		
-				try 
-				{
-					region = gameMap.getRegionByUID ( index.get () ) ;
-					selector.selectMate ( region ) ;
-					res = selector.getSelectedMove();
-				}
-				catch (WrongStateMethodCallException e) 
-				{
-					res = null ;
-				}
-			else
+		generationNotification ( "Scegli la regione dove vuoi provare a far eseguire l'accoppiamento ( vicina a te )." );
+		inputFromMapProcedure ( GameMapViewInputMode.REGIONS , selector.getAvailableRegionsForMate() ) ;	
+		if ( userWantsToChangeMove == false )		
+			try 
+			{
+				region = gameMap.getRegionByUID ( index.get () ) ;
+				selector.selectMate ( region ) ;
+				res = selector.getSelectedMove();
+			}
+			catch (WrongStateMethodCallException e) 
+			{
 				res = null ;
+			}
+		else
+			res = null ;
 		return res ;
 	}
 	
@@ -414,38 +369,32 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		PositionableElementType p ;
 		Animal animal ;
 		System.out.println ( "\n\n\n\n " + selector.getAvailableRegionsForMoveSheep () + "\n\n\n\n\\n" ) ;
-		gameView.setInputMode ( GameMapViewInputMode.REGIONS , selector.getAvailableRegionsForMoveSheep () ) ;
 		generationNotification ( "Scegli la regione da dove spostare l'ovino ( tra quelle vicine al pastore che hai scelto)." ) ;
-		index.set ( null ) ;
-		ThreadUtilities.waitForAtomicVariable ( index ) ;
-		if ( userWantsToChangeMove  == false )
+		inputFromMapProcedure ( GameMapViewInputMode.REGIONS , selector.getAvailableRegionsForMoveSheep () ) ;
+		if ( userWantsToChangeMove == false )
 		{
 			region = gameMap.getRegionByUID ( index.get() ) ;
 			index.set ( null ) ;
-			set = generateAllowedSet ( region.getContainedAnimals() ) ;
+			set = MapUtilities.generateAllowedSet ( region.getContainedAnimals() ) ;
 			p = OvineChooseView.showDialog ( set ) ;
-			animal = null ;
-			for ( Animal a : region.getContainedAnimals() )
-				if ( a.getPositionableElementType() == p )
-				{
-					animal = a ;
-					break ;
-				}
+			animal = MapUtilities.lookForAType( region.getContainedAnimals() , p ) ;
 			if ( animal != null )
 				try
 				{
-					selector.selectBreakdown(animal);
+					selector.selectMoveSheep( ( Ovine ) animal , MapUtilities.getOtherAdjacentDifferentFrom ( selector.getAssociatedSheperd().getPosition() , region ) ) ;
 					res = selector.getSelectedMove () ;
 				}
 				catch (WrongStateMethodCallException e) 
 				{
 					res = null ;
+					System.err.println ( e ) ;
 				}
 			else
 				res = null ;
 		}
 		else
-				res = null ;
+			res = null ;
+		System.out.println ( "GUI_CONTROLLER - moveSheepManagement : END \n RETURN : " + res ) ;
 		return res ;
 	}
 	
@@ -456,10 +405,8 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	{
 		Road road ;
 		MoveSelection res ;
-		index.set(null) ;
-		gameView.setInputMode ( GameMapViewInputMode.ROADS , selector.getAvailableRoadsForMoveSheperd() ) ;
-		ThreadUtilities.waitForAtomicVariable ( index ) ;
-		gameView.setInputMode ( null ,null ) ;
+		generationNotification ( "Scegli la strada dove mettere il tuo pastore ( tra quelle libere )" ) ;
+		inputFromMapProcedure ( GameMapViewInputMode.ROADS , selector.getAvailableRoadsForMoveSheperd() ) ;
 		if ( userWantsToChangeMove == false )
 			try 
 			{
@@ -485,7 +432,6 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		Iterable < SellableCard > res ;
 		System.out.println ( "GUI_CONTROLLER - onChooseCardsEligibleForSelling - INIZIO" ) ;
 		System.out.println ( "GUI_CONTROLLER - onChooseCardsEligibleForSelling - playerCards = " + playerCards ) ;
-		res = new LinkedList < SellableCard > () ;
 		generationNotification ( "Scegli le carte che vuoi vendere" );
 		res = CardsMarketView.showDialog ( playerCards , true , -1 ) ;
 		System.out.println ( "GUI_CONTROLLER - onChooseCardsEligibleForSelling - FINE" ) ;
@@ -498,9 +444,9 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	@Override
 	public Iterable < SellableCard > onChoseCardToBuy ( Iterable < SellableCard > acquirables , Integer playerMoney ) 
 	{
+		Iterable < SellableCard > res ;
 		System.out.println ( "GUI_CONTROLLER - ON_CHOOSE_CARDS_TO_BUY - INIZIO" ) ;
 		System.out.println ( "GUI_CONTROLLER - ON_CHOOSE_CARDS_TO_BUY : acquirables = " + acquirables ) ;
-		Iterable < SellableCard > res ;
 		generationNotification ( "Scegli le carte che vuoi vendere" );
 		res = CardsMarketView.showDialog ( acquirables , false , playerMoney ) ;
 		System.out.println ( "GUI_CONTROLLER - ON_CHOOSE_CARDS_TO_BUY - FINE" ) ;
@@ -536,9 +482,19 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 		catch (IOException e) 
 		{
 			e.printStackTrace();
-		}
-		
+		}	
 	}
+
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
+	@Override
+	public void onGameConclusionNotification(String cause) throws IOException 
+	{
+		JOptionPane.showMessageDialog ( currentShownWindow , cause , PresentationMessages.APP_NAME , JOptionPane.ERROR_MESSAGE ) ;
+		stopApp () ;
+	}
+	
 	
 	// EVENT HANDLERS
 	
@@ -566,7 +522,9 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	@Override
 	public void onSheperdSelected ( Integer sheperdId ) 
 	{
+		System.out.println ( "GUI_CONTROLLER - ON_SHEPERD_SELECTED : INIZIO\nPARAMETERS\n\tSHPERD_ID : " + sheperdId ) ;
 		processGameViewIntResReceived ( sheperdId , GameMapViewInputMode.SHEPERDS ) ;
+		System.out.println ( "GUI_CONTROLLER - ON_SHEPERD_SELECTED : FINE" ) ;
 	}
 	
 	/**
@@ -584,29 +542,30 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	@Override
 	public void onWantToChangeMove () 
 	{
-		index.set ( -1 ) ;
+		setIndexVariable ( -1 ) ;
 		userWantsToChangeMove = true ;
 	}
 
-	/**
-	 * AS THE SUPER'S ONE. 
-	 */
-	@Override
-	public void onGameConclusionNotification(String cause) throws IOException 
-	{
-		JOptionPane.showMessageDialog ( null , cause , PresentationMessages.APP_NAME , JOptionPane.ERROR_MESSAGE ) ;
-		stopApp () ;
-	}
-	
 	/***/
 	private void processGameViewIntResReceived ( Integer value , GameMapViewInputMode rightMode ) 
 	{
 		System.out.println ( "GUI_CONTROLLER - processGameViewIntResReceived :\n value = " + value + "\nRight mode = " + rightMode + "\nActual mode : " + gameView.getInputMode() ) ;
 		if ( gameView.getInputMode () == rightMode )
 		{
-			gameView.setInputMode ( null , null ) ;
 			setIndexVariable ( value ) ;
+			userWantsToChangeMove = false ;			
 		}
+	}
+	
+	/***/
+	private void inputFromMapProcedure ( GameMapViewInputMode inputMode , Iterable < ? extends Identifiable > rightIndexes )
+	{
+		System.out.println ( "GUI_CONTROLLER - inputFromMapProcedure : INIZIO" ) ;
+		index.set ( null ) ; 
+		gameView.setInputMode ( inputMode , rightIndexes ) ;
+		ThreadUtilities.waitForAtomicVariable ( index ) ;
+		gameView.setInputMode ( null , null ) ;
+		System.out.println ( "GUI_CONTROLLER - inputFromMapProcedure : FINE" ) ;
 	}
 	
 	/**
@@ -616,10 +575,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	{
 		synchronized ( index )
 		{
-			if ( value >= 0 )
-				index.set ( value ) ;
-			else
-				index.set ( -1 ) ;
+			index.set ( value ) ;
 			index.notifyAll () ;
 		}
 	}

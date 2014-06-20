@@ -81,6 +81,11 @@ public final class PresentationMessages
 	public static final String DO_MOVE_MESSAGE = "Scegli una mossa da effettuare!" ;
 	
 	/**
+	 * The message to display when the User did a move and this move has gone well. 
+	 */
+	public static final String MOVE_SUCCEED_MESSAGE = "Mossa riuscita perfettamente!" ;
+	
+	/**
 	 * The message to display when the User try to do a not allowed move. 
 	 */
 	public static final String MOVE_NOT_ALLOWED_MESSAGE = "Sorry, ma non puoi fare questa mossa!" ;

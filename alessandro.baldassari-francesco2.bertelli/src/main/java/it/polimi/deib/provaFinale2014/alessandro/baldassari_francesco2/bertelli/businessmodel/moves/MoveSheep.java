@@ -76,15 +76,16 @@ public class MoveSheep extends GameMove
 			sheperdFirstBorderRegion = moverSheperd.getPosition ().getFirstBorderRegion () ;
 			sheperdSecondBorderRegion = moverSheperd.getPosition ().getSecondBorderRegion () ;
 			// if the Sheep is not in the Region where the Sheperd wants to move her.
-			if ( movingOvine.getPosition ().equals ( ovineDestinationRegion ) == false )
+			if ( ! movingOvine.getPosition ().equals ( ovineDestinationRegion ) )
 			{
 				// if the ovine is near the Sheperd...
-				if ( ( ovineInitialRegion.equals ( sheperdFirstBorderRegion ) || ovineInitialRegion.equals ( sheperdSecondBorderRegion ) ) && ( ovineDestinationRegion.equals ( sheperdFirstBorderRegion ) == true || ovineDestinationRegion.equals ( sheperdSecondBorderRegion ) == true ) )
+				if ( ( ovineInitialRegion.equals ( sheperdFirstBorderRegion ) || ovineInitialRegion.equals ( sheperdSecondBorderRegion ) )
+				&& ( ovineDestinationRegion.equals ( sheperdFirstBorderRegion ) || ovineDestinationRegion.equals ( sheperdSecondBorderRegion ) ) )
 				{
 					//effectively move the Ovine.
 					ovineInitialRegion.removeAnimal ( movingOvine ) ;
-					movingOvine.moveTo ( ovineDestinationRegion ) ;
 					ovineDestinationRegion.addAnimal ( movingOvine ) ;
+					movingOvine.moveTo ( ovineDestinationRegion ) ;
 				}
 				else
 					throw new MoveNotAllowedException ( "Ovine not near the Sheperd ; he can not move her." ) ;

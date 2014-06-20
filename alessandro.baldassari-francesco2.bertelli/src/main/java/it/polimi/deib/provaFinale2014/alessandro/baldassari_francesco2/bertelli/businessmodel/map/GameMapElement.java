@@ -97,7 +97,7 @@ public abstract class GameMapElement extends WithReflectionAbstractObservable < 
 	/**
 	 *  
 	 */
-	protected final void notifyAddElement ( GameMapElementType whereType , int whereId , PositionableElementType whoType , int whoId ) 
+	protected final void notifyAddElement ( GameMapElementType whereType , int whereId , PositionableElementType whoType , Integer whoId ) 
 	{
 		try 
 		{
@@ -112,7 +112,7 @@ public abstract class GameMapElement extends WithReflectionAbstractObservable < 
 	}
 	
 	/***/
-	protected final void notifyRemoveElement ( GameMapElementType whereType , int whereId , PositionableElementType whoType , int whoId ) 
+	protected final void notifyRemoveElement ( GameMapElementType whereType , int whereId , PositionableElementType whoType , Integer whoId ) 
 	{
 		try 
 		{

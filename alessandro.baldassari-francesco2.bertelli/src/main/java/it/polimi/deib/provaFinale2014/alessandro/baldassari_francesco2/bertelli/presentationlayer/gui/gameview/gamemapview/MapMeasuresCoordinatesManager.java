@@ -194,7 +194,7 @@ public class MapMeasuresCoordinatesManager
 	}
 	
 	/***/
-	public Shape getRoadBorder ( int roadUID ) 
+	public Ellipse2D getRoadBorder ( int roadUID ) 
 	{
 		return roadsCoordinates.get ( roadUID ) ;
 	}
@@ -235,7 +235,8 @@ public class MapMeasuresCoordinatesManager
 		Integer roadUID ;
 		roadUID = getRoadId ( x , y ) ;
 		selectedRoadInfo = positionableElementsManager.getElementInRoad ( roadUID ) ;
-		if ( selectedRoadInfo != null && PositionableElementType.isSheperd( selectedRoadInfo.getFirstObject() ) )
+		System.out.println ( "\n\n\nMMCM : " + selectedRoadInfo +"\n\n\n" ) ;
+		if ( selectedRoadInfo != null && PositionableElementType.isSheperd( selectedRoadInfo.getFirstObject () ) )
 			res = selectedRoadInfo.getSecondObject () ;
 		else
 			res = null ;

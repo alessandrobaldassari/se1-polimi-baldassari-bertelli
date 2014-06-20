@@ -19,8 +19,10 @@ public class PositionableElementCoordinatesManager
 	
 	// ATTRIBUTES 
 	
+	/***/
 	private Map < Integer , Map < PositionableElementType , Collection < Integer > > > regionsData ;
 	
+	/***/
 	private Map < Integer , Couple < PositionableElementType , Integer > > roadsData ;
 	
 	// METHODS

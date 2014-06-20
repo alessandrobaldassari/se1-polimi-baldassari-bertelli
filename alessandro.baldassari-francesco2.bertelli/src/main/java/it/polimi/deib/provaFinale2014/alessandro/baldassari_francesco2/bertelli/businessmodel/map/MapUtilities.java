@@ -1,7 +1,9 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map;
 
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvineType;
@@ -10,6 +12,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Ovine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Wolf;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
@@ -148,6 +152,19 @@ public final class MapUtilities
 		return res ;
 	}
 	
+	public static Region getOtherAdjacentDifferentFrom ( Road r , Region not ) 
+	{
+		Region res ;
+		if ( r != null )
+			if ( r.getFirstBorderRegion ().equals ( not ) )
+				res = r.getSecondBorderRegion();
+			else
+				res = r.getFirstBorderRegion();
+		else
+			throw new IllegalArgumentException();
+		return res ;
+	}
+	
 	/***/
 	public static Animal findAnimalByUID ( Region location , int uid )
 	{
@@ -159,6 +176,48 @@ public final class MapUtilities
 				res = a ;
 				break ;
 			}
+		return res ;
+	}
+	
+	/***/
+	public static Identifiable lookForIdentifier ( Iterable < ? extends Identifiable > src, int key ) 
+	{
+		Identifiable res ;
+		res = null ;
+		for ( Identifiable i : src )
+			if ( i.getUID() == key )
+			{
+				res = i ;
+				break ;
+			}
+		return res ;
+	}
+	
+	/***/
+	public static Animal lookForAType ( Iterable < Animal > src , PositionableElementType p )
+	{
+		Animal res ;
+		res = null ;
+		for ( Animal a : src )
+			if ( a.getPositionableElementType() == p )
+			{
+				res = a ;
+				break ;
+			}
+		return res ;
+	}
+	
+	/***/
+	public static Set < PositionableElementType > generateAllowedSet ( Iterable < Animal > toRemove ) 
+	{
+		Set < PositionableElementType > res ;
+		res = new LinkedHashSet<PositionableElementType>();
+		res.add ( PositionableElementType.RAM ) ;
+		res.add ( PositionableElementType.SHEEP ) ;
+		res.add ( PositionableElementType.LAMB ) ;
+		for ( Animal a : toRemove )
+			if ( res.contains ( a.getPositionableElementType() ) )
+				res.remove ( a.getPositionableElementType() ) ;
 		return res ;
 	}
 	

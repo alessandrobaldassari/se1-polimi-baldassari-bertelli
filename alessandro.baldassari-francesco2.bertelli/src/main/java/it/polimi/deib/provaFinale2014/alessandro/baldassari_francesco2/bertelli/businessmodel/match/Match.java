@@ -96,7 +96,7 @@ public class Match implements Serializable
 		{
 			if ( playersOrdering.keySet ().containsAll ( players ) && players.containsAll ( playersOrdering.keySet() ) )
 			{
-				players = new ArrayList < Player > ( playersOrdering.keySet() ) ;
+				players = new Vector < Player > ( playersOrdering.keySet() ) ;
 				//players.clear () ;
 				//for ( Player p : playersOrdering.keySet () )
 					//players.add ( playersOrdering.get ( p ) , p ) ;

@@ -34,7 +34,7 @@ public class CollectionsUtilities
 		int res ;
 		int i ;
 		i = 0 ;
-		while ( i < src.length && ! src [ i ].equals ( key ) )
+		while ( i < src.length && ! key.equals ( src [ i ] ) )
 			i ++ ;
 		if ( i == src.length )
 			res = - 1 ;

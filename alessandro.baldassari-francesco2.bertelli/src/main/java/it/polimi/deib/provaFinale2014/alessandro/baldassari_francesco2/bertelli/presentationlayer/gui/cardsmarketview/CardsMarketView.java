@@ -119,6 +119,10 @@ public class CardsMarketView extends ObservableFrameworkedWithGridBagLayoutDialo
 	public void setCards ( Iterable < SellableCard > availableCards , boolean allowEdit ) 
 	{
 		cardsPanel.setCards ( availableCards , allowEdit ) ;
+		if ( allowEdit )
+			view.setTitle("Scegli le carte da vendere ( e fai il prezzo ) : ");
+		else
+			view.setTitle("Scegli le carte da comprare") ;
 	}
 	
 	/**

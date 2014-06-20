@@ -16,6 +16,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveNotAllowedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WorkflowException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
@@ -62,23 +64,32 @@ public class MoveSelector implements Serializable
 	
 	/**
 	 * @param associatedSheperd the Sheperd the User has choosen for this turn.
+	 * @throws WorkflowException 
 	 * @throws WrongStateMethodCallException 
 	 */
-	public MoveSelector ( Sheperd associatedSheperd ) throws WrongStateMethodCallException 
+	public MoveSelector ( Sheperd associatedSheperd ) throws WorkflowException  
 	{
 		if ( associatedSheperd != null )
 		{
-			movesAllowedDueToRuntimeRules = new HashMap<GameMoveType, Boolean> ( GameMoveType.values().length );
-			this.associatedSheperd = associatedSheperd ;
-			availableMoney = associatedSheperd.getOwner().getMoney();
-			selection = null ;
-			selectedMoves = new GameMoveType [] { null , null , null } ;
-			lastSelectedIndex = -1 ;
-			availableRoadsForMoveSheperd = null ;
-			availableRegionForMoveSheep = null ;
-			availableRegionsForBuyCard = null ;
-			availableRegionsForMate = null ;
-			availableRegionsForBreakdown = null ;
+			try 
+			{
+				movesAllowedDueToRuntimeRules = new HashMap<GameMoveType, Boolean> ( GameMoveType.values().length );
+				this.associatedSheperd = associatedSheperd ;
+				availableMoney = associatedSheperd.getOwner().getMoney();
+				selection = null ;
+				selectedMoves = new GameMoveType [] { null , null , null } ;
+				lastSelectedIndex = -1 ;
+				availableRoadsForMoveSheperd = null ;
+				availableRegionForMoveSheep = null ;
+				availableRegionsForBuyCard = null ;
+				availableRegionsForMate = null ;
+				availableRegionsForBreakdown = null ;
+			} 
+			catch (WrongStateMethodCallException e)
+			{
+				throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
+			}
+			
 		}
 		else
 			throw new IllegalArgumentException ( "MOVE_SELECTOR - <INIT> :" ) ;
@@ -104,6 +115,12 @@ public class MoveSelector implements Serializable
 	public int getAvailableMoney () 
 	{
 		return availableMoney ;
+	}
+	
+	/***/
+	public Sheperd getAssociatedSheperd () 
+	{
+		return associatedSheperd ;
 	}
 	
 	/***/
@@ -189,14 +206,25 @@ public class MoveSelector implements Serializable
 		boolean extCond ;
 		boolean shepCond ;
 		boolean twoCond ;
+		boolean twoConsCond ;
 		if ( g != null )
 		{
 			extCond = movesAllowedDueToRuntimeRules.get ( g ) ;
-			shepCond = ( lastSelectedIndex == 1 && CollectionsUtilities.arrayLinearSearchPK ( selectedMoves , GameMoveType.MOVE_SHEPERD )  == -1 ) ; 
-			twoCond = ( ( selectedMoves [ 0 ] == g && selectedMoves [ 1 ] == g ) 
+			if ( lastSelectedIndex > -1 )
+			{
+				shepCond = ( lastSelectedIndex == 1 && CollectionsUtilities.arrayLinearSearchPK ( selectedMoves , GameMoveType.MOVE_SHEPERD )  == -1 ) ; 
+				twoCond = ( ( selectedMoves [ 0 ] == g && selectedMoves [ 1 ] == g ) 
 					|| ( selectedMoves [ 1 ] == g && selectedMoves [ 2 ] == g ) ||
 					( selectedMoves [ 0 ] == g && selectedMoves [ 2 ] == g && selectedMoves [ 1 ] != GameMoveType.MOVE_SHEPERD ) )  ;
-			res = extCond && ! ( shepCond || twoCond ) ;
+				twoConsCond = selectedMoves [ lastSelectedIndex ] == g ;
+			}
+			else
+			{
+				shepCond = false ;
+				twoCond = false ;
+				twoConsCond = false ;
+			}
+			res = extCond && ! ( shepCond || twoCond || twoConsCond ) ;
 		}
 		else
 			throw new IllegalArgumentException() ;
@@ -261,8 +289,7 @@ public class MoveSelector implements Serializable
 		if (  movingOvine != null && ovineDestinationRegion != null )
 		{
 			if ( isMoveAllowed ( GameMoveType.MOVE_SHEEP ) && 
-				 availableRegionForMoveSheep.contains ( ovineDestinationRegion ) 
-				 && CollectionsUtilities.contains ( ovineDestinationRegion.getContainedAnimals() , movingOvine ) )
+				 availableRegionForMoveSheep.contains ( ovineDestinationRegion ) )
 			{
 				params = new ArrayList < Serializable > ( 2 ) ;
 				params.add ( movingOvine ) ;

@@ -221,12 +221,7 @@ public abstract class Client implements Runnable , Terminable
 						write ( m ) ;
 					break ;
 					case DO_MOVE_REQUESTING_REQUEST :
-						gf = ( MoveSelector ) inParams.get ( 0 ) ;
-						gm = ( GameMap ) inParams.get ( 1 ) ;
-						move = dataPicker.onDoMove ( gf , gm ) ;
-						outParams.add ( move ) ;
-						m = Message.newInstance ( GameProtocolMessage.DO_MOVE_REQUESTING_RESPONSE , outParams ) ;
-						write ( m ) ;
+						write ( doMove ( inParams ) ) ;
 					break ;
 					case CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST:
 						cards = ( Iterable < SellableCard > ) inParams.get ( 0 ) ;
@@ -292,6 +287,19 @@ public abstract class Client implements Runnable , Terminable
 		n = dataPicker.onSheperdColorRequest ( colors ) ;
 		System.out.println ( n ) ;
 		m = Message.newInstance ( GameProtocolMessage.SHEPERD_COLOR_REQUESTING_RESPONSE , Collections.<Serializable>singleton ( n ) ) ;
+		return m ;
+	}
+	
+	private Message doMove ( List < Serializable > inParams ) throws IOException 
+	{
+		MoveSelection move ;
+		MoveSelector gf ;
+		GameMap gm ;
+		Message m ;
+		gf = ( MoveSelector ) inParams.get ( 0 ) ;
+		gm = ( GameMap ) inParams.get ( 1 ) ;
+		move = dataPicker.onDoMove ( gf , gm ) ;
+		m = Message.newInstance ( GameProtocolMessage.DO_MOVE_REQUESTING_RESPONSE , Collections.<Serializable>singleton ( move ) ) ;
 		return m ;
 	}
 	

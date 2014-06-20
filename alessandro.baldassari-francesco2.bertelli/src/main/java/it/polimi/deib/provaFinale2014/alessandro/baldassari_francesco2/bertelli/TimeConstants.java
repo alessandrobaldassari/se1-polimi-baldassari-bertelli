@@ -16,7 +16,7 @@ public class TimeConstants
 	public static final long MATCH_CONTROLLER_TIMER_TIME = 45 * Utilities.MILLISECONDS_PER_SECOND ;
 	
 	/***/
-	public static final long CONNECTION_LOOSING_SERVER_WAITING_TIME = 60 * Utilities.MILLISECONDS_PER_SECOND ;
+	public static final long CONNECTION_LOOSING_SERVER_WAITING_TIME = 300 * Utilities.MILLISECONDS_PER_SECOND ;
 
 	/***/
 	public static final long CONNECTION_LOOSING_SERVER_SUSPENSION_TIME = 60 * Utilities.MILLISECONDS_PER_SECOND ;

@@ -13,6 +13,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatch;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WorkflowException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
@@ -38,7 +39,7 @@ public class MoveSelectorTest
 		{
 			new MoveSelector ( null ) ;
 		}
-		catch (WrongStateMethodCallException e) 
+		catch (WorkflowException e) 
 		{
 			fail () ;
 		}
@@ -65,7 +66,7 @@ public class MoveSelectorTest
 			assertTrue ( s != null ) ;
 
 		} 
-		catch (WrongStateMethodCallException e) 
+		catch (WorkflowException e) 
 		{
 			fail () ;
 		}
@@ -118,7 +119,7 @@ public class MoveSelectorTest
 			assertTrue ( CollectionsUtilities.compareIterable ( s.getAvailableRoadsForMoveSheperd() , moveSh ) );
 			assertTrue ( s.getAvailableRegionsForBuyCard().equals(m) );
 		}
-		catch (WrongStateMethodCallException e) 
+		catch (WorkflowException e) 
 		{
 			fail () ;
 		} 

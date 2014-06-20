@@ -100,8 +100,9 @@ public class MoveSheperd extends GameMove
 					match.getBank ().receiveMoney ( GameConstants.MONEY_TO_PAY_IF_ROADS_NON_ADJACENT ) ;
 				}
 				// effectively move the sheperd
-				sheperdToMove.moveTo ( roadWhereGo ) ;
+				whereTheSheperdIsNow.setElementContained(null); 
 				roadWhereGo.setElementContained ( sheperdToMove ) ;
+				sheperdToMove.moveTo ( roadWhereGo ) ;
 				// place a fence where the Sheperd was before.
 				whereTheSheperdIsNow.setElementContained ( match.getBank ().getAFence ( FenceType.NON_FINAL ) ) ;
 			} 

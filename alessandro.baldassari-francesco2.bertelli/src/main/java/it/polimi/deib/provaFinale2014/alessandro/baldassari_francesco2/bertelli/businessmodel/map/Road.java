@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Vector;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElement;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
 /**
@@ -149,11 +150,11 @@ public class Road extends GameMapElement
 	 */
 	public void setElementContained ( PositionableElement < Road > elementContained ) 
 	{
-		this.elementContained = elementContained ;
 		if ( elementContained != null )
 			notifyAddElement ( getGameMapElementType () , getUID () , elementContained.getPositionableElementType () , elementContained.getUID () ) ;
 		else
-			notifyRemoveElement ( getGameMapElementType () , getUID () , elementContained.getPositionableElementType () , elementContained.getUID ()  ) ;
+			notifyRemoveElement ( getGameMapElementType () , getUID () , this.elementContained.getPositionableElementType() , this.getElementContained().getUID() ) ;
+		this.elementContained = elementContained ;
 	}
 	
 	/**

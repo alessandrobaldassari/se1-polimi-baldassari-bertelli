@@ -24,6 +24,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WorkflowException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
@@ -92,14 +93,9 @@ class TurnationPhaseManager implements TurnNumberClock
 	 */ 
 	public void turnationPhase () throws WorkflowException 
 	{
-		MoveExecutor moveFactory ;
-		MoveSelector selector ;
-		MoveSelection selection ;
 		BlackSheep blackSheep ;
-		Sheperd choosenSheperd ;
 		Wolf wolf ;
 		MarketPhaseManager marketManager ;
-		byte moveIndex ;
 		boolean gamePlaying ;
 		try 
 		{
@@ -110,81 +106,19 @@ class TurnationPhaseManager implements TurnNumberClock
 			while ( gamePlaying )
 			{
 				turnNumber ++ ;
-				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - NUMERO TURNO : " + turnNumber ) ;
 				try 
 				{
-					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PECORA NERA PROVA A SCAPPARE " ) ;
 					blackSheep.escape () ;
 					playersGenericNotification ( "La pecora nera scappa !!!" );
-					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PECORA NERA SI MUOVE " ) ;
 				}
 				catch ( CharacterDoesntMoveException e1 ) 
 				{
-					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PECORA NERA NON SI MUOVE " ) ;
+					playersGenericNotification ( "La pecora nera non si muove !!!" );					
 				}
+				allPlayersTurn () ;
 				// if all the Users left the game, the Match will finish.
 				if ( match.getNumberOfPlayers () == 0 )
 					throw new WorkflowException ( "Too few players to continue !" ) ;
-				for ( Player currentPlayer : match.getPlayers() )
-				{		
-					if ( currentPlayer.isSuspended () == false )
-					{
-						System.out.println ( "GAME CONTROLLER - TURNATION PHASE - TURNO DEL PLAYER : " + currentPlayer.getName () ) ;
-						// if the last iteration brought us to the final phase, the turnation phase has to finish
-						if ( match.isInFinalPhase () )
-							break ;
-						try
-						{
-							// break in two.
-							choosenSheperd = chooseSheperd ( currentPlayer ) ;
-							moveFactory = new MoveExecutor ( choosenSheperd , this , lambEvolver ) ;
-							selector = new MoveSelector ( moveFactory.getAssociatedSheperd () ) ;
-							for ( moveIndex = 0 ; moveIndex < GameConstants.NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ )
-							{	
-								fillMoveSelectorWithAvailableParameters ( selector , choosenSheperd ) ;
-								selector.setMovesAllowedDueToRuntimeRules();
-								playersGenericNotification ( "Carissimo, per questo turno è la tua mossa # " + moveIndex ) ;
-								try 
-								{
-									System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - CHIEDENDO DI FARE UNA MOSSA " ) ;				
-									selection = currentPlayer.doMove ( selector , match.getGameMap () ) ;
-									if ( selection != null )
-									{
-										System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - MOSSA SCELTA " + selection.getSelectedType().toString() ) ;									
-										// effectively execute the move.
-										execMove ( moveFactory , selection, match , selector ) ;
-										System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " HA ESEGUITO LA MOSSA." ) ;									
-									}
-									else
-									{
-										// if a user does not want to do any move, it means that he does not want to play anymore; remove him from the match...
-										match.removePlayer ( currentPlayer ) ;
-										playersGenericNotification ( "Ehy boys, " + currentPlayer.getName() + " ci ha lasciati..." + Utilities.CARRIAGE_RETURN + "Peggio per lui !" ) ;
-										break ;
-									}
-								} 
-								catch ( MoveNotAllowedException e ) 
-								{
-									// the user tried to do an invalid move; give him another chance
-									System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - ERRORE DURANTE L'ESECUZIONE DELLA MOSSA." ) ;									
-									currentPlayer.genericNotification ( "Mossa fallita!\n" + e.getMessage() ) ;
-								} 
-							}
-						}
-						catch ( TimeoutException t ) 
-						{
-							playersGenericNotification ( "The game is going to continue without " + currentPlayer.getName() + Utilities.CARRIAGE_RETURN + "May be he will come back later..." );
-						}
-					}
-					if ( match.isInFinalPhase () == false && match.getBank().hasAFenceOfThisType ( FenceType.NON_FINAL ) == false )
-						try 
-						{
-							System.out.println ( "GAME CONTROLLER - TURNATION PHASE - ENTRO NELLA FASE FINALE " ) ;															
-							playersGenericNotification ( "Final Phase !!!" );
-							match.enterFinalPhase () ;
-						} 
-						catch ( AlreadyInFinalPhaseException e ) {}
-				}
 				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - PRIMA DELLA FASE DI MARKET." ) ;															
 				marketManager = new MarketPhaseManager ( match.getPlayers() ) ;
 				if ( match.getNumberOfPlayers () == 0 )
@@ -193,14 +127,12 @@ class TurnationPhaseManager implements TurnNumberClock
 				System.out.println ( "MATCH_CONTROLLER - TURNATION PHASE - DOPO LA FASE DI MARKET." ) ;															
 				try 
 				{
-					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - IL LUPO PROVA A SCAPPARE " ) ;															
 					wolf.escape () ;
 					playersGenericNotification ( "Il lupo scappa scappa !!!" );
-					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - IL LUPO PROVA E' SCAPPATO " ) ;															
 				}
 				catch (CharacterDoesntMoveException e) 
 				{
-					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - IL LUPO NON E' RIUSCITO A SCAPPARE " ) ;															
+					playersGenericNotification ( "Il lupo non scappa !!!" );
 				}
 				if ( match.isInFinalPhase () )
 					gamePlaying = false ;
@@ -209,8 +141,78 @@ class TurnationPhaseManager implements TurnNumberClock
 		catch ( WrongStateMethodCallException e2 ) 
 		{
 			// system error, this should never happen - stop everything.
-			System.out.println ( "MATCH_CONTROLLER - TURNATION PHASE : WOLF OR BLACK_SHEEP NOT FOUND AT THE BEGINNING." ) ;
-			throw new WorkflowException () ;
+			System.err.println ( "MATCH_CONTROLLER - TURNATION PHASE : WOLF OR BLACK_SHEEP NOT FOUND AT THE BEGINNING." ) ;
+			throw new WorkflowException ( e2 , Utilities.EMPTY_STRING ) ;
+		}
+	}
+	
+	/***/
+	private void allPlayersTurn () throws WorkflowException
+	{
+		MoveExecutor moveFactory ;
+		MoveSelector selector ;
+		MoveSelection selection ;
+		Sheperd choosenSheperd ;
+		byte moveIndex ;
+		for ( Player currentPlayer : match.getPlayers() )
+		{		
+			if ( currentPlayer.isSuspended () == false )
+			{
+				System.out.println ( "GAME CONTROLLER - TURNATION PHASE - TURNO DEL PLAYER : " + currentPlayer.getName () ) ;
+				// if the last iteration brought us to the final phase, the turnation phase has to finish
+				if ( match.isInFinalPhase () )
+					break ;
+				try
+				{
+					// break in two.
+					choosenSheperd = chooseSheperd ( currentPlayer ) ;
+					moveFactory = new MoveExecutor ( choosenSheperd , this , lambEvolver ) ;
+					selector = new MoveSelector ( moveFactory.getAssociatedSheperd () ) ;
+					for ( moveIndex = 0 ; moveIndex < GameConstants.NUMBER_OF_MOVES_PER_USER_PER_TURN ; moveIndex ++ )
+						try 
+						{
+							fillMoveSelectorWithAvailableParameters ( selector , choosenSheperd ) ;
+							selector.setMovesAllowedDueToRuntimeRules();
+							playersGenericNotification ( "Carissimo, per questo turno è la tua mossa # " + moveIndex ) ;
+							selection = currentPlayer.doMove ( selector , match.getGameMap () ) ;
+							if ( selection != null )
+							{
+								// effectively execute the move.
+								execMove ( moveFactory , selection, match , selector ) ;
+								currentPlayer.genericNotification ( PresentationMessages.MOVE_SUCCEED_MESSAGE ) ;
+							}
+							else
+							{
+								// if a user does not want to do any move, it means that he does not want to play anymore; remove him from the match...
+								match.removePlayer ( currentPlayer ) ;
+								playersGenericNotification ( "Ehy boys, " + currentPlayer.getName() + " ci ha lasciati..." + Utilities.CARRIAGE_RETURN + "Peggio per lui !" ) ;
+								break ;
+							}
+						} 
+						catch ( MoveNotAllowedException e ) 
+						{
+							// the user tried to do an invalid move; give him another chance
+							System.err.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - ERRORE DURANTE L'ESECUZIONE DELLA MOSSA." ) ;									
+							currentPlayer.genericNotification ( "Mossa fallita!\n" + e.getMessage() ) ;
+						}
+						catch (WrongStateMethodCallException e) 
+						{
+							e.printStackTrace();
+						} 
+				}
+				catch ( TimeoutException t ) 
+				{
+					playersGenericNotification ( "The game is going to continue without " + currentPlayer.getName() + Utilities.CARRIAGE_RETURN + "May be he will come back later..." );
+				}
+			}
+			if ( match.isInFinalPhase () == false && match.getBank().hasAFenceOfThisType ( FenceType.NON_FINAL ) == false )
+				try 
+				{
+					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - ENTRO NELLA FASE FINALE " ) ;															
+					playersGenericNotification ( "Final Phase !!!" );
+					match.enterFinalPhase () ;
+				} 
+				catch ( AlreadyInFinalPhaseException e ) {}
 		}
 	}
 	
@@ -246,7 +248,8 @@ class TurnationPhaseManager implements TurnNumberClock
 	}
 	
 	/**
-	 * @throws WorkflowException */
+	 * @throws WorkflowException 
+	 */
 	private void fillMoveSelectorWithAvailableParameters ( MoveSelector moveSelector , Sheperd sh ) throws WorkflowException 
 	{
 		try 
@@ -360,9 +363,7 @@ class TurnationPhaseManager implements TurnNumberClock
 	private Collection < Region > findAvailableRegionsForBreakdown ( Sheperd sh ) 
 	{
 		Collection < Region > res ;
-		Iterable < Animal > i ;
 		Region r ;
-		Animal a ;
 		int c ;
 		res = new ArrayList < Region > ( 2 ) ;
 		r = sh.getPosition().getFirstBorderRegion();
@@ -415,17 +416,18 @@ class TurnationPhaseManager implements TurnNumberClock
 			break ;
 			case MOVE_SHEEP :
 				mapUID = ( ( Region ) params.get ( 1 ) ).getUID () ;
-				exec.executeMoveSheep ( match , ( Ovine ) params.get(0) , match.getGameMap ().getRegionByUID ( mapUID ) ); 
+				exec.executeMoveSheep ( match , ( Ovine ) MapUtilities.findAnimalByUID ( ( ( Ovine ) params.get(0) ).getPosition() , ( ( Ovine ) params.get(0) ).getUID() ) , match.getGameMap ().getRegionByUID ( mapUID ) ); 
 				sel.updateSelection(GameMoveType.MOVE_SHEEP);
 			break ;
 			case MOVE_SHEPERD :
-				mapUID = ( (Road) params.get (0 ) ).getUID () ;
+				mapUID = ( ( Road ) params.get (0 ) ).getUID () ;
 				exec.executeMoveSheperd ( match, match.getGameMap ().getRoadByUID ( mapUID ) ); 
 				sel.updateSelection(GameMoveType.MOVE_SHEPERD);
 			break ;
 			default :
 				throw new MoveNotAllowedException ( "Scusa, ma questa mossa proprio non l'avevamo mai sentita..." ) ;
 		}
+		System.out.println ( "TURNATION_PHASE_MANAGER - execMove : END" ) ;
 	}
 	
 	/***/

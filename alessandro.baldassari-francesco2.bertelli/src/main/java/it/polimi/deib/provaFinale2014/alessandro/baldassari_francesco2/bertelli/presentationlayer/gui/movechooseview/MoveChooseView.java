@@ -71,7 +71,7 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 		setAlwaysOnTop ( true ) ;	
 		view.setShowKo(false); 
 		setUndecorated(true);
- 		setSize ( GraphicsUtilities.getThreeFourthVgaResolution() ) ;
+ 		setSize ( GraphicsUtilities.getVGAResolution() ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
 		view.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCoverImage(true) ); 
 		view.setTitle ( PresentationMessages.DO_MOVE_MESSAGE ) ;

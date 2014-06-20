@@ -44,4 +44,10 @@ public class GUIGameMapNotificationMessage extends GUINotificationMessage
 		return whoId ;
 	}
 	
+	@Override
+	public String toString () 
+	{
+		return "GUIGameMapNotificationMessage\nAction : " + getActionAssociated() + "\nWhere : " + whereType + " [ " + whereId + " ]\nWho : " + whoType + " [ " + whoId + " ] " ;
+	}
+	
 }

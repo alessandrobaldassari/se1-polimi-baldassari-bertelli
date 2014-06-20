@@ -216,7 +216,7 @@ public class NetworkCommunicantPlayer extends Player
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public MoveSelection doMove ( final MoveSelector moveFactory , final GameMap gameMap ) throws TimeoutException 
+	public MoveSelection doMove ( final MoveSelector moveSelector , final GameMap gameMap ) throws TimeoutException 
 	{
 		Callable < MoveSelection > commandToExecute ;
 		MoveSelection res  ;
@@ -226,7 +226,7 @@ public class NetworkCommunicantPlayer extends Player
 			public MoveSelection call () throws IOException 
 			{
 				MoveSelection res ;
-				res = clientHandler.doMove ( moveFactory , gameMap ) ;
+				res = clientHandler.doMove ( moveSelector , gameMap ) ;
 				setMethodCompleted () ;
 				return res ;
 			}  
