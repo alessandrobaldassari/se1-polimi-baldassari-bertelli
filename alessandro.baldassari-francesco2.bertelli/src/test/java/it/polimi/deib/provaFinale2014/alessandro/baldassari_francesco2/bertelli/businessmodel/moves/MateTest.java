@@ -1,17 +1,18 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.List;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank.Bank.NoMoreCardOfThisTypeException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.BlackSheepAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.WolfAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.LambEvolver;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.MapUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.TurnNumberClock;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatch;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WorkflowException;
@@ -24,7 +25,7 @@ import org.junit.Test;
 public class MateTest 
 {
 
-private DummyMatch d ;
+	private DummyMatch d ;
 	
 	@Before
 	public void setUp ()
@@ -32,288 +33,158 @@ private DummyMatch d ;
 		d = new DummyMatch () ;
 	}
 	
-	/**
-	 * Test the Exception launched by the constructor 
-	 */
-	@Test 
-	public void constructor1 () 
+	@Test ( expected = MoveNotAllowedException.class )
+	public void constructor1 () throws WriteOncePropertyAlreadSetException, NoMoreCardOfThisTypeException, WolfAlreadyGeneratedException, BlackSheepAlreadyGeneratedException, MoveNotAllowedException 
 	{
 		Mate m = null ;
-		try 
-		{
-			d.initializePlayersAndSheperds();
-			d.initializeAnimals();
-		}
-		catch (WriteOncePropertyAlreadSetException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (NoMoreCardOfThisTypeException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch (WolfAlreadyGeneratedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (BlackSheepAlreadyGeneratedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
+		d.initializePlayersAndSheperds();
+		d.initializeAnimals();
 		d.sheperds.get(0).moveTo ( d.match.getGameMap().getRoadByUID ( 2 ) );
-		try
-		{
-			m = new Mate ( new DummyTurnNumberClock() , new DummyLambEvolver () , d.sheperds.get(0) , d.match.getGameMap ().getRegionByUID ( 17 ) ) ;
-			fail () ;
-		}
-		catch (MoveNotAllowedException e) 
-		{
-			assertTrue ( m == null ) ;
-		}
+		m = new Mate ( new DummyTurnNumberClock() , new DummyLambEvolver () , d.sheperds.get(0) , d.match.getGameMap ().getRegionByUID ( 17 ) ) ;
 	}
 	
 	/**
 	 * Constructor has now to function well. 
+	 * @throws NoMoreCardOfThisTypeException 
+	 * @throws WriteOncePropertyAlreadSetException 
+	 * @throws BlackSheepAlreadyGeneratedException 
+	 * @throws WolfAlreadyGeneratedException 
+	 * @throws MoveNotAllowedException 
 	 */
 	@Test
-	public void constructor2 () 
+	public void constructor2 () throws WriteOncePropertyAlreadSetException, NoMoreCardOfThisTypeException, WolfAlreadyGeneratedException, BlackSheepAlreadyGeneratedException, MoveNotAllowedException 
 	{
 		Mate m = null ;
-		try 
-		{
-			d.initializePlayersAndSheperds();
-			d.initializeAnimals();
-		}
-		catch (WriteOncePropertyAlreadSetException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (NoMoreCardOfThisTypeException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch (WolfAlreadyGeneratedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch (BlackSheepAlreadyGeneratedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
+		d.initializePlayersAndSheperds();
+		d.initializeAnimals();
 		d.sheperds.get(0).moveTo ( d.match.getGameMap().getRoadByUID ( 2 ) );
 		d.match.getGameMap().getRoadByUID ( 2 ).setElementContained ( d.sheperds.get(0) ) ;
 		d.match.getGameMap().getRegionByUID(1).addAnimal ( d.animals.get(3)); 
 		d.match.getGameMap().getRegionByUID(1).addAnimal ( d.animals.get(8));  
-		try
-		{
-			m = new Mate ( new DummyTurnNumberClock() , new DummyLambEvolver () , d.sheperds.get(0) , d.match.getGameMap ().getRegionByUID ( 1 ) ) ;
-			assertTrue ( m != null ) ;
-		}
-		catch (MoveNotAllowedException e) 
-		{
-			fail () ;
-		}
+		m = new Mate ( new DummyTurnNumberClock() , new DummyLambEvolver () , d.sheperds.get(0) , d.match.getGameMap ().getRegionByUID ( 1 ) ) ;
+		assertTrue ( m != null ) ;
 	}
 	
 	/**
 	 * Test the precondition match != null 
 	 */
-	@Test 
-	public void execute1 () 
+	@Test ( expected = IllegalArgumentException.class )
+	public void execute1 () throws WriteOncePropertyAlreadSetException, NoMoreCardOfThisTypeException, WolfAlreadyGeneratedException, BlackSheepAlreadyGeneratedException, MoveNotAllowedException, WorkflowException 
 	{
 		Mate m = null ;
-		try 
-		{
-			d.initializePlayersAndSheperds();
-			d.initializeAnimals();
-		}
-		catch (WriteOncePropertyAlreadSetException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (NoMoreCardOfThisTypeException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch (WolfAlreadyGeneratedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch (BlackSheepAlreadyGeneratedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
+		d.initializePlayersAndSheperds();
+		d.initializeAnimals();
 		d.sheperds.get(0).moveTo ( d.match.getGameMap().getRoadByUID ( 2 ) );
 		d.match.getGameMap().getRoadByUID ( 2 ).setElementContained ( d.sheperds.get(0) ) ;
 		d.match.getGameMap().getRegionByUID(2).addAnimal ( d.animals.get(3)); 
 		d.match.getGameMap().getRegionByUID(2).addAnimal ( d.animals.get(8));  
-		
-		try
-		{
-			m = new Mate ( new DummyTurnNumberClock() , new DummyLambEvolver () , d.sheperds.get(0) , d.match.getGameMap ().getRegionByUID ( 2 ) ) ;
-			m.execute(null);
-		}
-		catch (IllegalArgumentException e) 
-		{
-			assertTrue ( true ) ;
-		} 
-		catch (MoveNotAllowedException e) 
-		{
-			fail () ;
-		} catch (WorkflowException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		m = new Mate ( new DummyTurnNumberClock() , new DummyLambEvolver () , d.sheperds.get(0) , d.match.getGameMap ().getRegionByUID ( 2 ) ) ;
+		m.execute(null);
+	
 	}
 	
 	
 	/*
-	 * Test the exception postcondition 1 - no ram
-	
-	@Test 
-	public void execute2 () 
+	 * Test the exception postcondition 1 sheperd not near the mate region
+	*/
+	@Test ( expected = MoveNotAllowedException.class )
+	public void execute2 () throws WorkflowException, WriteOncePropertyAlreadSetException, NoMoreCardOfThisTypeException, WolfAlreadyGeneratedException, BlackSheepAlreadyGeneratedException, MoveNotAllowedException 
 	{
+		d = new DummyMatch();
 		Mate m = null ;
-		try 
-		{
-			d.initializePlayersAndSheperds();
-			d.initializeAnimals();
-		}
-		catch (WriteOncePropertyAlreadSetException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (NoMoreCardOfThisTypeException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch (WolfAlreadyGeneratedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (BlackSheepAlreadyGeneratedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		d.sheperds.get(0).moveTo ( d.match.getGameMap().getRoadByUID ( 2 ) );
-		d.match.getGameMap().getRegionByUID(2).addAnimal ( d.animals.get(0) ) ;
-		d.animals.get(0).moveTo ( d.match.getGameMap().getRegionByUID(2) ) ;
-		try
-		{
-			m = new Mate ( new DummyTurnNumberClock() , new DummyLambEvolver () , d.sheperds.get(0) , d.match.getGameMap ().getRegionByUID ( 2 ) ) ;
-			m.execute ( d.match );
-			fail () ;
-		}
-		catch (MoveNotAllowedException e) 
-		{
-			assertTrue ( true ) ;
-		}
+		d.initializePlayersAndSheperds();
+		d.initializeAnimals();
+		d.sheperds.get(0).moveTo ( d.match.getGameMap().getRoadByUID(34) ); 
+		d.match.getGameMap().getRoadByUID(34).setElementContained(d.sheperds.get(0)); 
+		m = new Mate ( new DummyTurnNumberClock() , new DummyLambEvolver () , d.sheperds.get(0) , d.match.getGameMap ().getRegionByUID ( 2 ) ) ;
 	}
 	
-	/*
+	
 	/**
-	 * Test the precondition match != null - yer ram, no sheep.
-	
+	 * Test the precondition No ram, no sheep.
+	*/
 	@Test 
-	public void execute3 () 
+	public void execute3 () throws WorkflowException, WriteOncePropertyAlreadSetException, NoMoreCardOfThisTypeException, WolfAlreadyGeneratedException, BlackSheepAlreadyGeneratedException, MoveNotAllowedException 
 	{
 		Mate m = null ;
-		try 
-		{
-			d.initializePlayersAndSheperds();
-			d.initializeAnimals();
-		}
-		catch (WriteOncePropertyAlreadSetException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (NoMoreCardOfThisTypeException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch (WolfAlreadyGeneratedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (BlackSheepAlreadyGeneratedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
+		d.initializePlayersAndSheperds();
+		d.initializeAnimals();
 		d.sheperds.get(0).moveTo ( d.match.getGameMap().getRoadByUID ( 2 ) );
-		d.match.getGameMap().getRegionByUID ( 2 ).addAnimal ( d.animals.get(2) ) ;
+		d.match.getGameMap().getRoadByUID(2);
 		
-		d.animals.get(2).moveTo ( d.match.getGameMap().getRegionByUID(2) ) ;
-		d.match.getGameMap ().getRegionByUID ( 2 ).addAnimal ( d.animals.get(2) ) ;
-		
-		d.animals.get(0).moveTo ( d.match.getGameMap().getRegionByUID ( 2 ) );
-		d.match.getGameMap().getRegionByUID ( 2 ).addAnimal ( d.animals.get(0) );
-		
+		d.match.getGameMap().getRegionByUID ( 2 ).addAnimal ( d.animals.get(0) ) ;
+		d.animals.get(0).moveTo ( d.match.getGameMap().getRegionByUID(2) );
+		// no ram
 		try
 		{
 			m = new Mate ( new DummyTurnNumberClock() , new DummyLambEvolver () , d.sheperds.get(0) , d.match.getGameMap ().getRegionByUID ( 2 ) ) ;
-			m.execute(d.match);
-			fail () ;
 		}
-		catch (MoveNotAllowedException e) 
+		catch ( MoveNotAllowedException e )
 		{
-			assertTrue ( true ) ;
+			assertTrue ( m == null ) ;
 		}
+		// no sheep
+		d.match.getGameMap().getRegionByUID(2).addAnimal ( d.animals.get(0) );
+		d.animals.get(0).moveTo ( d.match.getGameMap().getRegionByUID(2) ) ; 
+		try
+		{
+			m = new Mate ( new DummyTurnNumberClock() , new DummyLambEvolver () , d.sheperds.get(0) , d.match.getGameMap ().getRegionByUID ( 2 ) ) ;
+		}
+		catch ( MoveNotAllowedException e )
+		{
+			assertTrue ( m == null ) ;
+		}
+		// ok now.
+		d.match.getGameMap().getRegionByUID(2).addAnimal ( d.animals.get(7) );
+		d.animals.get(7).moveTo ( d.match.getGameMap().getRegionByUID(2) ) ; 
+		m = new Mate ( new DummyTurnNumberClock() , new DummyLambEvolver () , d.sheperds.get(0) , d.match.getGameMap ().getRegionByUID ( 2 ) ) ;		
+		assertTrue ( m != null ) ;
 	}
-	
 	/**
 	 * Test the exception postcondition 3 and the right flow
-	 
+	 * @throws NoMoreCardOfThisTypeException 
+	 * @throws WriteOncePropertyAlreadSetException 
+	 * @throws BlackSheepAlreadyGeneratedException 
+	 * @throws WolfAlreadyGeneratedException 
+	 * @throws MoveNotAllowedException 
+	 * @throws WorkflowException 
+	 */
 	@Test
-	public void execute4 () 
+	public void execute4 () throws WriteOncePropertyAlreadSetException, NoMoreCardOfThisTypeException, WolfAlreadyGeneratedException, BlackSheepAlreadyGeneratedException, MoveNotAllowedException, WorkflowException 
 	{
 		Mate m = null ;
-		try 
-		{
-			d.initializePlayersAndSheperds();
-			d.initializeAnimals();
-		}
-		catch (WriteOncePropertyAlreadSetException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (NoMoreCardOfThisTypeException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch (WolfAlreadyGeneratedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (BlackSheepAlreadyGeneratedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
+		d.initializePlayersAndSheperds();
+		d.initializeAnimals();
 		d.sheperds.get(0).moveTo ( d.match.getGameMap().getRoadByUID ( 2 ) );
-		d.match.getGameMap().getRegionByUID ( 2 ).addAnimal ( d.animals.get(2) ) ;
+		d.match.getGameMap().getRoadByUID(2);
+		d.match.getGameMap().getRegionByUID ( 2 ).addAnimal ( d.animals.get(0) ) ;
+		d.animals.get(0).moveTo ( d.match.getGameMap().getRegionByUID(2) );
+		d.match.getGameMap().getRegionByUID(2).addAnimal ( d.animals.get(0) );
+		d.animals.get(0).moveTo ( d.match.getGameMap().getRegionByUID(2) ) ; 		
+		d.match.getGameMap().getRegionByUID(2).addAnimal ( d.animals.get(7) );
+		d.animals.get(7).moveTo ( d.match.getGameMap().getRegionByUID(2) ) ; 
+		m = new Mate ( new DummyTurnNumberClock() , new DummyLambEvolver () , d.sheperds.get(0) , d.match.getGameMap ().getRegionByUID ( 2 ) ) ;		
+		m.execute ( d.match ) ;
+	}
+	
+	@Test
+	public void canMateDueToSexReasons () throws WolfAlreadyGeneratedException, BlackSheepAlreadyGeneratedException, WriteOncePropertyAlreadSetException, NoMoreCardOfThisTypeException 
+	{
+		Mate m = null ;
+		d.initializePlayersAndSheperds();
+		d.initializeAnimals();
+		d.sheperds.get(0).moveTo ( d.match.getGameMap().getRoadByUID ( 2 ) );
+		d.match.getGameMap().getRoadByUID(2);
+		d.match.getGameMap().getRegionByUID ( 2 ).addAnimal ( d.animals.get(0) ) ;
+		d.animals.get(0).moveTo ( d.match.getGameMap().getRegionByUID(2) );
+		assertFalse ( Mate.canMateDueToSexReasons ( d.match.getGameMap().getRegionByUID(2) ) ) ;
+		d.match.getGameMap().getRegionByUID(2).addAnimal ( d.animals.get(0) );
+		d.animals.get(0).moveTo ( d.match.getGameMap().getRegionByUID(2) ) ; 		
+		assertFalse ( Mate.canMateDueToSexReasons ( d.match.getGameMap().getRegionByUID(2) ) ) ;
+		d.match.getGameMap().getRegionByUID(2).addAnimal ( d.animals.get(7) );
+		d.animals.get(7).moveTo ( d.match.getGameMap().getRegionByUID(2) ) ; 
 		
-		d.animals.get(2).moveTo ( d.match.getGameMap().getRegionByUID(2) ) ;
-		d.match.getGameMap ().getRegionByUID ( 2 ).addAnimal ( d.animals.get(2) ) ;
-		
-		d.animals.get ( 8 ).moveTo ( d.match.getGameMap().getRegionByUID ( 2 ) );
-		d.match.getGameMap().getRegionByUID ( 2 ).addAnimal ( d.animals.get(8) );
-		List < Animal > iniAn ;
-		List afterAn ;
-		iniAn = CollectionsUtilities.newListFromIterable ( d.match.getGameMap().getRegionByUID(2).getContainedAnimals() ) ;
-		try
-		{
-			m = new Mate ( new DummyTurnNumberClock() , new DummyLambEvolver () , d.sheperds.get(0) , d.match.getGameMap ().getRegionByUID ( 2 ) ) ;
-			m.execute(d.match);
-			afterAn = CollectionsUtilities.newListFromIterable (  d.match.getGameMap().getRegionByUID ( 2 ).getContainedAnimals() )  ;
-			assertTrue ( afterAn.size() == iniAn.size() + 1 );
-			afterAn.removeAll ( iniAn ) ;
-			assertTrue ( afterAn.size() == 1 ) ;
-			assertTrue ( afterAn.get(0) instanceof Lamb ) ;
-		}
-		catch (MoveNotAllowedException e) 
-		{
-			assertTrue ( iniAn.equals ( CollectionsUtilities.newListFromIterable ( d.match.getGameMap().getRegionByUID(2).getContainedAnimals() ) ) ) ;
-		}
-	}*/
+	}
 	
 	class DummyTurnNumberClock implements TurnNumberClock 
 	{

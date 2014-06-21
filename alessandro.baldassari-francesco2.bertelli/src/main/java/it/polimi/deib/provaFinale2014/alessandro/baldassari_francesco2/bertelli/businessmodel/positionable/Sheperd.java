@@ -41,7 +41,7 @@ public class Sheperd extends Character < Road >
 		{
 			this.color = color ;
 			this.owner = owner ;
-			setElementType ( PositionableElementType.associateColorAndType ( color ) );
+			setElementType ( PositionableElementType.getSheperdByColor ( color.getName () ) );
 		}
 		else
 			throw new IllegalArgumentException () ;

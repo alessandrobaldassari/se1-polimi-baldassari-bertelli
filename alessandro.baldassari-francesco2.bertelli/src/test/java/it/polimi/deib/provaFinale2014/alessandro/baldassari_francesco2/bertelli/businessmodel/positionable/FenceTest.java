@@ -11,25 +11,22 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObjectIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class FenceTest 
 {
 
-	/*
-	 * Initializing variables test built the test environment using some static variables to bypass some technical problems with animalFactory
-	 */
-	static GameMap map;
-	static ObjectIdentifier < Match > dummyMatchIdentifier;
-	static Fence fenceNonFinal = new Fence(FenceType.NON_FINAL);
-	static Fence fenceFinal = new Fence(FenceType.FINAL);
+	 GameMap map;
+	 ObjectIdentifier < Match > dummyMatchIdentifier;
+	 Fence fenceNonFinal = new Fence(FenceType.NON_FINAL);
+	 Fence fenceFinal = new Fence(FenceType.FINAL);
 	
-	@BeforeClass
-	public static void setUpBeforeClass()
+	@Before
+	public void setUpBeforeClass()
 	{
-		int i ;
-		i = 0 ; 
+		
 		do 
 		{
 			try 
@@ -41,21 +38,30 @@ public class FenceTest
 			}
 			catch (SingletonElementAlreadyGeneratedException e) 
 			{
-				i ++ ;
+				fail () ;
 			}
 			catch ( FenceAlreadyPlacedException e ) 
 			{
-				throw new RuntimeException ( e ) ;
+				fail () ;
 			}
 		}
 		while ( map == null ) ;
 	}
 	
 	@Test
-	public void Fence(){
-		assertTrue(fenceNonFinal.equals(fenceNonFinal));
+	public void equalsTest () 
+	{
+		assertFalse ( fenceFinal.equals ( new Integer ( 2 ) ) ) ;
+		assertTrue ( fenceFinal.equals ( fenceFinal ) ) ;
+		assertFalse ( fenceNonFinal.equals(fenceFinal) );
 	}
 	
+	@Test ( expected = IllegalArgumentException.class )
+	public void FenceExc()
+	{
+		new Fence ( null ) ;
+	}
+
 	@Test
 	public void isFinal(){
 		assertTrue(fenceFinal.isFinal());
@@ -79,9 +85,10 @@ public class FenceTest
 	}
 	
 	@Test
-	public void equals(){
-		assertTrue(fenceFinal.equals(fenceFinal));
-		assertFalse(fenceFinal.equals(fenceNonFinal));
+	public void toStringT () 
+	{
+		assertFalse ( fenceFinal.toString() == null ) ;
+		assertTrue ( ! fenceFinal.toString ().isEmpty() ) ;
 	}
 	
 }

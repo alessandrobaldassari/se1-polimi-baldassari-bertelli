@@ -1,7 +1,6 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.factory;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves;
 
 import static org.junit.Assert.assertTrue;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Lamb;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.LambEvolver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.TurnNumberClock;
@@ -28,6 +27,8 @@ public class MoveExecutorTest {
 		tnc = new DummytTNC();
 		mf = MoveExecutor.newInstance( sh , tnc , new DummyLambEvolver() ) ; 
 	}
+	
+	
 	
 	@Test
 	public void getSheperd () 

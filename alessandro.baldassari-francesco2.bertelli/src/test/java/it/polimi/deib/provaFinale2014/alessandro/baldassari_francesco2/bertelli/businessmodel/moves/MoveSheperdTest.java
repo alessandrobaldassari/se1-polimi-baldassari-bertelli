@@ -29,20 +29,9 @@ public class MoveSheperdTest
 	 * Test an Exception launched by the ctor - road not empty
 	 */
 	@Test
-	public void ctor1 () 
+	public void ctor1 () throws WriteOncePropertyAlreadSetException, NoMoreCardOfThisTypeException 
 	{
-		try 
-		{
-			d.initializePlayersAndSheperds();
-		}
-		catch (WriteOncePropertyAlreadSetException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch ( NoMoreCardOfThisTypeException e ) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
+		d.initializePlayersAndSheperds();
 		d.sheperds.get(0).moveTo ( d.match.getGameMap().getRoadByUID ( 5 ) ) ;
 		d.match.getGameMap().getRoadByUID ( 5 ).setElementContained ( d.sheperds.get(0) ) ;
 		d.sheperds.get(1).moveTo ( d.match.getGameMap().getRoadByUID ( 2 ) ) ;
@@ -65,22 +54,13 @@ public class MoveSheperdTest
 
 	/**
 	 * Test an Exception launched by the ctor - sheperd does not move actually.
+	 * @throws NoMoreCardOfThisTypeException 
+	 * @throws WriteOncePropertyAlreadSetException 
 	 */
 	@Test
-	public void ctor2 () 
+	public void ctor2 () throws WriteOncePropertyAlreadSetException, NoMoreCardOfThisTypeException 
 	{
-		try 
-		{
-			d.initializePlayersAndSheperds();
-		}
-		catch (WriteOncePropertyAlreadSetException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch ( NoMoreCardOfThisTypeException e ) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
+		d.initializePlayersAndSheperds();
 		d.sheperds.get(0).moveTo ( d.match.getGameMap().getRoadByUID ( 5 ) ) ;
 		d.match.getGameMap().getRoadByUID ( 5 ).setElementContained ( d.sheperds.get(0) ) ;
 		MoveSheperd m = null ;
@@ -102,20 +82,9 @@ public class MoveSheperdTest
 	 * Test the few money exception post 
 	 */
 	@Test
-	public void execute1 () 
+	public void execute1 () throws WriteOncePropertyAlreadSetException, NoMoreCardOfThisTypeException 
 	{
-		try 
-		{
-			d.initializePlayersAndSheperds();
-		}
-		catch (WriteOncePropertyAlreadSetException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch ( NoMoreCardOfThisTypeException e ) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
+		d.initializePlayersAndSheperds();
 		d.sheperds.get(0).moveTo ( d.match.getGameMap().getRoadByUID ( 5 ) ) ;
 		d.match.getGameMap().getRoadByUID ( 5 ).setElementContained ( d.sheperds.get(0) ) ;
 		try 
@@ -148,26 +117,13 @@ public class MoveSheperdTest
 	 * Test the right flow - he has to pay
 	 */
 	@Test
-	public void execute2 () 
+	public void execute2 () throws WriteOncePropertyAlreadSetException, NoMoreCardOfThisTypeException, WrongStateMethodCallException, MoveNotAllowedException, WorkflowException 
 	{
-		try 
-		{
-			d.initializePlayersAndSheperds();
-		}
-		catch (WriteOncePropertyAlreadSetException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch ( NoMoreCardOfThisTypeException e ) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
+		d.initializePlayersAndSheperds();
 		d.sheperds.get(0).moveTo ( d.match.getGameMap().getRoadByUID ( 5 ) ) ;
 		d.match.getGameMap().getRoadByUID ( 5 ).setElementContained ( d.sheperds.get(0) ) ;
 		MoveSheperd m = null ;
-		try 
-		{
-			int initMon ;
+		int initMon ;
 			int rIdBefore ;
 			initMon = d.sheperds.get(0).getOwner().getMoney();
 			rIdBefore = d.sheperds.get(0).getPosition().getUID();
@@ -177,16 +133,7 @@ public class MoveSheperdTest
 			assertTrue ( d.sheperds.get(0).getPosition().equals ( d.match.getGameMap().getRoadByUID(39) ) ) ;
 			assertTrue ( d.match.getGameMap().getRoadByUID ( 39 ).getElementContained().equals ( d.sheperds.get(0) ) ) ;
 			assertTrue ( d.match.getGameMap().getRoadByUID(rIdBefore).getElementContained() instanceof Fence );
-		}
-		catch (MoveNotAllowedException e) 
-		{
-			fail () ;
-		} catch (WrongStateMethodCallException e) {
-			fail () ;
-		} catch (WorkflowException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	
 	}
 	
 	

@@ -110,6 +110,7 @@ public class Fence extends PositionableElement < Road >
 			if ( road != null )
 			{
 				setPosition ( road ) ;
+				road.setElementContained ( this ) ;
 				placed = true ;
 			}
 			else

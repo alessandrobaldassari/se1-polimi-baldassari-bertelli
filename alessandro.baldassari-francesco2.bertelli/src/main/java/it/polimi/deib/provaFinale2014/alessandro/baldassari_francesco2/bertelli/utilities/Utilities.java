@@ -15,22 +15,6 @@ public class Utilities
 	
 	/***/
 	public static final int MILLISECONDS_PER_SECOND = 1000 ;
-
-	/***/
-	public static boolean isEmptyString ( String s ) 
-	{
-		boolean res ;
-		if ( s != null )
-		{
-			if ( s.trim().compareToIgnoreCase ( EMPTY_STRING ) == 0 )
-				res = true ;
-			else
-				res = false ;
-		}
-		else
-			throw new NullPointerException();
-		return res ;
-	}
 	
 	/***/
 	public static Class < ? > [] getTypes ( Object ... src ) 

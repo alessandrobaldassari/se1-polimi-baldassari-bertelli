@@ -77,34 +77,20 @@ public class BreakDownTest
 	
 	/**
 	 * Constructor has now to function well. 
+	 * @throws NoMoreCardOfThisTypeException 
+	 * @throws WriteOncePropertyAlreadSetException 
+	 * @throws BlackSheepAlreadyGeneratedException 
+	 * @throws WolfAlreadyGeneratedException 
 	 */
 	@Test
-	public void constructor2 () 
+	public void constructor2 () throws WriteOncePropertyAlreadSetException, NoMoreCardOfThisTypeException, WolfAlreadyGeneratedException, BlackSheepAlreadyGeneratedException 
 	{
 		BreakDown b ;
 		Animal a ;
 		Sheperd k ;
-		try 
-		{
+	
 			d.initializePlayersAndSheperds();
 			d.initializeAnimals();
-		}
-		catch (WriteOncePropertyAlreadSetException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (NoMoreCardOfThisTypeException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
-		catch (WolfAlreadyGeneratedException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch ( BlackSheepAlreadyGeneratedException e ) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
 		a = d.animals.get ( 0 );
 		k = d.sheperds.get ( 0 ) ;
 		a.moveTo ( d.match.getGameMap().getRegionByUID ( 4 ) ) ;

@@ -49,4 +49,15 @@ public class PositionableElementTypeTest {
 		
 	}
 
+	@Test
+	public void sheperdsColors () 
+	{
+		assertTrue ( PositionableElementType.getSheperdByColor ( "red" ) == PositionableElementType.RED_SHEPERD ) ;
+		assertTrue ( PositionableElementType.getSheperdByColor ( "green" ) == PositionableElementType.GREEN_SHEPERD ) ;
+		assertTrue ( PositionableElementType.getSheperdByColor ( "blue" ) == PositionableElementType.BLUE_SHEPERD ) ;
+		assertTrue ( PositionableElementType.getSheperdByColor ( "yellow" ) == PositionableElementType.YELLOW_SHEPERD ) ;
+		assertTrue ( PositionableElementType.getSheperdByColor ( "black" ) == null ) ;
+
+	}
+	
 }

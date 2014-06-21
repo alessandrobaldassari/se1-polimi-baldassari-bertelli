@@ -1,4 +1,4 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.Couple;
 
@@ -32,4 +32,20 @@ public class CoupleTest
 	{
 		assertEquals ( couple.getSecondObject () , "Pippo" ) ;
 	}
+	
+	@Test
+	public void toStringT () 
+	{
+		assertTrue ( ! couple.toString().isEmpty() );
+	}
+	
+	@Test
+	public void equals () 
+	{
+		Couple c2 ;
+		c2 = new Couple < Integer , String > ( 40 , "Bruto" ) ;
+		assertTrue ( c2.equals(c2) ) ;
+		assertFalse ( couple.equals(c2) ) ;
+	}
+	
 }

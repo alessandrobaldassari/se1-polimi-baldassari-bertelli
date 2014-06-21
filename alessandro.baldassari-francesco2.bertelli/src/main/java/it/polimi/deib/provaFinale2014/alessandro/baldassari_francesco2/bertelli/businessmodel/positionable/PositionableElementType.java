@@ -84,22 +84,4 @@ public enum PositionableElementType
 		return res ;
 	}
 	
-	/***/
-	public static PositionableElementType associateColorAndType ( NamedColor color )
-	{
-		if ( color.getName ().compareToIgnoreCase( "RED" ) == 0 )
-			return PositionableElementType.RED_SHEPERD   ;
-		else
-			if ( color.getName ().compareToIgnoreCase ( "BLUE" ) == 0 )
-				return PositionableElementType.BLUE_SHEPERD ;
-			else
-				if ( color.getName ().compareToIgnoreCase ( "YELLOW" ) == 0 )
-					return PositionableElementType.YELLOW_SHEPERD  ;
-				else
-					if ( color.getName ().compareToIgnoreCase ( "GREEN" ) == 0 )
-						return PositionableElementType.GREEN_SHEPERD  ;
-					else
-						return null ;
-	}
-	
 }

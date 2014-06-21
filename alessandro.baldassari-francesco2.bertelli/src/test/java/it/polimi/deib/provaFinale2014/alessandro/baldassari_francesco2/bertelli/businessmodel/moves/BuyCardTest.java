@@ -1,15 +1,10 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank.Bank.CardPriceNotRightException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.bank.Bank.NoMoreCardOfThisTypeException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.BlackSheepAlreadyGeneratedException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory.WolfAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player.TooFewMoneyException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatch;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WorkflowException;
@@ -33,152 +28,60 @@ private DummyMatch d ;
 	
 	/**
 	 * Test the Exception launched by the constructor 
+	 * @throws MoveNotAllowedException 
 	 */
-	@Test 
-	public void constructor1 () 
+	@Test ( expected = MoveNotAllowedException.class )
+	public void constructor1 () throws WriteOncePropertyAlreadSetException, NoMoreCardOfThisTypeException, MoveNotAllowedException 
 	{
 		BuyCard b = null ;
-		try 
-		{
-			d.initializePlayersAndSheperds();
-		}
-		catch (WriteOncePropertyAlreadSetException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (NoMoreCardOfThisTypeException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
+		d.initializePlayersAndSheperds();
 		d.sheperds.get(0).moveTo ( d.match.getGameMap().getRoadByUID ( 2 ) );
-		try
-		{
-			b = new BuyCard ( d.sheperds.get(0) , RegionType.LACUSTRINE ) ;
-		}
-		catch (MoveNotAllowedException e) 
-		{
-			assertTrue ( b == null ) ;
-		}
+		d.match.getGameMap().getRoadByUID(2).setElementContained ( d.sheperds.get(0) ) ;
+		b = new BuyCard ( d.sheperds.get(0) , RegionType.LACUSTRINE ) ;
 	}
 	
 	/**
-	 * Constructor has now to function well. 
+	 * Constructor has now to function well.
 	 */
 	@Test
-	public void constructor2 () 
+	public void constructor2 () throws WriteOncePropertyAlreadSetException, NoMoreCardOfThisTypeException, MoveNotAllowedException 
 	{
 		BuyCard b = null ;
-		try 
-		{
-			d.initializePlayersAndSheperds();
-		}
-		catch (WriteOncePropertyAlreadSetException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (NoMoreCardOfThisTypeException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
+		d.initializePlayersAndSheperds();
 		d.sheperds.get(0).moveTo ( d.match.getGameMap().getRoadByUID ( 2 ) );
-		try
-		{
-			b = new BuyCard ( d.sheperds.get(0) , RegionType.CULTIVABLE ) ;
-			assertTrue ( b != null ) ;
-		}
-		catch (MoveNotAllowedException e) 
-		{
-			fail () ;
-		}
+		b = new BuyCard ( d.sheperds.get(0) , RegionType.CULTIVABLE ) ;
+		assertTrue ( b != null ) ;
+	
 	}
 	
 	/**
 	 * Test the precondition match != null 
+	 * @throws NoMoreCardOfThisTypeException 
+	 * @throws WriteOncePropertyAlreadSetException 
+	 * @throws MoveNotAllowedException 
+	 * @throws WorkflowException 
 	 */
-	@Test 
-	public void execute1 () 
+	@Test ( expected = IllegalArgumentException.class )
+	public void execute1 () throws WriteOncePropertyAlreadSetException, NoMoreCardOfThisTypeException, MoveNotAllowedException, WorkflowException 
 	{
 		BuyCard b = null ;
-		try 
-		{
-			d.initializePlayersAndSheperds();
-		}
-		catch (WriteOncePropertyAlreadSetException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (NoMoreCardOfThisTypeException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
+		d.initializePlayersAndSheperds();
 		d.sheperds.get(0).moveTo ( d.match.getGameMap().getRoadByUID ( 2 ) );
-		try
-		{
-			b = new BuyCard ( d.sheperds.get(0) , RegionType.LACUSTRINE ) ;
-			b.execute(null);
-			fail () ;
-		}
-		catch (MoveNotAllowedException e) 
-		{
-			assertTrue ( true ) ;
-		} 
-		catch (WorkflowException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		b = new BuyCard ( d.sheperds.get(0) , RegionType.CULTIVABLE ) ;
+		b.execute(null);		
 	}
 	
 	/**
 	 * Test the exception postcondition 1
+	 * @throws WorkflowException 
 	 */
-	@Test 
-	public void execute2 () 
+	@Test ( expected = MoveNotAllowedException.class )
+	public void execute2 () throws WriteOncePropertyAlreadSetException, NoMoreCardOfThisTypeException, MoveNotAllowedException, WorkflowException 
 	{
 		BuyCard b = null ;
-		try 
-		{
-			d.initializePlayersAndSheperds();
-		}
-		catch (WriteOncePropertyAlreadSetException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		} 
-		catch (NoMoreCardOfThisTypeException e) 
-		{
-			throw new RuntimeException ( e ) ;
-		}
+		d.initializePlayersAndSheperds();
 		d.sheperds.get(0).moveTo ( d.match.getGameMap().getRoadByUID ( 2 ) );
-		try
-		{
-			b = new BuyCard ( d.sheperds.get(0) , RegionType.LACUSTRINE ) ;
-			boolean x = false ;
-			do
-			{
-				try 
-				{
-					d.bank.sellACard ( d.bank.getPeekCardPrice(RegionType.LACUSTRINE ) , RegionType.LACUSTRINE ) ;
-				} 
-				catch (CardPriceNotRightException e) 
-				{
-					fail () ;
-				} 
-				catch (NoMoreCardOfThisTypeException e) 
-				{
-					x = true ;
-				}
-			}
-			while ( x == false ) ;
-			b.execute(d.match);
-			fail () ;
-		}
-		catch (MoveNotAllowedException e) 
-		{
-			assertTrue ( true ) ;
-		} 
-		catch (WorkflowException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		b = new BuyCard ( d.sheperds.get(0) , RegionType.LACUSTRINE ) ;
 	}
 	
 	/**

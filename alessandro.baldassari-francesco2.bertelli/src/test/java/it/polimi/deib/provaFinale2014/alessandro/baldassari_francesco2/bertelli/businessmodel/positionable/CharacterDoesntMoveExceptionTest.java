@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvineType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AnimalFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Ovine;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.WolfTestClosed.DummyMatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObjectIdentifier;
@@ -25,7 +24,6 @@ public class CharacterDoesntMoveExceptionTest
 	 */
 	Ovine sheep;
 	AnimalFactory animalFactory ;
-	ObjectIdentifier < Match > dummyMatchIdentifier;
 	
 	/*
 	 * Building the test environment
@@ -35,8 +33,7 @@ public class CharacterDoesntMoveExceptionTest
 	{
 		try 
 		{
-			dummyMatchIdentifier = MatchIdentifier.newInstance();
-			animalFactory = AnimalFactory.newAnimalFactory ( dummyMatchIdentifier);
+			animalFactory = AnimalFactory.newAnimalFactory ( MatchIdentifier.newInstance() );
 			sheep =  animalFactory.newAdultOvine("Sheep", AdultOvineType.SHEEP);
 		} 
 		catch (SingletonElementAlreadyGeneratedException e) {}

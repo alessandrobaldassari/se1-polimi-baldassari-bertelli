@@ -7,6 +7,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MathUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
 /**
  * This class models a Wolf, a particular Animal present in the Game.
@@ -33,6 +34,7 @@ public class Wolf extends Animal
 	 */
 	public void escape () throws CharacterDoesntMoveException
 	{
+		Iterable < Animal > eatable ;
 		Road winnerRoad ;
 		Region initRegion ;
 		Region destRegion ;
@@ -55,7 +57,8 @@ public class Wolf extends Animal
 				destRegion.addAnimal ( this ) ;
 				setPosition ( destRegion ) ;
 				// il lupo cerca di mangiare qualcuno
-				for ( Animal a : destRegion.getContainedAnimals () )
+				eatable = CollectionsUtilities.newCollectionFromIterable ( destRegion.getContainedAnimals () ) ;
+				for ( Animal a : eatable )
 					if ( ! ( a instanceof BlackSheep ) )
 					{
 						// mangia
@@ -74,6 +77,9 @@ public class Wolf extends Animal
 		
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public boolean equals ( Object obj )
 	{

@@ -14,6 +14,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.CharacterDoesntMoveException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
@@ -21,55 +22,40 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 /*
  * This jUnit test class test Wolf
  */
-public class WolfTestClosed {
+public class WolfTestClosed 
+{
 
 	/*
 	 * Initializing variables test built the test environment using some static variables to bypass some technical problems with animalFactory
 	 */
-	static AnimalFactory animalFactory ;
-	static GameMap map;
-	static DummyMatchIdentifier dummyMatchIdentifier;
-	static Wolf wolf;
-	static ArrayList<Fence> fences = new ArrayList<Fence>();
+	 AnimalFactory animalFactory ;
+	 GameMap map;
+	 Wolf wolf;
+	 ArrayList<Fence> fences = new ArrayList<Fence>();
 	
-	@BeforeClass
-	public static void setUpBeforeClass()
+	@Before
+	public void setUpBeforeClass() throws SingletonElementAlreadyGeneratedException
 	{
-		dummyMatchIdentifier = new DummyMatchIdentifier();
-		try {
-			animalFactory = AnimalFactory.newAnimalFactory(dummyMatchIdentifier);
-		} catch (SingletonElementAlreadyGeneratedException e) {
-			e.printStackTrace();
-		}
-		try {
-			wolf = (Wolf) animalFactory.newWolf();
-		} catch (WolfAlreadyGeneratedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		try {
-			map = GameMapFactory.getInstance().newInstance(dummyMatchIdentifier);
+		animalFactory = AnimalFactory.newAnimalFactory(MatchIdentifier.newInstance()); 
+		wolf = (Wolf) animalFactory.newWolf();
+		map = GameMapFactory.getInstance().newInstance(MatchIdentifier.newInstance());
 			map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().addAnimal(wolf);
 			wolf.moveTo(map.getRegionByType(RegionType.SHEEPSBURG).iterator().next());
-		} catch (SingletonElementAlreadyGeneratedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		
 	}
 	
 	/*
 	 * Testing escape() method. All border roads occupied.
 	 */
 	@Test 
-	public void escape() {
+	public void escape () 
+	{
 		LinkedList <Road> borderRoads;
 		LinkedList <Region> borderRegions = new LinkedList<Region>();
 		for(int i=0; i<6; i++)
@@ -77,9 +63,11 @@ public class WolfTestClosed {
 		borderRoads = (LinkedList<Road>) map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().getBorderRoads();
 		for(Road road : borderRoads)
 			road.setElementContained(fences.remove(0));
-		try {
+		try 
+		{
 			wolf.escape();
-		} catch (CharacterDoesntMoveException e) {
+		}
+		catch (CharacterDoesntMoveException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -104,18 +92,4 @@ public class WolfTestClosed {
 		assertTrue ( CollectionsUtilities.iterableSize( map.getRegionByType(RegionType.SHEEPSBURG).iterator().next().getContainedAnimals() ) == 0);
 	}	
 	
-	/*
-	 * Declaring a dummy MatchIdentifier to initialize animalFactory correctly
-	 */
-	public static class DummyMatchIdentifier implements ObjectIdentifier<Match>{
-
-		public DummyMatchIdentifier() {
-			// TODO Auto-generated constructor stub
-		}
-
-		public boolean isEqualsTo(ObjectIdentifier<Match> otherObject) {
-			// TODO Auto-generated method stub
-			return true;
-		}
-	}
 }

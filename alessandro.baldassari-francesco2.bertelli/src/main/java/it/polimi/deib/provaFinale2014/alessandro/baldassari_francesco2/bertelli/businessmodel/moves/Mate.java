@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.concurrent.Executors;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.GameConstants;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.WrongMatchStateMethodCallException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.CanNotMateWithHimException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.AdultOvine.MateNotSuccesfullException;
@@ -57,13 +56,9 @@ public class Mate extends GameMove
 	 */
 	public Mate ( TurnNumberClock clockSource , LambEvolver lambEvolver , Sheperd theOneWhoWantsTheMate , Region whereMate ) throws MoveNotAllowedException 
 	{
-		List < AdultOvine > adults ;
 		if ( clockSource != null && lambEvolver != null && theOneWhoWantsTheMate != null && whereMate != null ) 
-		{
 			if ( MapUtilities.areAdjacents( theOneWhoWantsTheMate.getPosition () , whereMate ) )
-			{
-				adults = MapUtilities.extractAdultOvinesExceptBlackSheep ( whereMate.getContainedAnimals () ) ;
-				if ( MapUtilities.lookForAnOvine ( adults , AdultOvineType.RAM ) != null && MapUtilities.lookForAnOvine ( adults , AdultOvineType.SHEEP ) != null )
+				if ( canMateDueToSexReasons ( whereMate ) )
 				{
 					this.clockSource = clockSource ;
 					this.lambEvolver = lambEvolver ; 
@@ -72,10 +67,8 @@ public class Mate extends GameMove
 				}
 				else
 					throw new MoveNotAllowedException ( "There is not here a Ram and a Sheep that can mate..." ) ;
-			}
 			else
 				throw new MoveNotAllowedException ( "Selected Region not adjacent to the selected Sheperd." ) ;
-		} 
 		else
 			throw new IllegalArgumentException () ;
 	}
