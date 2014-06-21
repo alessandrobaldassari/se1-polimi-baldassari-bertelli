@@ -10,6 +10,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match.MatchState;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WorkflowException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -99,7 +101,7 @@ class ResultsCalculatorManager
 	 *        this Match.
 	 * @return the score of the Player passed by parameter.
 	 */
-	public int calculatePlayerScore ( Player player )
+	public int calculatePlayerScore ( Player player ) throws WorkflowException
 	{
 		int res;
 		Collection <Card> playerCards;
@@ -112,7 +114,12 @@ class ResultsCalculatorManager
 		res = 0;
 		for(Card card : playerCards)
 			res = res + regionValuesMap.get(card.getRegionType());
-		return 0;	
+		try {
+			res = res + player.getMoney();
+		} catch (WrongStateMethodCallException e) {
+			throw new WorkflowException();
+		}
+		return res;	
 	}
 	
 }

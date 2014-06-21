@@ -10,11 +10,10 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapFactory;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.CharacterDoesntMoveException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Fence.FenceType;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.ObjectIdentifier;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.testutilities.DummyMatchIdentifier;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 
 import org.junit.BeforeClass;
@@ -78,22 +77,4 @@ public class WolfTestRandom {
 		wolf.escape();		
 	}
 		
-	
-
-	
-	
-	/*
-	 * Declaring a dummy MatchIdentifier to initialize animalFactory correctly
-	 */
-	public static class DummyMatchIdentifier implements ObjectIdentifier<Match>{
-
-		public DummyMatchIdentifier() {
-			// TODO Auto-generated constructor stub
-		}
-
-		public boolean isEqualsTo(ObjectIdentifier<Match> otherObject) {
-			// TODO Auto-generated method stub
-			return true;
-		}
-	}
 }
