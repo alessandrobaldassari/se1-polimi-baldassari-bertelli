@@ -323,6 +323,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	 */
 	private MoveSelection buyCardManagement ( MoveSelector selector ) throws MoveNotAllowedException 
 	{
+		System.err.println ( "GUI_CONTROLLER - buyCardManagement : INIZIO\nParameters : " + selector.getAvailableRegionsForBuyCard().keySet() ) ;
 		MoveSelection res ;
 		RegionType type ;
 		type = RegionTypeChooseView.showDialog ( selector.getAvailableRegionsForBuyCard() , selector.getAvailableMoney () ).getFirstObject () ; 

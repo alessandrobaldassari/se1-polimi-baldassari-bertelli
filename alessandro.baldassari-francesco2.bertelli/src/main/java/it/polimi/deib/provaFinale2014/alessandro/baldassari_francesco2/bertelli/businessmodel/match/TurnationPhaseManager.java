@@ -152,10 +152,11 @@ class TurnationPhaseManager implements TurnNumberClock
 	 * During a turn, each Player can do 3 moves.
 	 * If one is not corretct, it looses it.
 	 * 
-	 * @throws WorkflowException if a serious error occcurs so the match can not go away.
+	 * @throws WorkflowException if a serious error occurs so the match can not go away.
 	 */
 	private void allPlayersTurn () throws WorkflowException
 	{
+		Iterable < Player > players ;
 		MoveExecutor moveFactory ;
 		MoveSelector selector ;
 		MoveSelection selection ;
@@ -163,7 +164,8 @@ class TurnationPhaseManager implements TurnNumberClock
 		byte moveIndex ;
 		boolean breakPlayer ;
 		// for each Player
-		for ( Player currentPlayer : match.getPlayers() )
+		players = CollectionsUtilities.newCollectionFromIterable ( match.getPlayers() );
+		for ( Player currentPlayer : players )
 		{		
 			// if he is with us.
 			if ( ! currentPlayer.isSuspended () )			
@@ -179,8 +181,8 @@ class TurnationPhaseManager implements TurnNumberClock
 						try 
 						{
 							fillMoveSelectorWithAvailableParameters ( selector , choosenSheperd ) ;
-							selector.setMovesAllowedDueToRuntimeRules () ;
-							System.err.println ( choosenSheperd.getPosition() );
+							selector.setMovesAllowedDueToRuntimeRules ( moveFactory ) ;
+							System.err.println ( selector.getAvailableMoves() );
 							playersGenericNotification ( "Carissimo, per questo turno è la tua mossa # " + moveIndex ) ;
 							selection = currentPlayer.doMove ( selector , match.getGameMap () ) ;
 							if ( selection != null )
@@ -419,11 +421,6 @@ class TurnationPhaseManager implements TurnNumberClock
 		catch ( MoveNotAllowedException m )
 		{
 			throw new MoveNotAllowedException ( Utilities.EMPTY_STRING , m ) ;
-		}
-		finally 
-		{
-			if ( selection.getSelectedType() != null )
-				sel.updateSelection ( selection.getSelectedType () ) ;
 		}
 		System.out.println ( "TURNATION_PHASE_MANAGER - execMove : END" ) ;
 	}

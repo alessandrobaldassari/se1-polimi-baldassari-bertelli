@@ -13,13 +13,13 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMoveType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveExecutor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.MoveNotAllowedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WorkflowException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
 /**
  * This class is the component that allows a User ( also a remote one ) to select a move during the game.
@@ -40,13 +40,7 @@ public class MoveSelector implements Serializable
 	
 	/***/
 	private MoveSelection selection ;
-	
-	/***/
-	private GameMoveType [] selectedMoves ;
 
-	/***/
-	private int lastSelectedIndex ;
-	
 	/***/
 	private Collection < Road > availableRoadsForMoveSheperd ;
 	
@@ -77,8 +71,6 @@ public class MoveSelector implements Serializable
 				this.associatedSheperd = associatedSheperd ;
 				availableMoney = associatedSheperd.getOwner().getMoney();
 				selection = null ;
-				selectedMoves = new GameMoveType [] { null , null , null } ;
-				lastSelectedIndex = -1 ;
 				availableRoadsForMoveSheperd = null ;
 				availableRegionForMoveSheep = null ;
 				availableRegionsForBuyCard = null ;
@@ -96,14 +88,14 @@ public class MoveSelector implements Serializable
 	}
 	
 	/***/
-	public void setMovesAllowedDueToRuntimeRules () 
+	public void setMovesAllowedDueToRuntimeRules ( MoveExecutor exec ) 
 	{
 		movesAllowedDueToRuntimeRules.clear();
-		movesAllowedDueToRuntimeRules.put ( GameMoveType.BREAK_DOWN , availableRegionsForBreakdown.size() > 0 ) ;
-		movesAllowedDueToRuntimeRules.put ( GameMoveType.BUY_CARD , availableRegionsForBuyCard.size() > 0  ) ;
-		movesAllowedDueToRuntimeRules.put ( GameMoveType.MATE , availableRegionsForMate.size() > 0  ) ;
-		movesAllowedDueToRuntimeRules.put ( GameMoveType.MOVE_SHEEP , availableRegionForMoveSheep.size() > 0 ) ;
-		movesAllowedDueToRuntimeRules.put ( GameMoveType.MOVE_SHEPERD , availableRoadsForMoveSheperd.size() > 0 ) ;
+		movesAllowedDueToRuntimeRules.put ( GameMoveType.BREAK_DOWN , availableRegionsForBreakdown.size() > 0  && exec.canBreakdown()) ;
+		movesAllowedDueToRuntimeRules.put ( GameMoveType.BUY_CARD , availableRegionsForBuyCard.size() > 0 && exec.canBuyCard()  ) ;
+		movesAllowedDueToRuntimeRules.put ( GameMoveType.MATE , availableRegionsForMate.size() > 0 && exec.canMate() ) ;
+		movesAllowedDueToRuntimeRules.put ( GameMoveType.MOVE_SHEEP , availableRegionForMoveSheep.size() > 0 && exec.canMoveSheep() ) ;
+		movesAllowedDueToRuntimeRules.put ( GameMoveType.MOVE_SHEPERD , availableRoadsForMoveSheperd.size() > 0 && exec.canMoveSheperd() ) ;
 	}
 	
 	/**
@@ -207,33 +199,12 @@ public class MoveSelector implements Serializable
 	}
 	
 	/***/
-	public void updateSelection ( GameMoveType g ) 
-	{
-		lastSelectedIndex ++ ;
-		selectedMoves [ lastSelectedIndex ] = g ;
-	}
-	
-	/***/
 	public boolean isMoveAllowed ( GameMoveType g )
 	{
 		boolean res ;
-		boolean extCond ;
-		boolean shepCond ;
-		boolean twoCond ;
 		if ( g != null )
 		{
-			extCond = movesAllowedDueToRuntimeRules.get ( g ) ;
-			if ( lastSelectedIndex > -1 )
-			{
-				shepCond = ( lastSelectedIndex == 1 && CollectionsUtilities.arrayLinearSearchPK ( selectedMoves , GameMoveType.MOVE_SHEPERD )  == -1 ) ; 
-				twoCond = ( lastSelectedIndex == 0 && selectedMoves [ 0 ] == g ) || ( lastSelectedIndex == 1 && selectedMoves [ 1 ] == g ) ;
-			}
-			else
-			{
-				shepCond = false ;
-				twoCond = false ;
-			}
-			res = extCond && ! ( shepCond || twoCond ) ;
+			res = movesAllowedDueToRuntimeRules.get ( g ) ;
 		}
 		else
 			throw new IllegalArgumentException() ;

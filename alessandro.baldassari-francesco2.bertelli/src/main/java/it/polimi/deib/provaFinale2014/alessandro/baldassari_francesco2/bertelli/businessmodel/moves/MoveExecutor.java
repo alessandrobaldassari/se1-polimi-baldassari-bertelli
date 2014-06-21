@@ -79,6 +79,11 @@ public class MoveExecutor
 		return sheperd;
 	}
 	
+	public boolean canBreakdown () 
+	{
+		return numberOfMovesDone < 3 && ! ( numberOfMovesDone == 2 && sheperdMoved == false ) && lastMove != GameMoveType.BREAK_DOWN ;
+	}
+	
 	/**
 	 * @throws {@link WorkflowException } 
 	 * @throws {@link MoveNotAllowedException } 
@@ -86,7 +91,7 @@ public class MoveExecutor
 	public void executeBreakdown ( Match match , Animal animalToBreak ) throws MoveNotAllowedException, WorkflowException
 	{
 		if ( match != null && animalToBreak != null )
-			if ( numberOfMovesDone < 3 && ! ( numberOfMovesDone == 2 && sheperdMoved == false ) && lastMove != GameMoveType.BREAK_DOWN )
+			if ( canBreakdown () )
 			{
 				numberOfMovesDone ++ ;
 				lastMove = GameMoveType.BREAK_DOWN ;
@@ -98,19 +103,32 @@ public class MoveExecutor
 			throw new IllegalArgumentException () ;
 	} 
 	
+	public boolean canBuyCard () 
+	{
+		return numberOfMovesDone < 3 && ! ( numberOfMovesDone == 2 && sheperdMoved == false ) && lastMove != GameMoveType.BUY_CARD ; 
+	}
+	
 	/**
 	 * @throws WorkflowException 
 	 */
 	public void executeBuyCard ( Match match , RegionType buyingCardType ) throws MoveNotAllowedException, WorkflowException 
 	{
-		if ( numberOfMovesDone < 3 && ! ( numberOfMovesDone == 2 && sheperdMoved == false ) && lastMove != GameMoveType.BUY_CARD  )
-		{
-			numberOfMovesDone ++ ;
-			lastMove = GameMoveType.BUY_CARD ;
-			new BuyCard ( sheperd , buyingCardType ).execute ( match ) ;
-		}
+		if ( match != null && buyingCardType != null )
+			if ( canBuyCard () )
+			{
+				numberOfMovesDone ++ ;
+				lastMove = GameMoveType.BUY_CARD ;
+				new BuyCard ( sheperd , buyingCardType ).execute ( match ) ;
+			}
+			else
+				throw new MoveNotAllowedException ( PresentationMessages.MOVE_NOT_ALLOWED_MESSAGE ) ; 
 		else
-			throw new MoveNotAllowedException ( PresentationMessages.MOVE_NOT_ALLOWED_MESSAGE ) ; 
+			throw new IllegalArgumentException ();
+	}
+	
+	public boolean canMate () 
+	{
+		return numberOfMovesDone < 3 && ! ( numberOfMovesDone == 2 && sheperdMoved == false ) && lastMove != GameMoveType.MATE ;
 	}
 	
 	/**
@@ -122,7 +140,7 @@ public class MoveExecutor
 	public void executeMate ( Match match , Region whereMate ) throws MoveNotAllowedException, WorkflowException  
 	{
 		if ( match != null && whereMate != null )
-			if ( numberOfMovesDone < 3 && ! ( numberOfMovesDone == 2 && sheperdMoved == false ) && lastMove != GameMoveType.MATE )
+			if ( canMate () )
 			{
 				numberOfMovesDone ++ ; 
 				lastMove = GameMoveType.MATE ;
@@ -134,18 +152,31 @@ public class MoveExecutor
 			throw new IllegalArgumentException () ;
 	}
 	
+	public boolean canMoveSheep ()
+	{
+		return numberOfMovesDone < 3 && ! ( numberOfMovesDone == 2 && sheperdMoved == false ) &&  lastMove != GameMoveType.MOVE_SHEEP ;
+	}
+	
 	/***/
 	public void executeMoveSheep ( Match match , Ovine movingOvine , Region ovineDestinationRegion ) throws MoveNotAllowedException 
 	{
-		if ( numberOfMovesDone < 3 && ! ( numberOfMovesDone == 2 && sheperdMoved == false ) &&  lastMove != GameMoveType.MOVE_SHEEP )
-		{
-			numberOfMovesDone ++ ;
-			lastMove = GameMoveType.MOVE_SHEEP ;
-			new MoveSheep ( sheperd , movingOvine , ovineDestinationRegion ).execute ( match ) ;	
-		}
+		if ( match != null && movingOvine != null && ovineDestinationRegion != null )
+			if ( canMoveSheep() )
+			{
+				numberOfMovesDone ++ ;
+				lastMove = GameMoveType.MOVE_SHEEP ;
+				new MoveSheep ( sheperd , movingOvine , ovineDestinationRegion ).execute ( match ) ;	
+			}
+			else
+				throw new MoveNotAllowedException ( "Can not do two equals moves sequentially." ) ; 
 		else
-			throw new MoveNotAllowedException ( "Can not do two equals moves sequentially." ) ; 
+			throw new IllegalArgumentException () ;
 		}
+	
+	public boolean canMoveSheperd () 
+	{
+		return  numberOfMovesDone < 3 ;
+	}
 	
 	/**
 	 * @throws WrongStateMethodCallException 
@@ -153,7 +184,7 @@ public class MoveExecutor
 	public void executeMoveSheperd ( Match match , Road roadWhereGo ) throws MoveNotAllowedException, WorkflowException 
 	{
 		if  ( match != null && roadWhereGo != null )
-			if ( numberOfMovesDone < 3 )
+			if ( canMoveSheperd() )
 			{
 				numberOfMovesDone ++ ;
 				lastMove = GameMoveType.MOVE_SHEPERD ;

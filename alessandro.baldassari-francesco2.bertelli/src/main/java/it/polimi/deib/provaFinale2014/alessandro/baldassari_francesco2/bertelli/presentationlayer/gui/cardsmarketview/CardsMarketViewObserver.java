@@ -14,7 +14,7 @@ public interface CardsMarketViewObserver extends Observer
 	 * 
 	 * @param selectedCards the Cards the User has choosen.
 	 */
-	public void onCardChoosed ( Iterable < SellableCard > selectedCards ) ;
+	public void onCardChoosed ( SellableCard [] selectedCards ) ;
 	
 	/**
 	 * Called when the User does not want to make any selection. 

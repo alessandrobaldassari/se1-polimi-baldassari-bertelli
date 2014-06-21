@@ -9,10 +9,10 @@ public class DefaultCardsMarketViewObserver implements CardsMarketViewObserver
 {
 
 	/***/
-	private AtomicReference < Iterable < SellableCard > > cards ;
+	private AtomicReference < SellableCard [] > cards ;
 	
 	/***/
-	public DefaultCardsMarketViewObserver ( AtomicReference < Iterable < SellableCard > > cards ) 
+	public DefaultCardsMarketViewObserver ( AtomicReference < SellableCard [] > cards ) 
 	{
 		this.cards = cards ;
 	}
@@ -21,7 +21,7 @@ public class DefaultCardsMarketViewObserver implements CardsMarketViewObserver
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void onCardChoosed ( Iterable < SellableCard > selectedCards ) 
+	public void onCardChoosed ( SellableCard [] selectedCards ) 
 	{
 		synchronized ( cards ) 
 		{
