@@ -7,6 +7,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer.WithReflectionAbstractObservable;
 
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class represent a generic element which composes the GameMapElement.
@@ -97,7 +99,7 @@ public abstract class GameMapElement extends WithReflectionAbstractObservable < 
 	/**
 	 *  
 	 */
-	protected final void notifyAddElement ( GameMapElementType whereType , int whereId , PositionableElementType whoType , Integer whoId ) 
+	protected synchronized final void notifyAddElement ( GameMapElementType whereType , Integer whereId , PositionableElementType whoType , Integer whoId ) 
 	{
 		try 
 		{
@@ -105,14 +107,12 @@ public abstract class GameMapElement extends WithReflectionAbstractObservable < 
 		}
 		catch ( MethodInvocationException e ) 
 		{
-			e.printStackTrace () ;
-			System.out.println ( e.getMessage() ) ;
-			System.out.println ( e.getCause() ) ;
+			// log.
 		}
 	}
 	
 	/***/
-	protected final void notifyRemoveElement ( GameMapElementType whereType , int whereId , PositionableElementType whoType , Integer whoId ) 
+	protected synchronized final void notifyRemoveElement ( GameMapElementType whereType , Integer whereId , PositionableElementType whoType , Integer whoId ) 
 	{
 		try 
 		{
@@ -120,14 +120,8 @@ public abstract class GameMapElement extends WithReflectionAbstractObservable < 
 		} 
 		catch ( MethodInvocationException e ) 
 		{
-			e.printStackTrace () ;
-			System.out.println ( e.getMessage() ) ;
-			System.out.println ( e.getCause() ) ;
+			Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , e  ) ;
 		}
 	}
-	
-	// ENUMERATIONS
-	
-	// INNER INTERFACES
 	
 }

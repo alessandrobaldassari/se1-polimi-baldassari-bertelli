@@ -30,7 +30,7 @@ public class MoveSelector implements Serializable
 {
 
 	/***/
-	private Map < GameMoveType , Boolean > movesAllowedDueToRuntimeRules ;
+	private Map < GameMoveType , Boolean > movesAllowed ;
 	
 	/***/
 	private Sheperd associatedSheperd ;
@@ -67,7 +67,7 @@ public class MoveSelector implements Serializable
 		{
 			try 
 			{
-				movesAllowedDueToRuntimeRules = new HashMap<GameMoveType, Boolean> ( GameMoveType.values().length );
+				movesAllowed = new HashMap<GameMoveType, Boolean> ( GameMoveType.values().length );
 				this.associatedSheperd = associatedSheperd ;
 				availableMoney = associatedSheperd.getOwner().getMoney();
 				selection = null ;
@@ -81,21 +81,20 @@ public class MoveSelector implements Serializable
 			{
 				throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
 			}
-			
 		}
 		else
 			throw new IllegalArgumentException ( "MOVE_SELECTOR - <INIT> :" ) ;
 	}
 	
 	/***/
-	public void setMovesAllowedDueToRuntimeRules ( MoveExecutor exec ) 
+	public void setMovesAllowed ( MoveExecutor exec ) 
 	{
-		movesAllowedDueToRuntimeRules.clear();
-		movesAllowedDueToRuntimeRules.put ( GameMoveType.BREAK_DOWN , availableRegionsForBreakdown.size() > 0  && exec.canBreakdown()) ;
-		movesAllowedDueToRuntimeRules.put ( GameMoveType.BUY_CARD , availableRegionsForBuyCard.size() > 0 && exec.canBuyCard()  ) ;
-		movesAllowedDueToRuntimeRules.put ( GameMoveType.MATE , availableRegionsForMate.size() > 0 && exec.canMate() ) ;
-		movesAllowedDueToRuntimeRules.put ( GameMoveType.MOVE_SHEEP , availableRegionForMoveSheep.size() > 0 && exec.canMoveSheep() ) ;
-		movesAllowedDueToRuntimeRules.put ( GameMoveType.MOVE_SHEPERD , availableRoadsForMoveSheperd.size() > 0 && exec.canMoveSheperd() ) ;
+		movesAllowed.clear();
+		movesAllowed.put ( GameMoveType.BREAK_DOWN , availableRegionsForBreakdown.size() > 0  && exec.canBreakdown()) ;
+		movesAllowed.put ( GameMoveType.BUY_CARD , availableRegionsForBuyCard.size() > 0 && exec.canBuyCard()  ) ;
+		movesAllowed.put ( GameMoveType.MATE , availableRegionsForMate.size() > 0 && exec.canMate() ) ;
+		movesAllowed.put ( GameMoveType.MOVE_SHEEP , availableRegionForMoveSheep.size() > 0 && exec.canMoveSheep() ) ;
+		movesAllowed.put ( GameMoveType.MOVE_SHEPERD , availableRoadsForMoveSheperd.size() > 0 && exec.canMoveSheperd() ) ;
 	}
 	
 	/**
@@ -203,9 +202,7 @@ public class MoveSelector implements Serializable
 	{
 		boolean res ;
 		if ( g != null )
-		{
-			res = movesAllowedDueToRuntimeRules.get ( g ) ;
-		}
+			res = movesAllowed.get ( g ) ;
 		else
 			throw new IllegalArgumentException() ;
 		return res ;
@@ -217,10 +214,8 @@ public class MoveSelector implements Serializable
 	{		
 		if ( animalToBreak != null )
 		{
-			if ( isMoveAllowed ( GameMoveType.BREAK_DOWN ) && availableRegionsForBreakdown.contains ( animalToBreak ) )
-			{
+			if ( isMoveAllowed ( GameMoveType.BREAK_DOWN ) && availableRegionsForBreakdown.contains ( animalToBreak.getPosition() ) )
 				selection = new MoveSelection  ( GameMoveType.BREAK_DOWN , Collections.<Serializable>singleton ( animalToBreak ) ) ;
-			}
 			else
 				throw new MoveNotAllowedException ( PresentationMessages.MOVE_NOT_ALLOWED_MESSAGE ) ;
 		}

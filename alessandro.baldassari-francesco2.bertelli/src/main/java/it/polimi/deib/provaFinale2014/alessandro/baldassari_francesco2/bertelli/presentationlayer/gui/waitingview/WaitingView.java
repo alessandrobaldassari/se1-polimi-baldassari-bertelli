@@ -1,4 +1,4 @@
-package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui;
+package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.waitingview;
 
 import java.awt.Frame;
 import java.awt.Graphics;
@@ -8,12 +8,15 @@ import java.awt.Insets;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.NotificationContainer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.NotificationPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.GraphicsUtilities;
 
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 
 /**
@@ -33,7 +36,7 @@ public class WaitingView extends JDialog implements NotificationContainer
 		super ( ( Frame ) null , PresentationMessages.APP_NAME , false ) ;
 		waitingPanel = new WaitingViewPanel () ;
 		add ( waitingPanel ) ;
-		setSize ( GraphicsUtilities.getVGAResolution() ) ;
+		setSize ( GraphicsUtilities.getThreeFourthVgaResolution() ) ;
 		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
 	}
@@ -74,6 +77,11 @@ class WaitingViewPanel extends FrameworkedWithGridBagLayoutPanel
 	 * The Label that indicates the User why is he waiting. 
 	 */
 	private JLabel textLabel ;
+	
+	/**
+	 * 
+	 */
+	private JScrollPane scrollPane ;
 	
 	/**
 	 * An area to show notification to the user during the waiting time. 
@@ -127,6 +135,7 @@ class WaitingViewPanel extends FrameworkedWithGridBagLayoutPanel
 	protected void createComponents () 
 	{
 		textLabel = new JLabel () ;
+		scrollPane = new JScrollPane () ;
 		notificationArea = new NotificationPanel();
 		p = new JProgressBar () ;
 		backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getBackgroundImage ( true ) ;	
@@ -142,9 +151,11 @@ class WaitingViewPanel extends FrameworkedWithGridBagLayoutPanel
 		insets = new Insets ( 5 , 5 , 5 , 5 ) ;
 		textLabel.setHorizontalTextPosition ( SwingConstants.CENTER ) ;
 		layoutComponent ( textLabel , 0 , 0 , 1 , 0.125 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
-		layoutComponent ( notificationArea , 0 , 1 , 1 , 0.75 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+		layoutComponent ( scrollPane , 0 , 1 , 1 , 0.75 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 		layoutComponent ( p , 0 , 2 , 1 , 0.125 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
-		p.setIndeterminate ( true ) ;			
+		p.setIndeterminate ( true ) ;
+		scrollPane.setViewportView(notificationArea); 
+		scrollPane.setOpaque(false); 
 	}
 
 	/**
@@ -160,7 +171,7 @@ class WaitingViewPanel extends FrameworkedWithGridBagLayoutPanel
 	protected void injectComponents () 
 	{
 		add ( textLabel ) ;
-		add ( notificationArea ) ;
+		add ( scrollPane ) ;
 		add ( p ) ;
 	}
 	

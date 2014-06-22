@@ -30,7 +30,6 @@ public class RMIGUINotifier implements Runnable , PlayerObserver
 	{
 		GUIGameMapNotificationMessage nextMessage ;
 		int i ;
-		System.out.println ( "SOCKET_GUI_MAP_SERVER - CLIENT SPECIFIC NOTIFIER START" ) ;
 		i = 0 ;
 		while ( true )
 		{
@@ -38,14 +37,12 @@ public class RMIGUINotifier implements Runnable , PlayerObserver
 			{
 				
 				nextMessage = messages.get(i) ;
-				System.out.println ( "SOCKET_GUI_MAP_SERVER - MESSAGE RETRIEVED" ) ;
 				try 
 				{
 					synchronized  ( lastArrived ) 
 					{
 						lastArrived.putMessage ( nextMessage ) ;							
 					}
-					System.out.println ( "SOCKET_GUI_MAP_SERVER - MESSAGE NOTIFIED" ) ;
 				} 
 				catch (RemoteException e) 
 				{

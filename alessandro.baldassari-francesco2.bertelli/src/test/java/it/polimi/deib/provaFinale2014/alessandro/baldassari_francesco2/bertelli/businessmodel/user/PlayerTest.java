@@ -46,16 +46,16 @@ public class PlayerTest {
 			SellableCard c2 = c.get(1);
 			p.addCard ( c1 ) ;
 			assertTrue ( CollectionsUtilities.contains ( p.getSellableCards() , c1 ) ) ;
-			assertFalse ( p.hasCard(c2) );
+			assertFalse ( p.hasCard(c2.getUID()) );
 			p.addCard(c2) ;
 			assertTrue ( CollectionsUtilities.contains ( p.getSellableCards() , c1 ) ) ;
-			assertTrue ( p.hasCard(c1) ) ;
+			assertTrue ( p.hasCard(c1.getUID()) ) ;
 			assertTrue ( CollectionsUtilities.contains ( p.getSellableCards() , c2 ) ) ;
 			p.removeCard ( c1 ) ;
 			assertFalse ( CollectionsUtilities.contains ( p.getSellableCards() , c1 ) ) ;
 			assertTrue ( CollectionsUtilities.contains ( p.getSellableCards() , c2 ) ) ;			
-			assertTrue ( p.hasCard ( c2 ) ) ;
-			assertFalse ( p.hasCard ( c1 ) ) ;
+			assertTrue ( p.hasCard ( c2.getUID() ) ) ;
+			assertFalse ( p.hasCard ( c1.getUID()) ) ;
 		} 
 		catch (SingletonElementAlreadyGeneratedException e) {
 			// TODO Auto-generated catch block

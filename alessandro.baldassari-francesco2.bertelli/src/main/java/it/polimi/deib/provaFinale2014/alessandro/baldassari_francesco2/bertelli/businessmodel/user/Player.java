@@ -129,9 +129,31 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 		}
 	}
 	
-	public boolean hasCard ( SellableCard s )
+	/***/
+	public boolean hasCard ( int uid )
 	{
-		return sellableCards.contains ( s ) ;
+		SellableCard s ;
+		boolean res ;
+		s = getCard(uid);
+		if ( s == null )
+			res = false ;
+		else
+			res = true ;
+		return res ;
+	}
+	
+	/***/
+	public SellableCard getCard ( int uid )
+	{
+		SellableCard res ;
+		res  = null ;
+		for ( SellableCard s : sellableCards)
+			if ( s.getUID() == uid )
+			{
+				res = s ;
+				break ;
+			}
+		return res ;
 	}
 	
 	/**

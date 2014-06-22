@@ -40,6 +40,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -437,9 +438,7 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 		try 
 		{
 			orderedPlayers = CollectionsUtilities.newListFromIterable ( match.getPlayers () ) ;
-			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - CHOOSE PLAYER ORDER PHASE : RANDOMIZZANDO I GIOCATORI " ) ;
 			CollectionsUtilities.listMesh ( orderedPlayers );
-			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - CHOOSE PLAYER ORDER PHASE : GIOCATORI RANDOMIZZATI" ) ;
 			playersMapOrder = new HashMap < Player , Integer > ( orderedPlayers.size () ) ;
 			i = 0 ;
 			for ( Player p : orderedPlayers )
@@ -448,14 +447,12 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 				p.genericNotification ( "Il tuo turno nella partita è il numero " + ( i + 1 ) + " !" ) ;
 				i ++ ;
 			}
-			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - CHOOSE PLAYER ORDER PHASE : IMPOSTANDO L'ORDINE DEI GIOCATORI NEL MATCH." ) ;
 			match.setPlayerOrder ( playersMapOrder ) ;
-			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - CHOOSE PLAYER ORDER PHASE : ORDINE DEI GIOCATORI NEL MATCH IMPOSTATO." ) ;			
 			System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - CHOOSE PLAYER ORDER PHASE : FINE " ) ;
 		} 
 		catch ( WrongMatchStateMethodCallException e ) 
 		{
-			throw new WorkflowException () ;
+			throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
 		}
 	}
 	
@@ -481,20 +478,16 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 			{
 				try 
 				{
-					System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : GESTITSCO IL PLAYER " + currentPlayer.getName () ) ;
 					sheperds = new Sheperd [ numberOfSheperdsPerPlayer ] ;		
-					System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : CHIDEDENDO AL PLAYER " + currentPlayer.getName () + " DI SCEGLIERE UN COLORE." ) ;
 					// ask the player a color
-					choosenColor = currentPlayer.getColorForSheperd ( colors ) ;
-					System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : IL PLAYER " + currentPlayer.getName () + " HA SCELTO IL COLORE " + choosenColor.getName () ) ;
+					choosenColor = currentPlayer.getColorForSheperd ( colors ) ;NamedColor n ;
 					colors.remove ( choosenColor ) ;				
 					// create sheperds
-					sheperds [ 0 ] = new Sheperd ( currentPlayer.getName () + "_#" + 0 , choosenColor , currentPlayer ) ;
+					sheperds [ 0 ] = new Sheperd ( currentPlayer.getName () + "_#" + 0 , new NamedColor ( choosenColor ) , currentPlayer ) ;
 					if ( numberOfSheperdsPerPlayer == 2 )
-						sheperds [ 1 ] = new Sheperd ( currentPlayer.getName () + "_#" + 1 , choosenColor , currentPlayer ) ;				
+						sheperds [ 1 ] = new Sheperd ( currentPlayer.getName () + "_#" + 1 , new NamedColor ( choosenColor ) , currentPlayer ) ;				
 					try 
 					{
-						System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : SETTANDO I PASTORI PER IL PLAYER " + currentPlayer.getName () ) ;
 						currentPlayer.initializeSheperds ( sheperds ) ;
 					}
 					catch ( WriteOncePropertyAlreadSetException e ) 
@@ -526,7 +519,10 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	{
 		TurnationPhaseManager turnationPhaseManager ;
 		turnationPhaseManager = new TurnationPhaseManager ( match , lambEvolver ) ;
-		turnationPhaseManager.turnationPhase();
+		synchronized (match) 
+		{
+			turnationPhaseManager.turnationPhase();			
+		}
 	}	
 	
 	/**
@@ -559,7 +555,7 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 				else
 					p.genericNotification ( "Il vincitore è : " + winner.getName () ) ;
 			for ( Player p : match.getPlayers () )
-				p.genericNotification ( "Your points : " + playerScoresMap.get ( p ) ) ;
+				p.genericNotification ( "I tuoi punti : " + playerScoresMap.get ( p ) ) ;
 		}
 		catch ( WrongMatchStateMethodCallException e ) 
 		{
@@ -573,7 +569,7 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	{
 		for ( Player currentPlayer : match.getPlayers () )
 			if ( currentPlayer.isSuspended() == false )
-			currentPlayer.matchEndNotification ( msg ) ;
+				currentPlayer.matchEndNotification ( msg ) ;
 	}
 	
 	/**

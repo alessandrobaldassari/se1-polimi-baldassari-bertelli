@@ -1,12 +1,16 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.Couple;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Vector;
 
 /***/
 public class WithReflectionObservableSupport < T extends Observer > implements Serializable
@@ -16,9 +20,13 @@ public class WithReflectionObservableSupport < T extends Observer > implements S
 	private Collection < T > observers ;
  
 	/***/
+	private Map < Couple < String , Class [] > , Method > bufferedMethods ;
+	
+	/***/
 	public WithReflectionObservableSupport () 
 	{
-		observers = new ArrayList < T > () ;
+		observers = new Vector < T > () ;
+		bufferedMethods = new HashMap < Couple < String , Class [] > , Method > () ;
 	}
 	
 	/***/
@@ -42,34 +50,45 @@ public class WithReflectionObservableSupport < T extends Observer > implements S
 	/***/
 	public void notifyObservers ( String methodName , Object ... args ) throws MethodInvocationException
 	{
-		Method m ; 
-		if ( observers.isEmpty() == false )
+		Method m ;
+		System.err.println("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc " + methodName);
+		System.err.println ( "WITH_REFLECTION_OBSERVABLE_SUPPORT - NOTIFY_OBSERVERS : INIZIO\nPARAMETERS\n- methodName : " + methodName + "\n-args : " +Utilities.generateArrayStringContent(args) );
+		if ( ! observers.isEmpty() )
 		{
 			try 
 			{
+				System.err.println ( "notify not empty" ) ;
 				m = obtainMethod ( methodName , args ) ;
+				System.err.println ( "preso " + m ) ;
 				effectiveNotification ( m , args ) ;
+				System.err.println ( "finito " + methodName ) ;
 			}
 			catch ( NoSuchMethodException e ) 
 			{
+				e.printStackTrace();
 				throw new MethodInvocationException ( methodName , e ) ;
 			}
 			catch ( SecurityException e ) 
 			{
+				e.printStackTrace();
 				throw new MethodInvocationException ( methodName , e ) ;
 			} 
 			catch ( IllegalAccessException e ) 
 			{
+				e.printStackTrace();
 				throw new MethodInvocationException ( methodName , e ) ;
 			}
 			catch ( IllegalArgumentException e ) 
 			{
+				e.printStackTrace();
 				throw new MethodInvocationException ( methodName , e ) ;
 			} 
 			catch ( InvocationTargetException e ) 
 			{
+				e.printStackTrace();
 				throw new MethodInvocationException ( methodName , e ) ;
 			}
+			System.out.println ( "WITH_REFLECTION_OBSERVABLE_SUPPORT - NOTIFY_OBSERVERS : END ( " + methodName + " )" ) ;
 		}
 	}
 	
@@ -78,10 +97,7 @@ public class WithReflectionObservableSupport < T extends Observer > implements S
 	{
 		Class < ? > [] parametersTypes ;
 		Method res ; 
-		byte i ;
-		parametersTypes = new Class < ? > [ parameters.length ] ;
-		for ( i = 0 ; i < parameters.length ; i ++ )
-			parametersTypes [ i ] = parameters [ i ].getClass () ; 
+		parametersTypes = Utilities.getTypes ( parameters ) ;
 		res = observers.iterator ().next ().getClass ().getMethod ( methodName , parametersTypes ) ;
 		return res ;
 	} 

@@ -72,7 +72,7 @@ public class OvineChooseView extends ObservableFrameworkedWithGridBagLayoutDialo
 		setAlwaysOnTop ( true ) ;	
 		view.setShowKo(false); 
 		setUndecorated(true);
- 		setSize ( GraphicsUtilities.getVGAResolution () ) ;
+ 		setSize ( GraphicsUtilities.getThreeFourthVgaResolution() ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
 		view.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCoverImage(true)) ; 
 		view.setTitle ( "Seleziona il tipo di ovino : " );

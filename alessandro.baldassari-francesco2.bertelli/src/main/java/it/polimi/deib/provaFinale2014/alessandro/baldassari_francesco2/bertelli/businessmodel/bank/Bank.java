@@ -196,10 +196,16 @@ public class Bank implements Serializable
 	public int getPeekCardPrice ( RegionType regionType ) throws NoMoreCardOfThisTypeException 
 	{
 		int res ;
-		if ( ! cards.get ( regionType ).isEmpty () )
-			res = cards.get ( regionType ).peek ().getInitialPrice () ;
+		if ( regionType != null )
+			if ( regionType != RegionType.SHEEPSBURG )
+			if ( ! cards.get ( regionType ).isEmpty () )
+				res = cards.get ( regionType ).peek ().getInitialPrice () ;
+			else
+				throw new NoMoreCardOfThisTypeException ( regionType ) ;
+			else
+				throw new IllegalArgumentException () ;
 		else
-			throw new NoMoreCardOfThisTypeException ( regionType ) ;
+			throw new IllegalArgumentException () ;
 		return res ;
 	}
 	

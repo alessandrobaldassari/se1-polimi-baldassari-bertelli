@@ -1,5 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.MapUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.NoRoadWithThisNumberException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
@@ -49,29 +50,31 @@ public class Wolf extends Animal
 			// se il lupo si può muovere
 			if ( allGatesClosed || ( ! allGatesClosed && !( winnerRoad.getElementContained () instanceof Fence) ) ) 
 			{
-				if ( winnerRoad.getFirstBorderRegion ().equals ( initRegion ) )
-					destRegion = winnerRoad.getSecondBorderRegion () ;
+				destRegion = MapUtilities.getOtherAdjacentDifferentFrom ( winnerRoad , initRegion ) ;
+				if ( destRegion != null )
+				{
+					initRegion.removeAnimal ( this ) ;
+					destRegion.addAnimal ( this ) ;
+					setPosition ( destRegion ) ;
+					// il lupo cerca di mangiare qualcuno
+					eatable = CollectionsUtilities.newCollectionFromIterable ( destRegion.getContainedAnimals () ) ;
+					for ( Animal a : eatable )
+						if ( ! ( a instanceof BlackSheep ) )
+						{
+							// mangia
+							a.getPosition ().removeAnimal ( a ) ;
+							a.moveTo ( null ) ; 
+							break ;
+						}
+				}
 				else
-					destRegion = winnerRoad.getFirstBorderRegion () ;
-				initRegion.removeAnimal ( this ) ;
-				destRegion.addAnimal ( this ) ;
-				setPosition ( destRegion ) ;
-				// il lupo cerca di mangiare qualcuno
-				eatable = CollectionsUtilities.newCollectionFromIterable ( destRegion.getContainedAnimals () ) ;
-				for ( Animal a : eatable )
-					if ( ! ( a instanceof BlackSheep ) )
-					{
-						// mangia
-						a.getPosition ().removeAnimal ( a ) ;
-						a.moveTo ( null ) ; 
-					}	
+					throw new CharacterDoesntMoveException ( this ) ;					
 			}
 			else
 				throw new CharacterDoesntMoveException ( this ) ;
 		} 
-		catch (NoRoadWithThisNumberException e ) 
+		catch ( NoRoadWithThisNumberException e ) 
 		{
-			e.printStackTrace();
 			throw new CharacterDoesntMoveException ( this ) ;			
 		}
 		

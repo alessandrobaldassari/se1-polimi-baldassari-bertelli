@@ -5,13 +5,16 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.TimeConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.card.SellableCard;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.card.SellableCard.NotSellableException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.card.SellableCard.SellingPriceNotSetException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMap;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.selector.MoveSelection;
@@ -21,6 +24,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosing.ConnectionLoosingManager;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.PropertyNotSetYetException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOnceProperty;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
@@ -50,9 +54,6 @@ public class NetworkCommunicantPlayer extends Player
 	 */
 	private transient ConnectionLoosingManager connectionLoosingManager ;
 	
-	/***/
-	private transient ExecutorService executorService ;
-	
 	/**
 	 * @param name the name of this Player
 	 * @param clientHandler the value for the ClientHandler property.
@@ -65,7 +66,6 @@ public class NetworkCommunicantPlayer extends Player
 		{
 			this.clientHandler = clientHandler;
 			this.connectionLoosingManager = connectionLoosingManager ;
-			executorService = Executors.newCachedThreadPool () ;
 		}
 		else 
 			throw new IllegalArgumentException();
@@ -248,6 +248,7 @@ public class NetworkCommunicantPlayer extends Player
 			public void run ()  
 			{
 				Iterable < SellableCard > arrived ;
+				SellableCard sc ;
 				boolean res ;
 				System.out.println ( "NETWORK_COMMUNICANT_PLAYER - chooseCardsEligibleForSelling : " + getSellableCards () ) ;
 				try 
@@ -256,10 +257,11 @@ public class NetworkCommunicantPlayer extends Player
 					res = setMethodCompleted () ;
 					if ( res )
 						for ( SellableCard s : arrived )
-							if ( hasCard( s )  )
+							if ( hasCard( s.getUID() )  )
 							{
-								removeCard ( s ) ;
-								addCard ( s ) ;
+								sc = getCard(s.getUID());
+								sc.setSellable(true); 
+								sc.setSellingPrice ( s.getSellingPrice() ) ;
 							}
 				}
 				catch ( IOException e ) 
@@ -278,9 +280,18 @@ public class NetworkCommunicantPlayer extends Player
 					}
  					e.printStackTrace();
 				}
+				catch (NotSellableException e) 
+				{
+					Logger.getGlobal().log ( Level.SEVERE, Utilities.EMPTY_STRING, e ) ; 
+				} 
+				catch (SellingPriceNotSetException e )
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}  
 		} ;
-		executeNow(commandToExecute);
+		executeNow ( commandToExecute ) ;
  	}
 
 	
@@ -305,7 +316,7 @@ public class NetworkCommunicantPlayer extends Player
 					setMethodCompleted () ;
 					return res ;
 				} 
-				catch (WrongStateMethodCallException e) 
+				catch ( WrongStateMethodCallException e ) 
 				{
 					throw new IOException ( e ) ;
 				}

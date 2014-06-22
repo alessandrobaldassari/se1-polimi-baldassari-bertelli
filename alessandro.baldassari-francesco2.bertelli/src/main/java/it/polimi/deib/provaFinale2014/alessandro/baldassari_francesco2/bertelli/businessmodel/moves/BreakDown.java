@@ -7,7 +7,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.Animal;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal.BlackSheep;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.MapUtilities;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.Sheperd;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
@@ -127,9 +126,14 @@ public class BreakDown extends GameMove
 	 */
 	private void adjacentPlayersDiceLaunching ( Collection < Player > adjacentPlayers ) 
 	{
+		Collection < Player > winners ;
+		winners = new LinkedList < Player > () ;
 		for ( Player player : adjacentPlayers )
-			if ( player.launchDice () < GameConstants.MINIMUM_POINTS_TO_BE_PAYED )
-				adjacentPlayers.remove ( player ) ;
+			if ( ! player.isSuspended() && player.launchDice () >= GameConstants.MINIMUM_POINTS_TO_BE_PAYED )
+				winners.add(player);
+		adjacentPlayers.clear();
+		for ( Player p : winners )
+			adjacentPlayers.add(p);
 	}
 	
 }

@@ -21,7 +21,7 @@ public class Utilities
 	{
 		Class < ? > [] res ; 
 		int i ;
-		res = new Class [ src.length ] ;
+		res = new Class < ? > [ src.length ] ;
 		i = 0 ;
 		for ( Object o : src )
 		{
@@ -42,6 +42,21 @@ public class Utilities
 				res = i ;
 				break ;
 			}
+		return res ;
+	}
+	
+	/***/
+	public static String generateArrayStringContent ( Object [] array ) 
+	{
+		String res ;
+		StringBuffer s ;
+		s = new StringBuffer () ;
+		for ( Object o : array )
+		{
+			s.append ( o.toString () ) ;
+			s.append ( CARRIAGE_RETURN ) ;
+		}
+		res = s.toString () ; 
 		return res ;
 	}
 	

@@ -130,7 +130,7 @@ public class MatchLauncherServer implements MatchPlayerAdder , Runnable , MatchS
 			newClientHandler.notifyNameChoose ( true , "Nome ammesso." ) ;
 			System.out.println ( "CLIENT DI NOME " + name + " NOTIFICATO CHE IL SUO NOME E' CORRETTO" ) ;
 			System.out.println ( "MASTER SERVER : PLAYER DI NOME " + name + "AGGIUNTO ALLA PARTITA" ) ;
-			currentMatchController.addPlayer ( new NetworkCommunicantPlayer ( name, newClientHandler , connectionLoosingManager ) ) ;					
+			currentMatchController.addPlayer ( new NetworkCommunicantPlayer ( new String ( name ) , newClientHandler , connectionLoosingManager ) ) ;					
 			// notify other players of the new one.
 			notifyAll () ;
 		}

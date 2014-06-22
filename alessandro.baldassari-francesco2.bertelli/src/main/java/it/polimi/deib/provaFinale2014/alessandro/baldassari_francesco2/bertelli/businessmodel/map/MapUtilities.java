@@ -44,6 +44,7 @@ public final class MapUtilities
 		return res ;
 	}
 	
+	/***/
 	public static boolean areAdjacents ( Road r1 , Road r2 ) 
 	{
 		boolean res ;
@@ -122,6 +123,16 @@ public final class MapUtilities
 		return res ;
 	}
 	
+	public static Collection < Ovine > extractOvinesExceptBlackSheep ( Iterable < Animal > src )
+	{
+		Collection < Ovine > res ;
+		res = new LinkedList < Ovine > () ;
+		for ( Animal a : src )
+			if ( Ovine.class.isAssignableFrom ( a.getClass() ) && ! ( a instanceof BlackSheep ) )
+				res.add((Ovine) a);
+		return res ;
+	}
+	
 	/**
 	 * Search for an AdultOvine of the parameter specified type in the src List, and if 
 	 * it exists, return it.
@@ -143,7 +154,9 @@ public final class MapUtilities
 		return res ;
 	}
 
-	
+	/**
+	 * 
+	 */
 	public static int ovineCount ( Region region ) 
 	{
 		int res ;

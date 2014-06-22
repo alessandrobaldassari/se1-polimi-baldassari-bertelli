@@ -4,12 +4,13 @@ import java.io.Serializable;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.user.Player;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 
 /**
  * This class model the concept of a Card of the Game.
  * This details the static part ( about its structure ) of a card.
  */
-public class Card implements Serializable
+public class Card implements Serializable , Identifiable
 {
 
 	// ATTRIBUTES
@@ -65,7 +66,8 @@ public class Card implements Serializable
 	 * 
 	 * @return the UID of this Card.
 	 */
-	public int getId () 
+	@Override
+	public int getUID () 
 	{
 		return id ;
 	}
@@ -107,7 +109,7 @@ public class Card implements Serializable
 		if ( obj instanceof Card ) 
 		{
 			otherCard = ( Card ) obj ;
-			if ( id == otherCard.getId () )
+			if ( id == otherCard.getUID () )
 				res = true ;
 			else
 				res = false ;

@@ -43,7 +43,7 @@ public class CardTest
 	public void getId ()
 	{
 		Card c = new Card ( RegionType.CULTIVABLE ,3 ) ;		
-		assertTrue ( c.getId() == 3 ) ;	
+		assertTrue ( c.getUID() == 3 ) ;	
 	}
 	
 	@Test

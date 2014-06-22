@@ -95,7 +95,7 @@ public class GameMap extends WithReflectionAbstractObservable < GameMapObserver 
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void onElementAdded ( GameMapElementType whereType , Integer whereId , PositionableElementType whoType , Integer whoId ) 
+	public synchronized void onElementAdded ( GameMapElementType whereType , Integer whereId , PositionableElementType whoType , Integer whoId ) 
 	{
 		try 
 		{
@@ -111,7 +111,7 @@ public class GameMap extends WithReflectionAbstractObservable < GameMapObserver 
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void onElementRemoved ( GameMapElementType whereType , Integer whereId , PositionableElementType whoType , Integer whoId ) 
+	public synchronized void onElementRemoved ( GameMapElementType whereType , Integer whereId , PositionableElementType whoType , Integer whoId ) 
 	{
 		try
 		{

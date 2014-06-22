@@ -36,6 +36,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.ovinechooseview.OvineChooseView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.regiontypechooseview.RegionTypeChooseView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.sheperdcolorchooseview.SheperdColorChooseView;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.waitingview.WaitingView;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
@@ -440,11 +441,11 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	@Override
 	public Iterable < SellableCard > onChooseCardsEligibleForSelling ( Iterable < SellableCard > playerCards ) 
 	{
-		System.out.println ( "GUI_CONTROLLER - onChooseCardsEligibleForSelling - INIZIO" ) ;
+		System.err.println ( "GUI_CONTROLLER - onChooseCardsEligibleForSelling - INIZIO\nPARAMETERS : " + playerCards ) ;
 		Iterable < SellableCard > res ;
 		generationNotification ( PresentationMessages.CHOOSE_CARDS_ELIGIBLE_FOR_SELLING_MESSAGE ) ;
 		res = CardsMarketView.showDialog ( playerCards , true , -1 ) ;
-		System.out.println ( "GUI_CONTROLLER - onChooseCardsEligibleForSelling - FINE" ) ;
+		System.out.println ( "GUI_CONTROLLER - onChooseCardsEligibleForSelling - FINE\nRETURN : " + res ) ;
 		return res ;
 	}
 	

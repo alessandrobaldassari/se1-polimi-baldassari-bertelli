@@ -1,5 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.MapUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Road;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.CharacterDoesntMoveException;
@@ -41,13 +42,9 @@ public class BlackSheep extends AdultOvine
 				winnerRoad = road ;
 				break ;
 			}
-
 		if ( winnerRoad != null && winnerRoad.getElementContained () == null  ) 
 		{
-			if ( winnerRoad.getFirstBorderRegion ().equals ( myRegion ) )
-				destinationRegion = winnerRoad.getSecondBorderRegion () ;
-			else
-				destinationRegion = winnerRoad.getFirstBorderRegion () ;
+			destinationRegion = MapUtilities.getOtherAdjacentDifferentFrom ( winnerRoad , myRegion ) ;
 			myRegion.removeAnimal ( this ) ;
 			destinationRegion.addAnimal ( this ) ;
 			moveTo ( destinationRegion ) ;

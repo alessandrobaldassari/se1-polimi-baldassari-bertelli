@@ -4,10 +4,8 @@ import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.Image;
 import java.awt.Insets;
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.FilePaths;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
@@ -74,7 +72,7 @@ public class LoginView extends ObservableFrameworkedWithGridBagLayoutDialog < Lo
 		inputView.setTitle ( PresentationMessages.NAME_REQUEST_MESSAGE ) ;
 		inputView.setBackgroundImage( SheeplandClientApp.getInstance().getImagesHolder().getCoverImage ( true ) ) ; 
 		setUndecorated(true);
- 		setSize ( GraphicsUtilities.getVGAResolution () ) ;
+ 		setSize ( GraphicsUtilities.getThreeFourthVgaResolution() ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
 	}
 

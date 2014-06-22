@@ -8,6 +8,7 @@ import java.awt.Image;
 import java.awt.Insets;
 
 import javax.swing.JFrame;
+import javax.swing.JScrollPane;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
@@ -124,6 +125,8 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	 */
 	private GameMapViewPanel mapPanel ;
 	
+	private JScrollPane notificationAreaScrollPane ;
+	
 	/**
 	 * A panel to show some notifications to the User. 
 	 */
@@ -151,6 +154,7 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 		model = new PlayerInfoViewModel () ;
 		playersCardPanel = new PlayerInfoView () ;
 		mapPanel = new GameMapViewPanel () ;
+		notificationAreaScrollPane = new JScrollPane () ;
 		notificationArea = new NotificationPanel();
 		backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getBackgroundImage(true);
 	}
@@ -163,10 +167,12 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	{
 		Insets insets ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
-		layoutComponent ( notificationArea , 0 , 0 , 1 , 0.25 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.WEST , insets ) ;
-		layoutComponent ( playersCardPanel , 0 , 1 , 1 , 0.75 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.WEST , insets ) ;
-		layoutComponent ( mapPanel , 1 , 0 , 5 , 1 , 2 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+		layoutComponent ( notificationAreaScrollPane , 0 , 0 , 0.25 , 0.375 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+		layoutComponent ( playersCardPanel , 0 , 1 , 0.25 , 0.625 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
+		layoutComponent ( mapPanel , 1 , 0 , 0.75 , 1 , 2 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 		setOpaque ( false ) ;
+		notificationArea.setOpaque(false); 
+		notificationAreaScrollPane.setViewportView(notificationArea); 
 	}
 
 	/**
@@ -186,7 +192,7 @@ class GameViewPanel extends FrameworkedWithGridBagLayoutPanel
 	{
 		add ( playersCardPanel ) ;
 		add ( mapPanel ) ;
-		add ( notificationArea ) ;
+		add ( notificationAreaScrollPane ) ;
 	}
 	
 	/**

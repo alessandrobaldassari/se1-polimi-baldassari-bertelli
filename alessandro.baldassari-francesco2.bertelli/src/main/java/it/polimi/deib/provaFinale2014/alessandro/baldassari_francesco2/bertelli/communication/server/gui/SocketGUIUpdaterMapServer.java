@@ -116,7 +116,7 @@ public class SocketGUIUpdaterMapServer extends GUIUpdaterServer
 			int whereId, PositionableElementType whoType, int whoId ) 
 	{
 		GUIGameMapNotificationMessage m ;
-		m = new GUIGameMapNotificationMessage ( actionAssociated , whereType , whereId , whoType , whoId ) ;
+		m = GUIGameMapNotificationMessage.newInstance ( actionAssociated , whereType , whereId , whoType , whoId ) ;
 		messages.add ( m ) ;
 		synchronized ( messagesForOthers ) 
 		{

@@ -6,8 +6,10 @@ import java.awt.Color;
 public class NamedColor extends Color
 {
 	
+	/***/
 	private String name ;
 
+	/***/
 	public NamedColor ( int r , int g , int b , String name ) 
 	{
 		super ( r , g , b ) ;
@@ -16,6 +18,11 @@ public class NamedColor extends Color
 		else
 			throw new IllegalArgumentException () ;
 	}	
+	
+	public NamedColor ( NamedColor src )
+	{
+		this ( src.getRed () , src.getGreen () , src.getBlue () , src.getName () ) ;
+	}
 	
 	public String getName () 
 	{

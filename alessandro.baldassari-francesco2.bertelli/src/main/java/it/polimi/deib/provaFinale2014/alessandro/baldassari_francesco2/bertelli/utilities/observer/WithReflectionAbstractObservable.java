@@ -1,8 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.observer;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
-
-import java.lang.reflect.InvocationTargetException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
 /***/
 public class WithReflectionAbstractObservable < T extends Observer > extends AbstractObservable < T > 
@@ -36,9 +35,11 @@ public class WithReflectionAbstractObservable < T extends Observer > extends Abs
 	}
 
 	/***/
-	protected void notifyObservers ( String methodName , Object ... args ) throws MethodInvocationException 
+	protected synchronized void notifyObservers ( String methodName , Object ... args ) throws MethodInvocationException 
 	{
+		System.err.println ( "WITH_REFLECTION_ABSTRACT_OBSERVABLE - NOTIFY_OBSERVERS : BEGINS\nPARAMETERS : \n- methodName : " +methodName + "\n- args : " + Utilities.generateArrayStringContent ( args ) ) ;
 		observableSupport.notifyObservers ( methodName , args );
+		System.err.println ( "WITH_REFLECTION_ABSTRACT_OBSERVABLE - NOTIFY_OBSERVERS : END ( " + methodName + " ) " ) ;
 	}
 	
 }

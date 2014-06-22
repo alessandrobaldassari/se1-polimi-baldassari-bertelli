@@ -6,8 +6,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.card.SellableCard.SellingPriceNotSetException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.Couple;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.IterableContainer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.GraphicsUtilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.InputView;
@@ -91,7 +91,7 @@ public class CardsMarketView extends ObservableFrameworkedWithGridBagLayoutDialo
 		setResizable ( false ) ;
 		setAlwaysOnTop ( true ) ;	
 		setUndecorated(true);
- 		setSize ( GraphicsUtilities.getVGAResolution () ) ;
+ 		setSize ( GraphicsUtilities.getThreeFourthVgaResolution() ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
 		view.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCoverImage(true) ); 
 	}
@@ -142,10 +142,6 @@ public class CardsMarketView extends ObservableFrameworkedWithGridBagLayoutDialo
 			int sum ;
 			res = cardsPanel.getSelectedData () ;
 			// if we are in a buying session
-			SellableCard [] array = new SellableCard [ CollectionsUtilities.iterableSize(res) ] ; 
-			int i = 0 ;
-			for ( SellableCard s : res )
-				array [ i++ ] = s ;
 			if ( maxAmount >= 0)
 			{	
 				sum = 0 ;
@@ -165,7 +161,7 @@ public class CardsMarketView extends ObservableFrameworkedWithGridBagLayoutDialo
 					if ( maxAmount >= sum )
 						try 
 						{
-							notifyObservers ( "onCardChoosed" , array );
+							notifyObservers ( "onCardChoosed" , new IterableContainer < SellableCard > ( res ) );
 						}
 						catch (MethodInvocationException e1) 
 						{
@@ -177,7 +173,7 @@ public class CardsMarketView extends ObservableFrameworkedWithGridBagLayoutDialo
 			else
 				try 
 				{
-					notifyObservers ( "onCardChoosed" , array );
+					notifyObservers ( "onCardChoosed" , new IterableContainer < SellableCard > ( res ) );
 				}
 				catch (MethodInvocationException e1) 
 				{
@@ -212,9 +208,9 @@ public class CardsMarketView extends ObservableFrameworkedWithGridBagLayoutDialo
 	public static Iterable < SellableCard > showDialog ( Iterable < SellableCard > availableCards , boolean allowEdit , int maxAmount ) 
 	{
 		CardsMarketView cardsChooseView ;
-		AtomicReference < SellableCard [] > cards ;
-		cards = new AtomicReference < SellableCard [] > ( null ) ;
-		cardsChooseView = new CardsMarketView ( new DefaultCardsMarketViewObserver ( cards ) , maxAmount ) ;
+		AtomicReference < IterableContainer < SellableCard > > cards ;
+		cards = new AtomicReference < IterableContainer < SellableCard > > ( null ) ;
+		cardsChooseView = new CardsMarketView ( new DefaultCardsMarketViewObserver (  cards ) , maxAmount ) ;
 		cardsChooseView.setCards ( availableCards , allowEdit ) ;
 		GraphicsUtilities.showUnshowWindow ( cardsChooseView , false , true ) ;
 		synchronized ( cards ) 
@@ -230,7 +226,7 @@ public class CardsMarketView extends ObservableFrameworkedWithGridBagLayoutDialo
 				}
 		}
 		GraphicsUtilities.showUnshowWindow ( cardsChooseView , false , false ) ;
-		return CollectionsUtilities.newIterableFromArray ( cards.get() ) ;
+		return cards.get().getData() ;
 	}
 	
 }
@@ -312,7 +308,6 @@ class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel
 		ChangeListener changeListener ;
 		int i ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
-		spinnerModel = new SpinnerNumberModel ( 1 , 1 , 4 , 1 ) ; 
 		i = 0 ;
 		for ( SellableCard n : in )
 		{
@@ -333,6 +328,7 @@ class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel
 			if ( allowEdit )
 			{
 				spinner = new JSpinner () ;
+				spinnerModel = new SpinnerNumberModel ( 1 , 1 , 4 , 1 ) ; 
 				spinner.setModel ( spinnerModel ) ;
 				layoutComponent ( spinner , i , 3 , 1 , 1 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;				
 				changeListener = new SpinnerListener ( n ) ;
@@ -361,6 +357,7 @@ class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel
 					e.printStackTrace();
 				}
 			}
+			i ++ ;
 		}
 	}
 	
@@ -422,21 +419,34 @@ class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel
 		{
 			if ( ( ( JToggleButton ) e.getSource() ).isSelected () )
 			{
-				myItem.setSellable(true); 
-				myItem.setSellingPrice ( ( Integer ) associatedValueEnter.getValue() ) ;
+				myItem.setSellable ( true ) ; 
 				selectedCards.add ( myItem ) ;
-				associatedValueEnter.setVisible(true);
+				// if we are in editing mode...
+				if ( associatedValueEnter != null )
+				{
+					if (  associatedValueEnter.getValue() != null )
+						myItem.setSellingPrice ( ( Integer ) associatedValueEnter.getValue () ) ;
+					else
+					{
+						myItem.setSellingPrice(1); 
+						associatedValueEnter.setValue(1); 
+					}
+					associatedValueEnter.setVisible ( true ) ;
+				}
 			}
 			else
 			{
 				for ( SellableCard in : selectedCards )
 					if ( in.equals ( myItem ) )
 					{
-						in.setSellable(false); 
+						in.setSellable(false);  
 						selectedCards.remove(in);
+
 						break ;
 					}
-				associatedValueEnter.setVisible(false);
+				// if we are in editing mode...
+				if ( associatedValueEnter != null )
+					associatedValueEnter.setVisible(false);
 			}
 		}	
 		

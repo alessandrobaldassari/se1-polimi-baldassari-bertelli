@@ -7,24 +7,20 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.Couple;
 
 import java.awt.Polygon;
-import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Scanner;
 
 /**
  * Class that manages the measures of the GameMap.
  */
-public class MapMeasuresCoordinatesManager
+public class MapMeasuresManager
 {
 
 	// ATTRIBUTES
@@ -34,33 +30,32 @@ public class MapMeasuresCoordinatesManager
 		
 	int ANIMAL_RADIUS = 20 ;
 	
-	/***/
+	/**
+	 * A Map containing, for each Region, it's coordinates approssimation as a Polygon. 
+	 */
 	private Map < Integer , Polygon > regionsCoordinates ;
 	
-	/***/
+	/**
+	 * A Map containing, for each Road, it's coordinates ( as an Ellipse on the Map ). 
+	 */
 	private Map < Integer , Ellipse2D > roadsCoordinates ;
 
-	/***/
+	/**
+	 * A Map containing, for each region, another Map that, for every PositionbleElemetType ( Animal ) has
+	 * a reference to a place where this Animal has to be draw. 
+	 */
 	private Map < Integer , Map < PositionableElementType , Ellipse2D > > animalsInRegions ;
-
-	/***/
-	private Map < Integer , Couple < PositionableElementType , Ellipse2D > > objectsInRoads ;
-	
-	/***/
-	private PositionableElementCoordinatesManager positionableElementsManager ;
 	
 	// METHODS
 	
 	/***/
-	public MapMeasuresCoordinatesManager ( PositionableElementCoordinatesManager positionableElementManager ) 
+	public MapMeasuresManager () 
 	{
 		InputStream regionsI ;
 		InputStream roadsI ;
 		InputStream animalsI ;
-		int i ;
 		try 
 		{
-			this.positionableElementsManager = positionableElementManager ;
 			regionsI = Files.newInputStream ( Paths.get ( FilePaths.REGIONS_COORDINATES_PATH ) , StandardOpenOption.READ ) ;
 			roadsI = Files.newInputStream ( Paths.get ( FilePaths.ROADS_COORDINATES_PATH ) , StandardOpenOption.READ ) ;
 			animalsI = Files.newInputStream ( Paths.get ( FilePaths.REGIONS_ANIMALS_PATH ) , StandardOpenOption.READ ) ;
@@ -69,9 +64,6 @@ public class MapMeasuresCoordinatesManager
 			roadsCoordinates = readRoadsCoordinates ( roadsI ) ;
 			roadsI.close () ;
 			animalsInRegions = readAnimalsCoordinates ( animalsI ) ;
-			objectsInRoads = new HashMap < Integer , Couple < PositionableElementType , Ellipse2D > > ( GameConstants.NUMBER_OF_ROADS ) ;
-			for ( i = 1 ; i <= GameConstants.NUMBER_OF_ROADS ; i ++ )
-				objectsInRoads.put ( i , null ) ;
 		}
 		catch ( IOException e ) 
 		{
@@ -154,39 +146,6 @@ public class MapMeasuresCoordinatesManager
 		return animalsInRegions.get ( regionUID ) ;
 	}
 	
-	/**
-	 * @param
-	 * @param 
-	 */
-	public void scale ( float xFactor , float yFactor ) 
-	{
-		Map < PositionableElementType , Ellipse2D > m ;
-		int i ;
-		for ( Polygon p : regionsCoordinates.values() )
-			for ( i = 0 ; i < p.npoints ; i ++ )
-			{
-				p.xpoints [ i ] = ( int ) ( p.xpoints [ i ] * xFactor ) ;
-				p.ypoints [ i ] = ( int ) ( p.ypoints [ i ] * yFactor ) ;
-			}
-		for ( Ellipse2D p : roadsCoordinates.values () )
-			p.setFrame ( p.getX () * xFactor , p.getY () * yFactor , p.getWidth () * xFactor , p.getHeight () * yFactor ) ;
-		for ( Integer r : animalsInRegions.keySet() )
-		{
-			m = animalsInRegions.get ( r ) ;
-			for ( Ellipse2D e : m.values () )
-				e.setFrame ( e.getX () * xFactor , e.getY () * yFactor , e.getWidth () * xFactor , e.getHeight () * yFactor ) ;
-		}
-		for ( Integer r : objectsInRoads.keySet() )
-		{
-			if ( objectsInRoads.get (r) != null )
-			{
-				Ellipse2D e = objectsInRoads.get ( r ).getSecondObject () ;
-				e.setFrame ( e.getX () * xFactor , e.getY () * yFactor , e.getWidth () * xFactor , e.getHeight () * yFactor ) ;
-			}
-		}
-		ROADS_RADIUS = (int) (ROADS_RADIUS * xFactor) ;
-	}
-		
 	/***/
 	public Polygon getRegionBorder ( int regionUID )
 	{
@@ -227,7 +186,7 @@ public class MapMeasuresCoordinatesManager
 		return res ;
 	}
 
-	/***/
+	/*
 	public Integer getSheperdId ( int x , int y ) 
 	{
 		Couple < PositionableElementType , Integer > selectedRoadInfo ;
@@ -235,7 +194,6 @@ public class MapMeasuresCoordinatesManager
 		Integer roadUID ;
 		roadUID = getRoadId ( x , y ) ;
 		selectedRoadInfo = positionableElementsManager.getElementInRoad ( roadUID ) ;
-		System.out.println ( "\n\n\nMMCM : " + selectedRoadInfo +"\n\n\n" ) ;
 		if ( selectedRoadInfo != null && PositionableElementType.isSheperd( selectedRoadInfo.getFirstObject () ) )
 			res = selectedRoadInfo.getSecondObject () ;
 		else
@@ -244,10 +202,10 @@ public class MapMeasuresCoordinatesManager
 	}
 	
 	/**
-	public Collection < Integer > getAnimalsId ( int x , int y ) 
+	public Integer getAnimalsId ( int x , int y ) 
 	{
 		Map < PositionableElementType , Collection < Integer > > animalsIds ;
-		Collection < Integer > res ;
+		Integer res ;
 		Integer regionUID ;
 		PositionableElementType elementTypeSelected ;
 		regionUID = getRegionId ( x , y ) ;
@@ -265,6 +223,7 @@ public class MapMeasuresCoordinatesManager
 		else
 			res = new LinkedList < Integer > () ;
 		return res ;
-	}**/
+	}
+	*/
 	
 }

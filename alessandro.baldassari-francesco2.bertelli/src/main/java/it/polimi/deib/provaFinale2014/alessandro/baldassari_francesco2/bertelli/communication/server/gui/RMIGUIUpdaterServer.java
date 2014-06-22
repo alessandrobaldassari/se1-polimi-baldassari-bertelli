@@ -116,7 +116,7 @@ public class RMIGUIUpdaterServer extends GUIUpdaterServer
 	public void onPositionableElementAdded ( GameMapElementType whereType , Integer whereId , 
 			PositionableElementType whoType, Integer whoId ) 
 	{
-		notificationAlgo ( "ADDED" , whereType , whereId , whoType , whoId ) ;
+		notificationAlgo ( "ADD" , whereType , whereId , whoType , whoId ) ;
 	}
 
 	/**
@@ -126,7 +126,7 @@ public class RMIGUIUpdaterServer extends GUIUpdaterServer
 	public void onPositionableElementRemoved ( GameMapElementType whereType,
 			Integer whereId, PositionableElementType whoType , Integer whoId)
 	{
-		notificationAlgo ( "REMOVED" , whereType , whereId , whoType , whoId ) ;	Vector cc ;	
+		notificationAlgo ( "REMOVE" , whereType , whereId , whoType , whoId ) ;
 	}
 	
 	/***/
@@ -134,7 +134,7 @@ public class RMIGUIUpdaterServer extends GUIUpdaterServer
 			int whereId, PositionableElementType whoType, int whoId ) 
 	{
 		GUIGameMapNotificationMessage m ;
-		m = new GUIGameMapNotificationMessage ( actionAssociated , whereType , whereId , whoType , whoId ) ;
+		m = GUIGameMapNotificationMessage.newInstance ( actionAssociated , whereType , whereId , whoType , whoId ) ;
 		messages.add ( messages.size () , m ) ;
 	}
 	

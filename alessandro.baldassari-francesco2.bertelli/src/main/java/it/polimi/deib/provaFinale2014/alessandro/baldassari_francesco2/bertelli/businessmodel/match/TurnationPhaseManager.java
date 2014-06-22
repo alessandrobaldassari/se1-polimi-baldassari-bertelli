@@ -36,6 +36,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /***/
 class TurnationPhaseManager implements TurnNumberClock
@@ -157,7 +159,7 @@ class TurnationPhaseManager implements TurnNumberClock
 	private void allPlayersTurn () throws WorkflowException
 	{
 		Iterable < Player > players ;
-		MoveExecutor moveFactory ;
+		MoveExecutor moveExecutor ;
 		MoveSelector selector ;
 		MoveSelection selection ;
 		Sheperd choosenSheperd ;
@@ -174,21 +176,22 @@ class TurnationPhaseManager implements TurnNumberClock
 					// choose a sheperd for this Player.
 					choosenSheperd = chooseSheperd ( currentPlayer ) ;
 					// generate a new MoveExecutor for this turn.
-					moveFactory = MoveExecutor.newInstance ( choosenSheperd , this , lambEvolver ) ;
-					selector = new MoveSelector ( moveFactory.getAssociatedSheperd () ) ;
+					moveExecutor = MoveExecutor.newInstance ( choosenSheperd , this , lambEvolver ) ;
 					breakPlayer = false ;
 					for ( moveIndex = 0 ; moveIndex < GameConstants.NUMBER_OF_MOVES_PER_USER_PER_TURN && ! breakPlayer ; moveIndex ++ )
 						try 
 						{
+							selector = new MoveSelector ( moveExecutor.getAssociatedSheperd () ) ;
+							System.err.println ( choosenSheperd.getPosition() ) ;
 							fillMoveSelectorWithAvailableParameters ( selector , choosenSheperd ) ;
-							selector.setMovesAllowedDueToRuntimeRules ( moveFactory ) ;
+							selector.setMovesAllowed ( moveExecutor ) ;
 							System.err.println ( selector.getAvailableMoves() );
 							playersGenericNotification ( "Carissimo, per questo turno è la tua mossa # " + moveIndex ) ;
 							selection = currentPlayer.doMove ( selector , match.getGameMap () ) ;
 							if ( selection != null )
 							{
 								// effectively execute the move.
-								execMove ( moveFactory , selection, match , selector ) ;
+								execMove ( moveExecutor , selection, match ) ;
 								currentPlayer.genericNotification ( PresentationMessages.MOVE_SUCCEED_MESSAGE ) ;
 							}
 							else
@@ -201,10 +204,10 @@ class TurnationPhaseManager implements TurnNumberClock
 						} 
 						catch ( MoveNotAllowedException e ) 
 						{
-							// the user tried to do an invalid move; give him another chance
-							System.err.println ( "GAME CONTROLLER - TURNATION PHASE - PLAYER : " + currentPlayer.getName () + " - ERRORE DURANTE L'ESECUZIONE DELLA MOSSA." ) ;									
+							Logger.getGlobal().log ( Level.INFO , Utilities.EMPTY_STRING , e ) ;
 							currentPlayer.genericNotification ( "Mossa fallita!\n" + e.getMessage() ) ;
 						}
+					currentPlayer.genericNotification ( "Bene, per questa sessione hai finito.\nOra calmati, guarda le pecore e lascia fare agli altri il loro turno di gioco!" );
 				}
 				catch ( TimeoutException t ) 
 				{
@@ -316,20 +319,26 @@ class TurnationPhaseManager implements TurnNumberClock
 			try
 			{
 				r =  sh.getPosition().getFirstBorderRegion ().getType () ;
-				price = match.getBank().getPeekCardPrice ( r ) ;
-				if ( sh.getOwner().getMoney() >= price )
-					res.put ( r , price ) ;
+				if ( r != RegionType.SHEEPSBURG )
+				{
+					price = match.getBank().getPeekCardPrice ( r ) ;
+					if ( sh.getOwner().getMoney() >= price )
+						res.put ( r , price ) ;
+				}
 			} 
 			catch (NoMoreCardOfThisTypeException e) {}
 			try
 			{
 				r =  sh.getPosition().getSecondBorderRegion ().getType () ;
-				price = match.getBank().getPeekCardPrice ( r ) ;
-				if ( sh.getOwner().getMoney() >= price )
-					res.put ( r , price ) ;
+				if ( r != RegionType.SHEEPSBURG )
+				{
+					price = match.getBank().getPeekCardPrice ( r ) ;
+					if ( sh.getOwner().getMoney() >= price )
+						res.put ( r , price ) ;
+				}
 			} 
 			catch (NoMoreCardOfThisTypeException e) {}
-			}
+		}
 		catch (WrongStateMethodCallException e) 
 		{
 			throw new WorkflowException ( e ,Utilities.EMPTY_STRING ) ;
@@ -360,19 +369,13 @@ class TurnationPhaseManager implements TurnNumberClock
 		int c ;
 		res = new ArrayList < Region > ( 2 ) ;
 		r = sh.getPosition().getFirstBorderRegion();
-		c = MapUtilities.ovineCount ( r ) ;
-		if ( c >= 2 )
+		c = MapUtilities.extractOvinesExceptBlackSheep ( r.getContainedAnimals() ).size();
+		if ( c >= 1 )
 			res.add(r);
-		else
-			if ( c == 1 && MapUtilities.extractAdultOvinesExceptBlackSheep ( r.getContainedAnimals () ).size() == 0 ) 
-				res.add(r) ;
 		r = sh.getPosition().getSecondBorderRegion();
-		c = MapUtilities.ovineCount ( r ) ;
-		if ( c >= 2 )
+		c = MapUtilities.extractOvinesExceptBlackSheep ( r.getContainedAnimals() ).size();
+		if ( c >= 1 )
 			res.add(r);
-		else
-			if ( c == 1 && MapUtilities.extractAdultOvinesExceptBlackSheep ( r.getContainedAnimals () ).size() == 0 )
-				res.add(r);
 		return res;
 	}
 	
@@ -380,13 +383,13 @@ class TurnationPhaseManager implements TurnNumberClock
 	 * This method effectively execute a Move selected by the User.
 	 * 
 	 * @param exec the object that will execute the move.
-	 * @param selection a reference to the move the User has choosedn.
+	 * @param selection a reference to the move the User has choosen.
 	 * @param match the Match over which operate.
 	 * @throws MoveNotAllowedException if the execution of the move is not allowed ( probably due to business rules ).
 	 * @throws WrongStateMethodCallException 
 	 * @throws WorkflowException 
 	 */
-	private void execMove ( MoveExecutor exec , MoveSelection selection , Match match , MoveSelector sel ) throws MoveNotAllowedException, WorkflowException
+	private void execMove ( MoveExecutor exec , MoveSelection selection , Match match ) throws MoveNotAllowedException, WorkflowException
 	{
 		List < Serializable > params ;
 		params = CollectionsUtilities.newListFromIterable ( selection.getParams() ) ; 
@@ -396,11 +399,11 @@ class TurnationPhaseManager implements TurnNumberClock
 			switch ( selection.getSelectedType() )
 			{	
 				case BREAK_DOWN :
-					mapUID =  ( ( Animal ) params.get(0) ).getPosition().getUID () ;
+					mapUID =  ( ( Animal ) params.get( 0 ) ).getPosition().getUID () ;
 					exec.executeBreakdown ( match , MapUtilities.findAnimalByUID ( match.getGameMap().getRegionByUID ( mapUID ) , ( ( Animal ) params.get(0) ).getUID () ) ) ;
 					break ;
 				case BUY_CARD :
-					exec.executeBuyCard ( match , ( RegionType ) params.get(0) ) ;
+					exec.executeBuyCard ( match , RegionType.valueOf ( ( ( RegionType ) params.get(0 ) ).name() )  ) ;
 				break ;
 				case MATE :
 					mapUID = ( ( Region ) params.get ( 0 ) ).getUID () ;
@@ -408,7 +411,9 @@ class TurnationPhaseManager implements TurnNumberClock
 				break ;
 				case MOVE_SHEEP :
 					mapUID = ( ( Region ) params.get ( 1 ) ).getUID () ;
-					exec.executeMoveSheep ( match , ( Ovine ) MapUtilities.findAnimalByUID ( ( ( Ovine ) params.get(0) ).getPosition() , ( ( Ovine ) params.get(0) ).getUID() ) , match.getGameMap ().getRegionByUID ( mapUID ) ); 
+					exec.executeMoveSheep ( match , 
+					( Ovine ) MapUtilities.findAnimalByUID ( match.getGameMap().getRegionByUID( ( ( Ovine ) params.get(0) ).getPosition().getUID() ) ,( ( Ovine ) params.get(0) ).getUID() ) 
+					, match.getGameMap ().getRegionByUID ( mapUID ) ); 
 				break ;
 				case MOVE_SHEPERD :
 					mapUID = ( ( Road ) params.get ( 0 ) ).getUID () ;

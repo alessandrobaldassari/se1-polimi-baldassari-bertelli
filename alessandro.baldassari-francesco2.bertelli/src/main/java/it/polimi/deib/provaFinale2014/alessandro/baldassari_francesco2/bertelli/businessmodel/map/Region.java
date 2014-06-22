@@ -107,14 +107,14 @@ public class Region extends GameMapElement
 	 * 
 	 * @param newAnimal the Animal to add into this Region 
 	 */
-	public void addAnimal ( Animal newAnimal ) 
+	public synchronized void addAnimal ( Animal newAnimal ) 
 	{
 		containedAnimals.add ( newAnimal ) ;
 		notifyAddElement ( getGameMapElementType () , getUID () , newAnimal.getPositionableElementType () , newAnimal.getUID () );
 	}
 	
 	/***/
-	public void removeAnimal ( Animal animal ) 
+	public synchronized void removeAnimal ( Animal animal ) 
 	{
 		containedAnimals.remove ( animal ) ;
 		notifyRemoveElement ( getGameMapElementType () , getUID () , animal.getPositionableElementType () , animal.getUID ()  );

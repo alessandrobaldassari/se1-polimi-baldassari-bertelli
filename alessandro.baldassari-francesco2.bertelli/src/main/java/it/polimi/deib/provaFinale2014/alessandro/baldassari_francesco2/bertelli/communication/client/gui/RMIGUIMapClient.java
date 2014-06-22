@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapObserver;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
@@ -13,6 +15,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.message.GUINotificationMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.message.GUIPlayerNotificationMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.ViewPresenter;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
 public class RMIGUIMapClient implements Runnable
 {
@@ -67,11 +70,7 @@ public class RMIGUIMapClient implements Runnable
 		Registry registry ;
 		try 
 		{
-			System.out.println ( "RMI_GUI_MAP_CLIENT - CONNECT : BEGIN" ) ;
-			System.out.println ( "RMI_GUI_MAP_CLIENT - CONNECT : LOCATING RMI REGISTRY." ) ;
 			registry = LocateRegistry.getRegistry ( SERVER_IP_ADDRESS , SERVER_DIRECT_PORT ) ;
-			System.out.println ( "RMI_GUI_MAP_CLIENT - CONNECT : RMI REGISTRY LOCATED." ) ;
-			System.out.println ( "RMI_GUI_MAP_CLIENT - CONNECT : RETRIEVING INITIAL CONNECTION SERVER." ) ;
 			clientBroker = ( RMIGUIClientBroker ) registry.lookup ( brokerName ) ;
 			on = true ;
 			this.viewPresenter = viewPresenter ;
@@ -86,41 +85,39 @@ public class RMIGUIMapClient implements Runnable
 	public void run () 
 	{
 		GUINotificationMessage m ;
-		String methodName ;
 		while ( on )
 		{
 			try 
 			{
-				System.out.println ( "RMI_GUI_MAP_CLIENT : WAITING FOR A MESSAGE" ) ;
 				m = ( GUINotificationMessage ) clientBroker.getMessage () ;
-				System.out.println ( "SOCKET_GUI_MAP_CLIENT : MESSAGE CATCH" ) ;
-				System.out.println ( "SOCKET_GUI_MAP_CLIENT : BEFORE NOTIFYING." ) ;
 				if ( m instanceof GUIGameMapNotificationMessage )
 					manageGameMapMessage ( (GUIGameMapNotificationMessage) m ) ;
 				else
-					mangePlayerMessage ( (GUIPlayerNotificationMessage) m ) ;
-				System.out.println ( "SOCKET_GUI_MAP_CLIENT : AFTER NOTIFYING." ) ;
+					managePlayerMessage ( (GUIPlayerNotificationMessage) m ) ;
 			}
 			catch (IOException e) 
 			{
-				e.printStackTrace();
+				Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , e ) ;
 				viewPresenter.stopApp();
 			} 
 		}		
 	}
 	
+	/***/
 	private void manageGameMapMessage ( GUIGameMapNotificationMessage m ) 
 	{
-		if ( gameMapObserver != null )
+		if ( gameMapObserver != null && m!= null )
 		{
-		if ( m.getActionAssociated ().compareTo ( "ADDED" ) == 0 )
-			gameMapObserver.onPositionableElementAdded ( m.getWhereType() , m.getWhereId () , m.getWhoType () , m.getWhoId () ) ;
-		else
-			gameMapObserver.onPositionableElementRemoved ( m.getWhereType() , m.getWhereId () , m.getWhoType () , m.getWhoId () ) ;
+			if ( m.getActionAssociated ().compareTo ( "ADD" ) == 0 )
+				gameMapObserver.onPositionableElementAdded ( m.getWhereType() , m.getWhereId () , m.getWhoType () , m.getWhoId () ) ;
+			else
+				if ( m.getActionAssociated ().compareTo ( "REMOVE" ) == 0 )
+					gameMapObserver.onPositionableElementRemoved ( m.getWhereType() , m.getWhereId () , m.getWhoType () , m.getWhoId () ) ;
 		}
 	}
 	
-	private void mangePlayerMessage ( GUIPlayerNotificationMessage m )
+	/***/
+	private void managePlayerMessage ( GUIPlayerNotificationMessage m )
 	{
 		if ( playerObserver != null )
 		{
@@ -135,6 +132,8 @@ public class RMIGUIMapClient implements Runnable
 					else
 						if ( m.getActionAssociated().compareToIgnoreCase ( "onCardRemoved" ) == 0 )
 							playerObserver.onCardRemoved ( (RegionType) m.getFirstParam() );
+						else
+							Logger.getGlobal().log ( Level.WARNING , "Unknown message" , m ) ;
 		}
 	}
 	

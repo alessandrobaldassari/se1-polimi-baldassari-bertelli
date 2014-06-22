@@ -9,7 +9,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WorkflowException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -50,54 +49,55 @@ class MarketPhaseManager
 		int amount ;
 		try
 		{
-			System.out.println ( "MARKET_PHASE_MANAGER - MARKET PHASE : ASKING THE PLAYERS WHICH CARDS THEY WANT TO SELL" ) ;
 			for ( Player currentPlayer : players )
 				if ( ! currentPlayer.isSuspended () )
 					currentPlayer.chooseCardsEligibleForSelling () ;
-			System.out.println ( "MARKET_PHASE_MANAGER - MARKET PHASE : ASKING THE PLAYERS WHICH CARDS THEY WANT TO BUY" ) ;			
 			for ( Player currentPlayer : players )
 			{
-				try
-				{					
-					amount = 0 ;
-					// generate a List containing all the Cards this Player can buy
-					sellableCards = generateGettableCardList ( currentPlayer ) ;
-					if ( ! sellableCards.isEmpty () )
-					{
-						// ask the User which Cards he wants to buy
-						receivedSellableCards = currentPlayer.chooseCardToBuy ( sellableCards ) ;
-						// if the user selected some cards...
-						if ( CollectionsUtilities.iterableSize ( receivedSellableCards ) > 0 )
+				System.err.println ( "MARKET : PLAYER " + currentPlayer.getName() + " PRIMA DELLA SOSP." ) ;
+				if ( ! currentPlayer.isSuspended () )
+					try
+					{					
+						// generate a List containing all the Cards this Player can buy
+						sellableCards = generateGettableCardList ( currentPlayer ) ;
+						System.err.println ( "MARKET : PLAYER " + currentPlayer.getName() + " PRIMA DELLA IF " + sellableCards ) ; 
+						if ( ! sellableCards.isEmpty () )
 						{
-							// calculate the amount of the transaction
+							System.err.println ( "MARKET : PLAYER " + currentPlayer.getName() + " DENTRO LA IF " ) ; 
+							// ask the User which Cards he wants to buy
+							receivedSellableCards = currentPlayer.chooseCardToBuy ( sellableCards ) ;
+							// if the user selected some cards...
+							amount = 0 ;
 							for ( SellableCard s : receivedSellableCards )
 								amount = amount + s.getSellingPrice () ;
-							// if he has enough money 
-							if ( amount <= currentPlayer.getMoney () )
-								transferCards ( receivedSellableCards , currentPlayer ) ;
-							else
-								throw currentPlayer.new TooFewMoneyException () ;
+							// if he has enough money
+							if ( amount > 0 )
+							{
+								if ( amount <= currentPlayer.getMoney () )
+									transferCards ( receivedSellableCards , currentPlayer ) ;
+								else
+									throw currentPlayer.new TooFewMoneyException () ;
 							}
 						}
-					else
-						currentPlayer.genericNotification ( "Sorry, ma per questa fase non ci sono carte che tu possa acquistare\nMagari al prossimo turno..." );
-				}
-				catch ( NotSellableException n ) 
-				{
-					currentPlayer.genericNotification ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;					
-				}
-				catch ( SellingPriceNotSetException e )
-				{
-					currentPlayer.genericNotification ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;										
-				}
-				catch ( TooFewMoneyException t ) 
-				{
-					currentPlayer.genericNotification ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;					
-				}
-				catch (WrongStateMethodCallException e) 
-				{
-					throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
-				}
+						else
+							currentPlayer.genericNotification ( "Sorry, ma per questa fase non ci sono carte che tu possa acquistare\nMagari al prossimo turno..." );
+					}
+					catch ( NotSellableException n ) 
+					{
+						currentPlayer.genericNotification ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;					
+					}
+					catch ( SellingPriceNotSetException e )
+					{
+						currentPlayer.genericNotification ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;										
+					}
+					catch ( TooFewMoneyException t ) 
+					{
+						currentPlayer.genericNotification ( PresentationMessages.NOT_ENOUGH_MONEY_MESSAGE ) ;					
+					}
+					catch (WrongStateMethodCallException e) 
+					{
+						throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
+					}
 			}
 		}
 		catch ( TimeoutException t ) 
@@ -108,19 +108,48 @@ class MarketPhaseManager
 	}
 	
 	/**
-	 * @throws WrongStateMethodCallException 
-	 * 
+	 * @throws WorkflowException 
 	 */
-	private void transferCards ( Iterable < SellableCard > receivedSellableCards , Player buyer ) throws TooFewMoneyException, NotSellableException, SellingPriceNotSetException, WrongStateMethodCallException 
+	private void transferCards ( Iterable < SellableCard > receivedSellableCards , Player buyer ) throws TooFewMoneyException, NotSellableException, SellingPriceNotSetException, WorkflowException 
 	{
+		Player seller ;
+		SellableCard transferredCard ;
 		for ( SellableCard s : receivedSellableCards )
 		{
-			s.getOwner().removeCard ( s ) ;
-			s.getOwner().receiveMoney ( s.getSellingPrice () ) ;
-			buyer.addCard ( s ) ; 
-			buyer.pay ( s.getSellingPrice() ) ;
-			s.setOwner ( buyer ) ;
+			try 
+			{
+				// find the seller.
+				seller = findPlayerByName ( s.getOwner().getName () ) ;
+				// find the Card to transfer
+				transferredCard = seller.getCard ( s.getUID () ) ;
+				// remove the Card from the Seller and pay him.
+				seller.removeCard(transferredCard); 
+				seller.receiveMoney(transferredCard.getSellingPrice () ) ;
+				// add the Card to the Buyer and make him pay.
+				buyer.addCard ( transferredCard ) ;
+				buyer.pay ( transferredCard.getSellingPrice() ) ;
+				transferredCard.setOwner ( buyer ) ;
+				// for this turn already selled, rest !
+				transferredCard.setSellable ( false ) ; 
+			} 
+			catch (WrongStateMethodCallException e) 
+			{
+				throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
+			}
 		}
+	}
+	
+	private Player findPlayerByName ( String n ) 
+	{
+		Player res ;
+		res  = null ;
+		for ( Player p : players )
+			if ( p.getName().compareToIgnoreCase ( n ) == 0 )
+			{
+				res = p ;
+				break ;
+			}
+		return res ;
 	}
 	
 	/**
@@ -135,9 +164,12 @@ class MarketPhaseManager
 	{
 		Collection < SellableCard > res ;
 		res = new LinkedList < SellableCard > () ;
+		// for each player
 		for ( Player p : players )
-			if ( buyer.equals ( buyer ) == false )
+			// if it's not the buyer and he's with us
+			if ( ! p.equals ( buyer ) && ! p.isSuspended () )
 				for ( SellableCard s : p.getSellableCards () )
+						// if p marked this Card as sellable
 						if ( s.isSellable () )
 							res.add ( s ) ;
 		return res ;

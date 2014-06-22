@@ -3,6 +3,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.GameConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.message.GUIGameMapNotificationMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.Couple;
 
 import java.util.Collection;
@@ -19,10 +20,20 @@ public class PositionableElementCoordinatesManager
 	
 	// ATTRIBUTES 
 	
-	/***/
+	/**
+	 * A Map containing all the data about Elements that are in placed in Regions.
+	 * Semantics :
+	 * key : the Region UID.
+	 * value : a Map containing, for each PositionableElementType ( Animal ), a Collection < Integer > containing the UIDs of the Animal here.  
+	 */
 	private Map < Integer , Map < PositionableElementType , Collection < Integer > > > regionsData ;
 	
-	/***/
+	/**
+	 * A Map containing, for each Road, info about the Elements in. 
+	 * Semantics :
+	 * key : the Road UID.
+	 * value : a Couple < PositionableElementType , Integer >, where the second object is the UID associated to the first object.
+	 */
 	private Map < Integer , Couple < PositionableElementType , Integer > > roadsData ;
 	
 	// METHODS
@@ -47,31 +58,56 @@ public class PositionableElementCoordinatesManager
 			roadsData.put ( i , null ) ;
 	}
 
-	/***/
-	public synchronized void addElement ( GameMapElementType whereType , int whereId , PositionableElementType whoType , int whoId  ) 
+	/**
+	 * Add an Element to this data structure.
+	 * 
+	 * @param
+	 * @param
+	 * @param
+	 * @param
+	 */
+	public synchronized void addElement ( GUIGameMapNotificationMessage removingMessage  ) 
 	{
-		if ( whereType == GameMapElementType.REGION )
-			regionsData.get ( whereId ).get ( whoType ).add(whoId) ;
+		if ( removingMessage != null )
+			if ( removingMessage.getWhereType () == GameMapElementType.REGION )
+				regionsData.get ( removingMessage.getWhereId () ).get ( removingMessage.getWhoType () ).add ( removingMessage.getWhoId () ) ;
+			else
+				roadsData.put ( removingMessage.getWhereId () , new Couple < PositionableElementType , Integer >  ( removingMessage.getWhoType () , removingMessage.getWhoId () ) ) ;
 		else
-			roadsData.put ( whereId , new Couple < PositionableElementType , Integer >  ( whoType , whoId ) ) ;
+			throw new IllegalArgumentException () ;
 	}
 	
-	/***/
-	public synchronized void removeElement ( GameMapElementType whereType , int whereId , PositionableElementType whoType , int whoId  ) 
+	/**
+	 * Remove an element from this data structure. 
+	 */
+	public synchronized void removeElement ( GUIGameMapNotificationMessage removingMessage ) 
 	{
-		if ( whereType == GameMapElementType.REGION )
-			regionsData.get ( whereId ).get ( whoType ).remove ( whoId ) ;
+		if ( removingMessage != null )
+			if ( removingMessage.getWhereType() == GameMapElementType.REGION )
+				regionsData.get ( removingMessage.getWhereId() ).get ( removingMessage.getWhoType() ).remove ( removingMessage.getWhoId() ) ;
+			else
+				roadsData.put ( removingMessage.getWhereId() , null ) ;
 		else
-			roadsData.put ( whereId , null ) ;
+			throw new IllegalArgumentException () ;
 	}
 	
-	/***/
+	/**
+	 * Getter method for the regionsData field; finds and returns the data associated with a Region.
+	 * 
+	 * @param regionUID the UID of the Region of interest.
+	 * @return a Map containing all data about the IDs of the Elements in the Region of interest.
+	 */
 	public Map < PositionableElementType , Collection < Integer > > getAnimalsInRegion ( int regionUID ) 
 	{
 		return regionsData.get ( regionUID ) ;
 	}
 	
-	/***/
+	/**
+	 * Getter method for the roadsData field; finds and returns the data associated with a Road.
+	 * 
+	 * @param roadUID the UID of the Road of interest.
+	 * @param a Couple < PositionableElementType , Integer > containing data about the IDs of the Elements in the Region of interest. 
+	 */
 	public Couple < PositionableElementType , Integer > getElementInRoad ( int roadUID ) 
 	{
 		return roadsData.get ( roadUID ) ;
