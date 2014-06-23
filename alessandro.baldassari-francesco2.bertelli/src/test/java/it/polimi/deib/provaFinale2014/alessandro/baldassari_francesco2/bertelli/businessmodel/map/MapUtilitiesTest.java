@@ -211,6 +211,7 @@ public class MapUtilitiesTest
 		assertTrue ( res.equals ( ao4 ) ) ;
 	}
 	
+	/***
 	@Test
 	public void ovineCount () throws SingletonElementAlreadyGeneratedException 
 	{
@@ -223,6 +224,7 @@ public class MapUtilitiesTest
 		r.addAnimal ( an.newBlackSheep() ) ;
 		assertTrue ( MapUtilities.ovineCount ( r ) == 3 ) ;
 	}
+	***/
 	
 	@Test
 	public void getOtherAdjacentDifferentFrom () throws SingletonElementAlreadyGeneratedException 
@@ -237,7 +239,8 @@ public class MapUtilitiesTest
 		setUp () ;
 		Region r ;
 		r = m.getRegionByUID(4) ;
-		for ( Animal a : r.getContainedAnimals() )
+		Iterable < Animal > i = CollectionsUtilities.newCollectionFromIterable ( r.getContainedAnimals() ) ;
+		for ( Animal a : i )
 			r.removeAnimal(a); 
 		Animal a = an.newWolf();
 		r.addAnimal ( a ) ; 
@@ -248,12 +251,13 @@ public class MapUtilitiesTest
 		assertTrue ( MapUtilities.findAnimalByUID ( r , 100000 ) == null ) ;
 	}
 	
+	/***
 	@Test
 	public void lookForAType () throws SingletonElementAlreadyGeneratedException 
 	{
 		setUp () ;
 		Region r ;
-		r = m.getRegionByUID(2) ;
+		r = m.getRegionByUID ( 2 ) ;
 		Animal a = an.newWolf();
 		r.addAnimal ( a ) ; 
 		r.addAnimal ( an.newAdultOvine ( AdultOvineType.RAM ) ) ;
@@ -261,7 +265,9 @@ public class MapUtilitiesTest
 		assertTrue ( MapUtilities.lookForAType(r.getContainedAnimals(), PositionableElementType.WOLF).equals(a) ) ; 
 		assertTrue ( MapUtilities.lookForAType ( r.getContainedAnimals() , PositionableElementType.SHEEP ) == null ) ;
 	}
+	***/
 	
+	/**
 	@Test
 	public void retrieveAdjacentPlayers () throws SingletonElementAlreadyGeneratedException 
 	{
@@ -283,7 +289,7 @@ public class MapUtilitiesTest
 		assertTrue ( out.contains(s2.getOwner()) ) ;
 		assertFalse ( out.contains(s1.getOwner()) ) ;
 		assertFalse ( out.contains ( s3.getOwner() ) ) ;
-	}
+	}***/
 	
 	@Test
 	public void generateAllowedSet () throws SingletonElementAlreadyGeneratedException 

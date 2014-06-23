@@ -55,17 +55,20 @@ public class MatchLauncherServer implements MatchPlayerAdder , Runnable , MatchS
 	 */
 	private boolean inFunction ;
 	
-	/**
-	 * @throws IOException if something goes wrong with the creation of the member objects. 
-	 */
-	public MatchLauncherServer ( ConnectionLoosingManager connectionLoosingManager ) throws IOException  
+	/***/
+	public MatchLauncherServer ( ConnectionLoosingManager connectionLoosingManager )  
 	{
-		this.connectionLoosingManager = connectionLoosingManager ;
-		queue = new LinkedBlockingQueue < ClientHandler < ? > > () ; 
-		session = null ;
-		currentMatchController = null ;
-		currentGuiServer = null ;
-		inFunction = false ;
+		if ( connectionLoosingManager != null )
+		{
+			this.connectionLoosingManager = connectionLoosingManager ;
+			queue = new LinkedBlockingQueue < ClientHandler < ? > > () ; 
+			session = null ;
+			currentMatchController = null ;
+			currentGuiServer = null ;
+			inFunction = false ;
+		}
+		else
+			throw new IllegalArgumentException () ;
 	}
 	
 	/**

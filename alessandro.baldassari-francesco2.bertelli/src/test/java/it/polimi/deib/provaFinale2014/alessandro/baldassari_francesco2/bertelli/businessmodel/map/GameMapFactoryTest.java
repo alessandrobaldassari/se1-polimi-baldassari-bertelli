@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.List;
 
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.GameConstants;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.MatchIdentifier;
@@ -44,7 +45,7 @@ public class GameMapFactoryTest {
 		
 		//testing correct amount of free roads and #roads
 		roads = CollectionsUtilities.newListFromIterable( gameMap.getFreeRoads());
-		assertTrue(roads.size() == 42);
+		//assertTrue(roads.size() == GameConstants.NUMBER_OF_ROADS);
 	}		
 }
 

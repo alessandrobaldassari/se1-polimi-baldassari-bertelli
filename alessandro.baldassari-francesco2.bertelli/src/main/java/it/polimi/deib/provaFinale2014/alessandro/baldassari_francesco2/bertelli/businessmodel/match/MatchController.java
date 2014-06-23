@@ -142,7 +142,8 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 			for ( Player p : match.getPlayers () )
 				if ( ( ( NetworkCommunicantPlayer ) p ).getClientHandler ().getUID() == clientHandlerUID )
 					( ( NetworkCommunicantPlayer ) p ).addObserver(playerObserver);
-		}else
+		}
+		else
 			throw new IllegalArgumentException() ;
 	}
 	

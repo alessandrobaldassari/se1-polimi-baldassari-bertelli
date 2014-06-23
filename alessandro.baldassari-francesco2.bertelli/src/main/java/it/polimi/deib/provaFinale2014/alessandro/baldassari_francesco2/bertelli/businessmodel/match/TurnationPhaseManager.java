@@ -482,7 +482,7 @@ class TurnationPhaseManager implements TurnNumberClock
 	private void playersGenericNotification ( String msg )
 	{
 		for ( Player p : match.getPlayers() )
-			if ( p.isSuspended() == false )
+			if ( ! p.isSuspended() )
 				p.genericNotification ( msg ) ;
 	}
 	

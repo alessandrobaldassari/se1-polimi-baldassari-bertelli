@@ -24,15 +24,9 @@ public class RequestAcceptServerTest
 	public void ctorOk () 
 	{
 		RequestAccepterServer r ;
-		try 
-		{
-			r = new DummyRequestAcceptServer ( new MatchLauncherServer ( new ConnectionLoosingServer () ) ) ;
-			assertTrue ( r != null ) ;
-		}
-		catch (IOException e) 
-		{
-			e.printStackTrace();
-		}
+		r = new DummyRequestAcceptServer ( new MatchLauncherServer ( new ConnectionLoosingServer () ) ) ;
+		assertTrue ( r != null ) ;
+		
 	}
 	/**
 	@Test

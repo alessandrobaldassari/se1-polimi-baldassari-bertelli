@@ -3,12 +3,15 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import java.io.IOException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.ServerEnvironment;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.connectionresuming.ConnectionResumerServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchconnectionloosing.ConnectionLoosingServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.matchlaunching.MatchLauncherServer;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepting.RequestAccepterServer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
 /**
  * This interface represents a Component that is responsible for the Server Network Communication. 
@@ -22,7 +25,7 @@ public class JSheeplandServer implements Runnable
 	private static JSheeplandServer instance ;
 	
 	/***/
-	private MatchLauncherServer matchLauncherCommunicationController ; 
+	private MatchLauncherServer matchLauncherCommunicationServer ; 
 
 	/**
 	 * A SocketServer object to intercept inbound socket connections.
@@ -40,10 +43,10 @@ public class JSheeplandServer implements Runnable
 	private ConnectionLoosingServer connectionLoosingServer ;
 	
 	/***/
-	private ConnectionResumerServer socketConnectionResumerServer ;
+	private ConnectionResumerServer < ? > socketConnectionResumerServer ;
 	
 	/***/
-	private ConnectionResumerServer rmiConnectionResumerServer ;
+	private ConnectionResumerServer < ? > rmiConnectionResumerServer ;
 	
 	/***/
 	private Executor fixedExecutorService ;
@@ -59,9 +62,9 @@ public class JSheeplandServer implements Runnable
 		connectionLoosingServer = new ConnectionLoosingServer () ;
 		socketConnectionResumerServer = ConnectionResumerServer.newSocketServer ( connectionLoosingServer ) ;
 		rmiConnectionResumerServer = ConnectionResumerServer.newRMIServer ( connectionLoosingServer ) ;
-		matchLauncherCommunicationController = new MatchLauncherServer ( connectionLoosingServer ) ; 
-		socketServer = RequestAccepterServer.newSocketServer ( matchLauncherCommunicationController ) ; 
-		rmiServer = RequestAccepterServer.newRMIServer ( matchLauncherCommunicationController , ServerEnvironment.getInstance ().getLocalhostIPAddress () , ServerEnvironment.RMI_REQUEST_ACCEPT_SERVER_PORT ) ; 
+		matchLauncherCommunicationServer = new MatchLauncherServer ( connectionLoosingServer ) ; 
+		socketServer = RequestAccepterServer.newSocketServer ( matchLauncherCommunicationServer ) ; 
+		rmiServer = RequestAccepterServer.newRMIServer ( matchLauncherCommunicationServer , ServerEnvironment.getInstance ().getLocalhostIPAddress () , ServerEnvironment.RMI_REQUEST_ACCEPT_SERVER_PORT ) ; 
 		fixedExecutorService = Executors.newFixedThreadPool ( 6 ) ;
 	}
 	
@@ -88,7 +91,7 @@ public class JSheeplandServer implements Runnable
 			socketConnectionResumerServer.connect();
 			rmiConnectionResumerServer.connect();
 			fixedExecutorService.execute ( connectionLoosingServer ) ;
-			fixedExecutorService.execute ( matchLauncherCommunicationController ) ;
+			fixedExecutorService.execute ( matchLauncherCommunicationServer ) ;
 			fixedExecutorService.execute ( socketConnectionResumerServer ) ;
 			fixedExecutorService.execute ( rmiConnectionResumerServer ) ;
 			fixedExecutorService.execute ( socketServer ) ;
@@ -101,7 +104,7 @@ public class JSheeplandServer implements Runnable
 				} 
 				catch (InterruptedException e)
 				{
-					e.printStackTrace () ;
+					Logger.getGlobal().log ( Level.WARNING , Utilities.EMPTY_STRING , e );
 				}
 			}
 		}

@@ -114,7 +114,7 @@ public final class ClientMainClass
 				{
 					out.println ( PresentationMessages.UNEXPECTED_ERROR_MESSAGE ) ;
 					System.exit ( 0 ) ;
-					// log this error to investingate about
+					// log this error to investigate about
 				}
 				catch ( IOException i )
 				{

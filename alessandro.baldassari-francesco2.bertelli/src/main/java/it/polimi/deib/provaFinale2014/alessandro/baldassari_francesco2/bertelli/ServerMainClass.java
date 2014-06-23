@@ -6,6 +6,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
 * This class represents the entry point of the Server Process.
@@ -37,7 +39,7 @@ public final class ServerMainClass
 		}
 		catch ( IOException e ) 
 		{
-			System.out.println ( "SERVER_MAIN_CLASS : CAN NOT CREATE A NETWORK_COMMUNICATION_CONTROLLER." + Utilities.CARRIAGE_RETURN + "Error details : " + e.getMessage () ) ;
+			Logger.getGlobal().log ( Level.SEVERE ,  "SERVER_MAIN_CLASS : CAN NOT CREATE A NETWORK_COMMUNICATION_CONTROLLER." + Utilities.CARRIAGE_RETURN + "Error details : " + e.getMessage () , e );
 			if ( threadExecutor != null )
 				threadExecutor.shutdownNow () ;
 		}	

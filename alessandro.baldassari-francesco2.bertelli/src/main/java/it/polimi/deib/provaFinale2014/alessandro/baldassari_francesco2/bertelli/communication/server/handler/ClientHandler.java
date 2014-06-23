@@ -26,6 +26,7 @@ public abstract class ClientHandler < T >
 {
 
 	private static int uidGenerator = 0 ;
+	
 	/***/
 	private final int UID ;
 	
@@ -386,10 +387,7 @@ public abstract class ClientHandler < T >
 		Message m ;
 		System.out.println ( "CLIENT HANDLER - SEND RESUME SUCCEED NOTIFICATION : PREPARING MESSAGE" ) ;
 		m = Message.newInstance ( GameProtocolMessage.RESUME_SUCCEEED , Collections.<Serializable> emptyList() ) ;
-		System.out.println ( "CLIENT HANDLER - SEND RESUME SUCCEED NOTIFICATION : MESSAGE PREPARED" ) ;
-		System.out.println ( "CLIENT HANDLER - SEND RESUME SUCCEED NOTIFICATION : WRITING MESSAGE" ) ;		
 		write ( m ) ;
-		System.out.println ( "CLIENT HANDLER - SEND RESUME SUCCEED NOTIFICATION : MESSAGE WRITTEN" ) ;		
 		System.out.println ( "CLIENT HANDLER - SEND RESUME SUCCEED NOTIFICATION : END" ) ;
 	}
 	
