@@ -1,6 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.character.animal;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
 /**
  * This class models a Lamb, the Ovine generated when a Ram and a Sheep mate.
@@ -12,6 +13,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  */
 public class Lamb extends Ovine 
 {
+	
+	// ATTRIBUTES
 	
 	/**
 	 * The father of this ovine, a Ram.
@@ -33,7 +36,7 @@ public class Lamb extends Ovine
 	 * @param birthTurn the birthDate of this Lamb, expressed in Game Turns times unit.
 	 * @param father the AdultOvine father of this Lamb.
 	 * @param mother the AdultOvine mother of this Lamb.
-	 * @throws IllegalArgumentException if the mother parameter is null, or the father 
+	 * @throws {@link IllegalArgumentException} if the mother parameter is null, or the father 
 	 *         parameter is null, or the birthTurn is < 0, or the father's parameter type is 
 	 *         equals to the mother's parameter type.
 	 */
@@ -51,6 +54,8 @@ public class Lamb extends Ovine
 	}
 
 	/**
+	 * Getter method for the birthTurn property.
+	 * 
 	 * @return the birthTurn property. 
 	 */
 	public int getBirthTurn () 
@@ -59,6 +64,8 @@ public class Lamb extends Ovine
 	}
 	
 	/**
+	 * Getter method for the father property.
+	 * 
 	 * @return the father property. 
 	 */
 	public AdultOvine getFather () 
@@ -67,6 +74,8 @@ public class Lamb extends Ovine
 	}
 	
 	/**
+	 * Getter method for the mother property.
+	 * 
 	 * @return the mother property. 
 	 */
 	public AdultOvine getMother () 
@@ -96,9 +105,9 @@ public class Lamb extends Ovine
 	{
 		String res ;
 		res = super.toString () ;
-		res = res + "Birth Turn : " + birthTurn + "\n" ;
-		res = res + "Mom : " + mother.getName() + "\n" ;
-		res = res + "Dad : " +father.getName() + "\n" ;
+		res = res + "Birth Turn : " + birthTurn + Utilities.CARRIAGE_RETURN ;
+		res = res + "Mom : " + mother.getName() + Utilities.CARRIAGE_RETURN ;
+		res = res + "Dad : " +father.getName() + Utilities.CARRIAGE_RETURN ;
 		return res ;
 	}
 	

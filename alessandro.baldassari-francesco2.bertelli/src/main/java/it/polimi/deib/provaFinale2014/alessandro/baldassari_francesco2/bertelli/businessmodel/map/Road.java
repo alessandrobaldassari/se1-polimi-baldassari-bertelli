@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Vector;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElement;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
 /**
@@ -97,11 +98,11 @@ public class Road extends GameMapElement
 	 * Setter method for the adjacentRoads property.
 	 * 
 	 * @param adjacentRoads the adjacentProperty value
-	 * @throws IllegalArgumentException if the parameter contains this Road object.
+	 * @throws IllegalArgumentException if the parameter contains this Road object or the adjacentRoads is null.
 	 */
 	void setAdjacentRoads ( Iterable < Road > adjacentRoads ) 
 	{
-		if ( CollectionsUtilities.contains ( adjacentRoads , this ) == false )
+		if ( adjacentRoads != null && CollectionsUtilities.contains ( adjacentRoads , this ) == false )
 		{	
 			this.adjacentRoads = new Vector < Road > () ;
 			for ( Road r : adjacentRoads )
@@ -112,7 +113,7 @@ public class Road extends GameMapElement
 	} 
 	
 	/**
-	 * Getter method for the AdjacentRoad proeprty.
+	 * Getter method for the AdjacentRoad property.
 	 * 
 	 * @return the adjacentRoads property. 
 	 */
@@ -188,7 +189,7 @@ public class Road extends GameMapElement
 	{
 		String res ;
 		res = super.toString () ;
-		res = res + "Number : " + number + "\n" ;
+		res = res + "Number : " + number + Utilities.CARRIAGE_RETURN ;
 		res = res + "Element Contained : " ;
 		if ( elementContained != null )
 			res = res + elementContained.getPositionableElementType().toString() + "\n" ;

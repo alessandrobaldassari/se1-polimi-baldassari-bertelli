@@ -13,11 +13,15 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  */
 class LambEvolverImpl implements LambEvolver 
 {
+	
+	// ATTRIBUTES
 
 	/**
 	 * An AnimalFactory object to replace the evolving Lamb. 
 	 */
 	private AnimalFactory animalFactory ;
+	
+	// METHODS
 	
 	/**
 	 * @param animalFactory the value for the animalFactory instance.

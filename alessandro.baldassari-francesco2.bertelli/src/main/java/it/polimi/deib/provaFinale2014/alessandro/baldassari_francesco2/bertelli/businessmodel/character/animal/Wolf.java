@@ -17,6 +17,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class Wolf extends Animal
 {
 
+	// METHODS
+	
 	/**
 	 * @param name the name of this Wolf. 
 	 */
@@ -30,7 +32,7 @@ public class Wolf extends Animal
 	 * W.R.T. this Wolf tries to escape, and if he succeeds in it, eat ( if possible ) an
 	 * animal of the Region where he arrived.
 	 * 
-	 * @throws CharacterDoesntMoveException if this Wold does not move ( an Exception but it is not 
+	 * @throws {@link CharacterDoesntMoveException} if this Wold does not move ( an Exception but it is not 
 	 *         a real error ).
 	 */
 	public void escape () throws CharacterDoesntMoveException
@@ -43,6 +45,7 @@ public class Wolf extends Animal
 		boolean allGatesClosed ;
 		try 
 		{
+			// random process.
 			diceResult = MathUtilities.launchDice () ;
 			initRegion = getPosition () ;
 			allGatesClosed = initRegion.isClosed () ;	
@@ -53,6 +56,7 @@ public class Wolf extends Animal
 				destRegion = MapUtilities.getOtherAdjacentDifferentFrom ( winnerRoad , initRegion ) ;
 				if ( destRegion != null )
 				{
+					// effectively move the Wolf.
 					initRegion.removeAnimal ( this ) ;
 					destRegion.addAnimal ( this ) ;
 					setPosition ( destRegion ) ;
@@ -61,7 +65,7 @@ public class Wolf extends Animal
 					for ( Animal a : eatable )
 						if ( ! ( a instanceof BlackSheep ) )
 						{
-							// mangia
+							// move the selected animal
 							a.getPosition ().removeAnimal ( a ) ;
 							a.moveTo ( null ) ; 
 							break ;

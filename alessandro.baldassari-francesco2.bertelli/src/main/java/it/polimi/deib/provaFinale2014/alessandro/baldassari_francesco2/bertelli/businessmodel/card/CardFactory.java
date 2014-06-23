@@ -17,9 +17,11 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  */
 public class CardFactory 
 {
+	
+	// ATTRIBUTES
 
 	/**
-	 * The only instance for this class to implemement the Singleton pattern. 
+	 * The only instance for this class to implements the Singleton pattern. 
 	 */
 	private static final CardFactory instance = new CardFactory () ;
 	
@@ -34,6 +36,8 @@ public class CardFactory
 	 * their sellable cards. 
 	 */
 	private final FactorySupport < Match > factorySupportSellableCards ;
+	
+	// METHODS
 	
 	/***/
 	private CardFactory () 

@@ -47,8 +47,6 @@ public class Sheperd extends Character < Road >
 			throw new IllegalArgumentException () ;
 	}
 	
-	
-	
 	/**
 	 * Getter for the owner property.
 	 * 

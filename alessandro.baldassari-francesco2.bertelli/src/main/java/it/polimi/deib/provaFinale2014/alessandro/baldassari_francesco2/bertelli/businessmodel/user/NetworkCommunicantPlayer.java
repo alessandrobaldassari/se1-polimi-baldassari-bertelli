@@ -29,10 +29,14 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WriteOncePropertyAlreadSetException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.WrongStateMethodCallException;
 
-/***/
+/**
+ * This class represents a Player that decide which commands do via network. 
+ */
 public class NetworkCommunicantPlayer extends Player  
 {
 
+	// ATTRIBUTES
+	
 	/**
 	 * The ClientHandler object this Player object will use to obtain data when the System will
 	 * query each Player during the Game. 
@@ -54,6 +58,8 @@ public class NetworkCommunicantPlayer extends Player
 	 */
 	private transient ConnectionLoosingManager connectionLoosingManager ;
 	
+	// METHODS
+	
 	/**
 	 * @param name the name of this Player
 	 * @param clientHandler the value for the ClientHandler property.
@@ -71,12 +77,21 @@ public class NetworkCommunicantPlayer extends Player
 			throw new IllegalArgumentException();
 	}
 	
+	/**
+	 * Return the ClientHandler associated with this Player. 
+	 */
 	public ClientHandler < ? > getClientHandler () 
 	{
 		return clientHandler ;
 	}
 	
-	/***/
+	/**
+	 * Executes a command and wait for a response.
+	 * 
+	 * @param commandToExecute the command to execute.
+	 * @return the results of the call.
+	 * @throws TimeoutException if the execution exceeds a Timer.
+	 */
 	private < T > T executeLater ( Callable < T > commandToExecute ) throws TimeoutException 
 	{
 		T res ;
@@ -118,7 +133,12 @@ public class NetworkCommunicantPlayer extends Player
 		return res ;
 	}
 	
-	/***/
+	/**
+	 * Execute a command without a return value.
+	 * 
+	 * @param commandToExecute the command to execute.
+	 * @throws TimeoutException if the execution time exceeds a Timer.
+	 */
 	private void executeNow ( Runnable commandToExecute ) throws TimeoutException 
 	{
 		createAndLaunchRequestTimetoutTimer () ;

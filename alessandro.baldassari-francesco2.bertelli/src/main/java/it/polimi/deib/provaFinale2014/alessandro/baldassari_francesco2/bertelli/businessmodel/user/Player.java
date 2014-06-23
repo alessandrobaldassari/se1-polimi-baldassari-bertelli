@@ -21,6 +21,8 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class models a Player in the Game.
@@ -95,7 +97,7 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 	 * Add a Card to this Player
 	 * 
 	 * @param toAdd the Card to add to this Player.
-	 * @throws {@link IllegalArgumentException }
+	 * @throws {@link IllegalArgumentException } if the parameters is null.
 	 */
 	public void addCard ( SellableCard toAdd ) 
 	{
@@ -108,14 +110,18 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 			}
 			catch (MethodInvocationException e) 
 			{
-				e.printStackTrace();
+				Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , e );
 			}
 		}
 		else
 			throw new IllegalArgumentException () ;
 	}
 	
-	/***/
+	/**
+	 * Remove a Card from this Player.
+	 * 
+	 * @param toRemove the Card to remove.
+	 */
 	public void removeCard ( SellableCard toRemove ) 
 	{
 		sellableCards.remove ( toRemove ) ;
@@ -125,11 +131,16 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 		}
 		catch (MethodInvocationException e) 
 		{
-			e.printStackTrace();
+			Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , e );
 		}
 	}
 	
-	/***/
+	/**
+	 * Test if this Player has a Card with the specified UID.
+	 * 
+	 * @param uid the uid of the Card to search,
+	 * @return true if this Player has a Card with the specified uid, false else.
+	 */
 	public boolean hasCard ( int uid )
 	{
 		SellableCard s ;
@@ -142,7 +153,12 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 		return res ;
 	}
 	
-	/***/
+	/**
+	 * Return the Card of this Player with the specified uid.
+	 * 
+	 * @param the uid of the Card to search.
+	 * @return the Card of this Player with the specified uid, null if not found.
+	 */
 	public SellableCard getCard ( int uid )
 	{
 		SellableCard res ;
@@ -204,7 +220,6 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 	public int pay ( int amountToPay ) throws TooFewMoneyException, WrongStateMethodCallException   
 	{
 		if ( amountToPay >= 0 )
-		{
 			if ( money != null )
 				if ( money >= amountToPay )
 				{
@@ -215,14 +230,13 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 					}
 					catch (MethodInvocationException e) 
 					{
-						e.printStackTrace();
+						Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , e );
 					}
 				}
 				else
 					throw new TooFewMoneyException () ;
 			else
 				throw new WrongStateMethodCallException () ;
-		}
 		else
 			throw new IllegalArgumentException () ;
 		return amountToPay ;
@@ -250,7 +264,7 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 			}
 			catch (MethodInvocationException e) 
 			{
-				e.printStackTrace();
+				Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , e );
 			}
 		}
 		else 
@@ -333,7 +347,7 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 				}
 				catch (MethodInvocationException e) 
 				{
-					e.printStackTrace();
+					Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , e );
 				}
 			}
 			else
@@ -391,6 +405,8 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 	 * set a sellable for a given price at the turn t, and this Card is not sold at the same turn t, if the Player does not 
 	 * want to sell this Card anymore at the turn t+1, he has to explicitly make it not sellable ( or modify its price if he wants ), 
 	 * otherwise the system will consider the selling state the same as the turn t.
+	 * 
+	 * @throws TimeoutException if the execution is too long.
 	 */
 	public void chooseCardsEligibleForSelling () throws TimeoutException 
 	{
@@ -398,6 +414,11 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 			chooseCardsEligibleForSellingIfThereAreSellableCards () ;
 	}
 	
+	/**
+	 * Superclasses has to override this method to define their strategy to choose the Cards eligible for selling during the Market phase.
+	 * 
+	 * @throws TimeoutException if the execution is too long.
+	 */
 	protected abstract void chooseCardsEligibleForSellingIfThereAreSellableCards () throws TimeoutException ;
 	
 	/**
@@ -504,19 +525,6 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 	 * @param cause the cause of the match finish in the form of a User friendly message.
 	 */
 	public abstract void matchEndNotification ( String cause ) ;
-	
-	public enum PlayerState 
-	{
-		
-		NOT_CONNECTED ,
-		
-		PLAYING ,
-		
-		SUSPENDED ,
-		
-		DISCONNECTED 
-		
-	}
 	
 	/**
 	 * AS THE SUPER'S ONE. 

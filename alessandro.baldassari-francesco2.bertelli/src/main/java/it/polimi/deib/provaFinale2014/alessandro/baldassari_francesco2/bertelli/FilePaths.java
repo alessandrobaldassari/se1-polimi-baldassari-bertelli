@@ -37,6 +37,8 @@ public final class FilePaths
 
 	public static final String MAP_IMAGE_PATH = "images/sheepland_map.jpg" ;
 
+	public static final String ROAD_CURSOR_IMAGE_PATH = "images/sheepland_road_selector.png" ;
+	
 	public static final String DICE_IMAGE_PATH = "images/sheepland_dice.jpg" ;
 	
 	public static final String FENCE_IMAGE_PATH = "images/fences/sheepland_fence.png" ;

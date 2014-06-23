@@ -26,6 +26,8 @@ public class ImagesHolder
 	
 	private BufferedImage transparentMapImage ;
 	
+	private BufferedImage roadSelectorImage ;
+	
 	private BufferedImage diceImage ;
 	
 	private BufferedImage transparentDiceImage ;
@@ -69,6 +71,7 @@ public class ImagesHolder
 			coverImage = GraphicsUtilities.getImage ( FilePaths.COVER_IMAGE_PATH ) ;
 			backgroundImage = GraphicsUtilities.getImage ( FilePaths.BACKGROUND_IMAGE_PATH ) ;
 			mapImage = GraphicsUtilities.getImage ( FilePaths.MAP_IMAGE_PATH ) ;
+			roadSelectorImage = GraphicsUtilities.getImage ( FilePaths.ROAD_CURSOR_IMAGE_PATH ) ;
 			diceImage = GraphicsUtilities.getImage ( FilePaths.DICE_IMAGE_PATH ) ;
 			for ( GameMoveType g : GameMoveType.values () )
 			{
@@ -172,6 +175,11 @@ public class ImagesHolder
 		else
 			res = mapImage ;
 		return res ;
+	}
+	
+	public Image getRoadSelectorImage ()
+	{
+		return roadSelectorImage;
 	}
 	
 	/***/

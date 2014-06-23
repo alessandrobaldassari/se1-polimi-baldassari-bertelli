@@ -14,7 +14,9 @@ public class PlayerWantsToExitGameException extends Exception
 		this ( Utilities.EMPTY_STRING ) ;
 	}
 	
-	/***/
+	/**
+	 * @param msg a message to describe the error. 
+	 */
 	public PlayerWantsToExitGameException ( String msg ) 
 	{
 		super ( msg ) ;

@@ -4,12 +4,9 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.MapMeasuresManager;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.PositionableElementCoordinatesManager;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-
 import javax.swing.JComponent;
 
-public class FIFOAnimator extends Animator 
+public class SimpleAnimator extends Animator 
 {
 
 	private MapMeasuresManager coordinatesManager ;
@@ -18,7 +15,7 @@ public class FIFOAnimator extends Animator
 	
 	private GUIGameMapNotificationMessage buffer ;
 	
-	public FIFOAnimator ( JComponent toRepaint , MapMeasuresManager coordinatesManager , PositionableElementCoordinatesManager positionableElementManager ) 
+	public SimpleAnimator ( JComponent toRepaint , MapMeasuresManager coordinatesManager , PositionableElementCoordinatesManager positionableElementManager ) 
 	{
 		super ( toRepaint ) ;
 		if ( coordinatesManager != null && positionableElementManager != null )
@@ -42,6 +39,7 @@ public class FIFOAnimator extends Animator
 	@Override
 	public synchronized void addAddMessage ( GUIGameMapNotificationMessage m ) 
 	{
+		System.err.println ( "\n\n\n\n\n\n\n\n\n\n simple animator" + coordinatesManager + "\n\n\n\n\n\n\n\n\n\n" ) ;
 		if ( buffer == null ) // surely an adding operation, no animation for this
 		{
 			positionableElementsManager.addElement ( m ) ;
@@ -51,7 +49,7 @@ public class FIFOAnimator extends Animator
 		{
 			if ( m.getUID () > buffer.getUID () && m.getWhoId() == buffer.getWhoId () )	// if sn ok and element uid ok,
 				new LinearAnimatorDrawer(this, positionableElementsManager, coordinatesManager, buffer, m ).animate(); 
-			else
+			else	// do not loss data.
 			{
 				positionableElementsManager.removeElement(buffer);
 				positionableElementsManager.addElement(m); 

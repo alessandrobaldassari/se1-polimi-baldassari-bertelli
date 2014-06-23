@@ -2,6 +2,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.GameMapElementType;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.message.GUIGameMapNotificationMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.MapMeasuresManager;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.PositionableElementCoordinatesManager;
@@ -30,19 +31,33 @@ public class LinearAnimatorDrawer
 			this.coordinatesManager = coordinatesManager ;
 			this.addedOne = addedOne ;
 			this.removedOne = removedOne ;
+			System.err.println ( "\n\n\n\n\n\n\n\n\n\n linear animator drawer \n" + this.coordinatesManager + "\n\n\n\n\n\n\n\n\n\n" ) ;
 		}
 	}
 	
 	public void animate () 
 	{
+		PositionableElementType p ;
 		Ellipse2D start ;
 		Ellipse2D end ;
 		System.out.println ( "ALGO_ANIMATOR - RUN : INIZIO" ) ;
 		// first, determines if a Sheperd or an Animal is moving, then act as a consequence.
+		System.out.println ( "add : " + addedOne ) ;
+		System.out.println ( "remove : " + removedOne ) ;
 		if ( removedOne.getWhereType() == GameMapElementType.REGION )
 		{
-			start = coordinatesManager.getRegionData ( removedOne.getWhereId() ).get ( removedOne.getWhoType () ) ;
-			end = coordinatesManager.getRegionData ( addedOne.getWhereId () ).get ( removedOne.getWhoType() ) ;
+			if ( PositionableElementType.isStandardOvine ( removedOne.getWhoType() ) )
+				p = PositionableElementType.STANDARD_ADULT_OVINE ;
+			else
+				p = removedOne.getWhoType() ;
+			start = coordinatesManager.getRegionData ( removedOne.getWhereId () ).get ( p ) ;
+			if ( PositionableElementType.isStandardOvine ( addedOne.getWhoType() ) )
+				p = PositionableElementType.STANDARD_ADULT_OVINE ;
+			else
+				p = removedOne.getWhoType() ;
+			end = coordinatesManager.getRegionData ( addedOne.getWhereId () ).get ( p ) ;
+			System.out.println ( "\n\n\nSTART : " + coordinatesManager.getRegionData ( removedOne.getWhereId () ) ) ;
+			System.out.println ( "\n\n\nEND : " + p + " ; " + coordinatesManager.getRegionData ( addedOne.getWhereId () ).get ( p ) ) ;
 		}
 		else
 		{
@@ -58,7 +73,7 @@ public class LinearAnimatorDrawer
 		animator.repaintComponent();
 		// re-activate the other threads
 		animator.endAnimation();
-		System.out.println ( "ALGO_ANIMATOR - RUN : FINE" ) ;
+		System.err.println ( "\n\n\n\n\n\n\n\n\n\n\nALGO_ANIMATOR - RUN : FINE\n\n\n\n\n\n\n\n\nn\n\n\n\n\n\n\n\n" ) ;
 	}
 	
 	/**
@@ -67,6 +82,7 @@ public class LinearAnimatorDrawer
 	 */
 	private void animationCycle ( Ellipse2D start , Ellipse2D end ) 
 	{
+		System.out.println ( "LINEAR_ANIMATOR_DRAWER - ANIMATION_CYCLE : INIZIO\nParameters :\n-start : " + start + "\n-end : " + end ) ;
 		//coordinatesManager.getRoadBorder ( removedOne.get )				
 		Ellipse2D current ;
 		int distanceX ;
@@ -77,7 +93,7 @@ public class LinearAnimatorDrawer
 		int pauseTime ;
 		int i ;
 		// set the pause time that will determine the speed - in millisecond.
-		pauseTime = 500 ;				
+		pauseTime = 1000 ;				
 		// retrieve the image.
 		animator.setImageToDraw( SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( removedOne.getWhoType () , false ) ) ;
 		// now perform the moving ; start from the start point.

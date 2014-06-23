@@ -20,6 +20,7 @@ public abstract class Character < T extends GameMapElement > extends Positionabl
 	// METHODS
 	
 	/**
+	 * @param positionableElementType the PositionableElementType of this Character.
 	 * @param name the Name of this Character.
 	 * @throws IllegalArgumentException if the name parameter is null.
 	 */

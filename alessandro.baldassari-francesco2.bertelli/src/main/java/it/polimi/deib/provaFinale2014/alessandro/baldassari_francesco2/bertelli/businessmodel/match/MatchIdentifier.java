@@ -9,12 +9,16 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class MatchIdentifier implements ObjectIdentifier < Match > 
 {
 
+	// ATTRIBUTES
+	
 	private static transient UIDGenerator uidGenerator ;
 	
 	/**
 	 * The unique identifier for this MatchIdentifier.
 	 */
 	private long uid ;
+	
+	// METHODS
 	
 	/**
 	 * @param uid the unique identifier for this MatchIdentifier. 
@@ -24,6 +28,11 @@ public class MatchIdentifier implements ObjectIdentifier < Match >
 		this.uid = uid ;
 	}
 	
+	/**
+	 * Creator method for this class.
+	 * 
+	 * @return a new MatchIdentifier object.
+	 */
 	public synchronized static MatchIdentifier newInstance () 
 	{
 		if ( uidGenerator == null )
@@ -48,6 +57,7 @@ public class MatchIdentifier implements ObjectIdentifier < Match >
 	 * @param otherObject the otherObject to compare this one.
 	 * @return true if this object is equals to the one passed by parameter, false else. 
 	 */
+	@Override
 	public boolean isEqualsTo ( ObjectIdentifier<Match> otherObject ) 
 	{
 		if ( otherObject instanceof MatchIdentifier )

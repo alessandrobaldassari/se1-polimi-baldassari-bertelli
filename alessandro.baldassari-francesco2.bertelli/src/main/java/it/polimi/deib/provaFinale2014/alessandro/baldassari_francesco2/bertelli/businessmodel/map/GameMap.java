@@ -14,6 +14,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class is a passive data structure that represents the GameMap ( as the name says ).
@@ -78,6 +80,7 @@ public class GameMap extends WithReflectionAbstractObservable < GameMapObserver 
 	
 	/**
 	 * AS THE SUPER'S ONE. 
+	 * When a new Observer is added, it is notified of the current state of the Map.
 	 */
 	@Override
 	public void addObserver ( GameMapObserver newObserver ) 
@@ -103,7 +106,7 @@ public class GameMap extends WithReflectionAbstractObservable < GameMapObserver 
 		} 
 		catch ( MethodInvocationException m ) 
 		{
-			m.printStackTrace () ;
+			Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , m );
 		}
 	}
 
@@ -119,7 +122,7 @@ public class GameMap extends WithReflectionAbstractObservable < GameMapObserver 
 		}
 		catch ( MethodInvocationException m ) 
 		{
-			m.printStackTrace () ;
+			Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , m );
 		}
 	}
 	
@@ -158,10 +161,15 @@ public class GameMap extends WithReflectionAbstractObservable < GameMapObserver 
 	public Iterable < Region > getRegionByType ( RegionType type ) 
 	{
 		Collection < Region > res ;
-		res = new LinkedList < Region > () ;
-		for ( Region r : regions.values () )
-			if ( r.getType () == type )
-				res.add ( r ) ;
+		if ( type != null )
+		{
+			res = new LinkedList < Region > () ;
+			for ( Region r : regions.values () )
+				if ( r.getType () == type )
+					res.add ( r ) ;
+		}
+		else
+			throw new IllegalArgumentException () ;
 		return res ;
 	}
 	
@@ -183,7 +191,7 @@ public class GameMap extends WithReflectionAbstractObservable < GameMapObserver 
 	 * Select and returns all the free Road objects contained in this map.
 	 * A Road is considered free if, and only if, there is nor a Sheperd or a Fence in it.
 	 * 
-	 * @return an Iterable containing all the Road object considered free.
+	 * @return an Iterable < Road >  containing all the Road object considered free.
 	 */
 	public Iterable < Road > getFreeRoads () 
 	{

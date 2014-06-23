@@ -12,7 +12,10 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public abstract class Animal extends Character < Region > 
 {
 
+	// METHODS
+	
 	/**
+	 * @param positionableElementType the PositionableElementType of this Animal
 	 * @param name the name of this Animal 
 	 */
 	protected Animal ( PositionableElementType positionableElementType , String name ) 

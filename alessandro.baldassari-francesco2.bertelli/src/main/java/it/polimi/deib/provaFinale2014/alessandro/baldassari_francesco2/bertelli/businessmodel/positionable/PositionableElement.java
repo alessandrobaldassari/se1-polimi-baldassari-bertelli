@@ -46,6 +46,9 @@ public abstract class PositionableElement < T extends GameMapElement > implement
 			throw new IllegalArgumentException () ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public int getUID () 
 	{
@@ -72,6 +75,12 @@ public abstract class PositionableElement < T extends GameMapElement > implement
 		this.position = position ;
 	}
 
+	/**
+	 * Setter method for the positionableElementType field.
+	 * 
+	 * @param newType the value for the positionableElementType field.
+	 * @throws IllegalArgumentException if the newType parameter is null.
+	 */
 	protected void setElementType ( PositionableElementType newType ) 
 	{
 		if ( newType != null )
@@ -102,7 +111,5 @@ public abstract class PositionableElement < T extends GameMapElement > implement
 			res = res + "Position : " + ( position != null ? position.getGameMapElementType () : " unset" )+ "\n" ;
 		return res ;
 	}
-	
-	// ENUMERATIONS
-	
+		
 }

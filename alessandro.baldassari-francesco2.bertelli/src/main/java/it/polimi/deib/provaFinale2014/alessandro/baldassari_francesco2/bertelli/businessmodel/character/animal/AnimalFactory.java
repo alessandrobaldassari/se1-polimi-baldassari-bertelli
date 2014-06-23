@@ -16,6 +16,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class AnimalFactory 
 {
 
+	// ATTRIBUTES
+	
 	/**
 	 * The default Wolf name, equals for every match. 
 	 */
@@ -53,6 +55,8 @@ public class AnimalFactory
 	 */
 	private UIDGenerator uidGenerator ;
 	
+	// METHODS
+	
 	/***/
 	private AnimalFactory () 
 	{
@@ -69,8 +73,9 @@ public class AnimalFactory
 	 * @param matchIdentifier the identifier of the Match requesting its AnimalFactory.
 	 * @return a new AnimalFactory instance if the requesting Match has not called this
 	 * 		   method before.
-	 * @throws AnimalFactoryAlreadyGeneratedForThisMatchException if a Match which has 
+	 * @throws {@link SingletonElementAlreadyGeneratedException} if a Match which has 
 	 *         already called this method, calls it again.
+	 * @throws {@link IllegalArgumentException} if the matchIdentifier parameters is null.
 	 */
 	public static synchronized AnimalFactory newAnimalFactory ( ObjectIdentifier < Match > matchIdentifier ) throws SingletonElementAlreadyGeneratedException  
 	{
@@ -160,7 +165,7 @@ public class AnimalFactory
 			wolfGenerated = true ;
 		}
 		else
-			throw new WolfAlreadyGeneratedException () ;
+			throw this.new WolfAlreadyGeneratedException () ;
 		return res ;
 	}
 	
@@ -180,7 +185,7 @@ public class AnimalFactory
 			blackSheepGenerated = true ;
 		}
 		else
-			throw new BlackSheepAlreadyGeneratedException () ;
+			throw this.new BlackSheepAlreadyGeneratedException () ;
 		return res ;
 	}
 	
@@ -196,7 +201,7 @@ public class AnimalFactory
 	{
 		
 		/***/
-		private WolfAlreadyGeneratedException () 
+		public WolfAlreadyGeneratedException () 
 		{
 			super () ;
 		}
@@ -211,7 +216,7 @@ public class AnimalFactory
 	{
 		
 		/***/
-		private BlackSheepAlreadyGeneratedException () 
+		public BlackSheepAlreadyGeneratedException () 
 		{
 			super () ;
 		}

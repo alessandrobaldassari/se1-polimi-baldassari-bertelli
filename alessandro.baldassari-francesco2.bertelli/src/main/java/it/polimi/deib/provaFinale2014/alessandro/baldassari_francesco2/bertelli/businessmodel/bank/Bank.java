@@ -171,17 +171,22 @@ public class Bank implements Serializable
 	/**
 	 * Return the initial Card of the specified type.
 	 * 
+	 * @param regionType the specified type.
 	 * @return the Initial Card of the type specified by the parameter.
 	 * @throws NoMoreCardOfThisTypeException if this Bank does not contain an Initial Card
 	 *         of type specified by the parameter.
+	 * @throws {@link IllegalArgumentException} if the regionType parameter is null.
 	 */
 	public Card takeInitialCard ( RegionType regionType ) throws NoMoreCardOfThisTypeException 
 	{
 		Card res ;
-		if ( initialCards.containsKey ( regionType ) )
-			res = initialCards.remove ( regionType ) ;
-		else 
+		if ( regionType != null )
+			if ( initialCards.containsKey ( regionType ) )
+				res = initialCards.remove ( regionType ) ;
+			else 
 			throw new NoMoreCardOfThisTypeException ( regionType ) ;
+		else
+			throw new IllegalArgumentException () ;
 		return res ;
 	}
 	
@@ -192,6 +197,7 @@ public class Bank implements Serializable
 	 * @return the price of the interested Card.
 	 * @throws NoMoreCardOfThisTypeException if there is no more Cards which type is 
 	 *         the one specified by the parameter.
+	 * @throws {@link IllegalArgumentException} if the regionType parameter is null or is equals to Sheepsburg.
 	 */
 	public int getPeekCardPrice ( RegionType regionType ) throws NoMoreCardOfThisTypeException 
 	{
@@ -359,7 +365,7 @@ public class Bank implements Serializable
 		 * @param priceProposed the amount of money a User try to pay for a Card. 
 		 * @param rightPrice the amount of money that is required by the Bank to sell a Card. 
 		 * @throws IllegalArgumentException if the priceProposed or the rightPrice parameter is 
-		 * <= 0 or the priceProposed and rightPrice parameters are equals.
+		 * 		   <= 0 or the priceProposed and rightPrice parameters are equals.
 		 */
 		private CardPriceNotRightException ( int priceProposed , int rightPrice ) 
 		{

@@ -24,6 +24,8 @@ import java.util.Map;
 class ResultsCalculatorManager 
 {
 
+	// ATTRIBUTES
+	
 	/**
 	 * The match where operate. 
 	 */
@@ -33,6 +35,8 @@ class ResultsCalculatorManager
 	 * A Map containing the points that every regions has. 
 	 */
 	private Map <RegionType, Integer> regionValuesMap;
+	
+	// METHODS
 	
 	/**
 	 * @param match the match where operate.
@@ -97,9 +101,8 @@ class ResultsCalculatorManager
 	 * Calculate the score of the Player passed by parameter and returns it.
 	 * 
 	 * @param player the Player on which calculate the score.
-	 * @param regionValuesMap a map containing, for each RegionType, the value of that RegionType in
-	 *        this Match.
 	 * @return the score of the Player passed by parameter.
+	 * @throws {@link WorkflowException} if an unexpected error occurs.
 	 */
 	public int calculatePlayerScore ( Player player ) throws WorkflowException
 	{

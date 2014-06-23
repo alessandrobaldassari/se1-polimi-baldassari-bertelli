@@ -2,6 +2,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MathUtilities;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
 /**
  * This class models an AdultOvine, which is a Sheep or a Ram.
@@ -10,6 +11,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  */
 public class AdultOvine extends Ovine
 {
+	
+	// ATTRIBUTES
 
 	/**
 	 * The type ( sex ) of this AdultOvine, Sheep XOR Ram.
@@ -57,10 +60,12 @@ public class AdultOvine extends Ovine
 	 * to the caller, else exceptions are throwns.
 	 * 
 	 * @param partner the partner with which mate.
+	 * @param currentTurn the turn where of the Game at the time this method is invoked.
 	 * @return the generated Lamb if everything goes ok.
-	 * @throws CanNotMateWithHimException if the partner's type is equals
+	 * @throws {@link CanNotMateWithHimException} if the partner's type is equals
 	 *         to this AdultOvine's type
-	 * @throws MateNotSuccesfullException if this mate process does not go well.
+	 * @throws {@link MateNotSuccesfullException} if this mate process does not go well.
+	 * @throws {@link IllegalArgumentException} if the partner parameter is null
 	 */
 	public Lamb mate ( AdultOvine partner , int currentTurn ) throws CanNotMateWithHimException, MateNotSuccesfullException  
 	{
@@ -68,28 +73,31 @@ public class AdultOvine extends Ovine
 		AdultOvine mother ;
 		Lamb res ;
 		double d ; 
-		if ( type != partner.getType () )
-		{
-			d = MathUtilities.genProbabilityValue () ;
-			if ( d > 0.5 )
+		if ( partner != null )
+			if ( type != partner.getType () )
 			{
-				if ( type == AdultOvineType.RAM )
+				d = MathUtilities.genProbabilityValue () ;
+				if ( d > 0.5 )
 				{
-					mother = partner ;
-					father = this ;
+					if ( type == AdultOvineType.RAM )
+					{
+						mother = partner ;
+						father = this ;
+					}
+					else
+					{
+						mother = this ;
+						father = partner ;
+					}
+					res = new Lamb ( Utilities.EMPTY_STRING , currentTurn , father , mother ) ;
 				}
 				else
-				{
-					mother = this ;
-					father = partner ;
-				}
-				res = new Lamb ( "" , currentTurn , father , mother ) ;
+					throw new MateNotSuccesfullException ( this , partner ) ; 
 			}
 			else
-				throw new MateNotSuccesfullException ( this , partner ) ; 
-		}
+				throw new CanNotMateWithHimException ( this , partner ) ; 
 		else
-			throw new CanNotMateWithHimException ( this , partner ) ; 
+			throw new IllegalArgumentException();
 		return res ;
 	}
 	

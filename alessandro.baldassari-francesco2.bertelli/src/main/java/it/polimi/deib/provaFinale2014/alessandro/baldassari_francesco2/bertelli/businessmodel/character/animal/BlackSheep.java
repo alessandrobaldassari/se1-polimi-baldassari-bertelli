@@ -14,6 +14,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class BlackSheep extends AdultOvine 
 {
 
+	// METHODS
+	
 	/**
 	 * @param name the name of this BlackSheep 
 	 */
@@ -23,6 +25,10 @@ public class BlackSheep extends AdultOvine
 	}
 
 	/**
+	 * Actuate the escape behavior of a BlackSheep.
+	 * It first retrieves all the possible destinations of the BlackSheep, then, if the BlackSheep has to move
+	 * ( due to business rules ), move it to the correct place ( that anyway is a Random one ). 
+	 * 
 	 * @throws CharacterDoesntMoveException if this BlackSheep does not move.  
 	 */
 	public void escape () throws CharacterDoesntMoveException 

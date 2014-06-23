@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 
 import javax.swing.JComponent;
 
-public class FIFOWaitingAnimator extends Animator
+public class ConcurrentAnimator extends Animator
 {
 	
 	private MapMeasuresManager coordinatesManager ;
@@ -26,7 +26,7 @@ public class FIFOWaitingAnimator extends Animator
 
 	private String expected ;
 
-	public FIFOWaitingAnimator ( JComponent toRepaint , MapMeasuresManager coordinatesManager , PositionableElementCoordinatesManager positionableElementManager ) 
+	public ConcurrentAnimator ( JComponent toRepaint , MapMeasuresManager coordinatesManager , PositionableElementCoordinatesManager positionableElementManager ) 
 	{
 		super ( toRepaint ) ;
 		if ( coordinatesManager != null && positionableElementManager != null )

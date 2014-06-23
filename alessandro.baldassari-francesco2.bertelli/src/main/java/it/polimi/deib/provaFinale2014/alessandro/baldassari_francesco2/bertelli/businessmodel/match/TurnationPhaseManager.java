@@ -43,10 +43,16 @@ import java.util.logging.Logger;
 class TurnationPhaseManager implements TurnNumberClock
 {
 
-	/***/
+	// ATTRIBUTES
+	
+	/**
+	 * The Match object where operate. 
+	 */
 	private Match match ;
 	
-	/***/
+	/**
+	 * A LambEvolver object to manage eventually born Lambs. 
+	 */
 	private LambEvolver lambEvolver ;
 	
 	/**
@@ -55,6 +61,8 @@ class TurnationPhaseManager implements TurnNumberClock
 	 * The access to this field will be permitted only during the TURNATION phase of the game. 
 	 */
 	private int turnNumber ;
+	
+	// METHODS
 	
 	/**
 	 * @param match the Match upon which execute the operations.
@@ -248,7 +256,11 @@ class TurnationPhaseManager implements TurnNumberClock
 	}
 	
 	/**
-	 * @throws WorkflowException 
+	 * This method fills a MoveSelector with the data available to the User for a Selection.
+	 * 
+	 * @param moveSelector the MoveSelector object to fill.
+	 * @param sh the Sheperd choosen by the User for this turn.
+	 * @throws WorkflowException if un unexpected method occurs.
 	 */
 	private void fillMoveSelectorWithAvailableParameters ( MoveSelector moveSelector , Sheperd sh ) throws WorkflowException 
 	{
@@ -269,7 +281,11 @@ class TurnationPhaseManager implements TurnNumberClock
 	}
 	
 	/**
-	 * @throws WorkflowException 
+	 * Find the Regions available for a MoveSheperd move.
+	 * 
+	 * @param sh the Sheperd that could move.
+	 * @return a Collection < Road > containing all the Region available for a MoveSheperd move.
+	 * @throws WorkflowException if un unexpected error occurs
 	 */
 	private Collection < Road > findAvailableRoadsForMoveSheperd ( Sheperd sh ) throws WorkflowException  
 	{
@@ -293,7 +309,12 @@ class TurnationPhaseManager implements TurnNumberClock
 		return res ;
 	}
 	
-	/***/
+	/**
+	 * Find all the Regions available for a MoveSheep move.
+	 * 
+	 * @param sh the Sheperd that will perform the move.
+	 * @return a Collection < Region > containing the Regions available for a MoveSheep move.
+	 */
 	private Collection < Region > findAvailableRegionsForMoveSheep ( Sheperd sh ) 
 	{
 		Collection < Region > res ;
@@ -306,7 +327,11 @@ class TurnationPhaseManager implements TurnNumberClock
 	}
 	
 	/**
-	 * @throws WorkflowException 
+	 * Find the RegionType available for a BuyCard move.
+	 * 
+	 * @param sh the Sheperd that will perform the move.
+	 * @return a Map containing, for each available RegionType, the associated price of a Card of that type ( Bank's price ).
+	 * @throws WorkflowException if an unexpected error occurs.
 	 */
 	private Map < RegionType , Integer > findAvailableRegionsForBuyCard ( Sheperd sh ) throws WorkflowException  
 	{
@@ -346,7 +371,12 @@ class TurnationPhaseManager implements TurnNumberClock
 		return res ;
 	}
 	
-	/***/
+	/**
+	 * Find all the Regions available for a Mate move.
+	 * 
+	 * @param sh the Sheperd that will perform the move.
+	 * @return a Collection < Region > containing all the Regions available for this move. 
+	 */
 	private Collection < Region > findAvailableRegionsForMate ( Sheperd sh ) 
 	{
 		Collection < Region > res ;
@@ -361,7 +391,12 @@ class TurnationPhaseManager implements TurnNumberClock
 		return res ;
 	}
 	
-	/***/
+	/**
+	 * Find all the Regions available for a Breakdown move.
+	 * 
+	 * @params sh the Sheperd that will perform the move.
+	 * @return a Collection < Region > containing the Regions available for the move.
+	 */
 	private Collection < Region > findAvailableRegionsForBreakdown ( Sheperd sh ) 
 	{
 		Collection < Region > res ;
@@ -385,9 +420,8 @@ class TurnationPhaseManager implements TurnNumberClock
 	 * @param exec the object that will execute the move.
 	 * @param selection a reference to the move the User has choosen.
 	 * @param match the Match over which operate.
-	 * @throws MoveNotAllowedException if the execution of the move is not allowed ( probably due to business rules ).
-	 * @throws WrongStateMethodCallException 
-	 * @throws WorkflowException 
+	 * @throws MoveNotAllowedException if the execution of the move is not allowed ( probably due to business rules ). 
+	 * @throws WorkflowException if an unexpected error occurs.
 	 */
 	private void execMove ( MoveExecutor exec , MoveSelection selection , Match match ) throws MoveNotAllowedException, WorkflowException
 	{
@@ -430,7 +464,11 @@ class TurnationPhaseManager implements TurnNumberClock
 		System.out.println ( "TURNATION_PHASE_MANAGER - execMove : END" ) ;
 	}
 	
-	/***/
+	/**
+	 * Notify the Users with a Message.
+	 * 
+	 * @param msg the message to notify.
+	 */
 	private void playersGenericNotification ( String msg )
 	{
 		for ( Player p : match.getPlayers() )

@@ -20,6 +20,16 @@ public abstract class GameMapElement extends WithReflectionAbstractObservable < 
 	// ATTRIBUTES
 	
 	/**
+	 * The name of the method to call during the onElementAdded event. 
+	 */
+	private static final String ON_ELEMENT_ADDED_METHOD_NAME = "onElementAdded" ;
+	
+	/**
+	 * The name of the method to call during the onElementRemoved event. 
+	 */
+	private static final String ON_ELEMENT_REMOVED_METHOD_NAME = "onElementRemoved" ;
+	
+	/**
 	 * The UID for this region, unique for every component of the map that extends this class
 	 */
 	private final int uid ;
@@ -32,6 +42,7 @@ public abstract class GameMapElement extends WithReflectionAbstractObservable < 
 	// METHODS 
 	
 	/**
+	 * @param gameMapElementType the GameMapElementType of this GameMapElement.
 	 * @param uid the uid of this GameMapElement
 	 * @throws IllegalArgumentException if the parameter is < 0  
 	 */
@@ -58,7 +69,7 @@ public abstract class GameMapElement extends WithReflectionAbstractObservable < 
 	}
 	
 	/**
-	 * @return the uid property. 
+	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
 	public int getUID () 
@@ -97,26 +108,38 @@ public abstract class GameMapElement extends WithReflectionAbstractObservable < 
 	}
 
 	/**
-	 *  
+	 * Notify the Observers of this GameMapElement that an Element has been added here.
+	 * 
+	 * @param whereType the type of location where the event took place.
+	 * @param whereId the id of the location where the event took place.
+	 * @param whoType the type of the element added.
+	 * @param whoId the id of the element added.
 	 */
 	protected synchronized final void notifyAddElement ( GameMapElementType whereType , Integer whereId , PositionableElementType whoType , Integer whoId ) 
 	{
 		try 
 		{
-			notifyObservers ( "onElementAdded" , whereType , whereId , whoType , whoId );
+			notifyObservers ( ON_ELEMENT_ADDED_METHOD_NAME , whereType , whereId , whoType , whoId );
 		}
 		catch ( MethodInvocationException e ) 
 		{
-			// log.
+			Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , e );
 		}
 	}
 	
-	/***/
+	/**
+	 * Notify the Observers of this GameMapElement that an Element has been removed from here.
+	 * 
+	 * @param whereType the type of location where the event took place.
+	 * @param whereId the id of the location where the event took place.
+	 * @param whoType the type of the element removed.
+	 * @param whoId the id of the element removed.
+	 */
 	protected synchronized final void notifyRemoveElement ( GameMapElementType whereType , Integer whereId , PositionableElementType whoType , Integer whoId ) 
 	{
 		try 
 		{
-			notifyObservers ( "onElementRemoved" , whereType , whereId , whoType , whoId );
+			notifyObservers ( ON_ELEMENT_REMOVED_METHOD_NAME , whereType , whereId , whoType , whoId );
 		} 
 		catch ( MethodInvocationException e ) 
 		{

@@ -38,6 +38,7 @@ public class Region extends GameMapElement
 	
 	/**
 	 * @param type the Type of this Region.
+	 * @param uid the UID of this Region.
 	 * @throws IllegalArgumentException if the type parameter is null.
 	 */
 	protected Region ( RegionType type , int uid ) 
@@ -86,7 +87,12 @@ public class Region extends GameMapElement
 	}
 	
 	/**
-	 * @throws NoRoadWithThisNumberException */
+	 * Returns the Road that borders this Region and has the number parameter as number.
+	 * 
+	 * @param number the number of the wants Road.
+	 * @return the Road that borders this Region and has the number parameter as number
+	 * @throws NoRoadWithThisNumberException if the wants Road is not found.
+	 */
 	public Road getBorderRoad ( int number ) throws NoRoadWithThisNumberException 
 	{
 		Road res ;
@@ -106,17 +112,27 @@ public class Region extends GameMapElement
 	 * Insert an Animal into this Region.
 	 * 
 	 * @param newAnimal the Animal to add into this Region 
+	 * @throws IllegalArgumentException if the newAnimal parameters is null.
 	 */
 	public synchronized void addAnimal ( Animal newAnimal ) 
 	{
-		containedAnimals.add ( newAnimal ) ;
-		notifyAddElement ( getGameMapElementType () , getUID () , newAnimal.getPositionableElementType () , newAnimal.getUID () );
+		if ( newAnimal != null )
+		{
+			containedAnimals.add ( newAnimal ) ;
+			notifyAddElement ( getGameMapElementType () , getUID () , newAnimal.getPositionableElementType () , newAnimal.getUID () );
+		}
+		else
+			throw new IllegalArgumentException () ;
 	}
 	
-	/***/
+	/**
+	 * Removes an Animal into this Region.
+	 * 
+	 * @param animal the Animal to remove from this Region 
+	 */
 	public synchronized void removeAnimal ( Animal animal ) 
 	{
-		containedAnimals.remove ( animal ) ;
+ 		containedAnimals.remove ( animal ) ;
 		notifyRemoveElement ( getGameMapElementType () , getUID () , animal.getPositionableElementType () , animal.getUID ()  );
 	}
 	

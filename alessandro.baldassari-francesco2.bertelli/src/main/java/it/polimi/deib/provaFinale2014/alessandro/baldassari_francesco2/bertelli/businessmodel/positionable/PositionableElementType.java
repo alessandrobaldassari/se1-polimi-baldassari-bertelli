@@ -1,8 +1,8 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable;
 
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.NamedColor;
-
-/***/
+/**
+ * This enum contains all the types a PositionableElement can be. 
+ */
 public enum PositionableElementType 
 {
 	
@@ -32,6 +32,13 @@ public enum PositionableElementType
 	
 	BLACK_SHEEP ;
 
+	/**
+	 * Given the name of a color, returns a Sheperd type of this color.
+	 * 
+	 * @param color the requested color.
+	 * @return a Sheperd type whose color is specified by the parameter.
+	 * @throws IllegalArgumentException if the color parameter is null.
+	 */
 	public static PositionableElementType getSheperdByColor ( String color ) 
 	{
 		PositionableElementType res ;
@@ -56,6 +63,12 @@ public enum PositionableElementType
 		return res ;
 	}
 	
+	/**
+	 * Decide if the p parameter represents a Sheperd.
+	 * 
+	 * @param p the positionableElementType to test.
+	 * @return true, if the p parameter represents a Sheperd, false else.
+	 */
 	public static boolean isSheperd ( PositionableElementType p )
 	{
 		boolean res ;
@@ -69,7 +82,13 @@ public enum PositionableElementType
 		return res ;
 	}
 	
-	public static boolean isStandardAdultOvine ( PositionableElementType p ) 
+	/**
+	 * Decide if the p parameter represents an Ovine but not a BlackSheep.
+	 * 
+	 * @param p the positionableElementType to test.
+	 * @return true, if the p parameter represents an Ovine but not a BlackSheep, false else.
+	 */
+	public static boolean isStandardOvine ( PositionableElementType p ) 
 	{
 		boolean res ;
 		if ( p != null )

@@ -8,7 +8,7 @@ public class CharacterDoesntMoveException extends Exception
 {
 	
 	/**
-	 * the Character involved in the Exception. 
+	 * The Character involved in the Exception. 
 	 */
 	private Character < ? > character ;
 	

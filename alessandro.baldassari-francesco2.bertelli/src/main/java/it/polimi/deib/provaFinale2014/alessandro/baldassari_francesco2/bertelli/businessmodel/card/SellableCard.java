@@ -67,7 +67,7 @@ public class SellableCard extends Card
 	 * Set the selling price.
 	 * 
 	 * @param sellingPrice the value the sellingPrice property must be set to.
-	 * @throw IllegalArgumentException if the paremeter is not a legal argument ( < of 
+	 * @throws IllegalArgumentException if the paremeter is not a legal argument ( < of 
 	 * 	      MINIMUM_SELLING_PRICE or > of MAXIMUM_SELLING_PRICE ).
 	 */
 	public void setSellingPrice ( int sellingPrice ) 
@@ -84,14 +84,14 @@ public class SellableCard extends Card
 	 * @return the sellingPrice property.
 	 * @throws NotSellableException if the sellable property is set to false.
 	 * @throws SellingPriceNotSetException if the sellingPrice property has not been set ( so 
-	 * if it is null when this method get called ).
+	 * 		   if it is null when this method get called ).
 	 */
 	public int getSellingPrice () throws NotSellableException , SellingPriceNotSetException 
 	{
 		if ( sellable )
 		{
 			if ( sellingPrice != null )
-				return sellingPrice ;
+				return sellingPrice.intValue () ;
 			else
 				throw new SellingPriceNotSetException () ;
 		}

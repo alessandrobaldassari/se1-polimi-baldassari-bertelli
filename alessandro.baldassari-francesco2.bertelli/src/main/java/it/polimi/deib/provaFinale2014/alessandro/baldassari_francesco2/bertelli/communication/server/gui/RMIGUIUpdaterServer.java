@@ -58,7 +58,6 @@ public class RMIGUIUpdaterServer extends GUIUpdaterServer
 			// create a stub for the broker.
 			stub = ( RMIGUIClientBroker ) UnicastRemoteObject.exportObject ( broker , 0 ) ;		
 			System.out.println ( "RMI_GUI_MAP_SERVER - ADD_PLAYER : BROKER IS OUT." ) ;
-			//
 			System.out.println ( "RMI_REQUEST_ACCEPT_SERVER - ADD_PLAYER : BINDING THE BROKER" ) ;
 			// generating a name for this broker
 			session ++ ;
@@ -66,7 +65,7 @@ public class RMIGUIUpdaterServer extends GUIUpdaterServer
 			// bind the broker and make it available to name services.
 			myRegistry.bind ( res , stub ) ;
 			System.out.println ( "RMI_REQUEST_ACCEPT_SERVER - ADD_PLAYER : BROKER BOUND." ) ;
-			synchronized (notifiers) 
+			synchronized ( notifiers ) 
 			{
 				notifiers.put ( res , new RMIGUINotifier ( messages , broker ) ) ;				
 			}

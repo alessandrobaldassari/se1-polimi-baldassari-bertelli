@@ -9,8 +9,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.animator.Animator;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.animator.BufferedAnimator;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.animator.FIFOAnimator;
-import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.animator.FIFOWaitingAnimator;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.animator.SimpleAnimator;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.animator.ConcurrentAnimator;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.Couple;
@@ -31,6 +31,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.geom.RectangularShape;
 import java.awt.image.BufferedImage;
 import java.util.Collection;
@@ -121,7 +122,7 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 		coordinatesManager = new MapMeasuresManager () ;
 		currentInputMode = null ;
 		uidOfSelectableElements = null ;
-		animator = new FIFOWaitingAnimator ( drawingPanel , coordinatesManager , positionableElementsManager ) ;
+		animator = new SimpleAnimator ( drawingPanel , coordinatesManager , positionableElementsManager ) ;
 		tlc = new Point ( 0 , 0 ) ;
 		xZoomMult = 1 ;
 		yZoomMult = 1 ;
@@ -277,7 +278,7 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 		{
 			Image backgroundImage ;
 			Rectangle r ;
-			backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getMapImage ( false ) ;
+			backgroundImage = SheeplandClientApp.getInstance().getImagesHolder().getMapImage ( currentInputMode != null ) ;
 			// draw the map
 			r = scaleCoordinates ( 0 , 0 , fixedSize.width , fixedSize.height ) ;
 			g.drawImage ( backgroundImage , r.x , r.y , r.width , r.height , this );
@@ -297,8 +298,8 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 			Ellipse2D pos ;
 			int count ;
 			int i ;
-			//boolean transparent ;
-			//transparent = ! ( currentInputMode == null || currentInputMode == GameMapViewInputMode.ANIMALS )  ;
+			boolean transparent ;
+			transparent = currentInputMode != null && currentInputMode != GameMapViewInputMode.ANIMALS  ;
 			// for each region
 			for ( i = 1 ; i <= GameConstants.NUMBER_OF_REGIONS ; i ++ )
 			{
@@ -309,7 +310,7 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 				// if the black sheep is here
 				if ( animalsInRegion.get ( PositionableElementType.BLACK_SHEEP ).size() > 0 )
 				{
-					toDraw =  SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( PositionableElementType.BLACK_SHEEP , false ) ;
+					toDraw =  SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( PositionableElementType.BLACK_SHEEP , transparent ) ;
 					pos = positions.get ( PositionableElementType.BLACK_SHEEP ) ;
 					r = scaleCoordinates ( ( int ) pos.getMinX() , ( int ) pos.getMinY() , ( int ) pos.getWidth() , ( int ) pos.getHeight() );
 					g.drawImage ( toDraw , r.x , r.y , r.width , r.height , this ) ;
@@ -325,7 +326,7 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 				//
 				count = 0 ;
 				for ( PositionableElementType p : animalsInRegion.keySet () )
-					if ( PositionableElementType.isStandardAdultOvine ( p ) )
+					if ( PositionableElementType.isStandardOvine ( p ) )
 						count = count + animalsInRegion.get ( p ).size () ;
 				// if there is someone
 				if ( count > 0 )
@@ -348,7 +349,7 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 			Shape shape ;
 			Rectangle r ;
 			int i ;
-			//boolean transparent ;
+			boolean transparent ;
 			// for each roads
 			for ( i = 1 ; i <= GameConstants.NUMBER_OF_ROADS ; i ++ )
 			{
@@ -362,9 +363,9 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 					// retrieve the type of object with which we are dealing with.
 					type = elementContained.getFirstObject () ;
 					// determine if transparency is needed.
-					//transparent = ! ( currentInputMode == null || type == PositionableElementType.SHEPERD && currentInputMode == GameMapViewInputMode.SHEPERDS ) ;
+					transparent = currentInputMode != null && ( ( type == PositionableElementType.SHEPERD && currentInputMode != GameMapViewInputMode.SHEPERDS ) ) ;
 					// select the appropriate image.
-					toDraw = SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( type , false ) ;
+					toDraw = SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( type , transparent ) ;
 					// determine the right coordinates.
 					r = scaleCoordinates ( ( int ) ( ( RectangularShape ) shape).getMinX() , ( int ) ( ( RectangularShape ) shape).getMinY() , 2 *  coordinatesManager.ROADS_RADIUS , 2 * coordinatesManager.ROADS_RADIUS ) ;
 					// draw the image effectively
@@ -376,13 +377,35 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 		/***/
 		private void drawRegionsHighlighted ( Graphics g ) 
 		{
-			// not implemented yet.
+			Image toDraw ;
+			Rectangle2D r2D ;
+			Rectangle r ;
+			if ( currentInputMode != null && currentInputMode == GameMapViewInputMode.REGIONS )
+				for ( Identifiable i : uidOfSelectableElements )
+				{
+					toDraw = SheeplandClientApp.getInstance().getImagesHolder().getRegionImage(i.getUID());
+					r2D = coordinatesManager.getRegionBorder(i.getUID()).getBounds2D();
+					r = scaleCoordinates ( ( int ) r2D.getMinX() , ( int ) r2D.getMinY() , ( int ) r2D.getWidth() , ( int ) r2D.getHeight() ) ;
+					g.drawImage ( toDraw , r.x , r.y , r.width , r.height , this ) ;
+				}
 		}
 		
 		/***/
 		public void drawRoadHighlighted ( Graphics g ) 
 		{
-			// not implemented yet.
+			Image toDraw ;
+			Ellipse2D e ;
+			Rectangle r ;
+			if ( currentInputMode != null && currentInputMode == GameMapViewInputMode.SHEPERDS )
+			{
+				toDraw = SheeplandClientApp.getInstance().getImagesHolder().getRoadSelectorImage();
+				for ( Identifiable i : uidOfSelectableElements )
+				{
+					e = coordinatesManager.getRoadBorder(i.getUID());
+					r = scaleCoordinates ( ( int ) e.getMinX() , ( int ) e.getMinY() , 2 *  coordinatesManager.ROADS_RADIUS , 2 * coordinatesManager.ROADS_RADIUS ) ;
+					g.drawImage ( toDraw ,r.x,r.y,r.width,r.height ,this);
+				}
+			}
 		}
 		
 		/***/

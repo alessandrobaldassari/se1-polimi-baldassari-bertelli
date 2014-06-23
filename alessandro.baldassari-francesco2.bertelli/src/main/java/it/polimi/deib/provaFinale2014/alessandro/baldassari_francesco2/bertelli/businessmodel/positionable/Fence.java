@@ -9,6 +9,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class Fence extends PositionableElement < Road >
 {
 
+	// ATTRIBUTES
+	
 	/**
 	 * The type of this Fence ( final or not final ).
 	 */
@@ -18,6 +20,8 @@ public class Fence extends PositionableElement < Road >
 	 * The property which says if a Fence has been placed in the GameMap or not. 
 	 */
 	private boolean placed ;
+	
+	// METHODS
 	
 	/**
 	 * @param type The type of this Fence. 
@@ -101,7 +105,10 @@ public class Fence extends PositionableElement < Road >
 	}
 	
 	/**
-	 * @param road 
+	 * This method set the position of this Fence.
+	 * 
+	 * @param road the Road where place this Road.
+	 * @throws FenceAlreadyPlacedException if the position of this Fence has already been set. 
 	 */
 	public void place ( Road road ) throws FenceAlreadyPlacedException 
 	{

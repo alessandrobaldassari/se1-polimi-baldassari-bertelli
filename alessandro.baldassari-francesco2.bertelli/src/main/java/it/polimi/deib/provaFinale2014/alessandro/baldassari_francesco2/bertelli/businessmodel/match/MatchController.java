@@ -40,7 +40,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +62,8 @@ import java.util.concurrent.TimeoutException;
  */
 public class MatchController implements Runnable , ConnectionLoosingManagerObserver
 {
+
+	// ATTRIBUTES
 	
 	/**
 	 * The component this GameController will invoke to notify that the Initialization phase of this
@@ -104,12 +105,15 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	 */
 	private BlockingQueue < Player > tempBlockingQueue ;
 		
-	/***/
+	/**
+	 * A Map containing the Objects that wants to observe the GameMap associated with this MatchController 
+	 */
 	private transient Iterable < GameMapObserver > mapObservers ;
 	
 	/**
 	 * @param matchStartCommunicationController the value for the matchStartCommunicationController field.
-	 * @throws IllegalArgumentException if the parameter passed is null.
+	 * @param mapObservers a value for the mapObservers field
+	 * @throws IllegalArgumentException if the matchStartCommunicationController or the mapObservers parameter is null.
 	 */
 	public MatchController ( MatchStarter matchStartCommunicationController , Iterable < GameMapObserver > mapObservers ) 
 	{
@@ -124,12 +128,22 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 			throw new IllegalArgumentException () ;
 	}
 	
-	/***/
+	/**
+	 * Add a Player observer to this MatchController.
+	 * 
+	 * @param playerObserver the playerObserver to add.
+	 * @param clientHandlerUID the uid of the ClientHandler associated with the Player to observe
+	 * @throws IllegalArgumentException if the playerObserver parameters is null.
+	 */
 	public void addPlayerObserver ( PlayerObserver playerObserver , int clientHandlerUID ) 
 	{
-		for ( Player p : match.getPlayers () )
-			if ( ( ( NetworkCommunicantPlayer ) p ).getClientHandler ().getUID() == clientHandlerUID )
-				( ( NetworkCommunicantPlayer ) p ).addObserver(playerObserver);
+		if (  playerObserver != null )
+		{
+			for ( Player p : match.getPlayers () )
+				if ( ( ( NetworkCommunicantPlayer ) p ).getClientHandler ().getUID() == clientHandlerUID )
+					( ( NetworkCommunicantPlayer ) p ).addObserver(playerObserver);
+		}else
+			throw new IllegalArgumentException() ;
 	}
 	
 	/**
@@ -186,9 +200,11 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	}
 	
 	/**
+	 * AS THE SUPER'S ONE.
 	 * The run method of this GameController, which implements the Game Workflow, using
 	 * appropriate private helper methods that describe each game phase.
 	 */
+	@Override
 	public void run () 
 	{
 		String endMessage ;
@@ -223,7 +239,7 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	 * It creates all the resources necessary to the game and starts a Timer
 	 * to wait for all players to add in. 
 	 * 
-	 * @throws RuntimeException if the AnimalFactory Singleton mechanism fails.
+	 * @throws WorkflowException if the AnimalFactory Singleton mechanism fails.
 	 */
 	private void creatingPhase () throws WorkflowException  
 	{
@@ -253,7 +269,7 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 		catch ( SingletonElementAlreadyGeneratedException e ) 
 		{
 			System.out.println ( "MATCH_CONTROLLER - CREATING PHASE : SINGLETON_ELEMENT_ALREADY_GENERATED_EXCETPION" ) ;
-			throw new WorkflowException ( PresentationMessages.UNEXPECTED_ERROR_MESSAGE ) ;
+			throw new WorkflowException ( e , PresentationMessages.UNEXPECTED_ERROR_MESSAGE ) ;
 		}
 	}
 	
@@ -262,6 +278,8 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	 * It wait for players to arrive.
 	 * When they do it, adds them to the Match, and if the MAX_NUMBER_OF_PLAYERS is reached,
 	 * cause the Match workflow to finish the INITIALIZATION phase and to move to the next phase. 
+	 * 
+	 * @throws {@link WorkflowException} if an error occurs.
 	 */
 	private void waitForPlayersPhase () throws WorkflowException
 	{
@@ -299,11 +317,9 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	
 	/**
 	 * This is the third method in the logical flow of the Game Controller.
-	 * It is divided in 4 phases:
-	 * 1. All the Sheeps are placed in the Regions.
-	 * 2. The initial Cards are given to the Players.
-	 * 3. The Players are provided with money from the Bank.
-	 * 4.
+	 * It is divided in 4 phases.
+	 * 
+	 * @throws {@link WorkflowException} if an error occurs.
 	 */
 	public void initializationPhase () throws WorkflowException 
 	{
@@ -323,6 +339,8 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	/**
 	 * This method place one Sheep per Region in the Game Map and the Black Sheep
 	 * in the Region of Sheepsburg.
+	 * 
+	 * @throws {@link WorkflowException} if an error occurs.
 	 * 
 	 */
 	private void placeSheeps () throws WorkflowException
@@ -367,6 +385,8 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	/**
 	 * This methods emulates the phase where one Initial Card is given to each Player.
 	 * Which Card give to each Player is a randomic decision.
+	 * 
+	 * @throws {@link WorkflowException} if an error occurs.
 	 */
 	private void distributeInitialCards () throws WorkflowException
 	{
@@ -427,6 +447,7 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	 * This method is the fourth in the INITIALIZATION PHASE.
 	 * It performs a randomic ordering on the Players list to determine who will play
 	 * first, second, and so on. 
+	 * 
 	 * @throws WorkflowException if an unexpected error occurs 
 	 */ 
 	private void choosePlayersOrder () throws WorkflowException 
@@ -514,7 +535,11 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - DISTRIBUTE SHEPERDS PHASE : FINE " ) ;
 	}
 	
-	/***/
+	/**
+	 * Manage the turnation phase of the game delegating this to a TurnationPhaseManager object.
+	 * 
+	 * @throws WorkflowException if the TurnationPhaseManager object launches an exception.
+	 */
 	private void turnationPhase () throws WorkflowException 
 	{
 		TurnationPhaseManager turnationPhaseManager ;
@@ -528,7 +553,8 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	/**
 	 * This move is the last in the game workflow.
 	 * It calculate the points that every Player did and communicate the winner. 
-	 * @throws WorkflowException in an unexpected error occurs 
+	 * 
+	 * @throws WorkflowException in an unexpected error occurs.
 	 */ 
 	private void resultsCalculationPhase () throws WorkflowException 
 	{
@@ -564,7 +590,11 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 		
 	}
 
-	/***/
+	/**
+	 *  Communicate to each Player that a Match is finishing.
+	 *  
+	 *  @param msg the message to communicate to the Users.
+	 */
 	private void matchFinishingProcedure ( String msg ) 
 	{
 		for ( Player currentPlayer : match.getPlayers () )

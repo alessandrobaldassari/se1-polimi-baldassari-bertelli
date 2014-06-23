@@ -18,6 +18,8 @@ import java.util.Vector;
  */
 public class Match implements Serializable
 {
+	
+	// ATTRIBUTES
 
 	/**
 	 * A list containing the players who are playing this Match. 
@@ -43,6 +45,8 @@ public class Match implements Serializable
 	 * A flag indicating if this Match is in its final phase. 
 	 */
 	private boolean inFinalPhase ;
+	
+	// METHODS
 	
 	/**
 	 * @param gameMap the GameMap object associated to this Match.
@@ -86,6 +90,7 @@ public class Match implements Serializable
 	 * This method simulates the phase of the Game where the Players' order is decided.
 	 * This method implements this functionality as a randomic list mesh of the Players's list. 
 	 * 
+	 * @param playersOrdering a Map containing, for each Player, the position in the Match that this Player will have.
 	 * @throws WrongMatchStateMethodCallException if this method is not called while the state attribute is
 	 *         equals to INITIALIZATION.
 	 */
@@ -212,12 +217,6 @@ public class Match implements Serializable
 	
 	/**
 	 * This enum describe all the possible states where a Match can be.
-	 * 1. CREATED
-	 * 2. WAIT_FOR_PLAYERS
-	 * 3. INITIALIZATION
-	 * 4. TURNATION
-	 * 5. SUSPENDED
-	 * 6. CALCULATING_RESULTS  
 	 */
 	public enum MatchState 
 	{

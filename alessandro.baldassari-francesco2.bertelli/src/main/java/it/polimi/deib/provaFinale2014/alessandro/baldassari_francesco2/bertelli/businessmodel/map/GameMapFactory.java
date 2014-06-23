@@ -8,6 +8,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.FilePaths;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.match.Match;
@@ -26,6 +28,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  */
 public class GameMapFactory extends WithFactorySupportObject < Match > 
 {
+	
+	// ATTRIBUTES
 	
 	/**
 	 * This class instance to realize the Singleton pattern. 
@@ -59,11 +63,11 @@ public class GameMapFactory extends WithFactorySupportObject < Match >
 			regionsMap = readRegionsDataFile ( regionsCSVInputStream ) ;
 			roadsMap = readRoadsDataFile ( roadsCSVInputStream , regionsMap ) ;
 			regionsCSVInputStream.close () ;
-			roadsCSVInputStream.close () ;
+			roadsCSVInputStream.close () ; 
 		} 
 		catch ( IOException e ) 
 		{
-			e.printStackTrace () ;
+			Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , e  ) ;
 			throw new RuntimeException ( e ) ;
 		} 
 	} 
@@ -82,7 +86,9 @@ public class GameMapFactory extends WithFactorySupportObject < Match >
 	
 	/**
 	 * Factory method for the GameMap object 
-	 * @throws SingletonElementAlreadyGeneratedException if 
+	 * 
+	 * @param requester the one who wants to obtain a new GameMap object.
+	 * @throws SingletonElementAlreadyGeneratedException if the requester parameter already called this method.
 	 */
 	public GameMap newInstance ( ObjectIdentifier < Match > requester ) throws SingletonElementAlreadyGeneratedException 
 	{
@@ -133,6 +139,7 @@ public class GameMapFactory extends WithFactorySupportObject < Match >
 	 * This method reads the raw data about Roads in the CSV data file passed by parameter.
 	 * 
 	 * @param roadsCSVInputStream the datasource where read the data in a raw CSV format, assuming it's already opened
+	 * @param regionsMap an Object containing information about Regions to associate Roads with their nearest Regions.
 	 * @return a Map object where, for every entry, the key is the UID of a Road, while the value is a Couple
 	 * 	       object where, the first param is the Road object associated with the UID key, and the value is
 	 *         an array of int, where each value matches the UID of a Road object ( if the workflow goes 

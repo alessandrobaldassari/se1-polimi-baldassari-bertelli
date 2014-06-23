@@ -20,10 +20,14 @@ import java.util.concurrent.TimeoutException;
 class MarketPhaseManager 
 {
 
+	// ATTRIBUTES
+	
 	/**
 	 * The List of Players over which operate. 
 	 */
 	private Iterable < Player > players ;
+	
+	// METHODS
 	
 	/**
 	 * @param players the List of Players over which operate.
@@ -41,6 +45,8 @@ class MarketPhaseManager
 	 * This method implements the Market phase of the Game.
 	 * The code is straightforward and highly tighted with the business rules.
 	 * It uses some private helper methods. 
+	 * 
+	 * @throws {@link WorkflowException} if any error occurs during the exection.
 	 */
 	public void marketPhase () throws WorkflowException
 	{
@@ -108,9 +114,13 @@ class MarketPhaseManager
 	}
 	
 	/**
-	 * @throws WorkflowException 
+	 * This method transfer the Cards contained in the receivedSellableCards to the buyer Player.
+	 * 
+	 * @param receivedSellableCards the Cards to transfer.
+	 * @param buyer the Player that will receive the Cards
+	 * @throws WorkflowException if any error occurs during the execution of this method.
 	 */
-	private void transferCards ( Iterable < SellableCard > receivedSellableCards , Player buyer ) throws TooFewMoneyException, NotSellableException, SellingPriceNotSetException, WorkflowException 
+	private void transferCards ( Iterable < SellableCard > receivedSellableCards , Player buyer ) throws WorkflowException 
 	{
 		Player seller ;
 		SellableCard transferredCard ;
@@ -136,9 +146,27 @@ class MarketPhaseManager
 			{
 				throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
 			}
+			catch (TooFewMoneyException e) 
+			{
+				throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
+			} 
+			catch (NotSellableException e) 
+			{
+				throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
+			}
+			catch (SellingPriceNotSetException e) 
+			{
+				throw new WorkflowException ( e , Utilities.EMPTY_STRING ) ;
+			}
 		}
 	}
 	
+	/**
+	 * Find and returns a Player with the name n.
+	 * 
+	 * @param n the name of the Player to find.
+	 * @return the Player with name n, null if not found.
+	 */
 	private Player findPlayerByName ( String n ) 
 	{
 		Player res ;

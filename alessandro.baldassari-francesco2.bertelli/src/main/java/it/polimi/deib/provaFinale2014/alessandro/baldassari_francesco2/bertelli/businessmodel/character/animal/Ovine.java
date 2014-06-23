@@ -9,7 +9,10 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public abstract class Ovine extends Animal 
 {
 
+	// ATTRIBUTES
+	
 	/**
+	 * @param positionableElementType the PositionableElementType of this Ovine.
 	 * @param name the name of this ovine. 
 	 */
 	protected Ovine ( PositionableElementType positionableElementType , String name ) 

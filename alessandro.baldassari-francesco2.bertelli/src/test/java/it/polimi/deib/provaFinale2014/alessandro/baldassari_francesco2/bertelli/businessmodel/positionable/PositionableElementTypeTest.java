@@ -33,19 +33,19 @@ public class PositionableElementTypeTest {
 	@Test
 	public void isStandardOvine(){
 		positionableElementType = null;
-		assertFalse(PositionableElementType.isStandardAdultOvine(positionableElementType));
+		assertFalse(PositionableElementType.isStandardOvine(positionableElementType));
 		
 		positionableElementType = PositionableElementType.LAMB;
-		assertTrue(PositionableElementType.isStandardAdultOvine(positionableElementType));
+		assertTrue(PositionableElementType.isStandardOvine(positionableElementType));
 		
 		positionableElementType = PositionableElementType.SHEEP;
-		assertTrue(PositionableElementType.isStandardAdultOvine(positionableElementType));
+		assertTrue(PositionableElementType.isStandardOvine(positionableElementType));
 		
 		positionableElementType = PositionableElementType.RAM;
-		assertTrue(PositionableElementType.isStandardAdultOvine(positionableElementType));
+		assertTrue(PositionableElementType.isStandardOvine(positionableElementType));
 		
 		positionableElementType = PositionableElementType.FENCE;
-		assertFalse(PositionableElementType.isStandardAdultOvine(positionableElementType));
+		assertFalse(PositionableElementType.isStandardOvine(positionableElementType));
 		
 	}
 
