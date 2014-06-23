@@ -2,7 +2,6 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import static org.junit.Assert.*;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
@@ -12,7 +11,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.SingletonElementAlreadyGeneratedException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
-import org.junit.Before;
 import org.junit.Test;
 
 public class GameMapFactoryTest {
@@ -21,18 +19,13 @@ public class GameMapFactoryTest {
 	ObjectIdentifier<Match> requesterDummyMatchIdentifier;
 	List<Region> regions;
 	List<Road> roads;
-	
-	@Before
-	public void setUp()  
-	{
-		requesterDummyMatchIdentifier = MatchIdentifier.newInstance();
-		
-	}
 
 	@Test
-	public void newIstance() {
+	public void newIstance() 
+	{
 		try 
 		{
+			requesterDummyMatchIdentifier = MatchIdentifier.newInstance();
 			gameMap = GameMapFactory.getInstance().newInstance(requesterDummyMatchIdentifier);
 		}
 		catch (SingletonElementAlreadyGeneratedException e) {

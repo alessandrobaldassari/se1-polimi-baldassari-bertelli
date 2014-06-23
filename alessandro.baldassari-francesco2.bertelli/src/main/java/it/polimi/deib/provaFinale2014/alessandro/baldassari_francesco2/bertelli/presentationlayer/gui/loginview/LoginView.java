@@ -2,9 +2,10 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
-import java.awt.Image;
 import java.awt.Insets;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
@@ -43,7 +44,6 @@ public class LoginView extends ObservableFrameworkedWithGridBagLayoutDialog < Lo
 	{
 		super ( ( Frame ) null , PresentationMessages.APP_NAME , true ) ;
 		addObserver ( observer ) ;		
-		System.out.println ( "LOGIN_VIEW : CONSTRUCTOR_EXECUTED" ) ;
 	}
 
 	/**
@@ -110,7 +110,7 @@ public class LoginView extends ObservableFrameworkedWithGridBagLayoutDialog < Lo
 	private class OkAction implements Runnable 
 	{
 		
-		private final String NAME_OF_THE_METHOD_TO_CALL = "onNameEntered" ;
+		private static final String NAME_OF_THE_METHOD_TO_CALL = "onNameEntered" ;
 		
 		/**
 		 * As the super's one. 
@@ -127,7 +127,7 @@ public class LoginView extends ObservableFrameworkedWithGridBagLayoutDialog < Lo
 				}
 				catch (MethodInvocationException e) 
 				{
-					e.printStackTrace();
+					Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , e ) ;
 				}
 			else
 				inputView.setErrors ( PresentationMessages.INVALID_CHOOSE_MESSAGE ) ;
@@ -151,7 +151,7 @@ public class LoginView extends ObservableFrameworkedWithGridBagLayoutDialog < Lo
 				}
 				catch (InterruptedException e ) 
 				{
-					e.printStackTrace();
+					Logger.getGlobal().log ( Level.WARNING , Utilities.EMPTY_STRING , e ) ;
 				}
 		}
 		GraphicsUtilities.showUnshowWindow ( loginView , false , false ) ;

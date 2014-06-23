@@ -6,9 +6,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-public class CollectionsUtilities 
+public final class CollectionsUtilities 
 {
 
+	private CollectionsUtilities () {}
+	
 	/***/
 	public static < T > int iterableSize ( Iterable < T > src ) 
 	{

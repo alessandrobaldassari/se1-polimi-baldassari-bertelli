@@ -22,6 +22,8 @@ import java.awt.event.ItemListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JCheckBox;
 import javax.swing.JSpinner;
@@ -282,13 +284,19 @@ class CardChooseViewPanel extends FrameworkedWithGridBagLayoutPanel
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	protected void bindListeners () {}
+	protected void bindListeners () 
+	{
+		Logger.getGlobal().log ( Level.INFO , "CardsMarketViewPanel - bind listeners" );
+	}
 
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	protected void injectComponents () {}
+	protected void injectComponents () 
+	{
+		Logger.getGlobal().log ( Level.INFO , "CardsMarketViewPanel - inject components" );		
+	}
 
 	/***/
 	public Iterable < SellableCard > getSelectedData () 

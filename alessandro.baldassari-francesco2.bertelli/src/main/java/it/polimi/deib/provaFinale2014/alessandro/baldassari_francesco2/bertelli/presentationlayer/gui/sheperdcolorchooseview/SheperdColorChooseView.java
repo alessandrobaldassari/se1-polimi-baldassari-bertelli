@@ -6,10 +6,11 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.SheeplandClientApp;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.positionable.PositionableElementType;
@@ -192,17 +193,6 @@ public class SheperdColorChooseView extends ObservableFrameworkedWithGridBagLayo
 		return color.get() ;
 	}
 	
-	public static void main ( String [] args ) 
-	{
-		ArrayList < NamedColor > a = new ArrayList < NamedColor > () ;
-		a.add(new NamedColor ( 0 , 0 , 0 , "BLACK" ) ) ;
-		a.add ( new NamedColor ( 255 , 0 , 0 , "RED" ) ) ;
-		a.add ( new NamedColor ( 0 , 255 , 0 , "GREEN") ) ;
-		NamedColor n ;
-		n = SheperdColorChooseView.showDialog( a );
-		System.out.println ( n ) ;
-	}
-	
 }
 
 /**
@@ -251,13 +241,19 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	protected void bindListeners () {}
+	protected void bindListeners () 
+	{
+		Logger.getGlobal().log ( Level.INFO , "Sheperd color choose view - bind listeners " ) ;
+	}
 
 	/**
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	protected void injectComponents () {}
+	protected void injectComponents () 
+	{
+		Logger.getGlobal().log ( Level.INFO , "Sheperd color choose view - inject components " ) ;
+	}
 
 	public void setModel (  SheperColorChooserViewModel model ) 
 	{

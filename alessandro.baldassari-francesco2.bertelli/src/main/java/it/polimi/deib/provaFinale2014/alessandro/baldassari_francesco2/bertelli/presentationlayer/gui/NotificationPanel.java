@@ -4,6 +4,8 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JTextArea;
 import javax.swing.border.TitledBorder;
@@ -56,7 +58,10 @@ public class NotificationPanel extends FrameworkedWithGridBagLayoutPanel
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	protected void bindListeners() {}
+	protected void bindListeners() 
+	{
+		Logger.getGlobal().log ( Level.INFO , "Notification panel - bind listeners" );
+	}
 
 	/**
 	 * AS THE SUPER'S ONE. 

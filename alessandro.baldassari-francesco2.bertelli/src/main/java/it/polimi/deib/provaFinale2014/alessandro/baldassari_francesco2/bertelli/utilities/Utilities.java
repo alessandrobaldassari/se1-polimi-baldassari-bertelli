@@ -1,7 +1,7 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities;
 
 /***/
-public class Utilities 
+public final class Utilities 
 {
 	
 	public static final String EMPTY_STRING = "" ;
@@ -15,6 +15,8 @@ public class Utilities
 	
 	/***/
 	public static final int MILLISECONDS_PER_SECOND = 1000 ;
+	
+	private Utilities () {}
 	
 	/***/
 	public static Class < ? > [] getTypes ( Object ... src ) 
@@ -49,8 +51,8 @@ public class Utilities
 	public static String generateArrayStringContent ( Object [] array ) 
 	{
 		String res ;
-		StringBuffer s ;
-		s = new StringBuffer () ;
+		StringBuilder s ;
+		s = new StringBuilder () ;
 		for ( Object o : array )
 		{
 			s.append ( o.toString () ) ;

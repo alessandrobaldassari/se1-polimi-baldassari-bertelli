@@ -39,8 +39,10 @@ public class ResultCalculatorManagerTest{
 	public void setUp()
 	{
 		dummyMatch = new DummyMatch();
-		try {
+		try
+		{
 			dummyMatch.initializePlayersAndSheperds();
+			dummyMatch.initializeAnimals();
 		} catch (WriteOncePropertyAlreadSetException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -48,14 +50,11 @@ public class ResultCalculatorManagerTest{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		try {
-			dummyMatch.initializeAnimals();
-		} catch (WolfAlreadyGeneratedException e) {
+		catch (WolfAlreadyGeneratedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (BlackSheepAlreadyGeneratedException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	
 	}
@@ -63,6 +62,7 @@ public class ResultCalculatorManagerTest{
 	@Test
 	public void MatchResultCalculator () 
 	{
+		setUp ();
 		dummyMatch.match.setMatchState(MatchState.CALCULATING_RESULTS);
 		try {
 			matchResultsCalculator = new ResultsCalculatorManager(dummyMatch.match);
@@ -87,7 +87,9 @@ public class ResultCalculatorManagerTest{
 	}
 	
 	@Test
-	public void calculatePlayerScore(){
+	public void calculatePlayerScore()
+	{
+		setUp () ;
 		dummyMatch.match.setMatchState(MatchState.CALCULATING_RESULTS);
 		try {
 			matchResultsCalculator = new ResultsCalculatorManager(dummyMatch.match);

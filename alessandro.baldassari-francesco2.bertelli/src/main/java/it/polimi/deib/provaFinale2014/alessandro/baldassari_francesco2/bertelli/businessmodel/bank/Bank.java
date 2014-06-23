@@ -282,7 +282,7 @@ public class Bank implements Serializable
 		/**
 		 * The Fence type a User wants to buy.
 		 */
-		private FenceType type ;
+		private final FenceType type ;
 		
 		/**
 		 * @param type the Fence type a User wants to buy.
@@ -318,7 +318,7 @@ public class Bank implements Serializable
 		/**
 		 * The type of the Region of the Card a User wants to buy. 
 		 */
-		private RegionType regionType ;
+		private final RegionType regionType ;
 		
 		/**
 		 * @param regionType the type of the Region of the Card a User wants to buy. 
@@ -354,12 +354,12 @@ public class Bank implements Serializable
 		/**
 		 * The amount of money a User try to pay for a Card. 
 		 */
-		private int proposedPrice ;
+		private final int proposedPrice ;
 		
 		/**
 		 * The amount of money that is required by the Bank to sell a Card. 
 		 */
-		private int rightPrice ;
+		private final int rightPrice ;
 		
 		/**
 		 * @param priceProposed the amount of money a User try to pay for a Card. 
@@ -367,7 +367,7 @@ public class Bank implements Serializable
 		 * @throws IllegalArgumentException if the priceProposed or the rightPrice parameter is 
 		 * 		   <= 0 or the priceProposed and rightPrice parameters are equals.
 		 */
-		private CardPriceNotRightException ( int priceProposed , int rightPrice ) 
+		public CardPriceNotRightException ( int priceProposed , int rightPrice ) 
 		{
 			if ( rightPrice >= 0 && priceProposed != rightPrice )
 			{

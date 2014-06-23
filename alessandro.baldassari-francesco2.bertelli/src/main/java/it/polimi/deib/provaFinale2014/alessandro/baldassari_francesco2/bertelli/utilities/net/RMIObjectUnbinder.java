@@ -21,7 +21,7 @@ public interface RMIObjectUnbinder
 	public class UnbindingException extends Exception 
 	{
 		
-		private String objectName ;
+		private final String objectName ;
 		
 		/**
 		 * @param cause the Throwable that generated this Exception. 

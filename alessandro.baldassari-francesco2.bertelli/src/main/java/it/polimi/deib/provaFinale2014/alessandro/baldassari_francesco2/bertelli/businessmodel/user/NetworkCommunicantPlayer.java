@@ -306,8 +306,7 @@ public class NetworkCommunicantPlayer extends Player
 				} 
 				catch (SellingPriceNotSetException e )
 				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , e ) ;
 				}
 			}  
 		} ;
@@ -358,7 +357,7 @@ public class NetworkCommunicantPlayer extends Player
 		}
 		catch ( IOException e ) 
 		{
-			e.printStackTrace();
+			Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , e ) ;
 		}
 	}
 
@@ -384,7 +383,7 @@ public class NetworkCommunicantPlayer extends Player
 		}
 		catch (IOException e) 
 		{
-			e.printStackTrace();
+			Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , e ) ;
 		}
 	}
 	
@@ -403,7 +402,7 @@ public class NetworkCommunicantPlayer extends Player
 				}
 				catch (InterruptedException e) 
 				{
-					e.printStackTrace();
+					Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , e ) ;
 				}
 			}
 	}
@@ -427,7 +426,6 @@ public class NetworkCommunicantPlayer extends Player
 			catch ( WriteOncePropertyAlreadSetException e ) 
 			{
 				res = false ;
-				e.printStackTrace () ;
 			}
 			finally
 			{

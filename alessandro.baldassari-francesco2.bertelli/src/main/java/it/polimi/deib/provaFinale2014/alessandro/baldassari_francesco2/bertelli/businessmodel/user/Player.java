@@ -410,7 +410,7 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 	 */
 	public void chooseCardsEligibleForSelling () throws TimeoutException 
 	{
-		if ( sellableCards.size () > 0 )
+		if ( ! sellableCards.isEmpty() )
 			chooseCardsEligibleForSellingIfThereAreSellableCards () ;
 	}
 	

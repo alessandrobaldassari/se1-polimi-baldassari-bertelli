@@ -64,8 +64,8 @@ public class Couple < T , S > implements Serializable
 	public String toString () 
 	{
 		String res ;
-		StringBuffer stringBuffer ;
-		stringBuffer = new StringBuffer () ;
+		StringBuilder stringBuffer ;
+		stringBuffer = new StringBuilder () ;
 		stringBuffer.append( "Coule" ) ;
 		stringBuffer.append ( "First Object : " );
 		stringBuffer.append ( Utilities.CARRIAGE_RETURN ) ;

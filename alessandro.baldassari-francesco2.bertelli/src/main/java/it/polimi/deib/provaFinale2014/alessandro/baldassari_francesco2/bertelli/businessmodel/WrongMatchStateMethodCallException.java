@@ -14,7 +14,7 @@ public class WrongMatchStateMethodCallException extends WrongStateMethodCallExce
 	/**
 	 * The state where the System is when this Exception is thrown. 
 	 */
-	private MatchState actualState ;
+	private final MatchState actualState ;
 	
 	/**
 	 * @param actualState the state where the System is when this Exception is thrown. 

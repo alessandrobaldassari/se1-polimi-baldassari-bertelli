@@ -250,7 +250,6 @@ class MoveListPanel extends FrameworkedWithGridBagLayoutPanel
 	protected void bindListeners () 
 	{
 		GameMoveType [] moveTypes ;
-		int i ;
 		moveTypes = GameMoveType.values () ;
 		for ( GameMoveType g : moveTypes )
 			selectors .get ( g ).addItemListener ( new SelectorListener ( g ) ) ;

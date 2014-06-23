@@ -2,7 +2,7 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
-public class TimeConstants 
+public final class TimeConstants 
 {
 
 	/**
@@ -20,6 +20,8 @@ public class TimeConstants
 
 	/***/
 	public static final long CONNECTION_LOOSING_SERVER_SUSPENSION_TIME = 60 * Utilities.MILLISECONDS_PER_SECOND ;
+	
+	private TimeConstants (){}
 	
 	
 }

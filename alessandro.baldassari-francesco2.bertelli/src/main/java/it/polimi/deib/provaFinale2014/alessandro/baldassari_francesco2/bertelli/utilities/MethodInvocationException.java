@@ -5,7 +5,7 @@ public class MethodInvocationException extends Exception
 {
 
 	/***/
-	private String methodName ;
+	private final String methodName ;
 	
 	/**
 	 * @param methodName 

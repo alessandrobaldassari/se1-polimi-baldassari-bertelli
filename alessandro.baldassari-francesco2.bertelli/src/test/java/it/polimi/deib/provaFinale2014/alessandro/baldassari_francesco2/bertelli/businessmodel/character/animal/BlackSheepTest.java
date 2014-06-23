@@ -20,7 +20,6 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class BlackSheepTest {
@@ -37,8 +36,6 @@ public class BlackSheepTest {
 	@Before
 	public void setUpBeforeClass()
 	{
-		int i ;
-		i = 0 ;
 		do 
 		{
 			try 
@@ -54,7 +51,7 @@ public class BlackSheepTest {
 			}
 			catch ( SingletonElementAlreadyGeneratedException e ) 
 			{
-				i ++ ;
+				fail () ;
 			}
 			catch ( CharacterDoesntMoveException e ) 
 			{}

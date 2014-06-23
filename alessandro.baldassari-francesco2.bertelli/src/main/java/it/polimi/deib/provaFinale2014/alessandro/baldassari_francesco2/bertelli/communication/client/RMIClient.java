@@ -5,11 +5,14 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepting.AnotherCommandYetRunningException;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepting.RMIClientBroker;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepting.RMIRequestAcceptServer;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
 import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * RMI-based implementation of the Client abstraction entity. 
@@ -66,7 +69,7 @@ public class RMIClient extends Client
 		} 
 		catch ( NotBoundException e ) 
 		{
-			e.printStackTrace();
+			Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , e );
 		}
 	}	
 	
@@ -108,7 +111,10 @@ public class RMIClient extends Client
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void technicalDisconnect () {}
+	public void technicalDisconnect () 
+	{
+		Logger.getGlobal().log ( Level.INFO , "RMIClient - technical disconnect called" );
+	}
 
 	/**
 	 * AS THE SUPER'S ONE. 

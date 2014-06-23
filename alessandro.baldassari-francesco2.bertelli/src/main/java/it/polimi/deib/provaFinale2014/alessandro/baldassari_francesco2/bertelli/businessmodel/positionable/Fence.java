@@ -14,7 +14,7 @@ public class Fence extends PositionableElement < Road >
 	/**
 	 * The type of this Fence ( final or not final ).
 	 */
-	private FenceType type ;
+	private final FenceType type ;
 	
 	/**
 	 * The property which says if a Fence has been placed in the GameMap or not. 
@@ -170,7 +170,7 @@ public class Fence extends PositionableElement < Road >
 		/**
 		 * The fence that raised this Exception. 
 		 */
-		private Fence fence ;
+		private final Fence fence ;
 		
 		/**
 		 * @throws IllegalArgumentException if the fence parameter is null. 

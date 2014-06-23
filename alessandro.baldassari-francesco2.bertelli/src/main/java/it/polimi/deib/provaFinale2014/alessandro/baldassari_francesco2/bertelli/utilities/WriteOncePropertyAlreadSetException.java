@@ -10,7 +10,7 @@ public class WriteOncePropertyAlreadSetException extends Exception
 	/**
 	 * The property already written. 
 	 */
-	private String propertyName ;
+	private final String propertyName ;
 	
 	/**
 	 * @param propertyName the property already written.

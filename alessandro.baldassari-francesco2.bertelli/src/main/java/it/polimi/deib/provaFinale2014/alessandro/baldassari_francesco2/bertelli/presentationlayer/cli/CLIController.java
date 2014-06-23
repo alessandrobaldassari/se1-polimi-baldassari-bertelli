@@ -10,6 +10,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.card.SellableCard;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.card.SellableCard.NotSellableException;
@@ -589,7 +591,10 @@ public class CLIController extends ViewPresenter
 	 * Obviously, the CLI does not do anything with this functionality.
 	 */
 	@Override
-	public void onGUIConnectorOnNotification ( Serializable guiConnector ) {}
+	public void onGUIConnectorOnNotification ( Serializable guiConnector ) 
+	{
+		Logger.getGlobal().log ( Level.INFO , "CLIController - onGUIConnectorOnNotification called." );
+	}
 	
 	// INNNER CLASSES
 	

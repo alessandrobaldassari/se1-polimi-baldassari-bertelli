@@ -4,6 +4,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.map.Region.RegionType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.PresentationMessages;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.GraphicsUtilities;
@@ -21,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
@@ -224,9 +227,6 @@ class RegionTypeViewPanel extends FrameworkedWithGridBagLayoutPanel
 	private List < JRadioButton > selectors ;
 		
 	/***/
-	private ButtonGroup buttonGroup ;	
-	
-	/***/
 	public RegionTypeViewPanel () 
 	{
 		super () ;
@@ -239,7 +239,6 @@ class RegionTypeViewPanel extends FrameworkedWithGridBagLayoutPanel
 		selected = null ;
 		imagePanels = new ArrayList < WithBackgroundImagePanel > () ;
 		selectors = new ArrayList < JRadioButton > () ;
-		buttonGroup = new ButtonGroup () ;
 	}
 
 	@Override
@@ -249,18 +248,26 @@ class RegionTypeViewPanel extends FrameworkedWithGridBagLayoutPanel
 	}
 
 	@Override
-	protected void bindListeners () {}
+	protected void bindListeners () 
+	{
+		Logger.getGlobal().log ( Level.INFO , Utilities.EMPTY_STRING );
+	}
 
 	@Override
-	protected void injectComponents () {}
+	protected void injectComponents () 
+	{
+		Logger.getGlobal().log ( Level.INFO , Utilities.EMPTY_STRING );
+	}
 	
 	public void setData ( Map < RegionType , Integer > inData )
 	{
 		Insets insets ;
 		WithBackgroundImagePanel panel ;
 		JRadioButton r ;
+		ButtonGroup buttonGroup ;
 		int i ;
 		insets = new Insets(5,5,5,5) ;
+		buttonGroup = new ButtonGroup () ;
 		i = 0 ;
 		for ( RegionType rt : inData.keySet() )
 		{
@@ -274,6 +281,7 @@ class RegionTypeViewPanel extends FrameworkedWithGridBagLayoutPanel
 			r.setHorizontalAlignment ( SwingConstants.CENTER ) ;
 			add ( panel ) ;
 			add ( r ) ;
+			buttonGroup.add(r); 
 			r.setOpaque(false); 
 			panel.setOpaque(false);
 			panel.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCardImage ( rt ) ) ;

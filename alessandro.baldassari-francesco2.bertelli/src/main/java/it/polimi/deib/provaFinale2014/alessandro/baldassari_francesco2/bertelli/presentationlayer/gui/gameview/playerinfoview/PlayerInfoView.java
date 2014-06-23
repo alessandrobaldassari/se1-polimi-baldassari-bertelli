@@ -4,6 +4,8 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -81,7 +83,10 @@ public class PlayerInfoView extends FrameworkedWithGridBagLayoutPanel implements
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	protected void bindListeners () {}
+	protected void bindListeners () 
+	{
+		Logger.getGlobal().log ( Level.INFO , "Player info view - bind listeners" );
+	}
 
 	/**
 	 * AS THE SUPERS' ONE. 

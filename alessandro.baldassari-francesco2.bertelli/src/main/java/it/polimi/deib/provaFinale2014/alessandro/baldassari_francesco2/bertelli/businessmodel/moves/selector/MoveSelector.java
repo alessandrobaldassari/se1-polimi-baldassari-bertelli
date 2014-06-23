@@ -114,11 +114,11 @@ public class MoveSelector implements Serializable
 	public void setMovesAllowed ( MoveExecutor exec ) 
 	{
 		movesAllowed.clear();
-		movesAllowed.put ( GameMoveType.BREAK_DOWN , availableRegionsForBreakdown.size() > 0  && exec.canBreakdown()) ;
-		movesAllowed.put ( GameMoveType.BUY_CARD , availableRegionsForBuyCard.size() > 0 && exec.canBuyCard()  ) ;
-		movesAllowed.put ( GameMoveType.MATE , availableRegionsForMate.size() > 0 && exec.canMate() ) ;
-		movesAllowed.put ( GameMoveType.MOVE_SHEEP , availableRegionForMoveSheep.size() > 0 && exec.canMoveSheep() ) ;
-		movesAllowed.put ( GameMoveType.MOVE_SHEPERD , availableRoadsForMoveSheperd.size() > 0 && exec.canMoveSheperd() ) ;
+		movesAllowed.put ( GameMoveType.BREAK_DOWN , ! availableRegionsForBreakdown.isEmpty()  && exec.canBreakdown()) ;
+		movesAllowed.put ( GameMoveType.BUY_CARD , ! availableRegionsForBuyCard.isEmpty() && exec.canBuyCard()  ) ;
+		movesAllowed.put ( GameMoveType.MATE , ! availableRegionsForMate.isEmpty() && exec.canMate() ) ;
+		movesAllowed.put ( GameMoveType.MOVE_SHEEP , ! availableRegionForMoveSheep.isEmpty() && exec.canMoveSheep() ) ;
+		movesAllowed.put ( GameMoveType.MOVE_SHEPERD , ! availableRoadsForMoveSheperd.isEmpty() && exec.canMoveSheperd() ) ;
 	}
 	
 	/**

@@ -8,6 +8,8 @@ import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
@@ -119,7 +121,7 @@ public class SocketClient extends Client
 	@Override
 	protected void operationFinished () throws IOException 
 	{
-		
+		Logger.getGlobal ().log ( Level.INFO , "Socket client : operationn finished called" );
 	}
 
 	/**

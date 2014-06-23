@@ -37,7 +37,6 @@ public class MapUtilitiesTest
 	
 	private AnimalFactory an ;
 	
-	@Before 
 	public void setUp () throws SingletonElementAlreadyGeneratedException 
 	{
 		do
@@ -52,8 +51,9 @@ public class MapUtilitiesTest
 	}
 	
 	@Test
-	public void areAdjacentsRoadRegion () 
+	public void areAdjacentsRoadRegion () throws SingletonElementAlreadyGeneratedException 
 	{
+		setUp () ;
 		Region region1 ;
 		Road road1 ;
 		Road road2 ;
@@ -65,8 +65,9 @@ public class MapUtilitiesTest
 	}
 	
 	@Test
-	public void areAdRoadRoad () 
+	public void areAdRoadRoad () throws SingletonElementAlreadyGeneratedException 
 	{
+		setUp();
 		Road r1 ;
 		Road r2 ;
 		Road r3 ;
@@ -78,8 +79,9 @@ public class MapUtilitiesTest
 	}
 	
 	@Test
-	public void findBlackSheepAtStart () 
+	public void findBlackSheepAtStart () throws SingletonElementAlreadyGeneratedException 
 	{
+		setUp () ;
 		BlackSheep b ;
 		try 
 		{
@@ -115,8 +117,9 @@ public class MapUtilitiesTest
 	}
 	
 	@Test
-	public void findWolfAtStart () 
+	public void findWolfAtStart () throws SingletonElementAlreadyGeneratedException 
 	{
+		setUp () ;
 		Wolf b ;
 		try 
 		{
@@ -152,8 +155,9 @@ public class MapUtilitiesTest
 	}
 	
 	@Test
-	public void extractAdultOvinesExceptBlackSheep () 
+	public void extractAdultOvinesExceptBlackSheep () throws SingletonElementAlreadyGeneratedException 
 	{
+		setUp();
 		Collection < Animal > in ;
 		Collection < AdultOvine > out ;
 		try 
@@ -187,8 +191,9 @@ public class MapUtilitiesTest
 	}
 	
 	@Test
-	public void lookForAnOvine () throws BlackSheepAlreadyGeneratedException, WolfAlreadyGeneratedException 
+	public void lookForAnOvine () throws SingletonElementAlreadyGeneratedException 
 	{
+		setUp () ;
 		Collection < Animal > in ;
 		AdultOvine res ;
 		in = new ArrayList < Animal > () ;
@@ -207,8 +212,9 @@ public class MapUtilitiesTest
 	}
 	
 	@Test
-	public void ovineCount () throws WolfAlreadyGeneratedException, BlackSheepAlreadyGeneratedException 
+	public void ovineCount () throws SingletonElementAlreadyGeneratedException 
 	{
+		setUp () ;
 		Region r ;
 		r = m.getRegionByUID(5) ;
 		r.addAnimal ( an.newWolf() ) ; 
@@ -219,14 +225,16 @@ public class MapUtilitiesTest
 	}
 	
 	@Test
-	public void getOtherAdjacentDifferentFrom () 
+	public void getOtherAdjacentDifferentFrom () throws SingletonElementAlreadyGeneratedException 
 	{
+		setUp () ;
 		assertTrue ( MapUtilities.getOtherAdjacentDifferentFrom ( m.getRoadByUID ( 29 ) , m.getRegionByUID( 8 ) ).equals ( m.getRegionByUID ( 9 ) ) ) ;
 	}
 	
 	@Test
-	public void findAnimalByUID () throws WolfAlreadyGeneratedException, BlackSheepAlreadyGeneratedException 
+	public void findAnimalByUID () throws SingletonElementAlreadyGeneratedException 
 	{
+		setUp () ;
 		Region r ;
 		r = m.getRegionByUID(4) ;
 		for ( Animal a : r.getContainedAnimals() )
@@ -241,8 +249,9 @@ public class MapUtilitiesTest
 	}
 	
 	@Test
-	public void lookForAType () throws WolfAlreadyGeneratedException, BlackSheepAlreadyGeneratedException 
+	public void lookForAType () throws SingletonElementAlreadyGeneratedException 
 	{
+		setUp () ;
 		Region r ;
 		r = m.getRegionByUID(2) ;
 		Animal a = an.newWolf();
@@ -254,8 +263,9 @@ public class MapUtilitiesTest
 	}
 	
 	@Test
-	public void retrieveAdjacentPlayers () 
+	public void retrieveAdjacentPlayers () throws SingletonElementAlreadyGeneratedException 
 	{
+		setUp ();
 		Road r1 ;
 		Sheperd s1 ;
 		Sheperd s2 ;
@@ -276,8 +286,9 @@ public class MapUtilitiesTest
 	}
 	
 	@Test
-	public void generateAllowedSet () 
+	public void generateAllowedSet () throws SingletonElementAlreadyGeneratedException 
 	{
+		setUp () ;
 		Collection in ;
 		Collection out ;
 		in = new ArrayList () ;

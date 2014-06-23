@@ -11,6 +11,7 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.animator.SimpleAnimator;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Identifiable;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.MethodInvocationException;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.Couple;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.FrameworkedWithGridBagLayoutPanel;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.graphic.GraphicsUtilities;
@@ -31,12 +32,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.geom.RectangularShape;
 import java.awt.image.BufferedImage;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -151,7 +153,10 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	protected void bindListeners () {}
+	protected void bindListeners () 
+	{
+		Logger.getGlobal().log ( Level.INFO , "GameMapViewPanel - bind listeners" );
+	}
 
 	/**
 	 * AS THE SUPER'S ONE. 
@@ -464,11 +469,9 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 		 */
 		public void zoom ( float xFactor , float yFactor ) 
 		{
-			System.out.println ( "DRAWING_PANEL - ZOOM : BEGINS" ) ;
 			xZoomMult =  xZoomMult * xFactor;
 			yZoomMult = yZoomMult * yFactor ;
 			repaint () ;
-			System.out.println ( "DRAWING_PANEL - ZOOM : END" ) ;
 		}
 		
 		/**
@@ -486,7 +489,6 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 		    public void mouseClicked(MouseEvent e) 
 		    {
 				Couple < PositionableElementType , Integer > couple ;
-				Collection < Integer > uids ;
 				String methodName ;
 				Integer uid ;
 				Rectangle r ;
@@ -557,17 +559,13 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 					try 
 					{
 						if ( uid != null && containsId(uidOfSelectableElements , uid ) )
-						{
 							notifyObservers ( methodName , uid ) ;
-						}
 						else
-						{
 							JOptionPane.showMessageDialog ( DrawingPanel.this , PresentationMessages.INVALID_CHOOSE_MESSAGE , PresentationMessages.APP_NAME , JOptionPane.ERROR_MESSAGE );
-						}
 					}
 					catch (MethodInvocationException e1) 
 					{
-						e1.printStackTrace();
+						Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , e1 ) ;
 					}
 				}
 		    }
@@ -694,7 +692,7 @@ public class GameMapViewPanel extends ObservableFrameworkedWithGridBagLayoutPane
 				}
 				catch (MethodInvocationException e1) 
 				{
-					e1.printStackTrace();
+					Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , e1 ) ;
 				}
 			} 
 			

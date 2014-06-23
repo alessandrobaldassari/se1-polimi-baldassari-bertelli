@@ -89,8 +89,8 @@ public class MoveSelection implements Serializable
 	@Override
 	public String toString () 
 	{
-		StringBuffer s ;
-		s = new StringBuffer () ;
+		StringBuilder s ;
+		s = new StringBuilder () ;
 		s.append ( "MoveSelection" ) ;
 		s.append ( "\n" ) ;
 		s.append ( "Selected Type : " ) ;

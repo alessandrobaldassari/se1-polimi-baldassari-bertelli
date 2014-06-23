@@ -3,11 +3,13 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 import java.util.Random;
 
 /***/
-public class MathUtilities 
+public final class MathUtilities 
 {
 
 	/***/
 	private static Random random = new Random () ;
+	
+	private MathUtilities(){}
 	
 	/***/
 	public static int launchDice () 

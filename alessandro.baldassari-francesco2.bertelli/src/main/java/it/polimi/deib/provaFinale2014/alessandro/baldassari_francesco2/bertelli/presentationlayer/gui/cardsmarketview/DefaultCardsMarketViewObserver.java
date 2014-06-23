@@ -1,5 +1,6 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.cardsmarketview;
 
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.card.SellableCard;
@@ -35,6 +36,13 @@ public class DefaultCardsMarketViewObserver implements CardsMarketViewObserver
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void onDoNotWantChooseAnyCard () {}
+	public void onDoNotWantChooseAnyCard () 
+	{
+		synchronized (cards) 
+		{
+			cards.set ( new IterableContainer < SellableCard > ( new ArrayList < SellableCard > ( 0 ) ) );
+			cards.notifyAll();
+		}
+	}
 
 }

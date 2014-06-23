@@ -160,9 +160,6 @@ public abstract class Client implements Runnable , Terminable
 		Iterable < Sheperd > sheperds ;
 		Iterable < Road > roads ;
 		Serializable se ;
-		MoveSelection move ;
-		MoveSelector gf ;
-		GameMap gm ;
 		Message m ;
 		String s ;
 		Sheperd sh ;

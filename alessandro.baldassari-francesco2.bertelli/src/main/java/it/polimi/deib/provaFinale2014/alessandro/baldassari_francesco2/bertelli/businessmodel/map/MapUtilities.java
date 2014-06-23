@@ -27,6 +27,8 @@ public final class MapUtilities
 {
 
 	// METHODS
+
+	private MapUtilities () {}
 	
 	/**
 	 * This methods check if a Road and a Region in a Map are adjacent.

@@ -10,7 +10,7 @@ public class CharacterDoesntMoveException extends Exception
 	/**
 	 * The Character involved in the Exception. 
 	 */
-	private Character < ? > character ;
+	private final Character < ? > character ;
 	
 	/**
 	 * @param character the Character involved in the Exception.

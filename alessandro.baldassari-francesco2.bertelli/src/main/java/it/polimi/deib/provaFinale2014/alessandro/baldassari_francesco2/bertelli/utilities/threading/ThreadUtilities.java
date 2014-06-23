@@ -2,9 +2,11 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ThreadUtilities 
+public final class ThreadUtilities 
 {
 
+	private ThreadUtilities() {}
+	
 	/***/
 	public static void waitForAtomicVariable ( AtomicReference < ? > toWaitFor )
 	{

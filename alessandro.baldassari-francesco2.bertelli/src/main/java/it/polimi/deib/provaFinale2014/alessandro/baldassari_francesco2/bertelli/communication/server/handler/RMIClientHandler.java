@@ -2,6 +2,8 @@ package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli
 
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.handler.message.Message;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.requestsaccepting.AnotherCommandYetRunningException;
@@ -44,7 +46,10 @@ public class RMIClientHandler extends ClientHandler < RMIClientBroker >
 	 * Nothing to do in this implementation
 	 */
 	@Override
-	protected void technicalRebinding () {}
+	protected void technicalRebinding () 
+	{
+		Logger.getGlobal().log ( Level.INFO , "RMIClientHandler - technicalRebinding called." );
+	}
 	
 	/**
 	 * AS THE SUPER'S ONE. 
