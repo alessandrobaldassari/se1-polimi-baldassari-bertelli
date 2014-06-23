@@ -46,7 +46,11 @@ public class ImagesHolder
 	
 	private Map < PositionableElementType , BufferedImage > normalPositionableImages ;
 	
+	private Map < PositionableElementType , BufferedImage > normalBigPositionableImages ;
+	
 	private Map < PositionableElementType , BufferedImage > transparentPositionableImages ;
+	
+	private Map < PositionableElementType , BufferedImage > transparentBigPositionableImages ;
 	
 	public ImagesHolder ()
 	{
@@ -57,7 +61,9 @@ public class ImagesHolder
 		regionImages = new HashMap < Integer , BufferedImage > ( GameConstants.NUMBER_OF_REGIONS ) ;
 		roadImages = new HashMap < Integer , BufferedImage > ( GameConstants.NUMBER_OF_ROADS ) ;
 		normalPositionableImages = new HashMap < PositionableElementType , BufferedImage > () ;
+		normalBigPositionableImages = new HashMap<PositionableElementType, BufferedImage>();
 		transparentPositionableImages = new HashMap < PositionableElementType , BufferedImage > () ;
+		transparentBigPositionableImages = new HashMap<PositionableElementType, BufferedImage>();
 		loadImages () ;
 		makeImagesTransparent () ;
 	}
@@ -114,6 +120,20 @@ public class ImagesHolder
 			normalPositionableImages.put ( PositionableElementType.YELLOW_SHEPERD , im ) ;
 			im = GraphicsUtilities.getImage ( FilePaths.GREEN_SHEPERD_IMAGE_PATH ) ;
 			normalPositionableImages.put ( PositionableElementType.GREEN_SHEPERD , im ) ;
+			im = GraphicsUtilities.getImage ( FilePaths.LAMB__BIG_IMAGE_PATH ) ;
+			normalBigPositionableImages.put ( PositionableElementType.LAMB , im ) ;
+			im = GraphicsUtilities.getImage ( FilePaths.SHEEP__BIG_IMAGE_PATH ) ;
+			normalBigPositionableImages.put ( PositionableElementType.SHEEP , im ) ;
+			im = GraphicsUtilities.getImage ( FilePaths.RAM_BIG_IMAGE_PATH ) ;
+			normalBigPositionableImages.put ( PositionableElementType.RAM ,  im ) ;
+			im = GraphicsUtilities.getImage ( FilePaths.RED_SHEPERD_BIG_IMAGE_PATH ) ;
+			normalBigPositionableImages.put ( PositionableElementType.RED_SHEPERD , im ) ;
+			im = GraphicsUtilities.getImage ( FilePaths.BLUE_SHEPERD_BIG_IMAGE_PATH ) ;
+			normalBigPositionableImages.put ( PositionableElementType.BLUE_SHEPERD , im ) ;
+			im = GraphicsUtilities.getImage ( FilePaths.YELLOW_SHEPERD_BIG_IMAGE_PATH ) ;
+			normalBigPositionableImages.put ( PositionableElementType.YELLOW_SHEPERD , im ) ;
+			im = GraphicsUtilities.getImage ( FilePaths.GREEN_SHEPERD_BIG_IMAGE_PATH ) ;
+			normalBigPositionableImages.put ( PositionableElementType.GREEN_SHEPERD , im ) ;
 		} 
 		catch (IOException e) 
 		{
@@ -145,6 +165,11 @@ public class ImagesHolder
 		{
 			im = GraphicsUtilities.makeImageTranslucent ( normalPositionableImages.get ( p ) , 0.5f ) ;
 			transparentPositionableImages.put ( p , im ) ; 
+		}
+		for ( PositionableElementType p : normalBigPositionableImages.keySet () )
+		{
+			im = GraphicsUtilities.makeImageTranslucent ( normalBigPositionableImages.get ( p ) , 0.5f ) ;
+			transparentBigPositionableImages.put ( p , im ) ; 
 		}
 	}
 	
@@ -219,13 +244,23 @@ public class ImagesHolder
 	}
 	
 	/***/
-	public BufferedImage getPositionableImage ( PositionableElementType key , boolean transparent ) 
+	public BufferedImage getPositionableImage ( PositionableElementType key , boolean transparent , boolean big ) 
 	{
 		BufferedImage res ;
-		if ( transparent )
-			res =  transparentPositionableImages.get ( key ) ;
+		if ( big )
+		{
+			if ( transparent )
+				res = transparentBigPositionableImages.get ( key );
+			else
+				res = normalBigPositionableImages.get(key);
+		}
 		else
-			res = normalPositionableImages.get ( key ) ;
+		{
+			if ( transparent )
+				res =  transparentPositionableImages.get ( key ) ;
+			else
+				res = normalPositionableImages.get ( key ) ;
+		}
 		return res ;
 	}
 	

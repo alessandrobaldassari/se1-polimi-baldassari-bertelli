@@ -51,7 +51,7 @@ public class Wolf extends Animal
 			allGatesClosed = initRegion.isClosed () ;	
 			winnerRoad = initRegion.getBorderRoad ( diceResult ) ;
 			// se il lupo si può muovere
-			if ( allGatesClosed || ( ! allGatesClosed && !( winnerRoad.getElementContained () instanceof Fence) ) ) 
+			if ( allGatesClosed || ( ! allGatesClosed && !( winnerRoad.getElementContained () instanceof Fence ) ) && winnerRoad != null ) 
 			{
 				destRegion = MapUtilities.getOtherAdjacentDifferentFrom ( winnerRoad , initRegion ) ;
 				if ( destRegion != null )
@@ -59,7 +59,7 @@ public class Wolf extends Animal
 					// effectively move the Wolf.
 					initRegion.removeAnimal ( this ) ;
 					destRegion.addAnimal ( this ) ;
-					setPosition ( destRegion ) ;
+					moveTo ( destRegion );
 					// il lupo cerca di mangiare qualcuno
 					eatable = CollectionsUtilities.newCollectionFromIterable ( destRegion.getContainedAnimals () ) ;
 					for ( Animal a : eatable )

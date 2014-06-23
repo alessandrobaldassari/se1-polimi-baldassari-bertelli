@@ -1,8 +1,12 @@
 package it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.animator;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.communication.server.gui.message.GUIGameMapNotificationMessage;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.MapMeasuresManager;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.presentationlayer.gui.gameview.gamemapview.PositionableElementCoordinatesManager;
+import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.Utilities;
 
 import javax.swing.JComponent;
 
@@ -33,13 +37,15 @@ public class SimpleAnimator extends Animator
 		{
 			Thread.sleep(60000);
 		}
-		catch (InterruptedException e) {}
+		catch (InterruptedException e) 
+		{
+			Logger.getGlobal().log(Level.WARNING , Utilities.EMPTY_STRING , e);
+		}
 	}
 
 	@Override
 	public synchronized void addAddMessage ( GUIGameMapNotificationMessage m ) 
 	{
-		System.err.println ( "\n\n\n\n\n\n\n\n\n\n simple animator" + coordinatesManager + "\n\n\n\n\n\n\n\n\n\n" ) ;
 		if ( buffer == null ) // surely an adding operation, no animation for this
 		{
 			positionableElementsManager.addElement ( m ) ;

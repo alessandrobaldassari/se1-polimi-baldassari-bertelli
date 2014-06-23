@@ -12,6 +12,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  */
 public class MoveSheep extends GameMove 
 {
+	
+	// ATTRIBUTES
 
 	/**
 	 * The Sheperd who wants to make this move. 
@@ -27,6 +29,8 @@ public class MoveSheep extends GameMove
 	 * The new destination of the moving ovine. 
 	 */
 	private Region ovineDestinationRegion ;
+	
+	// METHODS
 	
 	/**
 	 * @param moverSheperd the Sheperd who wants to make this move. 

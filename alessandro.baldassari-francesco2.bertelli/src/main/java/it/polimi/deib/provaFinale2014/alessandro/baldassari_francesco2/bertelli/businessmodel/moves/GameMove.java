@@ -28,6 +28,6 @@ public abstract class GameMove
 	 *         can not be executed.
 	 * @throws WorkflowException 
 	 */
-	public abstract void execute ( Match match ) throws MoveNotAllowedException , WrongStateMethodCallException, WorkflowException ;
+	public abstract void execute ( Match match ) throws MoveNotAllowedException, WorkflowException ;
 		
 }

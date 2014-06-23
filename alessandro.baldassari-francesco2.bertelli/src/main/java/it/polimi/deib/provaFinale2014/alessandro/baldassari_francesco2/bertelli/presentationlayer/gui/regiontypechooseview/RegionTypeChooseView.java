@@ -74,14 +74,15 @@ public class RegionTypeChooseView extends ObservableFrameworkedWithGridBagLayout
 		Insets insets ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
 		layoutComponent ( inputView , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
-		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
+		setDefaultCloseOperation ( DO_NOTHING_ON_CLOSE ) ;
 		setAlwaysOnTop ( true ) ;	
 		inputView.setShowKo(false); 
-		setUndecorated(true);
+		setUndecorated(false);
  		setSize ( GraphicsUtilities.getThreeFourthVgaResolution() ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
 		inputView.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCoverImage(true) ) ; 
 		inputView.setTitle ( "Scegli il tipo di regione : " ) ;
+		setResizable(false);
 
 	}
 

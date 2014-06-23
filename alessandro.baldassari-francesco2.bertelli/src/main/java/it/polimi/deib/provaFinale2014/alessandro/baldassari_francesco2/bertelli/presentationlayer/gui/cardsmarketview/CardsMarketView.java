@@ -87,13 +87,13 @@ public class CardsMarketView extends ObservableFrameworkedWithGridBagLayoutDialo
 		GraphicsUtilities.setComponentLayoutProperties ( view , getLayout () , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 		view.setTitle ( "Scegli le carte !" ) ;
 		view.setShowKo(false); 
-		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
-		setResizable ( false ) ;
+		setDefaultCloseOperation ( DO_NOTHING_ON_CLOSE ) ;
 		setAlwaysOnTop ( true ) ;	
-		setUndecorated(true);
+		setUndecorated(false);
  		setSize ( GraphicsUtilities.getThreeFourthVgaResolution() ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
 		view.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCoverImage(true) ); 
+		setResizable ( false ) ;
 	}
 
 	/**

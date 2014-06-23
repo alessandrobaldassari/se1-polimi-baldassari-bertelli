@@ -28,33 +28,55 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
  */
 public class MoveSelector implements Serializable
 {
+	
+	// ATTRIBUTES.
 
-	/***/
+	/**
+	 * A Map that, for each move, says if it is allowed or not. 
+	 */
 	private Map < GameMoveType , Boolean > movesAllowed ;
 	
-	/***/
+	/**
+	 * The Sheperd associated with this selection. 
+	 */
 	private Sheperd associatedSheperd ;
 
-	/***/
+	/**
+	 * The available money of the current Sheperd. 
+	 */
 	private int availableMoney ;
 	
-	/***/
+	/**
+	 * The selection done by the User. 
+	 */
 	private MoveSelection selection ;
 
-	/***/
+	/**
+	 * The Roads available for the MoveSheperd move. 
+	 */
 	private Collection < Road > availableRoadsForMoveSheperd ;
 	
-	/***/
+	/**
+	 * The Regions available for the MoveSheep move. 
+	 */
 	private Collection < Region > availableRegionForMoveSheep ;
 	
-	/***/
+	/**
+	 * A Map containing, for each RegionType available for selection, the price of the associated Card that can be buyed by the Bank. 
+	 */
 	private Map < RegionType , Integer > availableRegionsForBuyCard ;
 	
-	/***/
+	/**
+	 * The Regions available for the Mate move. 
+	 */
 	private Collection < Region > availableRegionsForMate ;
 	
-	/***/
+	/**
+	 * The Regions available for the Breakdown move. 
+	 */
 	private Collection < Region > availableRegionsForBreakdown ;
+	
+	// METHODS.
 	
 	/**
 	 * @param associatedSheperd the Sheperd the User has choosen for this turn.
@@ -86,7 +108,9 @@ public class MoveSelector implements Serializable
 			throw new IllegalArgumentException ( "MOVE_SELECTOR - <INIT> :" ) ;
 	}
 	
-	/***/
+	/**
+	 * 
+	 */
 	public void setMovesAllowed ( MoveExecutor exec ) 
 	{
 		movesAllowed.clear();

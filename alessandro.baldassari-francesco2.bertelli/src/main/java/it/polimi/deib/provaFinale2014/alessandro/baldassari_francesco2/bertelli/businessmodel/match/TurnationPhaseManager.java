@@ -129,9 +129,6 @@ class TurnationPhaseManager implements TurnNumberClock
 				}
 				// let the Players play.
 				allPlayersTurn () ;
-				// if all the Users left the game, the Match will finish.
-				if ( match.getNumberOfPlayers () == 0 )
-					throw new WorkflowException ( "Too few players to continue !" ) ;
 				// manage the market phase.
 				marketManager = new MarketPhaseManager ( match.getPlayers() ) ;
 				marketManager.marketPhase();
@@ -152,7 +149,6 @@ class TurnationPhaseManager implements TurnNumberClock
 		catch ( WrongStateMethodCallException e2 ) 
 		{
 			// system error, this should never happen - stop everything.
-			System.err.println ( "MATCH_CONTROLLER - TURNATION PHASE : WOLF OR BLACK_SHEEP NOT FOUND AT THE BEGINNING." ) ;
 			throw new WorkflowException ( e2 , Utilities.EMPTY_STRING ) ;
 		}
 	}
@@ -168,11 +164,7 @@ class TurnationPhaseManager implements TurnNumberClock
 	{
 		Iterable < Player > players ;
 		MoveExecutor moveExecutor ;
-		MoveSelector selector ;
-		MoveSelection selection ;
 		Sheperd choosenSheperd ;
-		byte moveIndex ;
-		boolean breakPlayer ;
 		// for each Player
 		players = CollectionsUtilities.newCollectionFromIterable ( match.getPlayers() );
 		for ( Player currentPlayer : players )
@@ -185,37 +177,11 @@ class TurnationPhaseManager implements TurnNumberClock
 					choosenSheperd = chooseSheperd ( currentPlayer ) ;
 					// generate a new MoveExecutor for this turn.
 					moveExecutor = MoveExecutor.newInstance ( choosenSheperd , this , lambEvolver ) ;
-					breakPlayer = false ;
-					for ( moveIndex = 0 ; moveIndex < GameConstants.NUMBER_OF_MOVES_PER_USER_PER_TURN && ! breakPlayer ; moveIndex ++ )
-						try 
-						{
-							selector = new MoveSelector ( moveExecutor.getAssociatedSheperd () ) ;
-							System.err.println ( choosenSheperd.getPosition() ) ;
-							fillMoveSelectorWithAvailableParameters ( selector , choosenSheperd ) ;
-							selector.setMovesAllowed ( moveExecutor ) ;
-							System.err.println ( selector.getAvailableMoves() );
-							playersGenericNotification ( "Carissimo, per questo turno è la tua mossa # " + moveIndex ) ;
-							selection = currentPlayer.doMove ( selector , match.getGameMap () ) ;
-							if ( selection != null )
-							{
-								// effectively execute the move.
-								execMove ( moveExecutor , selection, match ) ;
-								currentPlayer.genericNotification ( PresentationMessages.MOVE_SUCCEED_MESSAGE ) ;
-							}
-							else
-							{
-								// if a user does not want to do any move, it means that he does not want to play anymore; remove him from the match...
-								match.removePlayer ( currentPlayer ) ;
-								playersGenericNotification ( "Ehy boys, " + currentPlayer.getName() + " ci ha lasciati..." + Utilities.CARRIAGE_RETURN + "Peggio per lui !" ) ;
-								breakPlayer = true ;
-							}
-						} 
-						catch ( MoveNotAllowedException e ) 
-						{
-							Logger.getGlobal().log ( Level.INFO , Utilities.EMPTY_STRING , e ) ;
-							currentPlayer.genericNotification ( "Mossa fallita!\n" + e.getMessage() ) ;
-						}
+					singlePlayerMoves ( currentPlayer , choosenSheperd , moveExecutor ) ;
 					currentPlayer.genericNotification ( "Bene, per questa sessione hai finito.\nOra calmati, guarda le pecore e lascia fare agli altri il loro turno di gioco!" );
+					// if all the Users left the game, the Match will finish.
+					if ( match.getNumberOfPlayers () == 1 )
+						throw new WorkflowException ( "Too few players to continue !" ) ;
 				}
 				catch ( TimeoutException t ) 
 				{
@@ -224,12 +190,56 @@ class TurnationPhaseManager implements TurnNumberClock
 			if ( match.isInFinalPhase () == false && match.getBank().hasAFenceOfThisType ( FenceType.NON_FINAL ) == false )
 				try 
 				{
-					System.out.println ( "GAME CONTROLLER - TURNATION PHASE - ENTRO NELLA FASE FINALE " ) ;															
 					playersGenericNotification ( "Final Phase !!!" );
 					match.enterFinalPhase () ;
 				} 
 				catch ( AlreadyInFinalPhaseException e ) {}
 		}
+	}
+	
+	/**
+	 * Helper methods that let the User do his moves.
+	 * 
+	 * @param currentPlayer the Player that is currently doing moves.
+	 * @param choosenSheperd the choosen Sheperd.
+	 * @param moveExecutor the component that will effectively execute moves.
+	 * @throws WorkflowException if an unexpected exception occurs.
+	 * @throws TimeoutException if the User takes too much time to do a Move.
+	 */
+	private void singlePlayerMoves ( Player currentPlayer , Sheperd choosenSheperd , MoveExecutor moveExecutor ) throws WorkflowException, TimeoutException 
+	{
+		MoveSelector selector ;
+		MoveSelection selection ;
+		int moveIndex ;
+		boolean  breakPlayer ;
+		breakPlayer = false ;
+		for ( moveIndex = 0 ; moveIndex < GameConstants.NUMBER_OF_MOVES_PER_USER_PER_TURN && ! breakPlayer ; moveIndex ++ )
+			try 
+			{
+				selector = new MoveSelector ( moveExecutor.getAssociatedSheperd () ) ;
+				fillMoveSelectorWithAvailableParameters ( selector , choosenSheperd ) ;
+				selector.setMovesAllowed ( moveExecutor ) ;
+				playersGenericNotification ( "Carissimo, per questo turno è la tua mossa # " + moveIndex ) ;
+				selection = currentPlayer.doMove ( selector , match.getGameMap () ) ;
+				if ( selection != null )
+				{
+					// effectively execute the move.
+					execMove ( moveExecutor , selection, match ) ;
+					currentPlayer.genericNotification ( PresentationMessages.MOVE_SUCCEED_MESSAGE ) ;
+				}
+				else
+				{
+					// if a user does not want to do any move, it means that he does not want to play anymore; remove him from the match...
+					match.removePlayer ( currentPlayer ) ;
+					playersGenericNotification ( "Ehy boys, " + currentPlayer.getName() + " ci ha lasciati..." + Utilities.CARRIAGE_RETURN + "Peggio per lui !" ) ;
+					breakPlayer = true ;
+				}
+			} 
+			catch ( MoveNotAllowedException e ) 
+			{
+				Logger.getGlobal().log ( Level.INFO , Utilities.EMPTY_STRING , e ) ;
+				currentPlayer.genericNotification ( "Mossa fallita!\n" + e.getMessage() ) ;
+			}
 	}
 	
 	/**

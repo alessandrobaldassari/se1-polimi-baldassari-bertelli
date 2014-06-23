@@ -41,8 +41,10 @@ public final class GraphicsUtilities
 	/***/
 	private static Dimension vgaResolution ; 
 	
+	/***/
 	private static Dimension threeFourthVgaResolution ;
 	
+	/***/
 	private static Dimension halfVgaResolution ;
 	
 	// make it total.
@@ -138,6 +140,35 @@ public final class GraphicsUtilities
 			res.width = res.width / 2 ;
 			res.height = res.height / 2 ;
 		}
+		return res ;
+	}
+	
+	public static Rectangle approximateExternSimple ( Polygon p ) 
+	{
+		Rectangle res ;
+		int minX ;
+		int maxX ;
+		int minY ;
+		int maxY ;
+		int i ;
+		// first find the minX ;
+		minX = p.xpoints[0] ;
+		for ( i = 1 ; i < p.npoints ; i ++ )
+			if ( p.xpoints[i] < minX )
+				minX = p.xpoints[i];
+		maxX = p.xpoints[0] ;
+		for ( i = 1 ; i < p.npoints ; i ++ )
+			if ( p.xpoints[i] > maxX )
+				maxX = p.xpoints[i];
+		minY = p.ypoints[0] ;
+		for ( i = 1 ; i < p.npoints ; i ++ )
+			if ( p.ypoints[i] < minY )
+				minY = p.ypoints[i];
+		maxY = p.xpoints[0] ;
+		for ( i = 1 ; i < p.npoints ; i ++ )
+			if ( p.ypoints[i] > maxY )
+				maxY = p.ypoints[i];
+		res = new Rectangle ( minX , minY , Math.abs ( maxX - minX ) , Math.abs ( maxY - minY ) ) ;
 		return res ;
 	}
 	

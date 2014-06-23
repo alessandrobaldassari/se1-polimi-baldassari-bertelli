@@ -62,7 +62,6 @@ public class LoginView extends ObservableFrameworkedWithGridBagLayoutDialog < Lo
 	@Override
 	protected void manageLayout () 
 	{
-		Image backgroundImage ;
 		Insets insets ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
 		layoutComponent ( inputView , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
@@ -71,9 +70,11 @@ public class LoginView extends ObservableFrameworkedWithGridBagLayoutDialog < Lo
 		inputView.setShowKo ( false ) ;	
 		inputView.setTitle ( PresentationMessages.NAME_REQUEST_MESSAGE ) ;
 		inputView.setBackgroundImage( SheeplandClientApp.getInstance().getImagesHolder().getCoverImage ( true ) ) ; 
-		setUndecorated(true);
+		setDefaultCloseOperation ( DO_NOTHING_ON_CLOSE ) ;
+		setUndecorated(false);
  		setSize ( GraphicsUtilities.getThreeFourthVgaResolution() ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
+		setResizable(false); 
 	}
 
 	/**

@@ -71,11 +71,13 @@ public class OvineChooseView extends ObservableFrameworkedWithGridBagLayoutDialo
 		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
 		setAlwaysOnTop ( true ) ;	
 		view.setShowKo(false); 
-		setUndecorated(true);
+		setUndecorated(false);
+		setDefaultCloseOperation ( DO_NOTHING_ON_CLOSE ) ;
  		setSize ( GraphicsUtilities.getThreeFourthVgaResolution() ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
 		view.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCoverImage(true)) ; 
 		view.setTitle ( "Seleziona il tipo di ovino : " );
+		setResizable ( false ) ;
 	}
 
 	/**
@@ -238,7 +240,7 @@ class OvineListPanel extends FrameworkedWithGridBagLayoutPanel
 			r.setText ( p.name () ) ;
 			r.setOpaque ( false ) ;
 			r.setHorizontalAlignment ( SwingConstants.CENTER ) ;
-			panel.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( p , false ) );
+			panel.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( p , false , true ) );
 			panel.setOpaque ( false ) ;
 			i ++ ;
 		}

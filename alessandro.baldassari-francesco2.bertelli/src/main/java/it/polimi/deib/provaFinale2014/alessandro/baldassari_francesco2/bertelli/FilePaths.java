@@ -61,6 +61,20 @@ public final class FilePaths
 	
 	public static final String YELLOW_SHEPERD_IMAGE_PATH = "images/sheperds/sheepland_yellow_sheperd.png" ;
 	
+	public static final String RAM_BIG_IMAGE_PATH = "images/animals/sheepland_ram_big.png" ;
+
+	public static final String LAMB__BIG_IMAGE_PATH = "images/animals/sheepland_lamb_big.png" ;
+	
+	public static final String SHEEP__BIG_IMAGE_PATH = "images/animals/sheepland_sheep_big.png" ;	
+	
+	public static final String RED_SHEPERD_BIG_IMAGE_PATH = "images/sheperds/sheepland_red_sheperd_big.jpg" ;
+	
+	public static final String BLUE_SHEPERD_BIG_IMAGE_PATH = "images/sheperds/sheepland_blue_sheperd_big.jpg" ;
+	
+	public static final String GREEN_SHEPERD_BIG_IMAGE_PATH = "images/sheperds/sheepland_green_sheperd_big.jpg" ;
+	
+	public static final String YELLOW_SHEPERD_BIG_IMAGE_PATH = "images/sheperds/sheepland_yellow_sheperd_big.jpg" ;
+	
 	/***/
 	private FilePaths () {}
 	

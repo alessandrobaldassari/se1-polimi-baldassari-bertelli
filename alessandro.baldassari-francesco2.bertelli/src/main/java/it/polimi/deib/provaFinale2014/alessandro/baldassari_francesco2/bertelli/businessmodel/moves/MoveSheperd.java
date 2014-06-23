@@ -20,6 +20,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class MoveSheperd extends GameMove
 {
 	
+	// ATTRIBUTES
+	
 	/**
 	 * The Sheperd who wants to make this move. 
 	 */
@@ -29,6 +31,8 @@ public class MoveSheperd extends GameMove
 	 * The Road where the Sheperd wants to go. 
 	 */
 	private Road roadWhereGo ;
+
+	// METHODS
 	
 	/**
 	 * @param sheperdToMove the Sheperd who wants to make this move. 

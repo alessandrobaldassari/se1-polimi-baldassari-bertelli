@@ -67,14 +67,16 @@ public class MoveChooseView extends ObservableFrameworkedWithGridBagLayoutDialog
 		Insets insets ;
 		insets = new Insets ( 0 , 0 , 0 , 0 ) ;
 		GraphicsUtilities.setComponentLayoutProperties ( view , getLayout () , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
-		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
+		setDefaultCloseOperation ( DO_NOTHING_ON_CLOSE ) ;
 		setAlwaysOnTop ( true ) ;	
 		view.setShowKo(false); 
-		setUndecorated(true);
+		setUndecorated(false);
+		setDefaultCloseOperation ( DO_NOTHING_ON_CLOSE ) ;
  		setSize ( GraphicsUtilities.getVGAResolution() ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
 		view.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCoverImage(true) ); 
 		view.setTitle ( PresentationMessages.DO_MOVE_MESSAGE ) ;
+		setResizable ( false ) ;
 	}
 
 	/**

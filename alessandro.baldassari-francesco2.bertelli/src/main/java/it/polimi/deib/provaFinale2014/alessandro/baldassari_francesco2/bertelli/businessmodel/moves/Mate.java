@@ -25,6 +25,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class Mate extends GameMove
 {
 	
+	// ATTRIBUTES
+	
 	/**
 	 * The Sheperd who wants to perform this action. 
 	 */
@@ -44,6 +46,8 @@ public class Mate extends GameMove
 	 * A Lamb evolve to manage the life of the eventually born lambs. 
 	 */
 	private LambEvolver lambEvolver ;
+	
+	// METHODS
 	
 	/**
 	 * @param clockSource a component that will supply this Mate object information about the turn 
@@ -74,10 +78,11 @@ public class Mate extends GameMove
 	}
 	
 	/**
-	 * This method  
+	 * This method returns true if in a Region a Mate can happen, false else. 
 	 * 
-	 * @param region
-	 * @return
+	 * @param region the Region to test
+	 * @return true, if in the region parameter a Mate can happen, false else.
+	 * @throws {@link IllegalArgumentException} if the region parameter is null.
 	 */
 	public static boolean canMateDueToSexReasons ( Region region ) 
 	{
@@ -174,19 +179,32 @@ public class Mate extends GameMove
 	private class LambGrowerLookerRunnable implements Runnable 
 	{
 		
-		/***/
+		/**
+		 * A TurnNumberClock object to know when evolve the Lamb.
+		 */
 		private TurnNumberClock turnNumberClock ;
 		
-		/***/
+		/**
+		 * The Lamb to evolve. 
+		 */
 		private Lamb lambToEvolve ;
 		
-		/***/
+		/**
+		 * The object that will perform the evolution. 
+		 */
 		private LambEvolver lambEvolver ;
 		
-		/***/
+		/**
+		 * The Game turn when this Runnable was launched. 
+		 */
 		private int initTurn ;
 		
-		/***/
+		/**
+		 * @param turnNumberClock the value for the turnNumberClock field.
+		 * @param lambToEvolve the value for the lambToEvolve field.
+		 * @param lambEvolver the value for the lambEvolver field.
+		 * @throws IllegalArgumentException if one of the parameters is null. 
+		 */
 		public LambGrowerLookerRunnable ( TurnNumberClock turnNumberClock , Lamb lambToEvolve , LambEvolver lambEvolver ) 
 		{
 			if ( turnNumberClock != null && lambToEvolve != null && lambEvolver != null )

@@ -23,6 +23,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class BreakDown extends GameMove
 {
 	
+	// ATTRIBUTES
+	
 	/**
 	 * The Sheperd who wants to do this BreakDown. 
 	 */
@@ -32,6 +34,8 @@ public class BreakDown extends GameMove
 	 * The Animal that will be broken down if this process will go well. 
 	 */
 	private Animal animalToBreak ;
+	
+	// METHODS
 	
 	/**
 	 * @param breaker the Sheperd who wants to do this BreakDown action.
@@ -114,8 +118,6 @@ public class BreakDown extends GameMove
 		else
 			throw new IllegalArgumentException ( "BREAK_DOWN - EXECUTE : The match parameter can not be null." ) ;
 	}
-
-	
 
 	/**
 	 * Ask every adjacent Player ( adjacent to the Breaker ) to launch a dice to see

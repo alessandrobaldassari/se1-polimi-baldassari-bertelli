@@ -19,6 +19,8 @@ import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.
 public class BuyCard extends GameMove
 {
 
+	// ATTRIBUTES
+	
 	/**
 	 * The Sheperd who required to do this move. 
 	 */
@@ -28,6 +30,8 @@ public class BuyCard extends GameMove
 	 * The RegionType the buyer is interested in. 
 	 */
 	private RegionType buyingCardType ;
+	
+	// METHODS
 	
 	/**
 	 * @param buyer the Sheperd who required to do this move.

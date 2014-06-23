@@ -73,12 +73,13 @@ public class SheperdColorChooseView extends ObservableFrameworkedWithGridBagLayo
 		GraphicsUtilities.setComponentLayoutProperties ( view , getLayout () , 0 , 0 , 1 , 1 , 1 , 1 ,0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 		view.setTitle ( PresentationMessages.CHOOSE_COLOR_FOR_SHEPERD_MESSAGE ) ;
 		view.setShowKo(false); 
-		setDefaultCloseOperation ( DISPOSE_ON_CLOSE ) ;
+		setDefaultCloseOperation ( DO_NOTHING_ON_CLOSE ) ;
 		setAlwaysOnTop ( true ) ;
-		setUndecorated(true); 
+		setUndecorated(false); 
 		setSize ( GraphicsUtilities.getThreeFourthVgaResolution() ) ;
 		setLocation ( GraphicsUtilities.getCenterTopLeftCorner ( getSize () ) ) ;
 		view.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getCoverImage(true) ) ; 
+		setResizable(false); 
 	}
 
 	/**
@@ -297,7 +298,7 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 			r.setOpaque(false); 
 			layoutComponent ( p , i , 1 , 1 , 0.7 , 1 , 1 , 0 , 0 , GridBagConstraints.BOTH , GridBagConstraints.CENTER , insets ) ;
 			layoutComponent ( r , i , 2 , 1 , 0.3 , 1 , 1 , 0 , 0 , GridBagConstraints.HORIZONTAL , GridBagConstraints.CENTER , insets ) ;
-			p.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( PositionableElementType.getSheperdByColor ( n.getName () ) , true ) ) ;
+			p.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( PositionableElementType.getSheperdByColor ( n.getName () ) , true , true ) ) ;
 			r.addItemListener ( new SelectorListener ( i , p ) ) ;
 			r.setText ( n.getName () ) ; 
 			r.setHorizontalAlignment ( SwingConstants.CENTER ) ;
@@ -334,11 +335,11 @@ class ColorsListPanel extends FrameworkedWithGridBagLayoutPanel
 				imagePanels.get ( model.getSelectedColor().getName() ).
 				setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().
 				getPositionableImage ( PositionableElementType.
-				getSheperdByColor ( model.getSelectedColor().getName() ) , true ) );
+				getSheperdByColor ( model.getSelectedColor().getName() ) , true , true ) );
 			model.setSelected ( index ) ;
 			p.setBackgroundImage ( SheeplandClientApp.getInstance().getImagesHolder().
 			getPositionableImage ( PositionableElementType.getSheperdByColor 
-			( model.getColor ( index ).getName () ) , false )) ;
+			( model.getColor ( index ).getName () ) , false , true )) ;
 			repaint () ;
 		}	
 		

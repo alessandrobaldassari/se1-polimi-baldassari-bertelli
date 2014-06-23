@@ -31,7 +31,6 @@ public class LinearAnimatorDrawer
 			this.coordinatesManager = coordinatesManager ;
 			this.addedOne = addedOne ;
 			this.removedOne = removedOne ;
-			System.err.println ( "\n\n\n\n\n\n\n\n\n\n linear animator drawer \n" + this.coordinatesManager + "\n\n\n\n\n\n\n\n\n\n" ) ;
 		}
 	}
 	
@@ -42,8 +41,6 @@ public class LinearAnimatorDrawer
 		Ellipse2D end ;
 		System.out.println ( "ALGO_ANIMATOR - RUN : INIZIO" ) ;
 		// first, determines if a Sheperd or an Animal is moving, then act as a consequence.
-		System.out.println ( "add : " + addedOne ) ;
-		System.out.println ( "remove : " + removedOne ) ;
 		if ( removedOne.getWhereType() == GameMapElementType.REGION )
 		{
 			if ( PositionableElementType.isStandardOvine ( removedOne.getWhoType() ) )
@@ -56,8 +53,6 @@ public class LinearAnimatorDrawer
 			else
 				p = removedOne.getWhoType() ;
 			end = coordinatesManager.getRegionData ( addedOne.getWhereId () ).get ( p ) ;
-			System.out.println ( "\n\n\nSTART : " + coordinatesManager.getRegionData ( removedOne.getWhereId () ) ) ;
-			System.out.println ( "\n\n\nEND : " + p + " ; " + coordinatesManager.getRegionData ( addedOne.getWhereId () ).get ( p ) ) ;
 		}
 		else
 		{
@@ -89,13 +84,13 @@ public class LinearAnimatorDrawer
 		int distanceY ;
 		int dx ;
 		int dy ;
-		int numberOfMoves = 10 ;
+		int numberOfMoves = 20 ;
 		int pauseTime ;
 		int i ;
 		// set the pause time that will determine the speed - in millisecond.
-		pauseTime = 1000 ;				
+		pauseTime = 500 ;				
 		// retrieve the image.
-		animator.setImageToDraw( SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( removedOne.getWhoType () , false ) ) ;
+		animator.setImageToDraw( SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( removedOne.getWhoType () , false , false ) ) ;
 		// now perform the moving ; start from the start point.
 		current = new Ellipse2D.Double( start.getX() , start.getY() , start.getWidth() , start.getHeight() ) ;
 		animator.setWhereDraw( current ) ;

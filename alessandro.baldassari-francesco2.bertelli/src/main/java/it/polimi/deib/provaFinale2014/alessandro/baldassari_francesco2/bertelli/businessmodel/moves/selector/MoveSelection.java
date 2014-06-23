@@ -7,17 +7,30 @@ import java.util.Collections;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.businessmodel.moves.GameMoveType;
 import it.polimi.deib.provaFinale2014.alessandro.baldassari_francesco2.bertelli.utilities.datastructure.CollectionsUtilities;
 
-/***/
+/**
+ * This class describes a MoveSelection done by a User. 
+ */
 public class MoveSelection implements Serializable
 {
 
-	/***/
+	// ATTRIBUTES
+	
+	/**
+	 * The type of the selected move. 
+	 */
 	private GameMoveType selectedType ;
 	
-	/***/
+	/**
+	 * The parameters to perform the selected move. 
+	 */
 	private Collection < Serializable > params ;
 	
-	/***/
+	// METHODS
+	
+	/**
+	 * @param selectedType the value for the selectedType field.
+	 * @param params the value for the params property. 
+	 */
 	public MoveSelection ( GameMoveType selectedType , Iterable < Serializable > params ) 
 	{ 
 		if ( selectedType != null && params != null )
@@ -39,12 +52,19 @@ public class MoveSelection implements Serializable
 		return selectedType ;
 	}
 	
-	/***/
+	/**
+	 * Getter method for the params field.
+	 * 
+	 * @return the params field.
+	 */
 	public Iterable < Serializable > getParams () 
 	{
 		return params ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public boolean equals ( Object obj ) 
 	{
@@ -63,6 +83,9 @@ public class MoveSelection implements Serializable
 		return res ;
 	}
 	
+	/**
+	 * AS THE SUPER'S ONE. 
+	 */
 	@Override
 	public String toString () 
 	{
