@@ -88,7 +88,7 @@ public class LinearAnimatorDrawer
 		int pauseTime ;
 		int i ;
 		// set the pause time that will determine the speed - in millisecond.
-		pauseTime = 500 ;				
+		pauseTime = 250 ;				
 		// retrieve the image.
 		animator.setImageToDraw( SheeplandClientApp.getInstance().getImagesHolder().getPositionableImage ( removedOne.getWhoType () , false , false ) ) ;
 		// now perform the moving ; start from the start point.

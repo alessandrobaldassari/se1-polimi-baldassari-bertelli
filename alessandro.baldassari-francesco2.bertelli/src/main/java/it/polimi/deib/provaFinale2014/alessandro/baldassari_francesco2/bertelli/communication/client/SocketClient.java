@@ -112,6 +112,7 @@ public class SocketClient extends Client
 		System.out.println ( "SOCKET_CLIENT - WRITE : WRITING MESSAGE : " + m ) ; 
 		oos.writeObject ( m ) ;
 		oos.flush () ;
+		oos.reset();
 		System.out.println ( "SOCKET_CLIENT - WRITE : MESSAGE WRITTEN" ) ;
 	}
 	

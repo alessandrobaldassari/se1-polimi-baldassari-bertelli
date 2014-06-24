@@ -151,6 +151,10 @@ class TurnationPhaseManager implements TurnNumberClock
 			// system error, this should never happen - stop everything.
 			throw new WorkflowException ( e2 , Utilities.EMPTY_STRING ) ;
 		}
+		catch ( TimeoutException t ) 
+		{
+			
+		}
 	}
 	
 	/**
@@ -159,8 +163,9 @@ class TurnationPhaseManager implements TurnNumberClock
 	 * If one is not corretct, it looses it.
 	 * 
 	 * @throws WorkflowException if a serious error occurs so the match can not go away.
+	 * @throws TimeoutException if an operation takes too much time to occur.
 	 */
-	private void allPlayersTurn () throws WorkflowException
+	private void allPlayersTurn () throws WorkflowException, TimeoutException
 	{
 		Iterable < Player > players ;
 		MoveExecutor moveExecutor ;
@@ -478,8 +483,9 @@ class TurnationPhaseManager implements TurnNumberClock
 	 * Notify the Users with a Message.
 	 * 
 	 * @param msg the message to notify.
+	 * @throws TimeoutException if too long time is taken for the operation
 	 */
-	private void playersGenericNotification ( String msg )
+	private void playersGenericNotification ( String msg ) throws TimeoutException
 	{
 		for ( Player p : match.getPlayers() )
 			if ( ! p.isSuspended() )

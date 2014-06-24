@@ -236,13 +236,17 @@ public final class MapUtilities
 	{
 		Region res ;
 		if ( r != null && not != null )
-			if ( r.getFirstBorderRegion ().equals ( not ) )
+		{
+			if ( r.getFirstBorderRegion ().getUID () == not.getUID () )
 				res = r.getSecondBorderRegion();
 			else
-				if ( r.getSecondBorderRegion().equals(not) )
+			{
+				if ( r.getSecondBorderRegion().getUID() == not.getUID ())
 					res = r.getFirstBorderRegion();
 				else
 					throw new IllegalArgumentException () ;
+			}
+		}
 		else
 			throw new IllegalArgumentException();
 		return res ;

@@ -212,15 +212,14 @@ public abstract class ClientHandler < T >
 	 */
 	public Iterable < SellableCard > chooseCardsEligibleForSelling ( Iterable <SellableCard> sellableCards ) throws IOException 
 	{
+		Collection < Serializable > params ;
 		Iterable < SellableCard > res ;
 		Message m ;
-		System.out.println ( "CLIENT HANDLER - CHOOSE CARDS ELIGIBLE FOR SELLING : CREANDO IL MESSAGGIO" ) ;
-		m = Message.newInstance ( GameProtocolMessage.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST , Collections.< Serializable >singleton ( ( Serializable ) sellableCards ) ) ;
-		System.out.println ( "CLIENT HANDLER - CHOOSE CARDS ELIGIBLE FOR SELLING : INVIANDO IL MESSAGGIO" ) ;
+		params = new ArrayList<Serializable>(1);
+		params.add ( (Serializable) sellableCards);
+		m = Message.newInstance ( GameProtocolMessage.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_REQUEST , params ) ;
 		write ( m ) ;
-		System.out.println ( "CLIENT HANDLER - CHOOSE CARDS ELIGIBLE FOR SELLING : ATTENDENDO LA RISPOSTA" ) ;
 		m = read () ;
-		System.out.println ( "CLIENT HANDLER - CHOOSE CARDS ELIGIBLE FOR SELLING : RISPOSTA RICEVUTA" ) ;
 		if ( m.getOperation () == GameProtocolMessage.CHOOSE_CARDS_ELEGIBLE_FOR_SELLING_REQUESTING_RESPONSE )
 		{
 			System.out.println ( "CLIENT HANDLER - CHOOSE CARDS ELIGIBLE FOR SELLING - HEADER OK." ) ;

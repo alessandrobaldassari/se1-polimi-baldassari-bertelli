@@ -109,7 +109,11 @@ class MarketPhaseManager
 		catch ( TimeoutException t ) 
 		{
 			for ( Player p : players )
-				p.genericNotification ( "One of the players is not connected yet, so this market phase can not go away." + Utilities.CARRIAGE_RETURN + "It's not our fault, it's his !!!" );
+				try 
+				{
+					p.genericNotification ( "One of the players is not connected yet, so this market phase can not go away." + Utilities.CARRIAGE_RETURN + "It's not our fault, it's his !!!" );
+				} 
+				catch (TimeoutException e) {}
 		}
 	}
 	
@@ -133,8 +137,8 @@ class MarketPhaseManager
 				// find the Card to transfer
 				transferredCard = seller.getCard ( s.getUID () ) ;
 				// remove the Card from the Seller and pay him.
-				seller.removeCard(transferredCard); 
-				seller.receiveMoney(transferredCard.getSellingPrice () ) ;
+				seller.removeCard ( transferredCard ) ; 
+				seller.receiveMoney ( transferredCard.getSellingPrice () ) ;
 				// add the Card to the Buyer and make him pay.
 				buyer.addCard ( transferredCard ) ;
 				buyer.pay ( transferredCard.getSellingPrice() ) ;

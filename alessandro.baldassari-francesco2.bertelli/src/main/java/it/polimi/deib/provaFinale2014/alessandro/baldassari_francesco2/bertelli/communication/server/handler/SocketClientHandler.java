@@ -77,6 +77,7 @@ public class SocketClientHandler extends ClientHandler < Socket >
 		System.out.println ( "SOCKET_CLIENT_HANDLER - WRITE : DATA TO WRITE : " + m ) ;
 		oos.writeObject ( m ) ;
 		oos.flush () ;
+		oos.reset();
 		System.out.println ( "SOCKET_CLIENT_HANDLER - WRITE : DATA WRITTEN " ) ;
 	}
 

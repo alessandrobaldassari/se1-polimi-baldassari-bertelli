@@ -514,7 +514,7 @@ public abstract class Player extends WithReflectionAbstractObservable < PlayerOb
 	 * 
 	 * @param message the message the System wants to communicate to this Player.
 	 */
-	public abstract void genericNotification ( String message ) ;
+	public abstract void genericNotification ( String message ) throws TimeoutException ;
 	
 	/**
 	 * Method called by the System to notify the User that the Match is finishing.

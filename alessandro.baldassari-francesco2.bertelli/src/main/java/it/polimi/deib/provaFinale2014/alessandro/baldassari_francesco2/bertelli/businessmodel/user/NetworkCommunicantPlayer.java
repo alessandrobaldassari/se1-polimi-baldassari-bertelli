@@ -349,7 +349,7 @@ public class NetworkCommunicantPlayer extends Player
 	 * AS THE SUPER'S ONE. 
 	 */
 	@Override
-	public void genericNotification ( String message ) 
+	public void genericNotification ( String message ) throws TimeoutException 
 	{
 		try 
 		{
@@ -358,6 +358,8 @@ public class NetworkCommunicantPlayer extends Player
 		catch ( IOException e ) 
 		{
 			Logger.getGlobal().log ( Level.SEVERE , Utilities.EMPTY_STRING , e ) ;
+			if ( connectionLoosingManager.manageConnectionLoosing ( NetworkCommunicantPlayer.this , clientHandler , true ) == false )
+				throw new TimeoutException () ;
 		}
 	}
 

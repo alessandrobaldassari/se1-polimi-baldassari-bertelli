@@ -155,18 +155,25 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	{
 		for ( Player p : match.getPlayers() )
 			if ( p.isSuspended () == false )
-				p.genericNotification ( retrievedElem + " is with us again!" );
+				try 
+				{
+					p.genericNotification ( retrievedElem + " is with us again!" );
+				} 
+				catch (TimeoutException e) {}
 	}
 
 	/**
-	 * AS THE SUPER'S ONE. 
-	 */
+	 * AS THE SUPER'S ONE. 	 */
 	@Override
 	public void onBeginSuspensionControl ( Suspendable pendant ) 
 	{
 		for ( Player p : match.getPlayers() )
 			if ( p.equals ( pendant ) == false )
-				p.genericNotification ( "We all wait a few time to retrieve a pendant player..." );
+				try 
+				{
+					p.genericNotification ( "We all wait a few time to retrieve a pendant player..." );
+				}
+				catch (TimeoutException e) {}
 	}
 
 	/**
@@ -176,7 +183,11 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	public void onEndSuspensionControl ( Boolean suspendedRetrieved ) 
 	{
 		if ( suspendedRetrieved )
-			playersGenericNotification ( "We are all ok again." + Utilities.CARRIAGE_RETURN + "The show can go on!" ) ;
+			try 
+			{
+				playersGenericNotification ( "We are all ok again." + Utilities.CARRIAGE_RETURN + "The show can go on!" ) ;
+			}
+			catch (TimeoutException e) {}
 	}
 
 	/**
@@ -324,17 +335,16 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	 */
 	public void initializationPhase () throws WorkflowException 
 	{
-		System.out.println ( "GAME CONTROLLER : INITIALIZATION PHASE, PRIMA DI PLACE SHEEPS" ) ;
-		placeSheeps () ;
-		System.out.println ( "GAME CONTROLLER : INITIALIZATION PHASE, PRIMA DI DISTRIBUTE INITIAL CARDS" ) ;
-		distributeInitialCards () ;
-		System.out.println ( "GAME CONTROLLER : INITIALIZATION PHASE, PRIMA DI MONEY DISTRIBUTION" ) ;	
-		moneyDistribution () ;
-		System.out.println ( "GAME CONTROLLER : INITIALIZATION PHASE, PRIMA DI CHOOSE PLAYERS ORDER" ) ;
-		choosePlayersOrder () ;
-		System.out.println ( "GAME CONTROLLER : INITIALIZATION PHASE, PRIMA DI DISTRIBUTE SHEPERDS" ) ;
-		distributeSheperds () ;
-		match.setMatchState ( MatchState.TURNATION );
+		try 
+		{
+			placeSheeps () ;
+			distributeInitialCards () ;
+			moneyDistribution () ;
+			choosePlayersOrder () ;
+			distributeSheperds () ;
+			match.setMatchState ( MatchState.TURNATION );
+		}
+		catch (TimeoutException e) {}
 	}
 	
 	/**
@@ -381,6 +391,7 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 		{
 			throw new WorkflowException () ;
 		}
+		catch ( TimeoutException t ){}
 	}
 	
 	/**
@@ -418,14 +429,17 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 			System.out.println ( "MATCH_CONTROLLER - DISTRIBUTE_INITIAL_CARDS : NO_MORE_CARD_OF_THIS_TYPE_EXCEPTION GENERATED " ) ;
 			throw new RuntimeException () ;
 		}
+		catch ( TimeoutException t ){}
 	}
 	
 	/**
 	 * This method emulates the phase of the Game where money are given to every player.
 	 * It determines the money to give to every Player based on the number of Player,
 	 * and gives them them.
+	 * 
+	 * @throws TimeoutException if an operation takes too much time to occur.
 	 */
-	private void moneyDistribution ()
+	private void moneyDistribution () throws TimeoutException
 	{
 		int moneyToDistribute;
 		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - MONEY DISTRIBUTION : INIZIO " ) ;
@@ -450,8 +464,9 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	 * first, second, and so on. 
 	 * 
 	 * @throws WorkflowException if an unexpected error occurs 
+	 * @throws TimeoutException if an operation takes too much time to occur.
 	 */ 
-	private void choosePlayersOrder () throws WorkflowException 
+	private void choosePlayersOrder () throws WorkflowException, TimeoutException 
 	{
 		System.out.println ( "GAME CONTROLLER - INITIALIZATION PHASE - CHOOSE PLAYER ORDER PHASE : INIZIO " ) ;
 		Map < Player , Integer > playersMapOrder ;
@@ -483,8 +498,9 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	 * This procedure, determines the number of Sheperds per Player based on the total number
 	 * of Players, ask each Player the color he wants for a given Sheperd and assigns Sheperd.
 	 * to Players
+	 * @throws TimeoutException if an operation takes too much time to occurs.
 	 */
-	private void distributeSheperds () 
+	private void distributeSheperds () throws TimeoutException 
 	{
 		final Collection < NamedColor > colors ;
 		NamedColor choosenColor ;
@@ -588,6 +604,10 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 		{
 			throw new WorkflowException () ;
 		}
+		catch ( TimeoutException t ) 
+		{
+			
+		}
 		
 	}
 
@@ -607,8 +627,9 @@ public class MatchController implements Runnable , ConnectionLoosingManagerObser
 	 * Notifies all the non suspended Players in the Match of a Message
 	 * 
 	 * @param msg the message to pass.
+	 * @throws TimeoutException if an operation takes too much time to occur.
 	 */
-	private void playersGenericNotification ( String msg )
+	private void playersGenericNotification ( String msg ) throws TimeoutException
 	{
 		for ( Player p : match.getPlayers() )
 			if ( p.isSuspended() == false )

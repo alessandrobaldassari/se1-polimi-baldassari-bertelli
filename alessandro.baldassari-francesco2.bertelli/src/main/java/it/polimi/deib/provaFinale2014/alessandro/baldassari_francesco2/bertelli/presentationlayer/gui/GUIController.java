@@ -441,7 +441,7 @@ public class GUIController extends ViewPresenter implements GameMapViewObserver
 	@Override
 	public Iterable < SellableCard > onChooseCardsEligibleForSelling ( Iterable < SellableCard > playerCards ) 
 	{
-		System.err.println ( "GUI_CONTROLLER - onChooseCardsEligibleForSelling - INIZIO\nPARAMETERS : " + playerCards ) ;
+		System.out.println ( "GUI_CONTROLLER - onChooseCardsEligibleForSelling - INIZIO\nPARAMETERS : " + playerCards ) ;
 		Iterable < SellableCard > res ;
 		generationNotification ( PresentationMessages.CHOOSE_CARDS_ELIGIBLE_FOR_SELLING_MESSAGE ) ;
 		res = CardsMarketView.showDialog ( playerCards , true , -1 ) ;
